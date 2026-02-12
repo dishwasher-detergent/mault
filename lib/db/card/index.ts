@@ -3,12 +3,22 @@
 import { db } from "@/db";
 import { SearchCardMatch } from "@/interfaces/api.interface";
 import { Result } from "@/interfaces/result.interface";
+import { auth } from "@/lib/auth/server";
 import { vectorizeImageFromBuffer } from "@/lib/vectorize";
 import { sql } from "drizzle-orm";
 
 export async function Search(
   formData: FormData,
 ): Promise<Result<SearchCardMatch | null>> {
+  const { data: session } = await auth.getSession();
+
+  if (!session) {
+    return {
+      message: "Unauthorized",
+      success: false,
+    };
+  }
+
   const file = formData.get("image");
 
   if (!file || !(file instanceof File)) {

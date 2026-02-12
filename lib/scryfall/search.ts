@@ -3,8 +3,18 @@
 import { QUERY_MIN_LENGTH } from "@/constants/scryfall.constant";
 import { Result } from "@/interfaces/result.interface";
 import { ScryfallCard } from "@/interfaces/scryfall.interface";
+import { auth } from "@/lib/auth/server";
 
 export async function Search(query: string): Promise<Result<ScryfallCard[]>> {
+  const { data: session } = await auth.getSession();
+
+  if (!session) {
+    return {
+      message: "Unauthorized",
+      success: false,
+    };
+  }
+
   if (!query || query.trim().length < QUERY_MIN_LENGTH) {
     return {
       message: `Your query must be greater than ${QUERY_MIN_LENGTH}`,
@@ -40,6 +50,15 @@ export async function Search(query: string): Promise<Result<ScryfallCard[]>> {
 }
 
 export async function SearchById(id: string): Promise<Result<ScryfallCard>> {
+  const { data: session } = await auth.getSession();
+
+  if (!session) {
+    return {
+      message: "Unauthorized",
+      success: false,
+    };
+  }
+
   const response = await fetch(`https://api.scryfall.com/cards/${id}`);
 
   if (!response.ok) {
