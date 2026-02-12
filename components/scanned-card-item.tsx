@@ -1,4 +1,4 @@
-import { CardCorrectionDialog } from "@/components/card-correction-dialog";
+import { CardSelectDialog } from "@/components/card-select-dialog";
 import { Button } from "@/components/ui/button";
 import { DynamicPopover } from "@/components/ui/responsive-popover";
 import type {
@@ -143,7 +143,7 @@ export const ScannedCardItem = memo(function ScannedCardItem({
         </div>
       </div>
       {onCorrect && (
-        <CardCorrectionDialog
+        <CardSelectDialog
           open={correctionOpen}
           onOpenChange={setCorrectionOpen}
           currentCardName={card.name}

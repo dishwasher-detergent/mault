@@ -1,8 +1,8 @@
 "use client";
 
-import { CardCorrectionDialog } from "@/components/card-correction-dialog";
 import { CardGrid } from "@/components/card-grid";
 import { CardScanner } from "@/components/card-scanner";
+import { CardSelectDialog } from "@/components/card-select-dialog";
 import { ScanStats } from "@/components/scan-stats";
 import {
   AlertDialog,
@@ -304,7 +304,7 @@ export default function App() {
           </DrawerContent>
         </Drawer>
 
-        <CardCorrectionDialog
+        <CardSelectDialog
           open={manualAddOpen}
           onOpenChange={setManualAddOpen}
           currentCardName=""
@@ -393,7 +393,7 @@ export default function App() {
           </div>
         </section>
       </div>
-      <CardCorrectionDialog
+      <CardSelectDialog
         open={manualAddOpen}
         onOpenChange={setManualAddOpen}
         currentCardName=""

@@ -8,13 +8,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { QUERY_MIN_LENGTH } from "@/constants/scryfall.constant";
 import type { ScryfallCard } from "@/interfaces/scryfall.interface";
 import { Search } from "@/lib/scryfall/search";
 import { IconLoader2, IconSearch } from "@tabler/icons-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { ScrollArea } from "./ui/scroll-area";
 
-interface CardCorrectionDialogProps {
+interface CardSelectDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   currentCardName: string;
@@ -23,14 +24,14 @@ interface CardCorrectionDialogProps {
   description?: string;
 }
 
-export function CardCorrectionDialog({
+export function CardSelectDialog({
   open,
   onOpenChange,
   currentCardName,
   onSelect,
-  title = "Correct Card Match",
-  description = "Search Scryfall for the correct card to replace the wrong match.",
-}: CardCorrectionDialogProps) {
+  title = "Select Card",
+  description = "Search Scryfall for a card.",
+}: CardSelectDialogProps) {
   const [query, setQuery] = useState<string>("");
   const [results, setResults] = useState<ScryfallCard[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
@@ -38,7 +39,7 @@ export function CardCorrectionDialog({
   const debounceRef = useRef<ReturnType<typeof setTimeout>>(null);
 
   const search = useCallback(async (q: string) => {
-    if (q.trim().length < 2) {
+    if (q.trim().length < QUERY_MIN_LENGTH) {
       setResults([]);
       return;
     }
