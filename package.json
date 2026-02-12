@@ -10,12 +10,12 @@
   },
   "dependencies": {
     "@base-ui/react": "^1.1.0",
+    "@huggingface/transformers": "^3.8.1",
     "@neondatabase/auth": "0.2.0-beta.1",
     "@neondatabase/serverless": "^1.0.2",
     "@tabler/icons-react": "^3.36.1",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
-    "dotenv": "^17.2.4",
     "drizzle-orm": "^0.45.1",
     "idb": "^8.0.3",
     "next": "16.1.6",

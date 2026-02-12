@@ -9,6 +9,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import type { ScryfallCard } from "@/interfaces/scryfall.interface";
+import { Search } from "@/lib/scryfall/search";
 import { IconLoader2, IconSearch } from "@tabler/icons-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { ScrollArea } from "./ui/scroll-area";
@@ -43,21 +44,9 @@ export function CardCorrectionDialog({
     }
 
     setLoading(true);
-    try {
-      const response = await fetch(
-        `/api/scryfall-search?q=${encodeURIComponent(q)}`,
-      );
-      if (response.ok) {
-        const data = await response.json();
-        setResults(data.data ?? []);
-      } else {
-        setResults([]);
-      }
-    } catch {
-      setResults([]);
-    } finally {
-      setLoading(false);
-    }
+    const response = await Search(q);
+    setResults(response.data ?? []);
+    setLoading(false);
   }, []);
 
   const handleInputChange = (value: string) => {
