@@ -49,7 +49,7 @@ export function ScanStats() {
 
     for (const entry of cards) {
       const c = entry.card;
-      const price = Number.parseFloat(c.prices.usd ?? "0");
+      const price = Number.parseFloat(c.prices?.usd ?? "0");
 
       uniqueCards.add(c.id);
 
@@ -231,11 +231,9 @@ export function ScanStats() {
               </span>
               <div className="flex items-center gap-2 shrink-0">
                 <span className="text-muted-foreground">{s.count}</span>
-                {s.value > 0 && (
-                  <span className="text-muted-foreground w-14 text-right">
-                    {formatUsd(s.value)}
-                  </span>
-                )}
+                <span className="text-muted-foreground w-14 text-right">
+                  {formatUsd(s.value)}
+                </span>
               </div>
             </div>
           ))}

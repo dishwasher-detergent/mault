@@ -30,7 +30,7 @@ export function ScannerOverlay({
       );
     case "error":
       return (
-        <div className="absolute bottom-1 left-1 right-1 rounded-md bg-background/50 backdrop-blur-3xl border text-xs py-1 px-2 font-medium flex flex-row gap-1 items-center justify-between">
+        <div className="absolute bottom-1 left-1 right-1 rounded-md bg-background/50 backdrop-blur-3xl border text-xs py-1 px-2 font-medium flex flex-row gap-1 items-start justify-between">
           <span className="text-sm text-red-400">{errorMessage}</span>
           <Button
             variant="outline"

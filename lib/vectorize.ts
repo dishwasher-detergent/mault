@@ -14,7 +14,7 @@ async function getModel(): Promise<SiglipVisionModel> {
   if (!modelPromise) {
     console.log("[vectorize] Loading SigLIP model...");
     modelPromise = SiglipVisionModel.from_pretrained(MODEL_NAME, {
-      dtype: "fp32",
+      dtype: "q8",
     });
     await modelPromise;
     console.log(
@@ -33,20 +33,12 @@ async function getProcessor(): Promise<Processor> {
 
 async function vectorizeBuffer(buffer: Buffer): Promise<number[]> {
   const [model, processor] = await Promise.all([getModel(), getProcessor()]);
-
-  // Load image from buffer using RawImage
-  // Convert Buffer to Uint8Array to avoid Buffer.buffer type issues
   const uint8Array = new Uint8Array(buffer);
   const image = await RawImage.fromBlob(new Blob([uint8Array]));
-
-  // Process image for SigLIP (handles resizing and normalization automatically)
   const image_inputs = await processor(image);
-
-  // Generate embeddings using SigLIP vision model
   const { pooler_output } = await model(image_inputs);
-
-  // Convert to regular array
   const embedding = Array.from(pooler_output.data) as number[];
+
   console.log(
     `[vectorize] Generated ${embedding.length}-dimensional SigLIP embedding`,
   );

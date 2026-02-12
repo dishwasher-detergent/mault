@@ -45,8 +45,6 @@ export function CardSelectDialog({
 
     setLoading(true);
     const response = await Search(q);
-
-    console.log(response);
     setResults(response.data ?? []);
     setLoading(false);
   }, []);

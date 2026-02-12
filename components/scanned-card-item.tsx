@@ -26,7 +26,6 @@ export const ScannedCardItem = memo(function ScannedCardItem({
   scanId,
   onRemove,
 }: ScannedCardItemProps) {
-
   const prices = [
     formatPrice("USD", card.prices.usd),
     formatPrice("Foil", card.prices.usd_foil),
@@ -121,7 +120,7 @@ export const ScannedCardItem = memo(function ScannedCardItem({
               trigger={
                 <Button
                   size="icon"
-                  variant="secondary"
+                  variant="outline"
                   aria-label="Correct card match"
                 >
                   <IconPencil className="h-4 w-4" />

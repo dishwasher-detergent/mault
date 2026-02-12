@@ -21,8 +21,6 @@ export async function Search(
 
   const file = formData.get("image");
 
-  console.log(file);
-
   if (!file || !(file instanceof File)) {
     return {
       message: "No image provided.",

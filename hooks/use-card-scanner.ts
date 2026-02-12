@@ -1,4 +1,5 @@
 import type {
+  CardContour,
   CardScannerProps,
   DetectionResult,
   ScannerStatus,
@@ -17,6 +18,11 @@ import { useCallback, useEffect, useRef, useState } from "react";
 
 const STABILITY_FRAMES = 5;
 const DETECTION_INTERVAL_MS = 100;
+const SCANNABLE_STATUSES: ScannerStatus[] = [
+  "scanning",
+  "no-match",
+  "duplicate",
+];
 
 function playDingSound() {
   const ctx = new AudioContext();
@@ -37,6 +43,23 @@ function playDingSound() {
   oscillator.stop(ctx.currentTime + 0.3);
 
   oscillator.onended = () => ctx.close();
+}
+
+/** Search for a card by capturing a region (or full frame) from a canvas. */
+async function searchCardImage(
+  canvas: HTMLCanvasElement,
+  contour?: CardContour | null,
+): Promise<ScryfallCardWithDistance | null> {
+  const sourceCanvas = contour ? extractCardImage(canvas, contour) : canvas;
+  const blob = await canvasToBlob(sourceCanvas);
+  const formData = new FormData();
+  formData.append("image", blob, "card.jpg");
+
+  const { data } = await Search(formData);
+  if (!data) return null;
+
+  const { data: scryfallCard } = await SearchById(data.scryfallId);
+  return { ...scryfallCard!, distance: data.distance };
 }
 
 export function useCardScanner({
@@ -67,6 +90,8 @@ export function useCardScanner({
   const [duplicateCard, setDuplicateCard] =
     useState<ScryfallCardWithDistance | null>(null);
 
+  // --- Helpers ---
+
   const updateStatus = useCallback((newStatus: ScannerStatus) => {
     statusRef.current = newStatus;
     setStatus(newStatus);
@@ -81,6 +106,11 @@ export function useCardScanner({
     [onError, updateStatus],
   );
 
+  const resetStability = useCallback(() => {
+    stableCountRef.current = 0;
+    setIsStable(false);
+  }, []);
+
   // Keep refs in sync with latest props/callbacks
   useEffect(() => {
     onSearchResultsRef.current = onSearchResults;
@@ -89,6 +119,53 @@ export function useCardScanner({
   useEffect(() => {
     handleErrorRef.current = handleError;
   }, [handleError]);
+
+  // --- Capture Pipeline ---
+
+  /**
+   * Shared capture-and-search logic used by both auto-capture and force scan.
+   * @param checkDuplicate - When true, compares against lastScannedCardId.
+   * @param contour - Card contour for extraction; null uses full canvas.
+   */
+  const performCapture = useCallback(
+    async (checkDuplicate: boolean, contour?: CardContour | null) => {
+      const canvas = displayCanvasRef.current;
+      if (!canvas) {
+        isCapturingRef.current = false;
+        updateStatus("scanning");
+        return;
+      }
+
+      try {
+        const card = await searchCardImage(canvas, contour);
+
+        if (card) {
+          if (checkDuplicate && lastScannedCardIdRef.current === card.id) {
+            setDuplicateCard(card);
+            updateStatus("duplicate");
+          } else {
+            lastScannedCardIdRef.current = card.id;
+            onSearchResultsRef.current?.([card]);
+            updateStatus("scanning");
+          }
+        } else {
+          playDingSound();
+          updateStatus("no-match");
+        }
+
+        needsCardRemovalRef.current = true;
+      } catch (err) {
+        handleErrorRef.current(
+          err instanceof Error ? err.message : "Failed to search card",
+        );
+      } finally {
+        isCapturingRef.current = false;
+      }
+    },
+    [updateStatus],
+  );
+
+  // --- Camera ---
 
   const stopCamera = useCallback(() => {
     if (streamRef.current) {
@@ -140,9 +217,7 @@ export function useCardScanner({
       video.srcObject = stream;
       await video.play();
 
-      const width = video.videoWidth;
-      const height = video.videoHeight;
-
+      const { videoWidth: width, videoHeight: height } = video;
       for (const canvasRef of [
         displayCanvasRef,
         overlayCanvasRef,
@@ -166,6 +241,8 @@ export function useCardScanner({
     }
   }, [handleError, updateStatus]);
 
+  // --- Detection Loop ---
+
   const detectionLoop = useCallback(() => {
     const video = videoRef.current;
     const displayCanvas = displayCanvasRef.current;
@@ -186,7 +263,6 @@ export function useCardScanner({
 
     displayCtx.drawImage(video, 0, 0);
 
-    // When paused, keep drawing video but skip detection
     if (pausedRef.current) {
       overlayCtx.clearRect(0, 0, overlayCanvas.width, overlayCanvas.height);
       rafRef.current = requestAnimationFrame(detectionLoop);
@@ -217,12 +293,10 @@ export function useCardScanner({
         stableCountRef.current = 0;
         lastResultRef.current = null;
 
-        // Card was removed — reset for next scan
         if (needsCardRemovalRef.current) {
           needsCardRemovalRef.current = false;
           setDuplicateCard(null);
-          const currentStatus = statusRef.current;
-          if (currentStatus === "duplicate" || currentStatus === "no-match") {
+          if (SCANNABLE_STATUSES.includes(statusRef.current)) {
             updateStatus("scanning");
           }
         }
@@ -238,85 +312,32 @@ export function useCardScanner({
         !isCapturingRef.current &&
         statusRef.current === "scanning"
       ) {
-        isCapturingRef.current = true;
-        updateStatus("searching");
-
-        const captureCanvas = displayCanvasRef.current;
         const captureResult = lastResultRef.current;
-
-        if (captureCanvas && captureResult?.detected && captureResult.contour) {
-          const cardCanvas = extractCardImage(
-            captureCanvas,
-            captureResult.contour,
-          );
-
-          canvasToBlob(cardCanvas)
-            .then((blob) => {
-              const formData = new FormData();
-              formData.append("image", blob, "card.jpg");
-              return Search(formData);
-            })
-            .then(async (data) => {
-              if (data.data) {
-                // TODO: Add check for if nothing comes back.
-                const { data: scryfallCard } = await SearchById(
-                  data.data.scryfallId,
-                );
-                const cardWithDistance: ScryfallCardWithDistance = {
-                  ...scryfallCard!,
-                  distance: data.data.distance,
-                };
-
-                if (lastScannedCardIdRef.current === scryfallCard!.id) {
-                  setDuplicateCard(cardWithDistance);
-                  updateStatus("duplicate");
-                } else {
-                  // New card — auto-add
-                  lastScannedCardIdRef.current = scryfallCard!.id;
-                  onSearchResultsRef.current?.([cardWithDistance]);
-                  updateStatus("scanning");
-                }
-                needsCardRemovalRef.current = true;
-              } else {
-                playDingSound();
-                updateStatus("no-match");
-                needsCardRemovalRef.current = true;
-              }
-            })
-            .catch((err) => {
-              handleErrorRef.current(
-                err instanceof Error ? err.message : "Failed to search card",
-              );
-            })
-            .finally(() => {
-              isCapturingRef.current = false;
-            });
-        } else {
-          isCapturingRef.current = false;
-          updateStatus("scanning");
+        if (captureResult?.detected && captureResult.contour) {
+          isCapturingRef.current = true;
+          updateStatus("searching");
+          performCapture(true, captureResult.contour);
         }
       }
     }
 
     rafRef.current = requestAnimationFrame(detectionLoop);
-  }, [updateStatus]);
+  }, [updateStatus, performCapture]);
+
+  // --- User Actions ---
 
   const handleForceAddDuplicate = useCallback(() => {
     if (duplicateCard) {
       onSearchResultsRef.current?.([duplicateCard]);
       setDuplicateCard(null);
       updateStatus("scanning");
-      // needsCardRemovalRef stays true — user must lift card before next scan
     }
   }, [duplicateCard, updateStatus]);
 
   const handleForceScan = useCallback(() => {
-    const currentStatus = statusRef.current;
     if (
       isCapturingRef.current ||
-      (currentStatus !== "scanning" &&
-        currentStatus !== "no-match" &&
-        currentStatus !== "duplicate")
+      !SCANNABLE_STATUSES.includes(statusRef.current)
     )
       return;
 
@@ -324,105 +345,55 @@ export function useCardScanner({
     updateStatus("searching");
     setDuplicateCard(null);
 
-    const captureCanvas = displayCanvasRef.current;
-    const captureResult = lastResultRef.current;
-
-    const cardCanvas =
-      captureCanvas && captureResult?.detected && captureResult.contour
-        ? extractCardImage(captureCanvas, captureResult.contour)
-        : captureCanvas;
-
-    if (!cardCanvas) {
-      isCapturingRef.current = false;
-      updateStatus("scanning");
-      return;
-    }
-
-    canvasToBlob(cardCanvas)
-      .then((blob) => {
-        const formData = new FormData();
-        formData.append("image", blob, "card.jpg");
-        return Search(formData);
-      })
-      .then(async (data) => {
-        if (data.data) {
-          const { data: scryfallCard } = await SearchById(data.data.scryfallId);
-          const cardWithDistance: ScryfallCardWithDistance = {
-            ...scryfallCard!,
-            distance: data.data.distance,
-          };
-          lastScannedCardIdRef.current = scryfallCard!.id;
-          onSearchResultsRef.current?.([cardWithDistance]);
-          updateStatus("scanning");
-          needsCardRemovalRef.current = true;
-        } else {
-          playDingSound();
-          updateStatus("no-match");
-          needsCardRemovalRef.current = true;
-        }
-      })
-      .catch((err) => {
-        handleErrorRef.current(
-          err instanceof Error ? err.message : "Failed to search card",
-        );
-      })
-      .finally(() => {
-        isCapturingRef.current = false;
-      });
-  }, [updateStatus]);
+    const result = lastResultRef.current;
+    const contour = result?.detected ? result.contour : null;
+    performCapture(false, contour);
+  }, [updateStatus, performCapture]);
 
   const handlePause = useCallback(() => {
     pausedRef.current = true;
-    stableCountRef.current = 0;
-    setIsStable(false);
-    setDuplicateCard(null);
     needsCardRemovalRef.current = false;
+    resetStability();
+    setDuplicateCard(null);
     updateStatus("paused");
-  }, [updateStatus]);
+  }, [updateStatus, resetStability]);
 
   const handleResume = useCallback(() => {
     pausedRef.current = false;
-    stableCountRef.current = 0;
-    setIsStable(false);
+    resetStability();
     updateStatus("scanning");
-  }, [updateStatus]);
+  }, [updateStatus, resetStability]);
+
+  // --- Initialization ---
+
+  const initScanner = useCallback(async () => {
+    updateStatus("initializing");
+    await loadOpenCv();
+    await startCamera();
+    rafRef.current = requestAnimationFrame(detectionLoop);
+  }, [startCamera, detectionLoop, updateStatus]);
 
   const handleRetryError = useCallback(async () => {
     setErrorMessage("");
     try {
-      updateStatus("initializing");
-      await loadOpenCv();
-      await startCamera();
-      rafRef.current = requestAnimationFrame(detectionLoop);
+      await initScanner();
     } catch {
       handleError("Failed to reinitialize scanner");
     }
-  }, [startCamera, detectionLoop, handleError, updateStatus]);
+  }, [initScanner, handleError]);
 
   useEffect(() => {
     let cancelled = false;
 
-    async function init() {
-      try {
-        await loadOpenCv();
-        if (cancelled) return;
-        await startCamera();
-        if (cancelled) return;
-        rafRef.current = requestAnimationFrame(detectionLoop);
-      } catch {
-        if (!cancelled) {
-          handleError("Failed to initialize scanner");
-        }
-      }
-    }
-
-    init();
+    initScanner().catch(() => {
+      if (!cancelled) handleError("Failed to initialize scanner");
+    });
 
     return () => {
       cancelled = true;
       stopCamera();
     };
-  }, [startCamera, detectionLoop, stopCamera, handleError, updateStatus]);
+  }, [initScanner, stopCamera, handleError]);
 
   return {
     status,
