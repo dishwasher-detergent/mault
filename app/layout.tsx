@@ -19,7 +19,13 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning className={figtree.variable}>
       <body className="antialiased">
-        <NeonAuthUIProvider authClient={authClient} redirectTo="/app">
+        <NeonAuthUIProvider
+          authClient={authClient}
+          redirectTo="/app"
+          account={{
+            basePath: "/app/account",
+          }}
+        >
           {children}
         </NeonAuthUIProvider>
       </body>
