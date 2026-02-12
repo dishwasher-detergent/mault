@@ -7,13 +7,13 @@ import {
   IconPlus,
   IconSearch,
 } from "@tabler/icons-react";
+import { CardSelectDialog } from "./card-select-dialog";
 
 interface ScannerControlsProps {
   status: ScannerStatus;
   duplicateCardName?: string;
   onForceAddDuplicate: () => void;
   onForceScan: () => void;
-  onManualAdd: () => void;
   onPause: () => void;
   onResume: () => void;
 }
@@ -22,7 +22,6 @@ export function ScannerControls({
   status,
   onForceAddDuplicate,
   onForceScan,
-  onManualAdd,
   onPause,
   onResume,
 }: ScannerControlsProps) {
@@ -57,10 +56,14 @@ export function ScannerControls({
           Pause
         </Button>
       )}
-      <Button size="lg" onClick={onManualAdd} variant="outline">
-        <IconSearch className="size-3.5" />
-        Add Manually
-      </Button>
+      <CardSelectDialog
+        trigger={
+          <Button size="lg" variant="outline">
+            <IconSearch className="size-3.5" />
+            Add Manually
+          </Button>
+        }
+      ></CardSelectDialog>
     </>
   );
 }

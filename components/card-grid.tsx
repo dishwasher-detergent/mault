@@ -1,26 +1,29 @@
+"use client";
+
 import { ScannedCardItem } from "@/components/scanned-card-item";
-import type { ScannedCard } from "@/interfaces/scanner.interface";
-import type { ScryfallCard } from "@/interfaces/scryfall.interface";
-import { useRef } from "react";
+import { useCardFilterSort } from "@/hooks/use-card-filter-sort";
+import { useScannedCards } from "@/hooks/use-scanned-cards";
+import { exportToManabox } from "@/lib/export-manabox";
+import { useCallback } from "react";
+import { CardToolbar } from "./card-toolbar";
 
-interface CardGridProps {
-  cards: ScannedCard[];
-  onRemoveCard: (scanId: string) => void;
-  onCorrectCard?: (scanId: string, card: ScryfallCard) => void;
-}
+export function CardGrid() {
+  const { cards, removeCard, clearCards } = useScannedCards();
+  const {
+    filteredAndSorted,
+    searchQuery,
+    setSearchQuery,
+    sortKey,
+    setSortKey,
+  } = useCardFilterSort(cards);
 
-export function CardGrid({
-  cards,
-  onRemoveCard,
-  onCorrectCard,
-}: CardGridProps) {
-  const gridRef = useRef<HTMLDivElement>(null);
-  if (cards.length === 0) {
+  const handleExport = useCallback(() => {
+    exportToManabox(cards);
+  }, [cards]);
+
+  if (filteredAndSorted.length === 0) {
     return (
-      <div
-        ref={gridRef}
-        className="flex flex-col items-center justify-center py-16 text-muted-foreground"
-      >
+      <div className="flex flex-col items-center justify-center py-16 text-muted-foreground">
         <p className="text-sm font-medium">No cards scanned yet</p>
         <p className="text-xs">Scan a card to get started</p>
       </div>
@@ -28,16 +31,28 @@ export function CardGrid({
   }
 
   return (
-    <div ref={gridRef} className="flex w-full flex-row">
-      {cards.map((card, rowIndex) => (
-        <ScannedCardItem
-          card={card.card}
-          onRemove={() => onRemoveCard(card.scanId)}
-          onCorrect={
-            onCorrectCard ? (x) => onCorrectCard(card.scanId, x) : undefined
-          }
-        />
-      ))}
-    </div>
+    <>
+      <CardToolbar
+        searchQuery={searchQuery}
+        onSearchChange={setSearchQuery}
+        sortKey={sortKey}
+        onSortChange={setSortKey}
+        onExport={handleExport}
+        onClearAll={clearCards}
+        hasCards={filteredAndSorted.length > 0}
+      />
+      <div className="p-2">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+          {filteredAndSorted.map((card) => (
+            <ScannedCardItem
+              key={card.scanId}
+              card={card.card}
+              scanId={card.scanId}
+              onRemove={() => removeCard(card.scanId)}
+            />
+          ))}
+        </div>
+      </div>
+    </>
   );
 }

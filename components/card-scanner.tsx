@@ -1,3 +1,5 @@
+"use client";
+
 import { ScannerControls } from "@/components/scanner-controls";
 import { ScannerOverlay } from "@/components/scanner-overlay";
 import { useCardScanner } from "@/hooks/use-card-scanner";
@@ -5,12 +7,7 @@ import type { CardScannerProps } from "@/interfaces/scanner.interface";
 import { cn } from "@/lib/utils";
 import { ButtonGroup } from "./ui/button-group";
 
-export function CardScanner({
-  onSearchResults,
-  onManualAdd,
-  onError,
-  className,
-}: CardScannerProps) {
+export function CardScanner({ className }: CardScannerProps) {
   const {
     status,
     errorMessage,
@@ -23,7 +20,7 @@ export function CardScanner({
     handlePause,
     handleResume,
     handleRetryError,
-  } = useCardScanner({ onSearchResults, onError });
+  } = useCardScanner();
 
   return (
     <div className={cn("flex flex-col overflow-hidden", className)}>
@@ -49,7 +46,6 @@ export function CardScanner({
           status={status}
           onForceAddDuplicate={handleForceAddDuplicate}
           onForceScan={handleForceScan}
-          onManualAdd={onManualAdd ?? (() => {})}
           onPause={handlePause}
           onResume={handleResume}
         />

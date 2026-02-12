@@ -21,6 +21,8 @@ export async function Search(
 
   const file = formData.get("image");
 
+  console.log(file);
+
   if (!file || !(file instanceof File)) {
     return {
       message: "No image provided.",
@@ -41,6 +43,8 @@ export async function Search(
     const buffer = Buffer.from(arrayBuffer);
     embedding = await vectorizeImageFromBuffer(buffer);
   } catch (err) {
+    console.error(err);
+
     return {
       message: "Failed to vectorize image.",
       success: false,

@@ -1,9 +1,7 @@
-import type { ScannedCard } from "@/interfaces/scanner.interface";
-import { useMemo, useState } from "react";
+"use client";
 
-interface ScanStatsProps {
-  cards: ScannedCard[];
-}
+import { useScannedCards } from "@/hooks/use-scanned-cards";
+import { useMemo, useState } from "react";
 
 interface SetStats {
   code: string;
@@ -34,8 +32,9 @@ function formatUsd(value: number): string {
   return `$${value.toFixed(2)}`;
 }
 
-export function ScanStats({ cards }: ScanStatsProps) {
+export function ScanStats() {
   const [expandedSets, setExpandedSets] = useState(false);
+  const { cards } = useScannedCards();
 
   const stats = useMemo(() => {
     if (cards.length === 0) return null;
@@ -138,27 +137,27 @@ export function ScanStats({ cards }: ScanStatsProps) {
 
   return (
     <div className="flex flex-col gap-2 text-sm overflow-y-auto">
-      <div className="rounded-lg border bg-muted">
+      <div className="rounded-lg bg-input/20 dark:bg-input/30 border border-input">
         <div className="grid grid-cols-2">
           <StatCard
             label="Total Cards"
             value={String(stats.totalCount)}
-            className="border-r border-b"
+            className="border-r border-b border-input"
           />
           <StatCard
             label="Unique"
             value={String(stats.uniqueCount)}
-            className="border-b"
+            className="border-b border-input"
           />
           <StatCard
             label="Total Value"
             value={formatUsd(stats.totalValue)}
-            className="border-r"
+            className="border-r border-input"
           />
           <StatCard label="Avg Value" value={formatUsd(stats.avgValue)} />
         </div>
         {stats.mostValuable && (
-          <div className="p-2 border-t">
+          <div className="p-2 border-t border-input">
             <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-wide">
               Most Valuable
             </p>
@@ -173,7 +172,7 @@ export function ScanStats({ cards }: ScanStatsProps) {
           </div>
         )}
       </div>
-      <div className="rounded-lg border bg-muted p-2">
+      <div className="rounded-lg bg-input/20 dark:bg-input/30 border border-input p-2">
         <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-wide mb-1.5">
           By Rarity
         </p>
@@ -195,7 +194,7 @@ export function ScanStats({ cards }: ScanStatsProps) {
           ))}
         </div>
       </div>
-      <div className="rounded-lg border bg-muted p-2">
+      <div className="rounded-lg bg-input/20 dark:bg-input/30 border border-input p-2">
         <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-wide mb-1.5">
           By Color
         </p>
@@ -217,7 +216,7 @@ export function ScanStats({ cards }: ScanStatsProps) {
           ))}
         </div>
       </div>
-      <div className="rounded-lg border bg-muted p-2">
+      <div className="rounded-lg bg-input/20 dark:bg-input/30 border border-input p-2">
         <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-wide mb-1.5">
           By Set
         </p>

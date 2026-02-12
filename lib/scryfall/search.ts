@@ -40,11 +40,11 @@ export async function Search(query: string): Promise<Result<ScryfallCard[]>> {
     };
   }
 
-  const data = (await response.json()) as ScryfallCard[];
+  const data = (await response.json()) as { data: ScryfallCard[] };
 
   return {
     message: "Cards successfully retrieved.",
-    data: data,
+    data: data.data,
     success: true,
   };
 }

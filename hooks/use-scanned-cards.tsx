@@ -1,3 +1,5 @@
+"use client";
+
 import type { ScannedCard } from "@/interfaces/scanner.interface";
 import type {
   ScryfallCard,
@@ -11,9 +13,20 @@ import {
   getAllCards,
   putCard,
 } from "@/lib/card-db";
-import { useCallback, useEffect, useState } from "react";
+import { createContext, useCallback, useContext, useEffect, useState } from "react";
 
-export function useScannedCards() {
+interface ScannedCardsContextValue {
+  cards: ScannedCard[];
+  isLoading: boolean;
+  addCard: (card: ScryfallCardWithDistance) => void;
+  removeCard: (scanId: string) => void;
+  correctCard: (scanId: string, card: ScryfallCard) => void;
+  clearCards: () => void;
+}
+
+const ScannedCardsContext = createContext<ScannedCardsContextValue | null>(null);
+
+export function ScannedCardsProvider({ children }: { children: React.ReactNode }) {
   const [cards, setCards] = useState<ScannedCard[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -76,5 +89,17 @@ export function useScannedCards() {
     );
   }, []);
 
-  return { cards, isLoading, addCard, removeCard, correctCard, clearCards };
+  return (
+    <ScannedCardsContext value={{ cards, isLoading, addCard, removeCard, correctCard, clearCards }}>
+      {children}
+    </ScannedCardsContext>
+  );
+}
+
+export function useScannedCards() {
+  const context = useContext(ScannedCardsContext);
+  if (!context) {
+    throw new Error("useScannedCards must be used within a ScannedCardsProvider");
+  }
+  return context;
 }

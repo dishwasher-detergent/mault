@@ -1,12 +1,9 @@
 import { CardSelectDialog } from "@/components/card-select-dialog";
 import { Button } from "@/components/ui/button";
 import { DynamicPopover } from "@/components/ui/responsive-popover";
-import type {
-  ScryfallCard,
-  ScryfallCardWithDistance,
-} from "@/interfaces/scryfall.interface";
+import type { ScryfallCardWithDistance } from "@/interfaces/scryfall.interface";
 import { IconExternalLink, IconPencil, IconX } from "@tabler/icons-react";
-import { memo, useState } from "react";
+import { memo } from "react";
 import { Badge } from "./ui/badge";
 import { ButtonGroup } from "./ui/button-group";
 
@@ -20,16 +17,15 @@ function formatPrice(label: string, value: string | null): string | null {
 
 interface ScannedCardItemProps {
   card: ScryfallCardWithDistance;
+  scanId: string;
   onRemove: () => void;
-  onCorrect?: (card: ScryfallCard) => void;
 }
 
 export const ScannedCardItem = memo(function ScannedCardItem({
   card,
+  scanId,
   onRemove,
-  onCorrect,
 }: ScannedCardItemProps) {
-  const [correctionOpen, setCorrectionOpen] = useState(false);
 
   const prices = [
     formatPrice("USD", card.prices.usd),
@@ -121,16 +117,20 @@ export const ScannedCardItem = memo(function ScannedCardItem({
             </p>
           </div>
           <ButtonGroup>
-            {onCorrect && (
-              <Button
-                size="icon"
-                variant="secondary"
-                onClick={() => setCorrectionOpen(true)}
-                aria-label="Correct card match"
-              >
-                <IconPencil className="h-4 w-4" />
-              </Button>
-            )}
+            <CardSelectDialog
+              trigger={
+                <Button
+                  size="icon"
+                  variant="secondary"
+                  aria-label="Correct card match"
+                >
+                  <IconPencil className="h-4 w-4" />
+                </Button>
+              }
+              scanId={scanId}
+              title="Correct Card"
+              description="Search for the correct card."
+            />
             <Button
               size="icon"
               variant="destructive"
@@ -142,17 +142,6 @@ export const ScannedCardItem = memo(function ScannedCardItem({
           </ButtonGroup>
         </div>
       </div>
-      {onCorrect && (
-        <CardSelectDialog
-          open={correctionOpen}
-          onOpenChange={setCorrectionOpen}
-          currentCardName={card.name}
-          onSelect={(correctedCard) => {
-            onCorrect(correctedCard);
-            setCorrectionOpen(false);
-          }}
-        />
-      )}
     </>
   );
 });

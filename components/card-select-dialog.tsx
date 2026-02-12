@@ -9,34 +9,33 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { QUERY_MIN_LENGTH } from "@/constants/scryfall.constant";
+import { useScannedCards } from "@/hooks/use-scanned-cards";
 import type { ScryfallCard } from "@/interfaces/scryfall.interface";
 import { Search } from "@/lib/scryfall/search";
 import { IconLoader2, IconSearch } from "@tabler/icons-react";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
 import { ScrollArea } from "./ui/scroll-area";
 
 interface CardSelectDialogProps {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-  currentCardName: string;
-  onSelect: (card: ScryfallCard) => void;
+  trigger: React.ReactElement;
   title?: string;
   description?: string;
+  scanId?: string;
 }
 
 export function CardSelectDialog({
-  open,
-  onOpenChange,
-  currentCardName,
-  onSelect,
+  trigger,
   title = "Select Card",
   description = "Search Scryfall for a card.",
+  scanId,
 }: CardSelectDialogProps) {
+  const [open, setOpen] = useState(false);
   const [query, setQuery] = useState<string>("");
   const [results, setResults] = useState<ScryfallCard[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const [selectedSet, setSelectedSet] = useState<string | null>("all");
   const debounceRef = useRef<ReturnType<typeof setTimeout>>(null);
+  const { addCard, correctCard } = useScannedCards();
 
   const search = useCallback(async (q: string) => {
     if (q.trim().length < QUERY_MIN_LENGTH) {
@@ -46,6 +45,8 @@ export function CardSelectDialog({
 
     setLoading(true);
     const response = await Search(q);
+
+    console.log(response);
     setResults(response.data ?? []);
     setLoading(false);
   }, []);
@@ -56,6 +57,27 @@ export function CardSelectDialog({
     if (debounceRef.current) clearTimeout(debounceRef.current);
     debounceRef.current = setTimeout(() => search(value), 300);
   };
+
+  const handleSelect = useCallback(
+    (card: ScryfallCard) => {
+      if (scanId) {
+        correctCard(scanId, card);
+      } else {
+        addCard({ ...card, distance: 0 });
+      }
+      setOpen(false);
+    },
+    [scanId, addCard, correctCard],
+  );
+
+  const handleOpenChange = useCallback((isOpen: boolean) => {
+    setOpen(isOpen);
+    if (!isOpen) {
+      setQuery("");
+      setResults([]);
+      setSelectedSet("all");
+    }
+  }, []);
 
   const sets = useMemo(() => {
     const setMap = new Map<string, string>();
@@ -74,25 +96,13 @@ export function CardSelectDialog({
     return results.filter((card) => card.set === selectedSet);
   }, [results, selectedSet]);
 
-  useEffect(() => {
-    if (open && currentCardName) {
-      setQuery(currentCardName);
-      setSelectedSet("all");
-      search(currentCardName);
-    }
-    if (!open) {
-      setQuery("");
-      setResults([]);
-      setSelectedSet("all");
-    }
-  }, [open, currentCardName, search]);
-
   return (
     <DynamicDialog
-      open={open}
-      onOpenChange={onOpenChange}
+      trigger={trigger}
       title={title}
       description={description}
+      open={open}
+      onOpenChange={handleOpenChange}
       className="sm:max-w-lg max-h-[80vh] flex flex-col"
     >
       <div className="flex gap-2 px-4 md:px-0">
@@ -151,7 +161,7 @@ export function CardSelectDialog({
                 key={card.id}
                 variant="ghost"
                 className="w-full h-auto aspect-[2.5/3.5] p-0 rounded overflow-hidden"
-                onClick={() => onSelect(card)}
+                onClick={() => handleSelect(card)}
               >
                 {card.image_uris?.small ? (
                   <img
