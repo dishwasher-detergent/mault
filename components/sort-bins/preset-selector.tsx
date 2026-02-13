@@ -2,16 +2,6 @@
 
 import { Button } from "@/components/ui/button";
 import {
-  Dialog,
-  DialogClose,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
@@ -28,6 +18,7 @@ import {
   IconTrash,
 } from "@tabler/icons-react";
 import { useCallback, useState } from "react";
+import { DynamicDialog } from "../ui/responsive-dialog";
 
 export function PresetSelector() {
   const { presets, saveAsPreset, updatePreset, loadPreset, deletePreset } =
@@ -69,38 +60,41 @@ export function PresetSelector() {
         <span className="text-xs font-medium text-muted-foreground">
           Presets
         </span>
-        <Dialog open={saveDialogOpen} onOpenChange={setSaveDialogOpen}>
-          <DialogTrigger
-            render={
-              <Button variant="ghost" size="icon-xs" title="Save as preset">
-                <IconDeviceFloppy className="size-3.5" />
+        <DynamicDialog
+          open={saveDialogOpen}
+          onOpenChange={setSaveDialogOpen}
+          title="Save Preset"
+          description="Save the current bin configuration as a reusable preset."
+          trigger={
+            <Button variant="ghost" size="icon">
+              <IconDeviceFloppy className="size-3.5" />
+            </Button>
+          }
+          footer={
+            <>
+              <Button
+                variant="outline"
+                onClick={() => setSaveDialogOpen(false)}
+              >
+                Cancel
               </Button>
-            }
-          />
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Save Preset</DialogTitle>
-              <DialogDescription>
-                Save the current bin configuration as a reusable preset.
-              </DialogDescription>
-            </DialogHeader>
-            <Input
-              placeholder="Preset name..."
-              value={presetName}
-              onChange={(e) => setPresetName(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === "Enter") handleSaveNew();
-              }}
-              autoFocus
-            />
-            <DialogFooter>
-              <DialogClose render={<Button variant="outline">Cancel</Button>} />
               <Button onClick={handleSaveNew} disabled={!presetName.trim()}>
                 Save
               </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
+            </>
+          }
+          footerClassName="flex-col-reverse md:flex-row"
+        >
+          <Input
+            placeholder="Preset name..."
+            value={presetName}
+            onChange={(e) => setPresetName(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") handleSaveNew();
+            }}
+            autoFocus
+          />
+        </DynamicDialog>
       </div>
 
       {presets.length === 0 ? (
@@ -108,27 +102,19 @@ export function PresetSelector() {
       ) : (
         <div className="flex flex-col gap-1">
           {presets.map((preset) => (
-            <div
-              key={preset.id}
-              className="group flex items-center gap-1 rounded-md border px-2.5 py-1.5"
-            >
-              <button
-                type="button"
-                className="flex-1 text-left text-xs font-medium truncate hover:underline cursor-pointer"
+            <div key={preset.id} className="flex flex-row gap-1">
+              <Button
+                className="flex-1 justify-start"
+                variant="outline"
                 onClick={() => handleLoad(preset.id)}
-                title="Load this preset"
               >
                 {preset.name}
-              </button>
+              </Button>
               <DropdownMenu>
                 <DropdownMenuTrigger
                   render={
-                    <Button
-                      variant="ghost"
-                      size="icon-xs"
-                      className="opacity-0 group-hover:opacity-100 shrink-0"
-                    >
-                      <IconDotsVertical className="size-3" />
+                    <Button variant="ghost" size="icon">
+                      <IconDotsVertical />
                     </Button>
                   }
                 />

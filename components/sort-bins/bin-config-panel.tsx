@@ -45,18 +45,13 @@ export function BinConfigPanel({
 
   return (
     <div className="flex flex-col h-full">
-      <div className="flex items-center justify-between border-b px-4 py-3">
-        <h2 className="text-sm font-semibold">Bin {config.binNumber}</h2>
+      <div className="flex items-center justify-between px-4 py-3">
+        <h2 className="font-semibold">Bin {config.binNumber}</h2>
         <div className="flex gap-1.5">
-          <Button
-            type="button"
-            variant="destructive"
-            size="sm"
-            onClick={handleClear}
-          >
+          <Button type="button" variant="destructive" onClick={handleClear}>
             Clear
           </Button>
-          <Button type="button" size="sm" onClick={handleSave}>
+          <Button type="button" onClick={handleSave}>
             Save
           </Button>
         </div>
