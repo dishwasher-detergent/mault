@@ -2,8 +2,8 @@
 
 import { RuleSummary } from "@/components/sort-bins/rule-summary";
 import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { BinConfig, isRuleGroup } from "@/interfaces/sort-bins.interface";
+import { Button } from "../ui/button";
 
 interface BinCardProps {
   config: BinConfig;
@@ -28,33 +28,26 @@ export function BinCard({ config, active, onClick }: BinCardProps) {
   const conditionCount = countConditions(config);
 
   return (
-    <Card
-      size="sm"
-      className={`cursor-pointer transition-colors hover:bg-muted/50 ${isEmpty ? "border-dashed ring-0 border" : ""} ${active ? "ring-2 ring-primary bg-muted/50" : ""}`}
+    <Button
+      variant={active ? "default" : "outline"}
+      className="h-auto transition-colors hover:bg-muted/50 border rounded-lg p-2 flex flex-col justify-start text-start"
       onClick={onClick}
     >
-      <CardHeader>
-        <CardTitle className="flex items-center justify-between gap-2">
-          <span>Bin {config.binNumber}</span>
-          {!isEmpty && (
-            <Badge variant="secondary">
-              {conditionCount} rule{conditionCount !== 1 ? "s" : ""}
-            </Badge>
-          )}
-        </CardTitle>
-      </CardHeader>
-      <CardContent>
-        {isEmpty ? (
-          <p className="text-muted-foreground text-xs">Click to configure</p>
-        ) : (
-          <div className="flex flex-col gap-1">
-            {config.label && (
-              <p className="text-xs font-medium truncate">{config.label}</p>
-            )}
-            <RuleSummary rules={config.rules} />
-          </div>
+      <div className="flex flex-row justify-between gap-2 items-center w-full">
+        <p className="font-medium text-sm">Bin {config.binNumber}</p>
+        {!isEmpty && (
+          <Badge variant="secondary">
+            {conditionCount} rule{conditionCount !== 1 ? "s" : ""}
+          </Badge>
         )}
-      </CardContent>
-    </Card>
+      </div>
+      <div className="w-full">
+        {isEmpty ? (
+          <p className="text-xs">Click to configure</p>
+        ) : (
+          <RuleSummary rules={config.rules} />
+        )}
+      </div>
+    </Button>
   );
 }

@@ -49,9 +49,5 @@ function formatGroup(group: BinRuleGroup): string {
 export function RuleSummary({ rules }: { rules: BinRuleGroup }) {
   const text = formatGroup(rules);
 
-  return (
-    <p className="text-muted-foreground text-xs line-clamp-3 wrap-break-words">
-      {text}
-    </p>
-  );
+  return <p className="text-xs line-clamp-3 wrap-break-words">{text}</p>;
 }

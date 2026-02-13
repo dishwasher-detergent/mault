@@ -4,24 +4,18 @@ import { PresetSelector } from "@/components/sort-bins/preset-selector";
 
 export default function SortPage() {
   return (
-    <div className="grid grid-cols-12 h-full w-full">
-      <div className="col-span-3 border-r flex flex-col h-full">
-        <div className="px-4 py-2">
-          <h1 className="font-semibold">Sort Bins</h1>
-          <p className="text-muted-foreground text-sm">
-            Configure sorting rules for each bin.
-          </p>
-        </div>
-        <div className="flex flex-col flex-1">
+    <div className="grid grid-cols-12 flex-1 min-h-0 overflow-hidden p-4 gap-4">
+      <section className="col-span-5 md:col-span-4 lg:col-span-3 overflow-hidden flex flex-col h-full">
+        <div className="w-full overflow-hidden flex flex-col border rounded-lg p-2 bg-sidebar">
           <BinList />
-          <div className="p-2 pb-4 border-t">
+          <div className="overflow-y-auto min-h-0">
             <PresetSelector />
           </div>
         </div>
-      </div>
-      <div className="col-span-9">
+      </section>
+      <section className="col-span-7 md:col-span-8 lg:col-span-9 overflow-y-auto h-full @container">
         <BinConfigPanel />
-      </div>
+      </section>
     </div>
   );
 }
