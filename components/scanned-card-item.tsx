@@ -5,7 +5,6 @@ import type { ScryfallCardWithDistance } from "@/interfaces/scryfall.interface";
 import { IconExternalLink, IconPencil, IconX } from "@tabler/icons-react";
 import { memo } from "react";
 import { Badge } from "./ui/badge";
-import { ButtonGroup } from "./ui/button-group";
 
 function formatManaCost(manaCost: string): string {
   return manaCost.replace(/[{}]/g, " ").trim().replace(/\s+/g, " ");
@@ -46,6 +45,19 @@ export const ScannedCardItem = memo(function ScannedCardItem({
           trigger={
             <button type="button" className="w-full cursor-pointer">
               <div className="aspect-[2.5/3.5] rounded-lg overflow-hidden relative">
+                <div className="absolute bottom-1 left-1 right-1 flex gap-1 items-center justify-between">
+                  <Badge
+                    variant={card.distance < 0.15 ? "default" : "destructive"}
+                  >
+                    {card.distance != null
+                      ? (100 - card.distance * 100).toFixed(2)
+                      : "0.00"}
+                    %
+                  </Badge>
+                  <Badge variant="secondary" className="shadow-md">
+                    {binLabel || `Bin ${binNumber}`}
+                  </Badge>
+                </div>
                 <img
                   src={card.image_uris?.normal || ""}
                   alt={card.name}
@@ -101,14 +113,6 @@ export const ScannedCardItem = memo(function ScannedCardItem({
             <IconExternalLink className="h-3 w-3" />
           </a>
         </DynamicPopover>
-        <div className="absolute bottom-10 left-1 right-1 flex gap-1 items-center justify-between">
-          <Badge variant={card.distance < 0.15 ? "default" : "destructive"}>
-            ${card.distance.toFixed(2)}
-          </Badge>
-          <Badge variant="secondary" className="shadow-md">
-            {binLabel || `Bin ${binNumber}`}
-          </Badge>
-        </div>
         <div className="flex flex-row justify-between items-center">
           <div className="pl-2 flex flex-row items-center gap-2">
             <div
@@ -122,7 +126,7 @@ export const ScannedCardItem = memo(function ScannedCardItem({
               #{card.collector_number}
             </p>
           </div>
-          <ButtonGroup>
+          <div className="flex flex-row gap-1">
             <CardSelectDialog
               trigger={
                 <Button
@@ -145,7 +149,7 @@ export const ScannedCardItem = memo(function ScannedCardItem({
             >
               <IconX className="h-4 w-4" />
             </Button>
-          </ButtonGroup>
+          </div>
         </div>
       </div>
     </>

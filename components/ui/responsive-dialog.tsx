@@ -55,7 +55,7 @@ export function DynamicDialog({
               <DrawerDescription>{description}</DrawerDescription>
             )}
           </DrawerHeader>
-          <div className="p-4">{children}</div>
+          <div className="p-4 pt-0 flex flex-col gap-2">{children}</div>
           {footer && (
             <DrawerFooter className={footerClassName}>{footer}</DrawerFooter>
           )}
@@ -72,7 +72,7 @@ export function DynamicDialog({
           <DialogTitle>{title}</DialogTitle>
           {description && <DialogDescription>{description}</DialogDescription>}
         </DialogHeader>
-        {children}
+        <div className="flex flex-col gap-2">{children}</div>
         {footer && (
           <DialogFooter className={footerClassName}>{footer}</DialogFooter>
         )}

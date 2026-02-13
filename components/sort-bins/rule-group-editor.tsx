@@ -88,7 +88,6 @@ export function RuleGroupEditor({
           <Button
             type="button"
             variant={group.combinator === "and" ? "default" : "outline"}
-            size="sm"
             onClick={() => toggleCombinator("and")}
           >
             AND
@@ -96,7 +95,6 @@ export function RuleGroupEditor({
           <Button
             type="button"
             variant={group.combinator === "or" ? "default" : "outline"}
-            size="sm"
             onClick={() => toggleCombinator("or")}
           >
             OR
@@ -132,16 +130,11 @@ export function RuleGroupEditor({
       </div>
 
       <div className="flex gap-1.5 pl-2">
-        <Button
-          type="button"
-          variant="outline"
-          size="sm"
-          onClick={addCondition}
-        >
+        <Button type="button" variant="outline" onClick={addCondition}>
           <IconPlus /> Condition
         </Button>
         {depth < 2 && (
-          <Button type="button" variant="outline" size="sm" onClick={addGroup}>
+          <Button type="button" variant="outline" onClick={addGroup}>
             <IconPlus /> Group
           </Button>
         )}

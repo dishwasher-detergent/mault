@@ -101,9 +101,9 @@ export function CardSelectDialog({
       description={description}
       open={open}
       onOpenChange={handleOpenChange}
-      className="sm:max-w-lg max-h-[80vh] flex flex-col"
+      className="sm:max-w-lg max-h-[80vh] flex flex-col gap-2"
     >
-      <div className="flex gap-2 px-4 md:px-0">
+      <div className="flex gap-2">
         <div className="relative flex-1">
           <IconSearch className="absolute left-2 top-1/2 -translate-y-1/2 size-3 text-muted-foreground" />
           <Input
@@ -132,7 +132,7 @@ export function CardSelectDialog({
           </Select>
         )}
       </div>
-      <ScrollArea className="flex-1 overflow-y-auto min-h-0 max-h-[50vh] border rounded-lg p-1 bg-sidebar mx-4 mb-4 md:mx-0 md:mb-0">
+      <ScrollArea className="flex-1 overflow-y-auto min-h-0 max-h-[50vh] border rounded-lg p-1 bg-sidebar">
         {loading && (
           <div className="flex items-center justify-center py-8">
             <IconLoader2 className="size-5 animate-spin text-muted-foreground" />
