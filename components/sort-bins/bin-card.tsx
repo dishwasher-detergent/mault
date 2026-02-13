@@ -1,24 +1,18 @@
 "use client";
 
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { BinConfig, isRuleGroup } from "@/interfaces/sort-bins.interface";
 import { RuleSummary } from "./rule-summary";
 
 interface BinCardProps {
   config: BinConfig;
+  active?: boolean;
   onClick: () => void;
 }
 
 function countConditions(config: BinConfig): number {
-  function count(
-    items: BinConfig["rules"]["conditions"],
-  ): number {
+  function count(items: BinConfig["rules"]["conditions"]): number {
     return items.reduce((acc, item) => {
       if (isRuleGroup(item)) {
         return acc + count(item.conditions);
@@ -29,15 +23,14 @@ function countConditions(config: BinConfig): number {
   return count(config.rules.conditions);
 }
 
-export function BinCard({ config, onClick }: BinCardProps) {
-  const isEmpty =
-    !config.label && config.rules.conditions.length === 0;
+export function BinCard({ config, active, onClick }: BinCardProps) {
+  const isEmpty = !config.label && config.rules.conditions.length === 0;
   const conditionCount = countConditions(config);
 
   return (
     <Card
       size="sm"
-      className={`cursor-pointer transition-colors hover:bg-muted/50 ${isEmpty ? "border-dashed ring-0 border" : ""}`}
+      className={`cursor-pointer transition-colors hover:bg-muted/50 ${isEmpty ? "border-dashed ring-0 border" : ""} ${active ? "ring-2 ring-primary bg-muted/50" : ""}`}
       onClick={onClick}
     >
       <CardHeader>

@@ -42,6 +42,14 @@ export interface BinConfig {
   rules: BinRuleGroup;
 }
 
+export interface BinPreset {
+  id: number;
+  name: string;
+  bins: Omit<BinConfig, "id">[];
+  createdAt: Date;
+  updatedAt: Date;
+}
+
 export type FieldType = "string" | "numeric" | "enum" | "set";
 
 export interface FieldMeta {

@@ -53,3 +53,12 @@ export const sortBins = pgTable(
     unique("sort_bins_user_bin_idx").on(table.userId, table.binNumber),
   ],
 );
+
+export const sortBinPresets = pgTable("sort_bin_presets", {
+  id: serial().primaryKey(),
+  userId: text("user_id").notNull(),
+  name: text("name").notNull(),
+  bins: jsonb("bins").notNull(), // Array of { binNumber, label, rules }
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});

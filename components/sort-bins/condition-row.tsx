@@ -132,7 +132,7 @@ export function ConditionRow({
           value={String(condition.value)}
           onValueChange={(val) => handleValueChange(val as string)}
         >
-          <SelectTrigger className="w-full min-w-24">
+          <SelectTrigger className="min-w-24 flex-1">
             <SelectValue placeholder="Select..." />
           </SelectTrigger>
           <SelectContent>

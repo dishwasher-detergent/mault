@@ -8,6 +8,13 @@
       "when": 1770938180197,
       "tag": "0000_glossy_stellaris",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1770952555891,
+      "tag": "0001_nasty_synch",
+      "breakpoints": true
     }
   ]
 }
