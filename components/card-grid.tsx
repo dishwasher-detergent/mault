@@ -21,7 +21,7 @@ export function CardGrid() {
     exportToManabox(cards);
   }, [cards]);
 
-  if (filteredAndSorted.length === 0) {
+  if (cards.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-16 text-muted-foreground">
         <p className="text-sm font-medium">No cards scanned yet</p>
@@ -43,7 +43,13 @@ export function CardGrid() {
           hasCards={filteredAndSorted.length > 0}
         />
       </div>
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-2">
+      {filteredAndSorted.length === 0 && (
+        <div className="flex flex-col items-center justify-center py-16 text-muted-foreground">
+          <p className="text-sm font-medium">No cards match the search query</p>
+          <p className="text-xs">Try adjusting your search or sort options</p>
+        </div>
+      )}
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols6 xl:grid-cols-8 2xl:grid-col-8 gap-2">
         {filteredAndSorted.map((card) => (
           <ScannedCardItem
             key={card.scanId}

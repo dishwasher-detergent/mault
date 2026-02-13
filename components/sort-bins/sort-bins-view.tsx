@@ -43,20 +43,22 @@ export function SortBinsView() {
             Configure sorting rules for each bin.
           </p>
         </div>
-        <ScrollArea className="flex-1">
-          <div className="flex flex-col gap-2 p-3">
-            {configs.map((config) => (
-              <BinCard
-                key={config.binNumber}
-                config={config}
-                active={config.binNumber === selectedBin}
-                onClick={() => setSelectedBin(config.binNumber)}
-              />
-            ))}
+        <div className="flex flex-col flex-1">
+          <ScrollArea>
+            <div className="flex flex-col gap-2 p-3">
+              {configs.map((config) => (
+                <BinCard
+                  key={config.binNumber}
+                  config={config}
+                  active={config.binNumber === selectedBin}
+                  onClick={() => setSelectedBin(config.binNumber)}
+                />
+              ))}
+            </div>
+          </ScrollArea>
+          <div className="p-2 pb-4 border-t">
+            <PresetSelector />
           </div>
-        </ScrollArea>
-        <div className="p-2 pb-4 border-t">
-          <PresetSelector />
         </div>
       </div>
       <div className="col-span-9">

@@ -15,6 +15,7 @@ import {
 } from "@/lib/card-db";
 import { evaluateCardBin } from "@/lib/evaluate-bin";
 import { useBinConfigs } from "@/hooks/use-bin-configs";
+import { useSerial } from "@/hooks/use-serial";
 import {
   createContext,
   useCallback,
@@ -45,11 +46,17 @@ export function ScannedCardsProvider({
   const [cards, setCards] = useState<ScannedCard[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const { configs: binConfigs } = useBinConfigs();
+  const { sendBin, isConnected } = useSerial();
   const binConfigsRef = useRef(binConfigs);
+  const serialRef = useRef({ sendBin, isConnected });
 
   useEffect(() => {
     binConfigsRef.current = binConfigs;
   }, [binConfigs]);
+
+  useEffect(() => {
+    serialRef.current = { sendBin, isConnected };
+  }, [sendBin, isConnected]);
 
   useEffect(() => {
     let cancelled = false;
@@ -86,6 +93,15 @@ export function ScannedCardsProvider({
     putCard(record).catch((err) =>
       console.error("Failed to persist card:", err),
     );
+
+    // Send bin assignment to Arduino if connected
+    if (matchedBin && serialRef.current.isConnected) {
+      serialRef.current.sendBin(matchedBin.binNumber).then((response) => {
+        if (response) {
+          console.log("[Serial] Route for bin", matchedBin.binNumber, response);
+        }
+      });
+    }
   }, []);
 
   const removeCard = useCallback((scanId: string) => {
