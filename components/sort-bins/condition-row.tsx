@@ -1,13 +1,5 @@
 "use client";
 
-import { useCallback } from "react";
-import { FIELD_DEFINITIONS } from "@/constants/sort-bins.constant";
-import {
-  BinCondition,
-  ConditionField,
-  ConditionOperator,
-  FieldMeta,
-} from "@/interfaces/sort-bins.interface";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -17,7 +9,15 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { FIELD_DEFINITIONS } from "@/constants/sort-bins.constant";
+import {
+  BinCondition,
+  ConditionField,
+  ConditionOperator,
+  FieldMeta,
+} from "@/interfaces/sort-bins.interface";
 import { IconX } from "@tabler/icons-react";
+import { useCallback } from "react";
 
 interface ConditionRowProps {
   condition: BinCondition;
@@ -77,7 +77,12 @@ export function ConditionRow({
       const defaultOp = newMeta?.operators[0]?.value ?? "equals";
       const defaultValue =
         newMeta?.type === "enum" || newMeta?.type === "set" ? [] : "";
-      onChange({ ...condition, field, operator: defaultOp, value: defaultValue });
+      onChange({
+        ...condition,
+        field,
+        operator: defaultOp,
+        value: defaultValue,
+      });
     },
     [condition, onChange],
   );
@@ -103,14 +108,16 @@ export function ConditionRow({
       (fieldMeta.type === "enum" || fieldMeta.type === "set") &&
       fieldMeta.options
     ) {
-      const isMulti = ["in", "not_in", "contains_any", "contains_all", "contains_none"].includes(
-        condition.operator,
-      );
+      const isMulti = [
+        "in",
+        "not_in",
+        "contains_any",
+        "contains_all",
+        "contains_none",
+      ].includes(condition.operator);
 
       if (isMulti) {
-        const arrValue = Array.isArray(condition.value)
-          ? condition.value
-          : [];
+        const arrValue = Array.isArray(condition.value) ? condition.value : [];
         return (
           <CheckboxGroup
             options={fieldMeta.options}
@@ -145,7 +152,7 @@ export function ConditionRow({
           type="number"
           step="any"
           placeholder="0"
-          className="w-24"
+          className="min-w-24 flex-1"
           value={condition.value === "" ? "" : String(condition.value)}
           onChange={(e) => {
             const raw = e.target.value;
@@ -209,7 +216,7 @@ export function ConditionRow({
       <Button
         type="button"
         variant="ghost"
-        size="icon-sm"
+        size="icon"
         onClick={onRemove}
         className="shrink-0"
       >

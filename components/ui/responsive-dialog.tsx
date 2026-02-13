@@ -2,6 +2,7 @@ import {
   Dialog,
   DialogContent,
   DialogDescription,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
@@ -10,6 +11,7 @@ import {
   Drawer,
   DrawerContent,
   DrawerDescription,
+  DrawerFooter,
   DrawerHeader,
   DrawerTitle,
   DrawerTrigger,
@@ -18,9 +20,11 @@ import { useIsMobile } from "@/hooks/use-is-mobile";
 import type * as React from "react";
 
 interface DynamicDialogProps {
-  trigger: React.ReactElement;
+  trigger?: React.ReactElement;
   title: React.ReactNode;
   description?: React.ReactNode;
+  footer?: React.ReactNode;
+  footerClassName?: string;
   children: React.ReactNode;
   className?: string;
   open?: boolean;
@@ -31,6 +35,8 @@ export function DynamicDialog({
   trigger,
   title,
   description,
+  footer,
+  footerClassName,
   children,
   className,
   open,
@@ -41,7 +47,7 @@ export function DynamicDialog({
   if (isMobile) {
     return (
       <Drawer open={open} onOpenChange={onOpenChange}>
-        <DrawerTrigger asChild>{trigger}</DrawerTrigger>
+        {trigger && <DrawerTrigger asChild>{trigger}</DrawerTrigger>}
         <DrawerContent className={className}>
           <DrawerHeader>
             <DrawerTitle>{title}</DrawerTitle>
@@ -49,7 +55,10 @@ export function DynamicDialog({
               <DrawerDescription>{description}</DrawerDescription>
             )}
           </DrawerHeader>
-          {children}
+          <div className="p-4">{children}</div>
+          {footer && (
+            <DrawerFooter className={footerClassName}>{footer}</DrawerFooter>
+          )}
         </DrawerContent>
       </Drawer>
     );
@@ -57,13 +66,16 @@ export function DynamicDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogTrigger render={trigger}></DialogTrigger>
+      {trigger && <DialogTrigger render={trigger}></DialogTrigger>}
       <DialogContent className={className}>
         <DialogHeader>
           <DialogTitle>{title}</DialogTitle>
           {description && <DialogDescription>{description}</DialogDescription>}
         </DialogHeader>
         {children}
+        {footer && (
+          <DialogFooter className={footerClassName}>{footer}</DialogFooter>
+        )}
       </DialogContent>
     </Dialog>
   );

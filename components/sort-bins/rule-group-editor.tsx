@@ -1,15 +1,15 @@
 "use client";
 
-import { useCallback } from "react";
+import { Button } from "@/components/ui/button";
+import { ButtonGroup } from "@/components/ui/button-group";
 import {
   BinCondition,
   BinRuleGroup,
   isRuleGroup,
 } from "@/interfaces/sort-bins.interface";
-import { Button } from "@/components/ui/button";
-import { ButtonGroup } from "@/components/ui/button-group";
-import { ConditionRow } from "./condition-row";
 import { IconPlus, IconTrash } from "@tabler/icons-react";
+import { useCallback } from "react";
+import { ConditionRow } from "./condition-row";
 
 interface RuleGroupEditorProps {
   group: BinRuleGroup;
@@ -88,7 +88,7 @@ export function RuleGroupEditor({
           <Button
             type="button"
             variant={group.combinator === "and" ? "default" : "outline"}
-            size="xs"
+            size="sm"
             onClick={() => toggleCombinator("and")}
           >
             AND
@@ -96,7 +96,7 @@ export function RuleGroupEditor({
           <Button
             type="button"
             variant={group.combinator === "or" ? "default" : "outline"}
-            size="xs"
+            size="sm"
             onClick={() => toggleCombinator("or")}
           >
             OR
@@ -104,12 +104,7 @@ export function RuleGroupEditor({
         </ButtonGroup>
 
         {onRemove && (
-          <Button
-            type="button"
-            variant="ghost"
-            size="icon-sm"
-            onClick={onRemove}
-          >
+          <Button type="button" variant="ghost" size="icon" onClick={onRemove}>
             <IconTrash />
           </Button>
         )}
@@ -140,18 +135,13 @@ export function RuleGroupEditor({
         <Button
           type="button"
           variant="outline"
-          size="xs"
+          size="sm"
           onClick={addCondition}
         >
           <IconPlus /> Condition
         </Button>
         {depth < 2 && (
-          <Button
-            type="button"
-            variant="outline"
-            size="xs"
-            onClick={addGroup}
-          >
+          <Button type="button" variant="outline" size="sm" onClick={addGroup}>
             <IconPlus /> Group
           </Button>
         )}
