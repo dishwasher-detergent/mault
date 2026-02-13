@@ -1,5 +1,6 @@
 "use client";
 
+import { ConditionRow } from "@/components/sort-bins/condition-row";
 import { Button } from "@/components/ui/button";
 import { ButtonGroup } from "@/components/ui/button-group";
 import {
@@ -9,7 +10,6 @@ import {
 } from "@/interfaces/sort-bins.interface";
 import { IconPlus, IconTrash } from "@tabler/icons-react";
 import { useCallback } from "react";
-import { ConditionRow } from "./condition-row";
 
 interface RuleGroupEditorProps {
   group: BinRuleGroup;

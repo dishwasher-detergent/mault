@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { DynamicDialog } from "@/components/ui/responsive-dialog";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   Select,
   SelectContent,
@@ -14,7 +15,6 @@ import type { ScryfallCard } from "@/interfaces/scryfall.interface";
 import { Search } from "@/lib/scryfall/search";
 import { IconLoader2, IconSearch } from "@tabler/icons-react";
 import { useCallback, useMemo, useRef, useState } from "react";
-import { ScrollArea } from "./ui/scroll-area";
 
 interface CardSelectDialogProps {
   trigger: React.ReactElement;

@@ -1,9 +1,9 @@
 "use client";
 
+import { RuleSummary } from "@/components/sort-bins/rule-summary";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { BinConfig, isRuleGroup } from "@/interfaces/sort-bins.interface";
-import { RuleSummary } from "./rule-summary";
 
 interface BinCardProps {
   config: BinConfig;

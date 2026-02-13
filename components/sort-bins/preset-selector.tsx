@@ -9,6 +9,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
+import { DynamicDialog } from "@/components/ui/responsive-dialog";
 import { useBinConfigs } from "@/hooks/use-bin-configs";
 import { BinPreset } from "@/interfaces/sort-bins.interface";
 import {
@@ -18,7 +19,6 @@ import {
   IconTrash,
 } from "@tabler/icons-react";
 import { useCallback, useState } from "react";
-import { DynamicDialog } from "../ui/responsive-dialog";
 
 export function PresetSelector() {
   const { presets, saveAsPreset, updatePreset, loadPreset, deletePreset } =

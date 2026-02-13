@@ -1,10 +1,10 @@
 import { CardSelectDialog } from "@/components/card-select-dialog";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { DynamicPopover } from "@/components/ui/responsive-popover";
 import type { ScryfallCardWithDistance } from "@/interfaces/scryfall.interface";
 import { IconExternalLink, IconPencil, IconX } from "@tabler/icons-react";
 import { memo } from "react";
-import { Badge } from "./ui/badge";
 
 function formatManaCost(manaCost: string): string {
   return manaCost.replace(/[{}]/g, " ").trim().replace(/\s+/g, " ");

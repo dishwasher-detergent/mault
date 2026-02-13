@@ -1,3 +1,4 @@
+import { CardSelectDialog } from "@/components/card-select-dialog";
 import { Button } from "@/components/ui/button";
 import type { ScannerStatus } from "@/interfaces/scanner.interface";
 import {
@@ -7,7 +8,6 @@ import {
   IconPlus,
   IconSearch,
 } from "@tabler/icons-react";
-import { CardSelectDialog } from "./card-select-dialog";
 
 interface ScannerControlsProps {
   status: ScannerStatus;

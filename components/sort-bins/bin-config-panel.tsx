@@ -1,16 +1,21 @@
 "use client";
 
+import { RuleGroupEditor } from "@/components/sort-bins/rule-group-editor";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { BinConfig, BinRuleGroup } from "@/interfaces/sort-bins.interface";
 import { useCallback, useEffect, useState } from "react";
-import { RuleGroupEditor } from "./rule-group-editor";
 
 interface BinConfigPanelProps {
   config: BinConfig;
-  onSave: (binNumber: number, label: string, rules: BinRuleGroup, isCatchAll?: boolean) => void;
+  onSave: (
+    binNumber: number,
+    label: string,
+    rules: BinRuleGroup,
+    isCatchAll?: boolean,
+  ) => void;
   onClear: (binNumber: number) => void;
 }
 

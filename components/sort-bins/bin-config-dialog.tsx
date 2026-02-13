@@ -1,13 +1,13 @@
 "use client";
 
+import { RuleGroupEditor } from "@/components/sort-bins/rule-group-editor";
 import { Button } from "@/components/ui/button";
-import { DynamicDialog } from "@/components/ui/responsive-dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { DynamicDialog } from "@/components/ui/responsive-dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { BinConfig, BinRuleGroup } from "@/interfaces/sort-bins.interface";
 import { useCallback, useEffect, useState } from "react";
-import { RuleGroupEditor } from "./rule-group-editor";
 
 interface BinConfigDialogProps {
   config: BinConfig | null;

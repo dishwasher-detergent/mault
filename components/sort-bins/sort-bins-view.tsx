@@ -1,19 +1,24 @@
 "use client";
 
+import { BinCard } from "@/components/sort-bins/bin-card";
+import { BinConfigPanel } from "@/components/sort-bins/bin-config-panel";
+import { PresetSelector } from "@/components/sort-bins/preset-selector";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useBinConfigs } from "@/hooks/use-bin-configs";
 import { BinRuleGroup } from "@/interfaces/sort-bins.interface";
 import { useCallback, useState } from "react";
-import { BinCard } from "./bin-card";
-import { BinConfigPanel } from "./bin-config-panel";
-import { PresetSelector } from "./preset-selector";
 
 export function SortBinsView() {
   const { configs, save, clear } = useBinConfigs();
   const [selectedBin, setSelectedBin] = useState<number>(1);
 
   const handleSave = useCallback(
-    (binNumber: number, label: string, rules: BinRuleGroup, isCatchAll?: boolean) => {
+    (
+      binNumber: number,
+      label: string,
+      rules: BinRuleGroup,
+      isCatchAll?: boolean,
+    ) => {
       save(binNumber, label, rules, isCatchAll);
     },
     [save],
