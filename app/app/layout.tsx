@@ -1,6 +1,7 @@
 import { ScannedCardsProvider } from "@/hooks/use-scanned-cards";
 import { UserButton } from "@neondatabase/auth/react";
 import { IconBox } from "@tabler/icons-react";
+import Link from "next/link";
 
 export default function AppLayout({
   children,
@@ -15,6 +16,18 @@ export default function AppLayout({
             <IconBox /> MTG Vault
           </p>
           <div className="flex items-center gap-2">
+            <Link
+              href="/app"
+              className="rounded-md px-2 py-1 text-xs font-medium hover:bg-muted transition-colors"
+            >
+              Scanner
+            </Link>
+            <Link
+              href="/app/sort"
+              className="rounded-md px-2 py-1 text-xs font-medium hover:bg-muted transition-colors"
+            >
+              Sort Bins
+            </Link>
             <UserButton size="icon" />
           </div>
         </nav>

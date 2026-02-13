@@ -5,6 +5,7 @@ import type {
   ScryfallCard,
   ScryfallCardWithDistance,
 } from "@/interfaces/scryfall.interface";
+import type { BinConfig } from "@/interfaces/sort-bins.interface";
 import {
   clearCards as dbClearCards,
   removeCard as dbRemoveCard,
@@ -13,7 +14,9 @@ import {
   getAllCards,
   putCard,
 } from "@/lib/card-db";
-import { createContext, useCallback, useContext, useEffect, useState } from "react";
+import { loadBinConfigs } from "@/lib/db/sort-bins";
+import { evaluateCardBin } from "@/lib/evaluate-bin";
+import { createContext, useCallback, useContext, useEffect, useRef, useState } from "react";
 
 interface ScannedCardsContextValue {
   cards: ScannedCard[];
@@ -29,6 +32,7 @@ const ScannedCardsContext = createContext<ScannedCardsContextValue | null>(null)
 export function ScannedCardsProvider({ children }: { children: React.ReactNode }) {
   const [cards, setCards] = useState<ScannedCard[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const binConfigsRef = useRef<BinConfig[]>([]);
 
   useEffect(() => {
     let cancelled = false;
@@ -46,16 +50,26 @@ export function ScannedCardsProvider({ children }: { children: React.ReactNode }
           setIsLoading(false);
         }
       });
+
+    loadBinConfigs().then((result) => {
+      if (!cancelled && result.success && result.data) {
+        binConfigsRef.current = result.data;
+      }
+    });
+
     return () => {
       cancelled = true;
     };
   }, []);
 
   const addCard = useCallback((card: ScryfallCardWithDistance) => {
+    const matchedBin = evaluateCardBin(card, binConfigsRef.current);
     const record: ScannedCard = {
       scanId: generateScanId(),
       card,
       scannedAt: Date.now(),
+      binNumber: matchedBin?.binNumber,
+      binLabel: matchedBin?.label || undefined,
     };
     setCards((prev) => [record, ...prev]);
     putCard(record).catch((err) =>
