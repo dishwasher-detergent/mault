@@ -43,7 +43,7 @@ interface BinConfigsContextValue {
   configs: BinConfig[];
   presets: BinPreset[];
   isPending: boolean;
-  save: (binNumber: number, label: string, rules: BinRuleGroup) => void;
+  save: (binNumber: number, label: string, rules: BinRuleGroup, isCatchAll?: boolean) => void;
   clear: (binNumber: number) => void;
   saveAsPreset: (name: string) => Promise<void>;
   updatePreset: (presetId: number, name: string) => Promise<void>;
@@ -91,15 +91,15 @@ export function BinConfigsProvider({
   }, [refreshPresets]);
 
   const save = useCallback(
-    (binNumber: number, label: string, rules: BinRuleGroup) => {
+    (binNumber: number, label: string, rules: BinRuleGroup, isCatchAll?: boolean) => {
       setConfigs((prev) =>
         prev.map((c) =>
-          c.binNumber === binNumber ? { ...c, label, rules } : c,
+          c.binNumber === binNumber ? { ...c, label, rules, isCatchAll } : c,
         ),
       );
 
       startTransition(async () => {
-        const result = await saveBinConfigAction({ binNumber, label, rules });
+        const result = await saveBinConfigAction({ binNumber, label, rules, isCatchAll });
         if (result.success && result.data) {
           setConfigs((prev) =>
             prev.map((c) => (c.binNumber === binNumber ? result.data! : c)),

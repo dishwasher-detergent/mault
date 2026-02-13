@@ -124,12 +124,18 @@ function evaluateRuleGroup(card: ScryfallCard, group: BinRuleGroup): boolean {
     : results.some(Boolean);
 }
 
-/** Returns the first matching bin config for a card, or undefined if none match. */
+/** Returns the first matching bin config for a card, falling back to the catch-all bin if none match. */
 export function evaluateCardBin(
   card: ScryfallCard,
   configs: BinConfig[],
 ): BinConfig | undefined {
+  let catchAll: BinConfig | undefined;
+
   for (const config of configs) {
+    if (config.isCatchAll) {
+      catchAll = config;
+      continue;
+    }
     if (
       config.rules.conditions.length > 0 &&
       evaluateRuleGroup(card, config.rules)
@@ -137,5 +143,6 @@ export function evaluateCardBin(
       return config;
     }
   }
-  return undefined;
+
+  return catchAll;
 }

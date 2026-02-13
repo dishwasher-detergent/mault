@@ -24,6 +24,7 @@ export async function loadBinConfigs(): Promise<Result<BinConfig[]>> {
     binNumber: row.binNumber,
     label: row.label,
     rules: row.rules as BinRuleGroup,
+    isCatchAll: row.isCatchAll,
   }));
 
   return {
@@ -37,10 +38,12 @@ export async function saveBinConfig({
   binNumber,
   label,
   rules,
+  isCatchAll,
 }: {
   binNumber: number;
   label: string;
   rules: BinRuleGroup;
+  isCatchAll?: boolean;
 }): Promise<Result<BinConfig>> {
   const { data: session } = await auth.getSession();
 
@@ -59,7 +62,7 @@ export async function saveBinConfig({
   if (existing.length > 0) {
     const updated = await db
       .update(sortBins)
-      .set({ label, rules, updatedAt: new Date() })
+      .set({ label, rules, isCatchAll: isCatchAll ?? false, updatedAt: new Date() })
       .where(
         and(eq(sortBins.userId, userId), eq(sortBins.binNumber, binNumber)),
       )
@@ -68,7 +71,7 @@ export async function saveBinConfig({
   } else {
     const inserted = await db
       .insert(sortBins)
-      .values({ userId, binNumber, label, rules })
+      .values({ userId, binNumber, label, rules, isCatchAll: isCatchAll ?? false })
       .returning();
     row = inserted[0];
   }
@@ -81,6 +84,7 @@ export async function saveBinConfig({
       binNumber: row.binNumber,
       label: row.label,
       rules: row.rules as BinRuleGroup,
+      isCatchAll: row.isCatchAll,
     },
   };
 }

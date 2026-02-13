@@ -15,6 +15,13 @@
       "when": 1770952555891,
       "tag": "0001_nasty_synch",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1770990788047,
+      "tag": "0002_flaky_ultragirl",
+      "breakpoints": true
     }
   ]
 }

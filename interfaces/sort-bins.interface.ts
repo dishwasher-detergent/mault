@@ -40,6 +40,7 @@ export interface BinConfig {
   binNumber: number;
   label: string;
   rules: BinRuleGroup;
+  isCatchAll?: boolean;
 }
 
 export interface BinPreset {

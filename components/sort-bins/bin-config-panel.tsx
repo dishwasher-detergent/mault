@@ -10,7 +10,7 @@ import { RuleGroupEditor } from "./rule-group-editor";
 
 interface BinConfigPanelProps {
   config: BinConfig;
-  onSave: (binNumber: number, label: string, rules: BinRuleGroup) => void;
+  onSave: (binNumber: number, label: string, rules: BinRuleGroup, isCatchAll?: boolean) => void;
   onClear: (binNumber: number) => void;
 }
 
@@ -20,6 +20,7 @@ export function BinConfigPanel({
   onClear,
 }: BinConfigPanelProps) {
   const [label, setLabel] = useState("");
+  const [isCatchAll, setIsCatchAll] = useState(false);
   const [rules, setRules] = useState<BinRuleGroup>({
     id: crypto.randomUUID(),
     combinator: "and",
@@ -28,6 +29,7 @@ export function BinConfigPanel({
 
   useEffect(() => {
     setLabel(config.label);
+    setIsCatchAll(config.isCatchAll ?? false);
     setRules(
       config.rules.conditions.length > 0
         ? config.rules
@@ -36,8 +38,8 @@ export function BinConfigPanel({
   }, [config]);
 
   const handleSave = useCallback(() => {
-    onSave(config.binNumber, label, rules);
-  }, [config, label, rules, onSave]);
+    onSave(config.binNumber, label, rules, isCatchAll);
+  }, [config, label, rules, isCatchAll, onSave]);
 
   const handleClear = useCallback(() => {
     onClear(config.binNumber);
@@ -68,10 +70,27 @@ export function BinConfigPanel({
               onChange={(e) => setLabel(e.target.value)}
             />
           </div>
-          <div className="flex flex-col gap-1.5">
-            <Label>Rules</Label>
-            <RuleGroupEditor group={rules} onChange={setRules} />
+          <div className="flex items-center gap-2">
+            <Button
+              type="button"
+              variant={isCatchAll ? "default" : "outline"}
+              size="sm"
+              onClick={() => setIsCatchAll(!isCatchAll)}
+            >
+              {isCatchAll ? "Catch-all enabled" : "Set as catch-all"}
+            </Button>
+            {isCatchAll && (
+              <p className="text-xs text-muted-foreground">
+                Cards that don&apos;t match any other bin will go here.
+              </p>
+            )}
           </div>
+          {!isCatchAll && (
+            <div className="flex flex-col gap-1.5">
+              <Label>Rules</Label>
+              <RuleGroupEditor group={rules} onChange={setRules} />
+            </div>
+          )}
         </div>
       </ScrollArea>
     </div>

@@ -13,8 +13,8 @@ export function SortBinsView() {
   const [selectedBin, setSelectedBin] = useState<number>(1);
 
   const handleSave = useCallback(
-    (binNumber: number, label: string, rules: BinRuleGroup) => {
-      save(binNumber, label, rules);
+    (binNumber: number, label: string, rules: BinRuleGroup, isCatchAll?: boolean) => {
+      save(binNumber, label, rules, isCatchAll);
     },
     [save],
   );

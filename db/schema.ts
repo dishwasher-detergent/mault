@@ -1,4 +1,5 @@
 import {
+  boolean,
   customType,
   integer,
   jsonb,
@@ -46,6 +47,7 @@ export const sortBins = pgTable(
     binNumber: integer("bin_number").notNull(),
     label: text("label").notNull().default(""),
     rules: jsonb("rules").notNull(),
+    isCatchAll: boolean("is_catch_all").notNull().default(false),
     createdAt: timestamp("created_at").defaultNow().notNull(),
     updatedAt: timestamp("updated_at").defaultNow().notNull(),
   },
