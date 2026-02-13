@@ -110,10 +110,7 @@ function evaluateCondition(
   }
 }
 
-function evaluateRuleGroup(
-  card: ScryfallCard,
-  group: BinRuleGroup,
-): boolean {
+function evaluateRuleGroup(card: ScryfallCard, group: BinRuleGroup): boolean {
   if (group.conditions.length === 0) return false;
 
   const results = group.conditions.map((item) =>
@@ -133,7 +130,10 @@ export function evaluateCardBin(
   configs: BinConfig[],
 ): BinConfig | undefined {
   for (const config of configs) {
-    if (config.rules.conditions.length > 0 && evaluateRuleGroup(card, config.rules)) {
+    if (
+      config.rules.conditions.length > 0 &&
+      evaluateRuleGroup(card, config.rules)
+    ) {
       return config;
     }
   }

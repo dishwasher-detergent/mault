@@ -101,16 +101,12 @@ export const ScannedCardItem = memo(function ScannedCardItem({
             <IconExternalLink className="h-3 w-3" />
           </a>
         </DynamicPopover>
-        {binNumber != null && (
-          <div className="absolute top-2 right-2">
-            <Badge variant="secondary" className="shadow-md">
-              {binLabel || `Bin ${binNumber}`}
-            </Badge>
-          </div>
-        )}
         <div className="absolute bottom-10 left-1 right-1 flex gap-1 items-center justify-between">
           <Badge variant={card.distance < 0.15 ? "default" : "destructive"}>
-            {card.distance.toFixed(2)}
+            ${card.distance.toFixed(2)}
+          </Badge>
+          <Badge variant="secondary" className="shadow-md">
+            {binLabel || `Bin ${binNumber}`}
           </Badge>
         </div>
         <div className="flex flex-row justify-between items-center">

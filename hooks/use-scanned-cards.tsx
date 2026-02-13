@@ -16,7 +16,14 @@ import {
 } from "@/lib/card-db";
 import { loadBinConfigs } from "@/lib/db/sort-bins";
 import { evaluateCardBin } from "@/lib/evaluate-bin";
-import { createContext, useCallback, useContext, useEffect, useRef, useState } from "react";
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 
 interface ScannedCardsContextValue {
   cards: ScannedCard[];
@@ -27,9 +34,15 @@ interface ScannedCardsContextValue {
   clearCards: () => void;
 }
 
-const ScannedCardsContext = createContext<ScannedCardsContextValue | null>(null);
+const ScannedCardsContext = createContext<ScannedCardsContextValue | null>(
+  null,
+);
 
-export function ScannedCardsProvider({ children }: { children: React.ReactNode }) {
+export function ScannedCardsProvider({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   const [cards, setCards] = useState<ScannedCard[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const binConfigsRef = useRef<BinConfig[]>([]);
@@ -104,7 +117,9 @@ export function ScannedCardsProvider({ children }: { children: React.ReactNode }
   }, []);
 
   return (
-    <ScannedCardsContext value={{ cards, isLoading, addCard, removeCard, correctCard, clearCards }}>
+    <ScannedCardsContext
+      value={{ cards, isLoading, addCard, removeCard, correctCard, clearCards }}
+    >
       {children}
     </ScannedCardsContext>
   );
@@ -113,7 +128,9 @@ export function ScannedCardsProvider({ children }: { children: React.ReactNode }
 export function useScannedCards() {
   const context = useContext(ScannedCardsContext);
   if (!context) {
-    throw new Error("useScannedCards must be used within a ScannedCardsProvider");
+    throw new Error(
+      "useScannedCards must be used within a ScannedCardsProvider",
+    );
   }
   return context;
 }
