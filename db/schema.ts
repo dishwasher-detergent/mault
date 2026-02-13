@@ -1,7 +1,6 @@
 import {
   boolean,
   customType,
-  integer,
   jsonb,
   pgTable,
   serial,
@@ -39,28 +38,12 @@ export const cardImageVectors = pgTable(
   ],
 );
 
-export const sortBins = pgTable(
-  "sort_bins",
-  {
-    id: serial().primaryKey(),
-    userId: text("user_id").notNull(),
-    binNumber: integer("bin_number").notNull(),
-    label: text("label").notNull().default(""),
-    rules: jsonb("rules").notNull(),
-    isCatchAll: boolean("is_catch_all").notNull().default(false),
-    createdAt: timestamp("created_at").defaultNow().notNull(),
-    updatedAt: timestamp("updated_at").defaultNow().notNull(),
-  },
-  (table) => [
-    unique("sort_bins_user_bin_idx").on(table.userId, table.binNumber),
-  ],
-);
-
 export const sortBinPresets = pgTable("sort_bin_presets", {
   id: serial().primaryKey(),
   userId: text("user_id").notNull(),
   name: text("name").notNull(),
-  bins: jsonb("bins").notNull(), // Array of { binNumber, label, rules }
+  bins: jsonb("bins").notNull(), // Array of { binNumber, label, rules, isCatchAll }
+  isActive: boolean("is_active").notNull().default(false),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });

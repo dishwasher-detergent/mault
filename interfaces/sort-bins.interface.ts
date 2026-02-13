@@ -47,6 +47,7 @@ export interface BinPreset {
   id: number;
   name: string;
   bins: Omit<BinConfig, "id">[];
+  isActive?: boolean;
   createdAt: Date;
   updatedAt: Date;
 }

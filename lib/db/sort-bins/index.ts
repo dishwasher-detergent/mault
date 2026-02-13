@@ -1,11 +1,34 @@
 "use server";
 
 import { db } from "@/db";
-import { sortBins } from "@/db/schema";
+import { sortBinPresets } from "@/db/schema";
 import { Result } from "@/interfaces/result.interface";
 import { BinConfig, BinRuleGroup } from "@/interfaces/sort-bins.interface";
 import { auth } from "@/lib/auth/server";
 import { and, eq } from "drizzle-orm";
+
+type BinEntry = Omit<BinConfig, "id">;
+
+async function getOrCreateActivePreset(userId: string) {
+  const [existing] = await db
+    .select()
+    .from(sortBinPresets)
+    .where(
+      and(
+        eq(sortBinPresets.userId, userId),
+        eq(sortBinPresets.isActive, true),
+      ),
+    );
+
+  if (existing) return existing;
+
+  const [created] = await db
+    .insert(sortBinPresets)
+    .values({ userId, name: "__active__", bins: [], isActive: true })
+    .returning();
+
+  return created;
+}
 
 export async function loadBinConfigs(): Promise<Result<BinConfig[]>> {
   const { data: session } = await auth.getSession();
@@ -14,17 +37,14 @@ export async function loadBinConfigs(): Promise<Result<BinConfig[]>> {
     return { message: "Unauthorized", success: false };
   }
 
-  const rows = await db
-    .select()
-    .from(sortBins)
-    .where(eq(sortBins.userId, session.session.userId));
+  const preset = await getOrCreateActivePreset(session.session.userId);
+  const bins = preset.bins as BinEntry[];
 
-  const configs: BinConfig[] = rows.map((row) => ({
-    id: row.id,
-    binNumber: row.binNumber,
-    label: row.label,
-    rules: row.rules as BinRuleGroup,
-    isCatchAll: row.isCatchAll,
+  const configs: BinConfig[] = bins.map((bin) => ({
+    binNumber: bin.binNumber,
+    label: bin.label,
+    rules: bin.rules,
+    isCatchAll: bin.isCatchAll,
   }));
 
   return {
@@ -52,39 +72,30 @@ export async function saveBinConfig({
   }
 
   const userId = session.session.userId;
+  const preset = await getOrCreateActivePreset(userId);
+  const bins = (preset.bins as BinEntry[]).slice();
 
-  const existing = await db
-    .select()
-    .from(sortBins)
-    .where(and(eq(sortBins.userId, userId), eq(sortBins.binNumber, binNumber)));
-
-  let row;
-  if (existing.length > 0) {
-    const updated = await db
-      .update(sortBins)
-      .set({ label, rules, isCatchAll: isCatchAll ?? false, updatedAt: new Date() })
-      .where(
-        and(eq(sortBins.userId, userId), eq(sortBins.binNumber, binNumber)),
-      )
-      .returning();
-    row = updated[0];
+  const entry: BinEntry = { binNumber, label, rules, isCatchAll: isCatchAll ?? false };
+  const idx = bins.findIndex((b) => b.binNumber === binNumber);
+  if (idx >= 0) {
+    bins[idx] = entry;
   } else {
-    const inserted = await db
-      .insert(sortBins)
-      .values({ userId, binNumber, label, rules, isCatchAll: isCatchAll ?? false })
-      .returning();
-    row = inserted[0];
+    bins.push(entry);
   }
+
+  await db
+    .update(sortBinPresets)
+    .set({ bins, updatedAt: new Date() })
+    .where(eq(sortBinPresets.id, preset.id));
 
   return {
     message: "Successfully saved bin config.",
     success: true,
     data: {
-      id: row.id,
-      binNumber: row.binNumber,
-      label: row.label,
-      rules: row.rules as BinRuleGroup,
-      isCatchAll: row.isCatchAll,
+      binNumber: entry.binNumber,
+      label: entry.label,
+      rules: entry.rules,
+      isCatchAll: entry.isCatchAll,
     },
   };
 }
@@ -98,14 +109,16 @@ export async function clearBinConfig(
     return { message: "Unauthorized", success: false };
   }
 
+  const userId = session.session.userId;
+  const preset = await getOrCreateActivePreset(userId);
+  const bins = (preset.bins as BinEntry[]).filter(
+    (b) => b.binNumber !== binNumber,
+  );
+
   await db
-    .delete(sortBins)
-    .where(
-      and(
-        eq(sortBins.userId, session.session.userId),
-        eq(sortBins.binNumber, binNumber),
-      ),
-    );
+    .update(sortBinPresets)
+    .set({ bins, updatedAt: new Date() })
+    .where(eq(sortBinPresets.id, preset.id));
 
   return {
     message: "Successfully cleared bin config.",

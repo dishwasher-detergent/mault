@@ -1,12 +1,11 @@
 "use server";
 
 import { db } from "@/db";
-import { sortBinPresets, sortBins } from "@/db/schema";
+import { sortBinPresets } from "@/db/schema";
 import { Result } from "@/interfaces/result.interface";
 import {
   BinConfig,
   BinPreset,
-  BinRuleGroup,
 } from "@/interfaces/sort-bins.interface";
 import { auth } from "@/lib/auth/server";
 import { and, desc, eq } from "drizzle-orm";
@@ -18,7 +17,12 @@ export async function listPresets(): Promise<Result<BinPreset[]>> {
   const rows = await db
     .select()
     .from(sortBinPresets)
-    .where(eq(sortBinPresets.userId, session.session.userId))
+    .where(
+      and(
+        eq(sortBinPresets.userId, session.session.userId),
+        eq(sortBinPresets.isActive, false),
+      ),
+    )
     .orderBy(desc(sortBinPresets.updatedAt));
 
   const presets: BinPreset[] = rows.map((row) => ({
@@ -38,21 +42,22 @@ export async function savePreset(name: string): Promise<Result<BinPreset>> {
 
   const userId = session.session.userId;
 
-  // Load current active bins
-  const activeBins = await db
+  // Get active preset's bins
+  const [active] = await db
     .select()
-    .from(sortBins)
-    .where(eq(sortBins.userId, userId));
+    .from(sortBinPresets)
+    .where(
+      and(
+        eq(sortBinPresets.userId, userId),
+        eq(sortBinPresets.isActive, true),
+      ),
+    );
 
-  const bins: BinPreset["bins"] = activeBins.map((row) => ({
-    binNumber: row.binNumber,
-    label: row.label,
-    rules: row.rules as BinRuleGroup,
-  }));
+  const bins = active ? (active.bins as BinPreset["bins"]) : [];
 
   const [row] = await db
     .insert(sortBinPresets)
-    .values({ userId, name, bins })
+    .values({ userId, name, bins, isActive: false })
     .returning();
 
   return {
@@ -77,23 +82,28 @@ export async function updatePreset(
 
   const userId = session.session.userId;
 
-  // Load current active bins
-  const activeBins = await db
+  // Get active preset's bins
+  const [active] = await db
     .select()
-    .from(sortBins)
-    .where(eq(sortBins.userId, userId));
+    .from(sortBinPresets)
+    .where(
+      and(
+        eq(sortBinPresets.userId, userId),
+        eq(sortBinPresets.isActive, true),
+      ),
+    );
 
-  const bins: BinPreset["bins"] = activeBins.map((row) => ({
-    binNumber: row.binNumber,
-    label: row.label,
-    rules: row.rules as BinRuleGroup,
-  }));
+  const bins = active ? (active.bins as BinPreset["bins"]) : [];
 
   const [row] = await db
     .update(sortBinPresets)
     .set({ name, bins, updatedAt: new Date() })
     .where(
-      and(eq(sortBinPresets.id, presetId), eq(sortBinPresets.userId, userId)),
+      and(
+        eq(sortBinPresets.id, presetId),
+        eq(sortBinPresets.userId, userId),
+        eq(sortBinPresets.isActive, false),
+      ),
     )
     .returning();
 
@@ -124,39 +134,33 @@ export async function loadPreset(
     .select()
     .from(sortBinPresets)
     .where(
-      and(eq(sortBinPresets.id, presetId), eq(sortBinPresets.userId, userId)),
+      and(
+        eq(sortBinPresets.id, presetId),
+        eq(sortBinPresets.userId, userId),
+        eq(sortBinPresets.isActive, false),
+      ),
     );
 
   if (!preset) return { message: "Preset not found.", success: false };
 
   const bins = preset.bins as BinPreset["bins"];
 
-  // Clear existing active bins
-  await db.delete(sortBins).where(eq(sortBins.userId, userId));
-
-  // Insert preset bins as active
-  if (bins.length > 0) {
-    await db.insert(sortBins).values(
-      bins.map((bin) => ({
-        userId,
-        binNumber: bin.binNumber,
-        label: bin.label,
-        rules: bin.rules,
-      })),
+  // Copy preset bins into the active preset
+  await db
+    .update(sortBinPresets)
+    .set({ bins, updatedAt: new Date() })
+    .where(
+      and(
+        eq(sortBinPresets.userId, userId),
+        eq(sortBinPresets.isActive, true),
+      ),
     );
-  }
 
-  // Reload active bins to return with IDs
-  const activeBins = await db
-    .select()
-    .from(sortBins)
-    .where(eq(sortBins.userId, userId));
-
-  const configs: BinConfig[] = activeBins.map((row) => ({
-    id: row.id,
-    binNumber: row.binNumber,
-    label: row.label,
-    rules: row.rules as BinRuleGroup,
+  const configs: BinConfig[] = bins.map((bin) => ({
+    binNumber: bin.binNumber,
+    label: bin.label,
+    rules: bin.rules,
+    isCatchAll: bin.isCatchAll,
   }));
 
   return { message: "Preset loaded.", success: true, data: configs };
@@ -166,12 +170,28 @@ export async function deletePreset(presetId: number): Promise<Result<null>> {
   const { data: session } = await auth.getSession();
   if (!session) return { message: "Unauthorized", success: false };
 
+  // Guard against deleting the active preset
+  const [target] = await db
+    .select({ isActive: sortBinPresets.isActive })
+    .from(sortBinPresets)
+    .where(
+      and(
+        eq(sortBinPresets.id, presetId),
+        eq(sortBinPresets.userId, session.session.userId),
+      ),
+    );
+
+  if (target?.isActive) {
+    return { message: "Cannot delete the active configuration.", success: false };
+  }
+
   await db
     .delete(sortBinPresets)
     .where(
       and(
         eq(sortBinPresets.id, presetId),
         eq(sortBinPresets.userId, session.session.userId),
+        eq(sortBinPresets.isActive, false),
       ),
     );
 

@@ -43,6 +43,9 @@ interface BinConfigsContextValue {
   configs: BinConfig[];
   presets: BinPreset[];
   isPending: boolean;
+  selectedBin: number;
+  setSelectedBin: (bin: number) => void;
+  selectedConfig: BinConfig;
   save: (binNumber: number, label: string, rules: BinRuleGroup, isCatchAll?: boolean) => void;
   clear: (binNumber: number) => void;
   saveAsPreset: (name: string) => Promise<void>;
@@ -62,6 +65,10 @@ export function BinConfigsProvider({
   const [configs, setConfigs] = useState<BinConfig[]>(createEmptyConfigs);
   const [presets, setPresets] = useState<BinPreset[]>([]);
   const [isPending, startTransition] = useTransition();
+  const [selectedBin, setSelectedBin] = useState(1);
+
+  const selectedConfig =
+    configs.find((c) => c.binNumber === selectedBin) ?? configs[0];
 
   const refreshPresets = useCallback(async () => {
     const result = await listPresetsAction();
@@ -170,6 +177,9 @@ export function BinConfigsProvider({
         configs,
         presets,
         isPending,
+        selectedBin,
+        setSelectedBin,
+        selectedConfig,
         save,
         clear,
         saveAsPreset,

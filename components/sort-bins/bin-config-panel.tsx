@@ -5,25 +5,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { BinConfig, BinRuleGroup } from "@/interfaces/sort-bins.interface";
+import { useBinConfigs } from "@/hooks/use-bin-configs";
+import { BinRuleGroup } from "@/interfaces/sort-bins.interface";
 import { useCallback, useEffect, useState } from "react";
 
-interface BinConfigPanelProps {
-  config: BinConfig;
-  onSave: (
-    binNumber: number,
-    label: string,
-    rules: BinRuleGroup,
-    isCatchAll?: boolean,
-  ) => void;
-  onClear: (binNumber: number) => void;
-}
+export function BinConfigPanel() {
+  const { selectedConfig: config, save, clear } = useBinConfigs();
 
-export function BinConfigPanel({
-  config,
-  onSave,
-  onClear,
-}: BinConfigPanelProps) {
   const [label, setLabel] = useState("");
   const [isCatchAll, setIsCatchAll] = useState(false);
   const [rules, setRules] = useState<BinRuleGroup>({
@@ -43,12 +31,12 @@ export function BinConfigPanel({
   }, [config]);
 
   const handleSave = useCallback(() => {
-    onSave(config.binNumber, label, rules, isCatchAll);
-  }, [config, label, rules, isCatchAll, onSave]);
+    save(config.binNumber, label, rules, isCatchAll);
+  }, [config, label, rules, isCatchAll, save]);
 
   const handleClear = useCallback(() => {
-    onClear(config.binNumber);
-  }, [config, onClear]);
+    clear(config.binNumber);
+  }, [config, clear]);
 
   return (
     <div className="flex flex-col h-full">
