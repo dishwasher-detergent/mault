@@ -69,7 +69,12 @@ export function SerialProvider({ children }: { children: React.ReactNode }) {
       return;
     }
 
-    await port.open({ baudRate: 9600 });
+    try {
+      await port.open({ baudRate: 9600 });
+    } catch (e) {
+      console.error("[Serial] Failed to open port:", e);
+      return;
+    }
 
     portRef.current = port;
     writableRef.current = port.writable;

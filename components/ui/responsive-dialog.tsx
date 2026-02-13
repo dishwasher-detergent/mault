@@ -17,18 +17,32 @@ import {
   DrawerTrigger,
 } from "@/components/ui/drawer";
 import { useIsMobile } from "@/hooks/use-is-mobile";
-import type * as React from "react";
+import { cn } from "@/lib/utils";
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useState,
+  type ReactNode,
+} from "react";
+
+const DialogCloseContext = createContext<() => void>(() => {});
+
+export function useDialogClose() {
+  return useContext(DialogCloseContext);
+}
 
 interface DynamicDialogProps {
   trigger?: React.ReactElement;
-  title: React.ReactNode;
-  description?: React.ReactNode;
-  footer?: React.ReactNode;
+  title: ReactNode;
+  description?: ReactNode;
+  footer?: ReactNode;
   footerClassName?: string;
-  children: React.ReactNode;
+  children: ReactNode;
   className?: string;
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
+  onClose?: () => void;
 }
 
 export function DynamicDialog({
@@ -39,44 +53,68 @@ export function DynamicDialog({
   footerClassName,
   children,
   className,
-  open,
+  open: controlledOpen,
   onOpenChange,
+  onClose,
 }: DynamicDialogProps) {
+  const [uncontrolledOpen, setUncontrolledOpen] = useState(false);
+  const isControlled = controlledOpen !== undefined;
+  const open = isControlled ? controlledOpen : uncontrolledOpen;
+
+  const handleOpenChange = useCallback(
+    (isOpen: boolean) => {
+      if (!isControlled) setUncontrolledOpen(isOpen);
+      onOpenChange?.(isOpen);
+      if (!isOpen) onClose?.();
+    },
+    [isControlled, onOpenChange, onClose],
+  );
+
+  const close = useCallback(() => handleOpenChange(false), [handleOpenChange]);
+
   const isMobile = useIsMobile();
 
   if (isMobile) {
     return (
-      <Drawer open={open} onOpenChange={onOpenChange}>
-        {trigger && <DrawerTrigger asChild>{trigger}</DrawerTrigger>}
-        <DrawerContent className={className}>
-          <DrawerHeader>
-            <DrawerTitle>{title}</DrawerTitle>
-            {description && (
-              <DrawerDescription>{description}</DrawerDescription>
+      <DialogCloseContext value={close}>
+        <Drawer open={open} onOpenChange={handleOpenChange}>
+          {trigger && <DrawerTrigger asChild>{trigger}</DrawerTrigger>}
+          <DrawerContent className={className}>
+            <DrawerHeader className="py-0">
+              <DrawerTitle className="text-start">{title}</DrawerTitle>
+              {description && (
+                <DrawerDescription className="text-start">
+                  {description}
+                </DrawerDescription>
+              )}
+            </DrawerHeader>
+            <div className="p-4 pt-0 flex flex-col gap-2">{children}</div>
+            {footer && (
+              <DrawerFooter className={cn("pt-0", footerClassName)}>
+                {footer}
+              </DrawerFooter>
             )}
-          </DrawerHeader>
-          <div className="p-4 pt-0 flex flex-col gap-2">{children}</div>
-          {footer && (
-            <DrawerFooter className={footerClassName}>{footer}</DrawerFooter>
-          )}
-        </DrawerContent>
-      </Drawer>
+          </DrawerContent>
+        </Drawer>
+      </DialogCloseContext>
     );
   }
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      {trigger && <DialogTrigger render={trigger}></DialogTrigger>}
-      <DialogContent className={className}>
-        <DialogHeader>
-          <DialogTitle>{title}</DialogTitle>
-          {description && <DialogDescription>{description}</DialogDescription>}
-        </DialogHeader>
-        <div className="flex flex-col gap-2">{children}</div>
-        {footer && (
-          <DialogFooter className={footerClassName}>{footer}</DialogFooter>
-        )}
-      </DialogContent>
-    </Dialog>
+    <DialogCloseContext value={close}>
+      <Dialog open={open} onOpenChange={handleOpenChange}>
+        {trigger && <DialogTrigger render={trigger}></DialogTrigger>}
+        <DialogContent className={className}>
+          <DialogHeader>
+            <DialogTitle>{title}</DialogTitle>
+            {description && <DialogDescription>{description}</DialogDescription>}
+          </DialogHeader>
+          <div className="flex flex-col gap-2">{children}</div>
+          {footer && (
+            <DialogFooter className={footerClassName}>{footer}</DialogFooter>
+          )}
+        </DialogContent>
+      </Dialog>
+    </DialogCloseContext>
   );
 }

@@ -32,7 +32,7 @@ export function CardGrid() {
 
   return (
     <>
-      <div className="sticky top-0 z-10 border-b mb-2">
+      <div className="sticky top-0 z-10 mb-2">
         <CardToolbar
           searchQuery={searchQuery}
           onSearchChange={setSearchQuery}
@@ -49,7 +49,7 @@ export function CardGrid() {
           <p className="text-xs">Try adjusting your search or sort options</p>
         </div>
       )}
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols6 xl:grid-cols-8 2xl:grid-col-8 gap-2">
+      <div className="grid grid-cols-2 @sm:grid-cols-3 @md:grid-cols-2 @lg:grid-cols-3 @xl:grid-cols-4 @2xl:grid-cols-6 gap-2">
         {filteredAndSorted.map((card) => (
           <ScannedCardItem
             key={card.scanId}

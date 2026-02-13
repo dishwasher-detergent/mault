@@ -1,18 +1,36 @@
 import { Button } from "@/components/ui/button";
 import type { ScannerStatus } from "@/interfaces/scanner.interface";
-import { IconCamera, IconLoader2, IconRefresh } from "@tabler/icons-react";
+import {
+  IconCamera,
+  IconDeviceUsb,
+  IconLoader2,
+  IconRefresh,
+} from "@tabler/icons-react";
 
 interface ScannerOverlayProps {
   status: ScannerStatus;
   errorMessage: string;
+  isConnected: boolean;
   onRetryError: () => void;
 }
 
 export function ScannerOverlay({
   status,
   errorMessage,
+  isConnected,
   onRetryError,
 }: ScannerOverlayProps) {
+  if (!isConnected) {
+    return (
+      <div className="absolute inset-0 z-30 flex items-center justify-center bg-background/80 backdrop-blur-sm rounded-lg">
+        <div className="text-center text-sm text-muted-foreground">
+          <IconDeviceUsb className="mx-auto mb-2 size-8" />
+          <p>Connect Mault device to start scanning.</p>
+        </div>
+      </div>
+    );
+  }
+
   switch (status) {
     case "initializing":
       return (
