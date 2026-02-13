@@ -1,17 +1,13 @@
 "use client";
 
 import { useCallback, useState } from "react";
-import { BinConfig, BinRuleGroup } from "@/interfaces/sort-bins.interface";
+import { BinRuleGroup } from "@/interfaces/sort-bins.interface";
 import { useBinConfigs } from "@/hooks/use-bin-configs";
 import { BinCard } from "./bin-card";
 import { BinConfigDialog } from "./bin-config-dialog";
 
-interface SortBinsViewProps {
-  initialConfigs: BinConfig[];
-}
-
-export function SortBinsView({ initialConfigs }: SortBinsViewProps) {
-  const { configs, save, clear } = useBinConfigs(initialConfigs);
+export function SortBinsView() {
+  const { configs, save, clear } = useBinConfigs();
   const [openBin, setOpenBin] = useState<number | null>(null);
 
   const handleSave = useCallback(

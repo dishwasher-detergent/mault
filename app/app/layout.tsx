@@ -1,3 +1,4 @@
+import { BinConfigsProvider } from "@/hooks/use-bin-configs";
 import { ScannedCardsProvider } from "@/hooks/use-scanned-cards";
 import { UserButton } from "@neondatabase/auth/react";
 import { IconBox } from "@tabler/icons-react";
@@ -9,6 +10,7 @@ export default function AppLayout({
   children: React.ReactNode;
 }>) {
   return (
+    <BinConfigsProvider>
     <ScannedCardsProvider>
       <div className="h-dvh w-dvw overflow-hidden flex flex-col">
         <nav className="h-12 flex-none w-full p-1 px-4 border border-b bg-background/50 backdrop-blur-sm flex flex-row justify-between items-center">
@@ -36,5 +38,6 @@ export default function AppLayout({
         </main>
       </div>
     </ScannedCardsProvider>
+    </BinConfigsProvider>
   );
 }

@@ -5,7 +5,6 @@ import type {
   ScryfallCard,
   ScryfallCardWithDistance,
 } from "@/interfaces/scryfall.interface";
-import type { BinConfig } from "@/interfaces/sort-bins.interface";
 import {
   clearCards as dbClearCards,
   removeCard as dbRemoveCard,
@@ -14,8 +13,8 @@ import {
   getAllCards,
   putCard,
 } from "@/lib/card-db";
-import { loadBinConfigs } from "@/lib/db/sort-bins";
 import { evaluateCardBin } from "@/lib/evaluate-bin";
+import { useBinConfigs } from "@/hooks/use-bin-configs";
 import {
   createContext,
   useCallback,
@@ -45,7 +44,12 @@ export function ScannedCardsProvider({
 }) {
   const [cards, setCards] = useState<ScannedCard[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const binConfigsRef = useRef<BinConfig[]>([]);
+  const { configs: binConfigs } = useBinConfigs();
+  const binConfigsRef = useRef(binConfigs);
+
+  useEffect(() => {
+    binConfigsRef.current = binConfigs;
+  }, [binConfigs]);
 
   useEffect(() => {
     let cancelled = false;
@@ -63,12 +67,6 @@ export function ScannedCardsProvider({
           setIsLoading(false);
         }
       });
-
-    loadBinConfigs().then((result) => {
-      if (!cancelled && result.success && result.data) {
-        binConfigsRef.current = result.data;
-      }
-    });
 
     return () => {
       cancelled = true;
