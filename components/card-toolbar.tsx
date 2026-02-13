@@ -58,7 +58,7 @@ export function CardToolbar({
   };
 
   return (
-    <div className="flex flex-row gap-2 items-center w-full sticky top-0 z-10 bg-background p-2 border-b">
+    <div className="flex flex-row gap-2 items-center w-full">
       <Input
         placeholder="Search by name, set, type..."
         value={searchQuery}
@@ -85,7 +85,7 @@ export function CardToolbar({
         </SelectContent>
       </Select>
       <Button
-        variant="secondary"
+        variant="outline"
         size="icon"
         onClick={onExport}
         disabled={!hasCards}
@@ -99,7 +99,7 @@ export function CardToolbar({
       >
         <AlertDialogTrigger
           render={
-            <Button variant="secondary" size="icon" title="Clear all cards">
+            <Button variant="outline" size="icon" title="Clear all cards">
               <IconTrash className="size-4" />
             </Button>
           }
