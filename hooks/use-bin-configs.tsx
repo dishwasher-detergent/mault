@@ -3,21 +3,18 @@
 import { BIN_COUNT } from "@/constants/sort-bins.constant";
 import {
   BinConfig,
-  BinPreset,
   BinRuleGroup,
+  BinSet,
 } from "@/interfaces/sort-bins.interface";
 import {
+  activateSet as activateSetAction,
   clearBinConfig as clearBinConfigAction,
-  loadBinConfigs,
+  createSet as createSetAction,
+  deleteSet as deleteSetAction,
+  loadSets,
   saveBinConfig as saveBinConfigAction,
+  saveSet as saveSetAction,
 } from "@/lib/db/sort-bins";
-import {
-  deletePreset as deletePresetAction,
-  listPresets as listPresetsAction,
-  loadPreset as loadPresetAction,
-  savePreset as savePresetAction,
-  updatePreset as updatePresetAction,
-} from "@/lib/db/sort-bins/presets";
 import {
   createContext,
   useCallback,
@@ -32,70 +29,69 @@ function emptyRules(): BinRuleGroup {
 }
 
 function createEmptyConfig(binNumber: number): BinConfig {
-  return { binNumber, rules: emptyRules() };
+  return { guid: crypto.randomUUID(), binNumber, rules: emptyRules() };
 }
 
-function createEmptyConfigs(): BinConfig[] {
-  return Array.from({ length: BIN_COUNT }, (_, i) => createEmptyConfig(i + 1));
+function configsFromSet(set: BinSet | undefined): BinConfig[] {
+  const filled: BinConfig[] = [];
+  for (let i = 1; i <= BIN_COUNT; i++) {
+    const existing = set?.bins.find((c) => c.binNumber === i);
+    filled.push(existing ?? createEmptyConfig(i));
+  }
+  return filled;
 }
 
 interface BinConfigsContextValue {
   configs: BinConfig[];
-  presets: BinPreset[];
+  sets: BinSet[];
   isPending: boolean;
   selectedBin: number;
   setSelectedBin: (bin: number) => void;
   selectedConfig: BinConfig;
   save: (binNumber: number, rules: BinRuleGroup, isCatchAll?: boolean) => void;
   clear: (binNumber: number) => void;
-  saveAsPreset: (name: string) => Promise<void>;
-  updatePreset: (presetId: number, name: string) => Promise<void>;
-  loadPreset: (presetId: number) => Promise<void>;
-  deletePreset: (presetId: number) => Promise<void>;
-  refreshPresets: () => Promise<void>;
+  activateSet: (guid: string) => Promise<void>;
+  createSet: (name: string) => Promise<void>;
+  saveSet: (name: string) => Promise<void>;
+  deleteSet: (guid: string) => Promise<void>;
 }
 
 const BinConfigsContext = createContext<BinConfigsContextValue | null>(null);
+
+function applySets(
+  sets: BinSet[],
+  setSets: (s: BinSet[]) => void,
+  setConfigs: (c: BinConfig[]) => void,
+) {
+  setSets(sets);
+  const active = sets.find((s) => s.isActive);
+  setConfigs(configsFromSet(active));
+}
 
 export function BinConfigsProvider({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const [configs, setConfigs] = useState<BinConfig[]>(createEmptyConfigs);
-  const [presets, setPresets] = useState<BinPreset[]>([]);
+  const [configs, setConfigs] = useState<BinConfig[]>(() => configsFromSet(undefined));
+  const [sets, setSets] = useState<BinSet[]>([]);
   const [isPending, startTransition] = useTransition();
   const [selectedBin, setSelectedBin] = useState(1);
 
   const selectedConfig =
     configs.find((c) => c.binNumber === selectedBin) ?? configs[0];
 
-  const refreshPresets = useCallback(async () => {
-    const result = await listPresetsAction();
-    if (result.success && result.data) {
-      setPresets(result.data);
-    }
-  }, []);
-
   useEffect(() => {
     let cancelled = false;
-    loadBinConfigs().then((result) => {
+    loadSets().then((result) => {
       if (!cancelled && result.success && result.data) {
-        setConfigs(() => {
-          const filled: BinConfig[] = [];
-          for (let i = 1; i <= BIN_COUNT; i++) {
-            const existing = result.data!.find((c) => c.binNumber === i);
-            filled.push(existing ?? createEmptyConfig(i));
-          }
-          return filled;
-        });
+        applySets(result.data, setSets, setConfigs);
       }
     });
-    refreshPresets();
     return () => {
       cancelled = true;
     };
-  }, [refreshPresets]);
+  }, []);
 
   const save = useCallback(
     (binNumber: number, rules: BinRuleGroup, isCatchAll?: boolean) => {
@@ -133,64 +129,49 @@ export function BinConfigsProvider({
     });
   }, []);
 
-  const saveAsPreset = useCallback(
-    async (name: string) => {
-      const result = await savePresetAction(name);
-      if (result.success) {
-        await refreshPresets();
-      }
-    },
-    [refreshPresets],
-  );
-
-  const updatePresetFn = useCallback(
-    async (presetId: number, name: string) => {
-      const result = await updatePresetAction(presetId, name);
-      if (result.success) {
-        await refreshPresets();
-      }
-    },
-    [refreshPresets],
-  );
-
-  const loadPresetFn = useCallback(async (presetId: number) => {
-    const result = await loadPresetAction(presetId);
+  const activateSetFn = useCallback(async (guid: string) => {
+    const result = await activateSetAction(guid);
     if (result.success && result.data) {
-      const filled: BinConfig[] = [];
-      for (let i = 1; i <= BIN_COUNT; i++) {
-        const existing = result.data.find((c) => c.binNumber === i);
-        filled.push(existing ?? createEmptyConfig(i));
-      }
-      setConfigs(filled);
+      applySets(result.data, setSets, setConfigs);
     }
   }, []);
 
-  const deletePresetFn = useCallback(
-    async (presetId: number) => {
-      const result = await deletePresetAction(presetId);
-      if (result.success) {
-        await refreshPresets();
-      }
-    },
-    [refreshPresets],
-  );
+  const createSetFn = useCallback(async (name: string) => {
+    const result = await createSetAction(name);
+    if (result.success && result.data) {
+      applySets(result.data, setSets, setConfigs);
+    }
+  }, []);
+
+  const saveSetFn = useCallback(async (name: string) => {
+    const result = await saveSetAction(name);
+    if (result.success && result.data) {
+      applySets(result.data, setSets, setConfigs);
+    }
+  }, []);
+
+  const deleteSetFn = useCallback(async (guid: string) => {
+    const result = await deleteSetAction(guid);
+    if (result.success && result.data) {
+      applySets(result.data, setSets, setConfigs);
+    }
+  }, []);
 
   return (
     <BinConfigsContext
       value={{
         configs,
-        presets,
+        sets,
         isPending,
         selectedBin,
         setSelectedBin,
         selectedConfig,
         save,
         clear,
-        saveAsPreset,
-        updatePreset: updatePresetFn,
-        loadPreset: loadPresetFn,
-        deletePreset: deletePresetFn,
-        refreshPresets,
+        activateSet: activateSetFn,
+        createSet: createSetFn,
+        saveSet: saveSetFn,
+        deleteSet: deleteSetFn,
       }}
     >
       {children}

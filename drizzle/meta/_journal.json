@@ -29,6 +29,20 @@
       "when": 1771026379450,
       "tag": "0003_mute_randall",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1771038060524,
+      "tag": "0004_far_klaw",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1771039240758,
+      "tag": "0005_spooky_thaddeus_ross",
+      "breakpoints": true
     }
   ]
 }

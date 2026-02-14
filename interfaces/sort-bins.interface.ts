@@ -35,22 +35,6 @@ export interface BinRuleGroup {
   conditions: (BinCondition | BinRuleGroup)[];
 }
 
-export interface BinConfig {
-  id?: number;
-  binNumber: number;
-  rules: BinRuleGroup;
-  isCatchAll?: boolean;
-}
-
-export interface BinPreset {
-  id: number;
-  name: string;
-  bins: Omit<BinConfig, "id">[];
-  isActive?: boolean;
-  createdAt: Date;
-  updatedAt: Date;
-}
-
 export type FieldType = "string" | "numeric" | "enum" | "set";
 
 export interface FieldMeta {
@@ -65,4 +49,20 @@ export function isRuleGroup(
   item: BinCondition | BinRuleGroup,
 ): item is BinRuleGroup {
   return "combinator" in item && "conditions" in item;
+}
+
+export interface BinConfig {
+  guid: string;
+  binNumber: number;
+  rules: BinRuleGroup;
+  isCatchAll?: boolean;
+}
+
+export interface BinSet {
+  guid: string;
+  name: string;
+  isActive: boolean;
+  bins: BinConfig[];
+  createdAt: Date;
+  updatedAt: Date;
 }
