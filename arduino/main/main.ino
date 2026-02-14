@@ -1,9 +1,24 @@
 #include <ArduinoJson.h>
+#include <Wire.h>
+#include <Adafruit_PWMServoDriver.h>
 
-// Servo channel assignments per module
-// Module 1: channels 0 (LEFT/RIGHT), 1 (DOWN gate)
-// Module 2: channels 2 (LEFT/RIGHT), 3 (DOWN gate)
-// Module 3: channels 4 (LEFT/RIGHT), 5 (DOWN gate)
+Adafruit_PWMServoDriver pwm = Adafruit_PWMServoDriver();
+
+// Pulse length constants for 180° servos at 50 Hz
+// 102 = 0°, 307 = 90°, 512 = 180°
+#define SERVO_MIN 102
+#define SERVO_MAX 512
+
+// Servo positions (pulse lengths)
+#define POS_NEUTRAL 307   // 90° center
+#define POS_LEFT    102   // 0°
+#define POS_RIGHT   512   // 180°
+#define POS_DOWN    102   // 0° (gate open)
+
+// Servo channel assignments per module (3 servos each)
+// Module 1: ch0 (LEFT), ch1 (RIGHT), ch2 (DOWN)
+// Module 2: ch3 (LEFT), ch4 (RIGHT), ch5 (DOWN)
+// Module 3: ch6 (LEFT), ch7 (RIGHT), ch8 (DOWN)
 
 struct RouteStep {
   int module;
@@ -22,26 +37,78 @@ const BinRoute BIN_ROUTES[7] = {
   // Bin 1: M1 LEFT
   { { {1, "LEFT", 0} }, 1 },
   // Bin 2: M1 RIGHT
-  { { {1, "RIGHT", 0} }, 1 },
+  { { {1, "RIGHT", 1} }, 1 },
   // Bin 3: M1 DOWN -> M2 LEFT
-  { { {1, "DOWN", 1}, {2, "LEFT", 2} }, 2 },
+  { { {1, "DOWN", 2}, {2, "LEFT", 3} }, 2 },
   // Bin 4: M1 DOWN -> M2 RIGHT
-  { { {1, "DOWN", 1}, {2, "RIGHT", 2} }, 2 },
+  { { {1, "DOWN", 2}, {2, "RIGHT", 4} }, 2 },
   // Bin 5: M1 DOWN -> M2 DOWN -> M3 LEFT
-  { { {1, "DOWN", 1}, {2, "DOWN", 3}, {3, "LEFT", 4} }, 3 },
+  { { {1, "DOWN", 2}, {2, "DOWN", 5}, {3, "LEFT", 6} }, 3 },
   // Bin 6: M1 DOWN -> M2 DOWN -> M3 RIGHT
-  { { {1, "DOWN", 1}, {2, "DOWN", 3}, {3, "RIGHT", 4} }, 3 },
+  { { {1, "DOWN", 2}, {2, "DOWN", 5}, {3, "RIGHT", 7} }, 3 },
   // Bin 7: M1 DOWN -> M2 DOWN -> M3 DOWN
-  { { {1, "DOWN", 1}, {2, "DOWN", 3}, {3, "DOWN", 5} }, 3 },
+  { { {1, "DOWN", 2}, {2, "DOWN", 5}, {3, "DOWN", 8} }, 3 },
 };
 
 String inputBuffer = "";
+
+void setServoPosition(int channel, int pulse) {
+  pwm.setPWM(channel, 0, pulse);
+}
+
+int getActionPulse(const char* action) {
+  if (strcmp(action, "LEFT") == 0) return POS_LEFT;
+  if (strcmp(action, "RIGHT") == 0) return POS_RIGHT;
+  if (strcmp(action, "DOWN") == 0) return POS_DOWN;
+  return POS_NEUTRAL;
+}
+
+void setAllNeutral() {
+  for (int ch = 0; ch < 9; ch++) {
+    setServoPosition(ch, POS_NEUTRAL);
+  }
+}
+
+void runTestSweep() {
+  for (int ch = 0; ch < 9; ch++) {
+    // Determine active position based on servo type
+    // ch % 3 == 0: LEFT servo, ch % 3 == 1: RIGHT servo, ch % 3 == 2: DOWN servo
+    int activePos;
+    switch (ch % 3) {
+      case 0: activePos = POS_LEFT; break;
+      case 1: activePos = POS_RIGHT; break;
+      default: activePos = POS_DOWN; break;
+    }
+
+    setServoPosition(ch, activePos);
+    delay(300);
+    setServoPosition(ch, POS_NEUTRAL);
+    delay(200);
+  }
+}
+
+void executeRoute(const BinRoute& route) {
+  for (int i = 0; i < route.stepCount; i++) {
+    int channel = route.steps[i].channel;
+    int pulse = getActionPulse(route.steps[i].action);
+    setServoPosition(channel, pulse);
+    delay(200);
+  }
+  delay(300);
+  setAllNeutral();
+}
 
 void setup() {
   Serial.begin(9600);
   while (!Serial) {
     ; // Wait for serial port to connect (needed for native USB)
   }
+
+  pwm.begin();
+  pwm.setPWMFreq(50);
+  delay(10);
+  setAllNeutral();
+
   Serial.println("{\"status\":\"ready\"}");
 }
 
@@ -72,6 +139,13 @@ void handleCommand(const String& json) {
     return;
   }
 
+  // Handle test command
+  if (doc["test"].is<bool>() && doc["test"].as<bool>()) {
+    runTestSweep();
+    Serial.println("{\"status\":\"test_complete\"}");
+    return;
+  }
+
   if (!doc["bin"].is<int>()) {
     Serial.println("{\"error\":\"missing bin number\"}");
     return;
@@ -85,6 +159,9 @@ void handleCommand(const String& json) {
   }
 
   const BinRoute& route = BIN_ROUTES[bin - 1];
+
+  // Execute the physical servo movements
+  executeRoute(route);
 
   // Build response JSON
   JsonDocument response;

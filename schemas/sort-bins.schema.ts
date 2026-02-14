@@ -1,7 +1,16 @@
-import { z } from "zod";
+import {
+  CONDITION_NUMERIC_MAX,
+  CONDITION_STRING_MAX_LENGTH,
+  SET_NAME_MAX_LENGTH,
+} from "@/constants/sort-bins.constant";
+import { z } from "zod/v3";
 
 export const createSetSchema = z.object({
-  name: z.string().trim().min(1, "Name is required").max(50, "Name must be 50 characters or less"),
+  name: z
+    .string()
+    .trim()
+    .min(1, "Name is required")
+    .max(SET_NAME_MAX_LENGTH, `Name must be ${SET_NAME_MAX_LENGTH} characters or less`),
 });
 
 export type CreateSetFormValues = z.infer<typeof createSetSchema>;
@@ -37,9 +46,9 @@ export const binConditionSchema = z.object({
   field: z.enum(conditionFieldValues),
   operator: z.enum(conditionOperatorValues),
   value: z.union([
-    z.string().max(200),
-    z.number().max(100000),
-    z.array(z.string().max(200)),
+    z.string().max(CONDITION_STRING_MAX_LENGTH),
+    z.number().max(CONDITION_NUMERIC_MAX),
+    z.array(z.string().max(CONDITION_STRING_MAX_LENGTH)),
   ]),
 });
 
@@ -59,3 +68,5 @@ export const binConfigSchema = z.object({
   isCatchAll: z.boolean(),
   rules: binRuleGroupSchema,
 });
+
+export type BinConfigFormValues = z.infer<typeof binConfigSchema>;

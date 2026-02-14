@@ -2,6 +2,10 @@ import { FieldMeta } from "@/interfaces/sort-bins.interface";
 
 export const BIN_COUNT = 7;
 
+export const SET_NAME_MAX_LENGTH = 50;
+export const CONDITION_STRING_MAX_LENGTH = 200;
+export const CONDITION_NUMERIC_MAX = 100_000;
+
 export const FIELD_DEFINITIONS: FieldMeta[] = [
   {
     field: "rarity",

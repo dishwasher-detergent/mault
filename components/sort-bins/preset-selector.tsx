@@ -2,6 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import { ButtonGroup } from "@/components/ui/button-group";
+import { Field, FieldError, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { DynamicDialog } from "@/components/ui/responsive-dialog";
 import {
@@ -12,23 +13,44 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useBinConfigs } from "@/hooks/use-bin-configs";
+import {
+  createSetSchema,
+  type CreateSetFormValues,
+} from "@/schemas/sort-bins.schema";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { IconPlus, IconTrash } from "@tabler/icons-react";
 import { useCallback, useState } from "react";
+import { Controller, useForm } from "react-hook-form";
 
 export function PresetSelector() {
   const { sets, activateSet, createSet, deleteSet } = useBinConfigs();
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const [newSetName, setNewSetName] = useState("");
+
+  const form = useForm<CreateSetFormValues>({
+    resolver: zodResolver(createSetSchema),
+    defaultValues: { name: "" },
+    mode: "onChange",
+  });
 
   const activeSet = sets.find((s) => s.isActive);
 
-  const handleCreate = useCallback(async () => {
-    if (!newSetName.trim()) return;
-    await createSet(newSetName.trim());
-    setNewSetName("");
-    setCreateDialogOpen(false);
-  }, [newSetName, createSet]);
+  const handleCreate = useCallback(
+    async (values: CreateSetFormValues) => {
+      await createSet(values.name);
+      form.reset();
+      setCreateDialogOpen(false);
+    },
+    [createSet, form],
+  );
+
+  const handleCreateDialogChange = useCallback(
+    (open: boolean) => {
+      setCreateDialogOpen(open);
+      if (!open) form.reset();
+    },
+    [form],
+  );
 
   const handleDelete = useCallback(async () => {
     if (!activeSet) return;
@@ -82,7 +104,7 @@ export function PresetSelector() {
       />
       <DynamicDialog
         open={createDialogOpen}
-        onOpenChange={setCreateDialogOpen}
+        onOpenChange={handleCreateDialogChange}
         title="New Set"
         description="Create a new set with 7 empty bins."
         trigger={
@@ -94,26 +116,41 @@ export function PresetSelector() {
           <>
             <Button
               variant="outline"
-              onClick={() => setCreateDialogOpen(false)}
+              onClick={() => handleCreateDialogChange(false)}
             >
               Cancel
             </Button>
-            <Button onClick={handleCreate} disabled={!newSetName.trim()}>
+            <Button
+              onClick={form.handleSubmit(handleCreate)}
+              disabled={!form.formState.isValid}
+            >
               Create
             </Button>
           </>
         }
         footerClassName="flex-col-reverse md:flex-row"
       >
-        <Input
-          placeholder="Set name..."
-          value={newSetName}
-          onChange={(e) => setNewSetName(e.target.value)}
-          onKeyDown={(e) => {
-            if (e.key === "Enter") handleCreate();
-          }}
-          autoFocus
-        />
+        <form onSubmit={form.handleSubmit(handleCreate)}>
+          <Controller
+            name="name"
+            control={form.control}
+            render={({ field, fieldState }) => (
+              <Field data-invalid={fieldState.invalid || undefined}>
+                <FieldLabel htmlFor="set-name">Set name</FieldLabel>
+                <Input
+                  {...field}
+                  id="set-name"
+                  placeholder="Set name..."
+                  aria-invalid={fieldState.invalid}
+                  autoFocus
+                />
+                {fieldState.invalid && (
+                  <FieldError errors={[fieldState.error]} />
+                )}
+              </Field>
+            )}
+          />
+        </form>
       </DynamicDialog>
     </ButtonGroup>
   );

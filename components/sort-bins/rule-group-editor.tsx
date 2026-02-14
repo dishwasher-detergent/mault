@@ -129,6 +129,11 @@ export function RuleGroupEditor({
             />
           ),
         )}
+        {group.conditions.length === 0 && (
+          <p className="text-muted-foreground py-1.5 rounded-lg border px-3 text-xs bg-sidebar">
+            No conditions. Add a condition or group to get started.
+          </p>
+        )}
       </div>
 
       <ButtonGroup className="ml-4">

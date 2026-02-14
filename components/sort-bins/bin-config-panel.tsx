@@ -2,86 +2,112 @@
 
 import { RuleGroupEditor } from "@/components/sort-bins/rule-group-editor";
 import { Button } from "@/components/ui/button";
+import { FieldError } from "@/components/ui/field";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useBinConfigs } from "@/hooks/use-bin-configs";
 import { BinRuleGroup } from "@/interfaces/sort-bins.interface";
-import { binConfigSchema } from "@/schemas/sort-bins.schema";
-import { useCallback, useEffect, useState } from "react";
+import {
+  binConfigSchema,
+  type BinConfigFormValues,
+} from "@/schemas/sort-bins.schema";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useCallback, useEffect } from "react";
+import { Controller, useForm } from "react-hook-form";
 import { Label } from "../ui/label";
+
+function emptyRuleGroup(): BinRuleGroup {
+  return { id: crypto.randomUUID(), combinator: "and", conditions: [] };
+}
 
 export function BinConfigPanel() {
   const { selectedConfig: config, save, clear } = useBinConfigs();
 
-  const [isCatchAll, setIsCatchAll] = useState(false);
-  const [rules, setRules] = useState<BinRuleGroup>({
-    id: crypto.randomUUID(),
-    combinator: "and",
-    conditions: [],
+  const form = useForm<BinConfigFormValues>({
+    resolver: zodResolver(binConfigSchema),
+    defaultValues: {
+      isCatchAll: false,
+      rules: emptyRuleGroup(),
+    },
   });
-  const [validationError, setValidationError] = useState<string | null>(null);
 
   useEffect(() => {
-    setIsCatchAll(config.isCatchAll ?? false);
-    setRules(
-      config.rules.conditions.length > 0
-        ? config.rules
-        : { id: crypto.randomUUID(), combinator: "and", conditions: [] },
-    );
-    setValidationError(null);
-  }, [config]);
+    form.reset({
+      isCatchAll: config.isCatchAll ?? false,
+      rules:
+        config.rules.conditions.length > 0
+          ? config.rules
+          : emptyRuleGroup(),
+    });
+  }, [config, form]);
 
-  const handleSave = useCallback(() => {
-    const result = binConfigSchema.safeParse({ isCatchAll, rules });
-    if (!result.success) {
-      const firstError = result.error.issues[0];
-      setValidationError(firstError?.message ?? "Invalid bin configuration");
-      return;
-    }
-    setValidationError(null);
-    save(config.binNumber, rules, isCatchAll);
-  }, [config, rules, isCatchAll, save]);
+  const handleSave = useCallback(
+    (values: BinConfigFormValues) => {
+      save(config.binNumber, values.rules as BinRuleGroup, values.isCatchAll);
+    },
+    [config, save],
+  );
 
   const handleClear = useCallback(() => {
-    setValidationError(null);
+    form.reset({
+      isCatchAll: false,
+      rules: emptyRuleGroup(),
+    });
     clear(config.binNumber);
-  }, [config, clear]);
+  }, [config, clear, form]);
+
+  const isCatchAll = form.watch("isCatchAll");
 
   return (
     <div className="flex flex-col h-full gap-2">
       <div className="flex items-center justify-between">
         <h2 className="font-semibold">Bin {config.binNumber}</h2>
       </div>
-      <div className="flex items-center gap-2">
-        <Button
-          type="button"
-          variant={isCatchAll ? "default" : "outline"}
-          size="sm"
-          onClick={() => setIsCatchAll(!isCatchAll)}
-        >
-          {isCatchAll ? "Catch-all enabled" : "Set as catch-all"}
-        </Button>
-        {isCatchAll && (
-          <p className="text-xs text-muted-foreground">
-            Cards that don&apos;t match any other bin will go here.
-          </p>
+      <Controller
+        name="isCatchAll"
+        control={form.control}
+        render={({ field }) => (
+          <div className="flex items-center gap-2">
+            <Button
+              type="button"
+              variant={field.value ? "default" : "outline"}
+              size="sm"
+              onClick={() => field.onChange(!field.value)}
+            >
+              {field.value ? "Catch-all enabled" : "Set as catch-all"}
+            </Button>
+            {field.value && (
+              <p className="text-xs text-muted-foreground">
+                Cards that don&apos;t match any other bin will go here.
+              </p>
+            )}
+          </div>
         )}
-      </div>
+      />
       {!isCatchAll && (
         <ScrollArea>
           <div className="flex flex-col gap-2">
             <Label>Rules</Label>
-            <RuleGroupEditor group={rules} onChange={setRules} />
+            <Controller
+              name="rules"
+              control={form.control}
+              render={({ field }) => (
+                <RuleGroupEditor
+                  group={field.value as BinRuleGroup}
+                  onChange={field.onChange}
+                />
+              )}
+            />
           </div>
         </ScrollArea>
       )}
-      {validationError && (
-        <p className="text-destructive text-xs">{validationError}</p>
+      {form.formState.errors.rules && (
+        <FieldError errors={[form.formState.errors.rules]} />
       )}
       <div className="flex gap-1.5">
         <Button type="button" variant="destructive" onClick={handleClear}>
           Clear
         </Button>
-        <Button type="button" onClick={handleSave}>
+        <Button type="button" onClick={form.handleSubmit(handleSave)}>
           Save
         </Button>
       </div>

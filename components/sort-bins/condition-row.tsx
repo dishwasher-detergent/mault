@@ -15,7 +15,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { FIELD_DEFINITIONS } from "@/constants/sort-bins.constant";
+import {
+  CONDITION_NUMERIC_MAX,
+  CONDITION_STRING_MAX_LENGTH,
+  FIELD_DEFINITIONS,
+} from "@/constants/sort-bins.constant";
 import {
   BinCondition,
   ConditionField,
@@ -172,7 +176,7 @@ export function ConditionRow({
           type="number"
           step="any"
           placeholder="0"
-          max={100000}
+          max={CONDITION_NUMERIC_MAX}
           className="min-w-24 flex-1"
           value={condition.value === "" ? "" : String(condition.value)}
           onChange={(e) => {
@@ -187,7 +191,7 @@ export function ConditionRow({
       <Input
         type="text"
         placeholder="Value..."
-        maxLength={200}
+        maxLength={CONDITION_STRING_MAX_LENGTH}
         className="min-w-24 flex-1"
         value={String(condition.value)}
         onChange={(e) => handleValueChange(e.target.value)}

@@ -14,7 +14,7 @@ import { useEffect, useRef } from "react";
 
 export function CardScanner({ className }: CardScannerProps) {
   const { addCard } = useScannedCards();
-  const { isConnected, connect, disconnect } = useSerial();
+  const { isConnected, isReady, connect, disconnect } = useSerial();
   const {
     status,
     errorMessage,
@@ -35,16 +35,16 @@ export function CardScanner({ className }: CardScannerProps) {
     },
   });
 
-  const wasConnectedRef = useRef(isConnected);
+  const wasReadyRef = useRef(isReady);
   useEffect(() => {
-    if (!isConnected && wasConnectedRef.current) {
+    if (!isReady && wasReadyRef.current) {
       handlePause();
     }
-    if (isConnected && !wasConnectedRef.current && status === "paused") {
+    if (isReady && !wasReadyRef.current && status === "paused") {
       handleResume();
     }
-    wasConnectedRef.current = isConnected;
-  }, [isConnected, handlePause, handleResume, status]);
+    wasReadyRef.current = isReady;
+  }, [isReady, handlePause, handleResume, status]);
 
   return (
     <div className={cn("flex flex-col overflow-hidden", className)}>
@@ -63,6 +63,7 @@ export function CardScanner({ className }: CardScannerProps) {
           status={status}
           errorMessage={errorMessage}
           isConnected={isConnected}
+          isReady={isReady}
           onRetryError={handleRetryError}
         />
       </div>
@@ -76,12 +77,12 @@ export function CardScanner({ className }: CardScannerProps) {
           {isConnected ? <IconDeviceUsbFilled /> : <IconDeviceUsb />}
         </Button>
         <ScannerControls
-          status={isConnected ? status : "paused"}
+          status={isReady ? status : "paused"}
           onForceAddDuplicate={handleForceAddDuplicate}
           onForceScan={handleForceScan}
           onPause={handlePause}
-          onResume={isConnected ? handleResume : () => {}}
-          disabled={!isConnected}
+          onResume={isReady ? handleResume : () => {}}
+          disabled={!isReady}
         />
       </ButtonGroup>
     </div>
