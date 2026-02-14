@@ -20,6 +20,7 @@ import {
   useCallback,
   useContext,
   useEffect,
+  useMemo,
   useState,
   useTransition,
 } from "react";
@@ -45,6 +46,7 @@ interface BinConfigsContextValue {
   configs: BinConfig[];
   sets: BinSet[];
   isPending: boolean;
+  hasCatchAll: boolean;
   selectedBin: number;
   setSelectedBin: (bin: number) => void;
   selectedConfig: BinConfig;
@@ -80,6 +82,8 @@ export function BinConfigsProvider({
 
   const selectedConfig =
     configs.find((c) => c.binNumber === selectedBin) ?? configs[0];
+
+  const hasCatchAll = useMemo(() => configs.some((c) => c.isCatchAll), [configs]);
 
   useEffect(() => {
     let cancelled = false;
@@ -163,6 +167,7 @@ export function BinConfigsProvider({
         configs,
         sets,
         isPending,
+        hasCatchAll,
         selectedBin,
         setSelectedBin,
         selectedConfig,

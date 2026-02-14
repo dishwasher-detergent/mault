@@ -20,7 +20,7 @@ function emptyRuleGroup(): BinRuleGroup {
 }
 
 export function BinConfigPanel() {
-  const { selectedConfig: config, save, clear } = useBinConfigs();
+  const { selectedConfig: config, save, clear, configs } = useBinConfigs();
 
   const form = useForm<BinConfigFormValues>({
     resolver: zodResolver(binConfigSchema),
@@ -40,20 +40,37 @@ export function BinConfigPanel() {
     });
   }, [config, form]);
 
+  const isOnlyCatchAll =
+    config.isCatchAll &&
+    configs.filter((c) => c.isCatchAll && c.binNumber !== config.binNumber)
+      .length === 0;
+
   const handleSave = useCallback(
     (values: BinConfigFormValues) => {
+      if (!values.isCatchAll && isOnlyCatchAll) {
+        form.setError("isCatchAll", {
+          message: "At least one bin must be catch-all.",
+        });
+        return;
+      }
       save(config.binNumber, values.rules as BinRuleGroup, values.isCatchAll);
     },
-    [config, save],
+    [config, save, isOnlyCatchAll, form],
   );
 
   const handleClear = useCallback(() => {
+    if (isOnlyCatchAll) {
+      form.setError("isCatchAll", {
+        message: "At least one bin must be catch-all.",
+      });
+      return;
+    }
     form.reset({
       isCatchAll: false,
       rules: emptyRuleGroup(),
     });
     clear(config.binNumber);
-  }, [config, clear, form]);
+  }, [config, clear, form, isOnlyCatchAll]);
 
   const isCatchAll = form.watch("isCatchAll");
 
@@ -99,6 +116,9 @@ export function BinConfigPanel() {
             />
           </div>
         </ScrollArea>
+      )}
+      {form.formState.errors.isCatchAll && (
+        <FieldError errors={[form.formState.errors.isCatchAll]} />
       )}
       {form.formState.errors.rules && (
         <FieldError errors={[form.formState.errors.rules]} />

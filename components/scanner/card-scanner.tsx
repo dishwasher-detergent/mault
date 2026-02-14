@@ -5,6 +5,7 @@ import { ScannerOverlay } from "@/components/scanner/scanner-overlay";
 import { Button } from "@/components/ui/button";
 import { ButtonGroup } from "@/components/ui/button-group";
 import { useCardScanner } from "@/hooks/use-card-scanner";
+import { useBinConfigs } from "@/hooks/use-bin-configs";
 import { useScannedCards } from "@/hooks/use-scanned-cards";
 import { useSerial } from "@/hooks/use-serial";
 import type { CardScannerProps } from "@/interfaces/scanner.interface";
@@ -15,6 +16,7 @@ import { useEffect, useRef } from "react";
 export function CardScanner({ className }: CardScannerProps) {
   const { addCard } = useScannedCards();
   const { isConnected, isReady, connect, disconnect } = useSerial();
+  const { hasCatchAll } = useBinConfigs();
   const {
     status,
     errorMessage,
@@ -35,16 +37,17 @@ export function CardScanner({ className }: CardScannerProps) {
     },
   });
 
-  const wasReadyRef = useRef(isReady);
+  const canScan = isReady && hasCatchAll;
+  const wasReadyRef = useRef(canScan);
   useEffect(() => {
-    if (!isReady && wasReadyRef.current) {
+    if (!canScan && wasReadyRef.current) {
       handlePause();
     }
-    if (isReady && !wasReadyRef.current && status === "paused") {
+    if (canScan && !wasReadyRef.current && status === "paused") {
       handleResume();
     }
-    wasReadyRef.current = isReady;
-  }, [isReady, handlePause, handleResume, status]);
+    wasReadyRef.current = canScan;
+  }, [canScan, handlePause, handleResume, status]);
 
   return (
     <div className={cn("flex flex-col overflow-hidden", className)}>
@@ -64,6 +67,7 @@ export function CardScanner({ className }: CardScannerProps) {
           errorMessage={errorMessage}
           isConnected={isConnected}
           isReady={isReady}
+          hasCatchAll={hasCatchAll}
           onRetryError={handleRetryError}
         />
       </div>
@@ -77,12 +81,12 @@ export function CardScanner({ className }: CardScannerProps) {
           {isConnected ? <IconDeviceUsbFilled /> : <IconDeviceUsb />}
         </Button>
         <ScannerControls
-          status={isReady ? status : "paused"}
+          status={isReady && hasCatchAll ? status : "paused"}
           onForceAddDuplicate={handleForceAddDuplicate}
           onForceScan={handleForceScan}
           onPause={handlePause}
-          onResume={isReady ? handleResume : () => {}}
-          disabled={!isReady}
+          onResume={isReady && hasCatchAll ? handleResume : () => {}}
+          disabled={!isReady || !hasCatchAll}
         />
       </ButtonGroup>
     </div>

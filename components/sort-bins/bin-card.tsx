@@ -35,14 +35,20 @@ export function BinCard({ config, active, onClick }: BinCardProps) {
     >
       <div className="flex flex-row justify-between gap-2 items-center w-full">
         <p className="font-medium text-sm">Bin {config.binNumber}</p>
-        {!isEmpty && (
-          <Badge variant="secondary">
-            {conditionCount} rule{conditionCount !== 1 ? "s" : ""}
-          </Badge>
+        {config.isCatchAll ? (
+          <Badge variant="default">Catch-all</Badge>
+        ) : (
+          !isEmpty && (
+            <Badge variant="secondary">
+              {conditionCount} rule{conditionCount !== 1 ? "s" : ""}
+            </Badge>
+          )
         )}
       </div>
       <div className="w-full">
-        {isEmpty ? (
+        {config.isCatchAll ? (
+          <p className="text-xs text-muted-foreground">All unmatched cards</p>
+        ) : isEmpty ? (
           <p className="text-xs">Click to configure</p>
         ) : (
           <RuleSummary rules={config.rules} />

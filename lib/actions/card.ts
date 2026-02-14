@@ -47,8 +47,8 @@ export async function Search(
 						id,
 						scryfall_id,
 						embedding <=> ${embeddingStr}::vector(768) AS distance
-					FROM card_image_vectors
-					WHERE (embedding <=> ${embeddingStr}::vector(768)) < 0.2
+					FROM cards
+					WHERE (embedding <=> ${embeddingStr}::vector(768)) < 0.15
 					ORDER BY embedding <=> ${embeddingStr}::vector(768)
 					LIMIT 1
 				`);
