@@ -32,7 +32,7 @@ function emptyRules(): BinRuleGroup {
 }
 
 function createEmptyConfig(binNumber: number): BinConfig {
-  return { binNumber, label: "", rules: emptyRules() };
+  return { binNumber, rules: emptyRules() };
 }
 
 function createEmptyConfigs(): BinConfig[] {
@@ -46,7 +46,7 @@ interface BinConfigsContextValue {
   selectedBin: number;
   setSelectedBin: (bin: number) => void;
   selectedConfig: BinConfig;
-  save: (binNumber: number, label: string, rules: BinRuleGroup, isCatchAll?: boolean) => void;
+  save: (binNumber: number, rules: BinRuleGroup, isCatchAll?: boolean) => void;
   clear: (binNumber: number) => void;
   saveAsPreset: (name: string) => Promise<void>;
   updatePreset: (presetId: number, name: string) => Promise<void>;
@@ -98,15 +98,19 @@ export function BinConfigsProvider({
   }, [refreshPresets]);
 
   const save = useCallback(
-    (binNumber: number, label: string, rules: BinRuleGroup, isCatchAll?: boolean) => {
+    (binNumber: number, rules: BinRuleGroup, isCatchAll?: boolean) => {
       setConfigs((prev) =>
         prev.map((c) =>
-          c.binNumber === binNumber ? { ...c, label, rules, isCatchAll } : c,
+          c.binNumber === binNumber ? { ...c, rules, isCatchAll } : c,
         ),
       );
 
       startTransition(async () => {
-        const result = await saveBinConfigAction({ binNumber, label, rules, isCatchAll });
+        const result = await saveBinConfigAction({
+          binNumber,
+          rules,
+          isCatchAll,
+        });
         if (result.success && result.data) {
           setConfigs((prev) =>
             prev.map((c) => (c.binNumber === binNumber ? result.data! : c)),

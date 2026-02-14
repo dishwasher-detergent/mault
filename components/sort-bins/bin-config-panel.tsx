@@ -2,17 +2,15 @@
 
 import { RuleGroupEditor } from "@/components/sort-bins/rule-group-editor";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useBinConfigs } from "@/hooks/use-bin-configs";
 import { BinRuleGroup } from "@/interfaces/sort-bins.interface";
 import { useCallback, useEffect, useState } from "react";
+import { Label } from "../ui/label";
 
 export function BinConfigPanel() {
   const { selectedConfig: config, save, clear } = useBinConfigs();
 
-  const [label, setLabel] = useState("");
   const [isCatchAll, setIsCatchAll] = useState(false);
   const [rules, setRules] = useState<BinRuleGroup>({
     id: crypto.randomUUID(),
@@ -21,7 +19,6 @@ export function BinConfigPanel() {
   });
 
   useEffect(() => {
-    setLabel(config.label);
     setIsCatchAll(config.isCatchAll ?? false);
     setRules(
       config.rules.conditions.length > 0
@@ -31,8 +28,8 @@ export function BinConfigPanel() {
   }, [config]);
 
   const handleSave = useCallback(() => {
-    save(config.binNumber, label, rules, isCatchAll);
-  }, [config, label, rules, isCatchAll, save]);
+    save(config.binNumber, rules, isCatchAll);
+  }, [config, rules, isCatchAll, save]);
 
   const handleClear = useCallback(() => {
     clear(config.binNumber);
@@ -40,7 +37,7 @@ export function BinConfigPanel() {
 
   return (
     <div className="flex flex-col h-full">
-      <div className="flex items-center justify-between px-4 py-3">
+      <div className="flex items-center justify-between">
         <h2 className="font-semibold">Bin {config.binNumber}</h2>
         <div className="flex gap-1.5">
           <Button type="button" variant="destructive" onClick={handleClear}>
@@ -53,16 +50,7 @@ export function BinConfigPanel() {
       </div>
 
       <ScrollArea className="flex-1">
-        <div className="flex flex-col gap-4 p-4">
-          <div className="flex flex-col gap-1.5">
-            <Label htmlFor="bin-label">Label</Label>
-            <Input
-              id="bin-label"
-              placeholder="e.g. Rares, Bulk, Expensive..."
-              value={label}
-              onChange={(e) => setLabel(e.target.value)}
-            />
-          </div>
+        <div className="flex flex-col gap-4 ">
           <div className="flex items-center gap-2">
             <Button
               type="button"

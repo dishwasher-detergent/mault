@@ -42,7 +42,7 @@ export const sortBinPresets = pgTable("sort_bin_presets", {
   id: serial().primaryKey(),
   userId: text("user_id").notNull(),
   name: text("name").notNull(),
-  bins: jsonb("bins").notNull(), // Array of { binNumber, label, rules, isCatchAll }
+  bins: jsonb("bins").notNull(),
   isActive: boolean("is_active").notNull().default(false),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),

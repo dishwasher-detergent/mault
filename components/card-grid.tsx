@@ -57,7 +57,6 @@ export function CardGrid() {
             scanId={card.scanId}
             onRemove={() => removeCard(card.scanId)}
             binNumber={card.binNumber}
-            binLabel={card.binLabel}
           />
         ))}
       </div>

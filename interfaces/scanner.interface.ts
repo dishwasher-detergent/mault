@@ -47,5 +47,4 @@ export interface ScannedCard {
   card: ScryfallCardWithDistance;
   scannedAt: number;
   binNumber?: number;
-  binLabel?: string;
 }

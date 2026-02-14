@@ -38,7 +38,6 @@ export interface BinRuleGroup {
 export interface BinConfig {
   id?: number;
   binNumber: number;
-  label: string;
   rules: BinRuleGroup;
   isCatchAll?: boolean;
 }

@@ -24,7 +24,7 @@ function countConditions(config: BinConfig): number {
 }
 
 export function BinCard({ config, active, onClick }: BinCardProps) {
-  const isEmpty = !config.label && config.rules.conditions.length === 0;
+  const isEmpty = config.rules.conditions.length === 0;
   const conditionCount = countConditions(config);
 
   return (

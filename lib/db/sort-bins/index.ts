@@ -14,10 +14,7 @@ async function getOrCreateActivePreset(userId: string) {
     .select()
     .from(sortBinPresets)
     .where(
-      and(
-        eq(sortBinPresets.userId, userId),
-        eq(sortBinPresets.isActive, true),
-      ),
+      and(eq(sortBinPresets.userId, userId), eq(sortBinPresets.isActive, true)),
     );
 
   if (existing) return existing;
@@ -42,7 +39,6 @@ export async function loadBinConfigs(): Promise<Result<BinConfig[]>> {
 
   const configs: BinConfig[] = bins.map((bin) => ({
     binNumber: bin.binNumber,
-    label: bin.label,
     rules: bin.rules,
     isCatchAll: bin.isCatchAll,
   }));
@@ -56,12 +52,10 @@ export async function loadBinConfigs(): Promise<Result<BinConfig[]>> {
 
 export async function saveBinConfig({
   binNumber,
-  label,
   rules,
   isCatchAll,
 }: {
   binNumber: number;
-  label: string;
   rules: BinRuleGroup;
   isCatchAll?: boolean;
 }): Promise<Result<BinConfig>> {
@@ -75,7 +69,7 @@ export async function saveBinConfig({
   const preset = await getOrCreateActivePreset(userId);
   const bins = (preset.bins as BinEntry[]).slice();
 
-  const entry: BinEntry = { binNumber, label, rules, isCatchAll: isCatchAll ?? false };
+  const entry: BinEntry = { binNumber, rules, isCatchAll: isCatchAll ?? false };
   const idx = bins.findIndex((b) => b.binNumber === binNumber);
   if (idx >= 0) {
     bins[idx] = entry;
@@ -93,16 +87,13 @@ export async function saveBinConfig({
     success: true,
     data: {
       binNumber: entry.binNumber,
-      label: entry.label,
       rules: entry.rules,
       isCatchAll: entry.isCatchAll,
     },
   };
 }
 
-export async function clearBinConfig(
-  binNumber: number,
-): Promise<Result<null>> {
+export async function clearBinConfig(binNumber: number): Promise<Result<null>> {
   const { data: session } = await auth.getSession();
 
   if (!session) {

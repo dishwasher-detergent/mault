@@ -1,5 +1,7 @@
 "use client";
 
+import { useBinConfigs } from "@/hooks/use-bin-configs";
+import { useSerial } from "@/hooks/use-serial";
 import type { ScannedCard } from "@/interfaces/scanner.interface";
 import type {
   ScryfallCard,
@@ -14,8 +16,6 @@ import {
   putCard,
 } from "@/lib/card-db";
 import { evaluateCardBin } from "@/lib/evaluate-bin";
-import { useBinConfigs } from "@/hooks/use-bin-configs";
-import { useSerial } from "@/hooks/use-serial";
 import {
   createContext,
   useCallback,
@@ -87,7 +87,6 @@ export function ScannedCardsProvider({
       card,
       scannedAt: Date.now(),
       binNumber: matchedBin?.binNumber,
-      binLabel: matchedBin?.label || undefined,
     };
     setCards((prev) => [record, ...prev]);
     putCard(record).catch((err) =>

@@ -3,10 +3,7 @@
 import { db } from "@/db";
 import { sortBinPresets } from "@/db/schema";
 import { Result } from "@/interfaces/result.interface";
-import {
-  BinConfig,
-  BinPreset,
-} from "@/interfaces/sort-bins.interface";
+import { BinConfig, BinPreset } from "@/interfaces/sort-bins.interface";
 import { auth } from "@/lib/auth/server";
 import { and, desc, eq } from "drizzle-orm";
 
@@ -47,10 +44,7 @@ export async function savePreset(name: string): Promise<Result<BinPreset>> {
     .select()
     .from(sortBinPresets)
     .where(
-      and(
-        eq(sortBinPresets.userId, userId),
-        eq(sortBinPresets.isActive, true),
-      ),
+      and(eq(sortBinPresets.userId, userId), eq(sortBinPresets.isActive, true)),
     );
 
   const bins = active ? (active.bins as BinPreset["bins"]) : [];
@@ -87,10 +81,7 @@ export async function updatePreset(
     .select()
     .from(sortBinPresets)
     .where(
-      and(
-        eq(sortBinPresets.userId, userId),
-        eq(sortBinPresets.isActive, true),
-      ),
+      and(eq(sortBinPresets.userId, userId), eq(sortBinPresets.isActive, true)),
     );
 
   const bins = active ? (active.bins as BinPreset["bins"]) : [];
@@ -150,15 +141,11 @@ export async function loadPreset(
     .update(sortBinPresets)
     .set({ bins, updatedAt: new Date() })
     .where(
-      and(
-        eq(sortBinPresets.userId, userId),
-        eq(sortBinPresets.isActive, true),
-      ),
+      and(eq(sortBinPresets.userId, userId), eq(sortBinPresets.isActive, true)),
     );
 
   const configs: BinConfig[] = bins.map((bin) => ({
     binNumber: bin.binNumber,
-    label: bin.label,
     rules: bin.rules,
     isCatchAll: bin.isCatchAll,
   }));
@@ -182,7 +169,10 @@ export async function deletePreset(presetId: number): Promise<Result<null>> {
     );
 
   if (target?.isActive) {
-    return { message: "Cannot delete the active configuration.", success: false };
+    return {
+      message: "Cannot delete the active configuration.",
+      success: false,
+    };
   }
 
   await db

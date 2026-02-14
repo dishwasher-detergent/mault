@@ -8,7 +8,6 @@ interface ScannedCardItemProps {
   scanId: string;
   onRemove: () => void;
   binNumber?: number;
-  binLabel?: string;
 }
 
 export const ScannedCardItem = memo(function ScannedCardItem({
@@ -16,7 +15,6 @@ export const ScannedCardItem = memo(function ScannedCardItem({
   scanId,
   onRemove,
   binNumber,
-  binLabel,
 }: ScannedCardItemProps) {
   return (
     <div
@@ -40,7 +38,7 @@ export const ScannedCardItem = memo(function ScannedCardItem({
                   %
                 </Badge>
                 <Badge variant="secondary" className="shadow-md">
-                  {binLabel || `Bin ${binNumber}`}
+                  Bin {binNumber}
                 </Badge>
               </div>
               <img
