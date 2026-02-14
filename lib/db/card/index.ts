@@ -1,24 +1,14 @@
 "use server";
 
-import { db } from "@/db";
+import { authQuery } from "@/db";
 import { SearchCardMatch } from "@/interfaces/api.interface";
 import { Result } from "@/interfaces/result.interface";
-import { auth } from "@/lib/auth/server";
 import { vectorizeImageFromBuffer } from "@/lib/vectorize";
 import { sql } from "drizzle-orm";
 
 export async function Search(
   formData: FormData,
 ): Promise<Result<SearchCardMatch | null>> {
-  const { data: session } = await auth.getSession();
-
-  if (!session) {
-    return {
-      message: "Unauthorized",
-      success: false,
-    };
-  }
-
   const file = formData.get("image");
 
   if (!file || !(file instanceof File)) {
@@ -51,7 +41,8 @@ export async function Search(
 
   const embeddingStr = `[${embedding.join(",")}]`;
 
-  const matches = await db.execute(sql`
+  return authQuery(async (tx) => {
+    const matches = await tx.execute(sql`
 					SELECT
 						id,
 						scryfall_id,
@@ -62,18 +53,19 @@ export async function Search(
 					LIMIT 1
 				`);
 
-  const match: SearchCardMatch | null =
-    matches.rows.length > 0 && matches.rows[0]
-      ? {
-          id: matches.rows[0].scryfall_id as string,
-          scryfallId: matches.rows[0].scryfall_id as string,
-          distance: matches.rows[0].distance as number,
-        }
-      : null;
+    const match: SearchCardMatch | null =
+      matches.rows.length > 0 && matches.rows[0]
+        ? {
+            id: matches.rows[0].scryfall_id as string,
+            scryfallId: matches.rows[0].scryfall_id as string,
+            distance: matches.rows[0].distance as number,
+          }
+        : null;
 
-  return {
-    message: "Successfully searched for card.",
-    success: true,
-    data: match,
-  };
+    return {
+      message: "Successfully searched for card.",
+      success: true,
+      data: match,
+    };
+  });
 }

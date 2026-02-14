@@ -10,28 +10,13 @@ import {
 import { Input } from "@/components/ui/input";
 import { DynamicDialog } from "@/components/ui/responsive-dialog";
 import { useBinConfigs } from "@/hooks/use-bin-configs";
-import {
-  IconDeviceFloppy,
-  IconDotsVertical,
-  IconPlus,
-  IconTrash,
-} from "@tabler/icons-react";
+import { IconDotsVertical, IconPlus, IconTrash } from "@tabler/icons-react";
 import { useCallback, useState } from "react";
 
 export function PresetSelector() {
-  const { sets, activateSet, createSet, saveSet, deleteSet } =
-    useBinConfigs();
-  const [saveDialogOpen, setSaveDialogOpen] = useState(false);
+  const { sets, activateSet, createSet, deleteSet } = useBinConfigs();
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
-  const [presetName, setPresetName] = useState("");
   const [newSetName, setNewSetName] = useState("");
-
-  const handleSave = useCallback(async () => {
-    if (!presetName.trim()) return;
-    await saveSet(presetName.trim());
-    setPresetName("");
-    setSaveDialogOpen(false);
-  }, [presetName, saveSet]);
 
   const handleCreate = useCallback(async () => {
     if (!newSetName.trim()) return;
@@ -70,10 +55,7 @@ export function PresetSelector() {
                 >
                   Cancel
                 </Button>
-                <Button
-                  onClick={handleCreate}
-                  disabled={!newSetName.trim()}
-                >
+                <Button onClick={handleCreate} disabled={!newSetName.trim()}>
                   Create
                 </Button>
               </>
@@ -86,41 +68,6 @@ export function PresetSelector() {
               onChange={(e) => setNewSetName(e.target.value)}
               onKeyDown={(e) => {
                 if (e.key === "Enter") handleCreate();
-              }}
-              autoFocus
-            />
-          </DynamicDialog>
-          <DynamicDialog
-            open={saveDialogOpen}
-            onOpenChange={setSaveDialogOpen}
-            title="Save as Set"
-            description="Save the current bin configuration as a new set."
-            trigger={
-              <Button variant="ghost" size="icon">
-                <IconDeviceFloppy className="size-3.5" />
-              </Button>
-            }
-            footer={
-              <>
-                <Button
-                  variant="outline"
-                  onClick={() => setSaveDialogOpen(false)}
-                >
-                  Cancel
-                </Button>
-                <Button onClick={handleSave} disabled={!presetName.trim()}>
-                  Save
-                </Button>
-              </>
-            }
-            footerClassName="flex-col-reverse md:flex-row"
-          >
-            <Input
-              placeholder="Set name..."
-              value={presetName}
-              onChange={(e) => setPresetName(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === "Enter") handleSave();
               }}
               autoFocus
             />

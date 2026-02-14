@@ -1,3 +1,5 @@
+import { sql } from "drizzle-orm";
+import { authenticatedRole, authUid, crudPolicy } from "drizzle-orm/neon/rls";
 import {
   boolean,
   customType,
@@ -38,8 +40,13 @@ export const cardImageVectors = pgTable(
   },
   (table) => [
     unique("card_image_vectors_scryfall_face_idx").on(table.scryfallId),
+    crudPolicy({
+      role: authenticatedRole,
+      read: true,
+      modify: false,
+    }),
   ],
-);
+).enableRLS();
 
 export const binSets = pgTable(
   "bin_sets",
@@ -48,11 +55,21 @@ export const binSets = pgTable(
     guid: uuid("guid").defaultRandom(),
     name: text("name").notNull(),
     isActive: boolean("is_active").notNull().default(false),
+    userId: text("user_id")
+      .notNull()
+      .default(sql`auth.user_id()`),
     createdAt: timestamp("created_at").defaultNow().notNull(),
     updatedAt: timestamp("updated_at").defaultNow().notNull(),
   },
-  (table) => [unique("bin_sets_guid_idx").on(table.guid)],
-);
+  (table) => [
+    unique("bin_sets_guid_idx").on(table.guid),
+    crudPolicy({
+      role: authenticatedRole,
+      read: authUid(table.userId),
+      modify: authUid(table.userId),
+    }),
+  ],
+).enableRLS();
 
 export const bins = pgTable(
   "bins",
@@ -65,11 +82,21 @@ export const bins = pgTable(
     binSet: integer("bin_set")
       .notNull()
       .references(() => binSets.id),
+    userId: text("user_id")
+      .notNull()
+      .default(sql`auth.user_id()`),
     createdAt: timestamp("created_at").defaultNow().notNull(),
     updatedAt: timestamp("updated_at").defaultNow().notNull(),
   },
-  (table) => [unique("bins_guid_idx").on(table.guid)],
-);
+  (table) => [
+    unique("bins_guid_idx").on(table.guid),
+    crudPolicy({
+      role: authenticatedRole,
+      read: authUid(table.userId),
+      modify: authUid(table.userId),
+    }),
+  ],
+).enableRLS();
 
 export const binSetRelations = relations(binSets, ({ many }) => ({
   bins: many(bins),
