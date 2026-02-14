@@ -38,7 +38,7 @@ interface DynamicDialogProps {
   description?: ReactNode;
   footer?: ReactNode;
   footerClassName?: string;
-  children: ReactNode;
+  children?: ReactNode;
   className?: string;
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
@@ -107,7 +107,9 @@ export function DynamicDialog({
         <DialogContent className={className}>
           <DialogHeader>
             <DialogTitle>{title}</DialogTitle>
-            {description && <DialogDescription>{description}</DialogDescription>}
+            {description && (
+              <DialogDescription>{description}</DialogDescription>
+            )}
           </DialogHeader>
           <div className="flex flex-col gap-2">{children}</div>
           {footer && (

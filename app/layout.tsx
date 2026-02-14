@@ -1,10 +1,10 @@
 import { authClient } from "@/lib/auth/client";
 import { NeonAuthUIProvider } from "@neondatabase/auth/react";
 import type { Metadata } from "next";
-import { Figtree } from "next/font/google";
+import { Figtree, Raleway } from "next/font/google";
 import "./globals.css";
 
-const figtree = Figtree({ subsets: ["latin"], variable: "--font-sans" });
+const raleway = Raleway({subsets:['latin'],variable:'--font-sans'});
 
 export const metadata: Metadata = {
   title: "My Neon App",
@@ -17,7 +17,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning className={figtree.variable}>
+    <html lang="en" suppressHydrationWarning className={raleway.variable}>
       <body className="antialiased">
         <NeonAuthUIProvider
           authClient={authClient}

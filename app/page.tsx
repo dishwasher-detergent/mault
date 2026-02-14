@@ -1,5 +1,5 @@
-import { redirect } from "next/navigation";
+import { ComponentExample } from "@/components/component-example";
 
 export default function Page() {
-  redirect("/app");
+return <ComponentExample />;
 }

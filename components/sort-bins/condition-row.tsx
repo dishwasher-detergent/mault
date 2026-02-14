@@ -1,6 +1,12 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuCheckboxItem,
+  DropdownMenuContent,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import {
   Select,
@@ -16,7 +22,8 @@ import {
   ConditionOperator,
   FieldMeta,
 } from "@/interfaces/sort-bins.interface";
-import { IconX } from "@tabler/icons-react";
+import { cn } from "@/lib/utils";
+import { IconChevronDown, IconX } from "@tabler/icons-react";
 import { useCallback } from "react";
 
 interface ConditionRowProps {
@@ -29,7 +36,7 @@ function getFieldMeta(field: ConditionField): FieldMeta | undefined {
   return FIELD_DEFINITIONS.find((f) => f.field === field);
 }
 
-function CheckboxGroup({
+function MultiSelect({
   options,
   value,
   onChange,
@@ -38,18 +45,31 @@ function CheckboxGroup({
   value: string[];
   onChange: (value: string[]) => void;
 }) {
+  const selectedLabels = options
+    .filter((opt) => value.includes(opt.value))
+    .map((opt) => opt.label);
+
   return (
-    <div className="flex flex-wrap gap-1.5">
-      {options.map((opt) => {
-        const checked = value.includes(opt.value);
-        return (
-          <Button
+    <DropdownMenu>
+      <DropdownMenuTrigger
+        className={cn(
+          buttonVariants({ variant: "outline" }),
+          "min-w-24 flex-1",
+        )}
+      >
+        <span className="truncate flex-1 text-left">
+          {selectedLabels.length > 0 ? selectedLabels.join(", ") : "Select..."}
+        </span>
+        <IconChevronDown className="size-4 opacity-50 shrink-0" />
+      </DropdownMenuTrigger>
+      <DropdownMenuContent>
+        {options.map((opt) => (
+          <DropdownMenuCheckboxItem
             key={opt.value}
-            type="button"
-            variant={checked ? "default" : "outline"}
-            size="xs"
+            checked={value.includes(opt.value)}
+            onSelect={(e) => e.preventDefault()}
             onClick={() => {
-              if (checked) {
+              if (value.includes(opt.value)) {
                 onChange(value.filter((v) => v !== opt.value));
               } else {
                 onChange([...value, opt.value]);
@@ -57,10 +77,10 @@ function CheckboxGroup({
             }}
           >
             {opt.label}
-          </Button>
-        );
-      })}
-    </div>
+          </DropdownMenuCheckboxItem>
+        ))}
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 }
 
@@ -119,7 +139,7 @@ export function ConditionRow({
       if (isMulti) {
         const arrValue = Array.isArray(condition.value) ? condition.value : [];
         return (
-          <CheckboxGroup
+          <MultiSelect
             options={fieldMeta.options}
             value={arrValue}
             onChange={handleValueChange}
@@ -152,6 +172,7 @@ export function ConditionRow({
           type="number"
           step="any"
           placeholder="0"
+          max={100000}
           className="min-w-24 flex-1"
           value={condition.value === "" ? "" : String(condition.value)}
           onChange={(e) => {
@@ -166,6 +187,7 @@ export function ConditionRow({
       <Input
         type="text"
         placeholder="Value..."
+        maxLength={200}
         className="min-w-24 flex-1"
         value={String(condition.value)}
         onChange={(e) => handleValueChange(e.target.value)}

@@ -29,7 +29,7 @@ export function BinCard({ config, active, onClick }: BinCardProps) {
 
   return (
     <Button
-      variant={active ? "default" : "outline"}
+      variant={active ? "secondary" : "outline"}
       className="h-auto transition-colors hover:bg-muted/50 border rounded-lg p-2 flex flex-col justify-start text-start"
       onClick={onClick}
     >
