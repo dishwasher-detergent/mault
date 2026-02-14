@@ -61,7 +61,7 @@ export function PresetSelector() {
   return (
     <ButtonGroup className="w-full">
       <Select
-        value={activeSet?.guid}
+        value={activeSet?.guid ?? ""}
         onValueChange={(guid) => activateSet(guid!)}
       >
         <SelectTrigger className="flex-1 overflow-hidden">

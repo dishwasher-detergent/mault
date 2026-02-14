@@ -1,10 +1,10 @@
 import { Button } from "@/components/ui/button";
+import { Toaster } from "@/components/ui/sonner";
 import { BinConfigsProvider } from "@/hooks/use-bin-configs";
 import { ScannedCardsProvider } from "@/hooks/use-scanned-cards";
 import { SerialProvider } from "@/hooks/use-serial";
 import { UserButton } from "@neondatabase/auth/react";
 import Link from "next/link";
-import { Toaster } from "@/components/ui/sonner";
 
 export default function AppLayout({
   children,
@@ -23,10 +23,12 @@ export default function AppLayout({
               <div className="flex items-center gap-2">
                 <Button
                   variant="ghost"
+                  nativeButton={false}
                   render={<Link href="/app">Scanner</Link>}
                 />
                 <Button
                   variant="ghost"
+                  nativeButton={false}
                   render={<Link href="/app/sort">Sort Bins</Link>}
                 />
                 <UserButton size="icon" />

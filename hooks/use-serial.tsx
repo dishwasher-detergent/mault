@@ -144,7 +144,9 @@ export function SerialProvider({ children }: { children: React.ReactNode }) {
     writableRef.current = port.writable;
 
     const textDecoder = new TextDecoderStream();
-    readableRef.current = port.readable!.pipeThrough(textDecoder as unknown as TransformStream<Uint8Array, string>);
+    readableRef.current = port.readable!.pipeThrough(
+      textDecoder as unknown as TransformStream<Uint8Array, string>,
+    );
     const reader = readableRef.current.getReader();
     readerRef.current = reader;
 
@@ -152,10 +154,7 @@ export function SerialProvider({ children }: { children: React.ReactNode }) {
 
     startReading(reader);
 
-    // Send the test command without waiting for the response —
-    // isReady will be set by the subscription listener below.
     (async () => {
-      // Wait for the Arduino's initial {"status":"ready"} message
       const readyLine = await waitForLine(5000);
       if (readyLine) {
         try {
@@ -166,7 +165,6 @@ export function SerialProvider({ children }: { children: React.ReactNode }) {
         }
       }
 
-      // Fire the test command (response handled by subscription)
       await sendCommand(JSON.stringify({ test: true }) + "\n");
     })();
   }, [startReading, waitForLine, sendCommand]);
@@ -174,21 +172,18 @@ export function SerialProvider({ children }: { children: React.ReactNode }) {
   const disconnect = useCallback(async () => {
     const port = portRef.current;
 
-    // Clear refs immediately so connect() won't bail early
     portRef.current = null;
     writableRef.current = null;
     readableRef.current = null;
     setIsConnected(false);
     setIsReady(false);
 
-    // Reject any outstanding waiters
     for (const pending of pendingRef.current) {
       pending("");
     }
     pendingRef.current = [];
     bufferRef.current = "";
 
-    // Cancel reader first so the read loop exits
     if (readerRef.current) {
       try {
         await readerRef.current.cancel();
@@ -196,7 +191,6 @@ export function SerialProvider({ children }: { children: React.ReactNode }) {
       readerRef.current = null;
     }
 
-    // Close port and wait for it to fully close
     if (port) {
       try {
         await port.close();
@@ -204,7 +198,6 @@ export function SerialProvider({ children }: { children: React.ReactNode }) {
     }
   }, []);
 
-  // Drive isReady from subscription events
   useEffect(() => {
     const listener: SerialMessageListener = (msg) => {
       if (
@@ -251,7 +244,15 @@ export function SerialProvider({ children }: { children: React.ReactNode }) {
 
   return (
     <SerialContext
-      value={{ isConnected, isReady, connect, disconnect, sendBin, sendTest, subscribe }}
+      value={{
+        isConnected,
+        isReady,
+        connect,
+        disconnect,
+        sendBin,
+        sendTest,
+        subscribe,
+      }}
     >
       {children}
     </SerialContext>
