@@ -2,7 +2,6 @@
 
 import { Button } from "@/components/ui/button";
 import { ButtonGroup } from "@/components/ui/button-group";
-import { Field, FieldError } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { DynamicDialog } from "@/components/ui/responsive-dialog";
 import {
@@ -13,49 +12,29 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useBinConfigs } from "@/hooks/use-bin-configs";
-import {
-  createSetSchema,
-  CreateSetFormValues,
-} from "@/schemas/sort-bins.schema";
-import { zodResolver } from "@hookform/resolvers/zod";
 import { IconPlus, IconTrash } from "@tabler/icons-react";
 import { useCallback, useState } from "react";
-import { Controller, useForm } from "react-hook-form";
 
 export function PresetSelector() {
   const { sets, activateSet, createSet, deleteSet } = useBinConfigs();
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-
-  const form = useForm<CreateSetFormValues>({
-    resolver: zodResolver(createSetSchema),
-    defaultValues: { name: "" },
-  });
+  const [newSetName, setNewSetName] = useState("");
 
   const activeSet = sets.find((s) => s.isActive);
 
-  const onSubmit = useCallback(
-    async (data: CreateSetFormValues) => {
-      await createSet(data.name);
-      form.reset();
-      setCreateDialogOpen(false);
-    },
-    [createSet, form],
-  );
+  const handleCreate = useCallback(async () => {
+    if (!newSetName.trim()) return;
+    await createSet(newSetName.trim());
+    setNewSetName("");
+    setCreateDialogOpen(false);
+  }, [newSetName, createSet]);
 
   const handleDelete = useCallback(async () => {
     if (!activeSet) return;
     await deleteSet(activeSet.guid);
     setDeleteDialogOpen(false);
   }, [activeSet, deleteSet]);
-
-  const handleCreateDialogChange = useCallback(
-    (open: boolean) => {
-      setCreateDialogOpen(open);
-      if (!open) form.reset();
-    },
-    [form],
-  );
 
   return (
     <ButtonGroup className="w-full">
@@ -80,6 +59,7 @@ export function PresetSelector() {
         open={deleteDialogOpen}
         onOpenChange={setDeleteDialogOpen}
         title="Delete Set"
+        description={`Are you sure you want to delete "${activeSet?.name}"? This cannot be undone.`}
         trigger={
           <Button variant="outline" size="icon" disabled={!activeSet}>
             <IconTrash />
@@ -99,15 +79,10 @@ export function PresetSelector() {
           </>
         }
         footerClassName="flex-col-reverse md:flex-row"
-      >
-        <p className="wrap-break-word whitespace-normal">
-          Are you sure you want to delete "{activeSet?.name}"? This cannot be
-          undone.
-        </p>
-      </DynamicDialog>
+      />
       <DynamicDialog
         open={createDialogOpen}
-        onOpenChange={handleCreateDialogChange}
+        onOpenChange={setCreateDialogOpen}
         title="New Set"
         description="Create a new set with 7 empty bins."
         trigger={
@@ -119,37 +94,26 @@ export function PresetSelector() {
           <>
             <Button
               variant="outline"
-              onClick={() => handleCreateDialogChange(false)}
+              onClick={() => setCreateDialogOpen(false)}
             >
               Cancel
             </Button>
-            <Button
-              onClick={form.handleSubmit(onSubmit)}
-              disabled={!form.formState.isDirty}
-            >
+            <Button onClick={handleCreate} disabled={!newSetName.trim()}>
               Create
             </Button>
           </>
         }
         footerClassName="flex-col-reverse md:flex-row"
       >
-        <form onSubmit={form.handleSubmit(onSubmit)}>
-          <Controller
-            name="name"
-            control={form.control}
-            render={({ field, fieldState }) => (
-              <Field data-invalid={fieldState.invalid}>
-                <Input
-                  {...field}
-                  placeholder="Set name..."
-                  aria-invalid={fieldState.invalid}
-                  autoFocus
-                />
-                <FieldError errors={[fieldState.error]} />
-              </Field>
-            )}
-          />
-        </form>
+        <Input
+          placeholder="Set name..."
+          value={newSetName}
+          onChange={(e) => setNewSetName(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") handleCreate();
+          }}
+          autoFocus
+        />
       </DynamicDialog>
     </ButtonGroup>
   );
