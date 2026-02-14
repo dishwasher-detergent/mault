@@ -14,7 +14,7 @@ import {
   loadSets,
   saveBinConfig as saveBinConfigAction,
   saveSet as saveSetAction,
-} from "@/lib/db/sort-bins";
+} from "@/lib/actions/sort-bins";
 import {
   createContext,
   useCallback,

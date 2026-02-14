@@ -86,7 +86,6 @@ export async function activateSet(guid: string): Promise<Result<BinSet[]>> {
       return { message: "Set not found.", success: false };
     }
 
-    // Deactivate all, then activate target
     await tx.update(binSets).set({ isActive: false }).where(eq(binSets.isActive, true));
     await tx.update(binSets).set({ isActive: true }).where(eq(binSets.id, target.id));
 

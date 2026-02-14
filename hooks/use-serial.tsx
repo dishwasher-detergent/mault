@@ -23,9 +23,7 @@ export function SerialProvider({ children }: { children: React.ReactNode }) {
   const readerRef = useRef<ReadableStreamDefaultReader<string> | null>(null);
   const readableRef = useRef<ReadableStream<string> | null>(null);
   const writableRef = useRef<WritableStream<Uint8Array> | null>(null);
-  // Buffer for incoming serial data; responses are newline-delimited
   const bufferRef = useRef("");
-  // Queue of pending resolve callbacks waiting for a serial response line
   const pendingRef = useRef<Array<(line: string) => void>>([]);
 
   const startReading = useCallback(async (reader: ReadableStreamDefaultReader<string>) => {
@@ -36,7 +34,6 @@ export function SerialProvider({ children }: { children: React.ReactNode }) {
         if (value) {
           bufferRef.current += value;
           const lines = bufferRef.current.split("\n");
-          // Keep the last (possibly incomplete) chunk in the buffer
           bufferRef.current = lines.pop() || "";
           for (const line of lines) {
             const trimmed = line.trim();
@@ -86,7 +83,6 @@ export function SerialProvider({ children }: { children: React.ReactNode }) {
 
     setIsConnected(true);
 
-    // Start the background read loop
     startReading(reader);
   }, [startReading]);
 

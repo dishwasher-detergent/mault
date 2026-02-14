@@ -1,4 +1,4 @@
-import { CardSelectDialog } from "@/components/card-select-dialog";
+import { CardSelectDialog } from "@/components/cards/card-select-dialog";
 import { Badge } from "@/components/ui/badge";
 import type { ScryfallCardWithDistance } from "@/interfaces/scryfall.interface";
 import { memo } from "react";

@@ -14,7 +14,7 @@ import {
   generateScanId,
   getAllCards,
   putCard,
-} from "@/lib/card-db";
+} from "@/lib/idb";
 import { evaluateCardBin } from "@/lib/evaluate-bin";
 import {
   createContext,
@@ -93,7 +93,6 @@ export function ScannedCardsProvider({
       console.error("Failed to persist card:", err),
     );
 
-    // Send bin assignment to Arduino if connected
     if (matchedBin && serialRef.current.isConnected) {
       serialRef.current.sendBin(matchedBin.binNumber).then((response) => {
         if (response) {

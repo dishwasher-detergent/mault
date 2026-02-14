@@ -11,7 +11,7 @@ import {
   drawDetectionOverlay,
   extractCardImage,
 } from "@/lib/card-detection";
-import { Search } from "@/lib/db/card";
+import { Search } from "@/lib/actions/card";
 import { loadOpenCv } from "@/lib/opencv-loader";
 import { SearchById } from "@/lib/scryfall/search";
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -90,8 +90,6 @@ export function useCardScanner({
   const [duplicateCard, setDuplicateCard] =
     useState<ScryfallCardWithDistance | null>(null);
 
-  // --- Helpers ---
-
   const updateStatus = useCallback((newStatus: ScannerStatus) => {
     statusRef.current = newStatus;
     setStatus(newStatus);
@@ -111,7 +109,6 @@ export function useCardScanner({
     setIsStable(false);
   }, []);
 
-  // Keep refs in sync with latest props/callbacks
   useEffect(() => {
     onSearchResultsRef.current = onSearchResults;
   }, [onSearchResults]);
@@ -119,8 +116,6 @@ export function useCardScanner({
   useEffect(() => {
     handleErrorRef.current = handleError;
   }, [handleError]);
-
-  // --- Capture Pipeline ---
 
   /**
    * Shared capture-and-search logic used by both auto-capture and force scan.
@@ -164,8 +159,6 @@ export function useCardScanner({
     },
     [updateStatus],
   );
-
-  // --- Camera ---
 
   const stopCamera = useCallback(() => {
     if (streamRef.current) {
@@ -241,8 +234,6 @@ export function useCardScanner({
     }
   }, [handleError, updateStatus]);
 
-  // --- Detection Loop ---
-
   const detectionLoop = useCallback(() => {
     const video = videoRef.current;
     const displayCanvas = displayCanvasRef.current;
@@ -305,7 +296,6 @@ export function useCardScanner({
       const stable = stableCountRef.current >= STABILITY_FRAMES;
       setIsStable(stable);
 
-      // Auto-capture when card is stable and ready
       if (
         stable &&
         !needsCardRemovalRef.current &&
@@ -323,8 +313,6 @@ export function useCardScanner({
 
     rafRef.current = requestAnimationFrame(detectionLoop);
   }, [updateStatus, performCapture]);
-
-  // --- User Actions ---
 
   const handleForceAddDuplicate = useCallback(() => {
     if (duplicateCard) {
@@ -363,8 +351,6 @@ export function useCardScanner({
     resetStability();
     updateStatus("scanning");
   }, [updateStatus, resetStability]);
-
-  // --- Initialization ---
 
   const initScanner = useCallback(async () => {
     updateStatus("initializing");

@@ -1,6 +1,6 @@
-import { CardGrid } from "@/components/card-grid";
-import { CardScanner } from "@/components/card-scanner";
-import { ScanStats } from "@/components/scan-stats";
+import { CardGrid } from "@/components/cards/card-grid";
+import { CardScanner } from "@/components/scanner/card-scanner";
+import { ScanStats } from "@/components/scanner/scan-stats";
 
 export default function App() {
   return (

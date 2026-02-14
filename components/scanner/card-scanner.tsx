@@ -1,7 +1,7 @@
 "use client";
 
-import { ScannerControls } from "@/components/scanner-controls";
-import { ScannerOverlay } from "@/components/scanner-overlay";
+import { ScannerControls } from "@/components/scanner/scanner-controls";
+import { ScannerOverlay } from "@/components/scanner/scanner-overlay";
 import { Button } from "@/components/ui/button";
 import { ButtonGroup } from "@/components/ui/button-group";
 import { useCardScanner } from "@/hooks/use-card-scanner";
@@ -35,7 +35,6 @@ export function CardScanner({ className }: CardScannerProps) {
     },
   });
 
-  // Auto-pause when Arduino is disconnected, resume when reconnected
   const wasConnectedRef = useRef(isConnected);
   useEffect(() => {
     if (!isConnected && wasConnectedRef.current) {
