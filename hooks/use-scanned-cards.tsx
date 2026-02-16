@@ -15,7 +15,7 @@ import {
   getAllCards,
   putCard,
 } from "@/lib/idb";
-import { evaluateCardBin } from "@/lib/evaluate-bin";
+import { evaluateCardBin, getCatchAllBin } from "@/lib/evaluate-bin";
 import {
   createContext,
   useCallback,
@@ -29,6 +29,7 @@ interface ScannedCardsContextValue {
   cards: ScannedCard[];
   isLoading: boolean;
   addCard: (card: ScryfallCardWithDistance) => void;
+  sendCatchAllBin: () => void;
   removeCard: (scanId: string) => void;
   correctCard: (scanId: string, card: ScryfallCard) => void;
   clearCards: () => void;
@@ -102,6 +103,17 @@ export function ScannedCardsProvider({
     }
   }, []);
 
+  const sendCatchAllBin = useCallback(() => {
+    const catchAll = getCatchAllBin(binConfigsRef.current);
+    if (catchAll && serialRef.current.isConnected) {
+      serialRef.current.sendBin(catchAll.binNumber).then((response) => {
+        if (response) {
+          console.log("[Serial] Route unmatched card to catch-all bin", catchAll.binNumber, response);
+        }
+      });
+    }
+  }, []);
+
   const removeCard = useCallback((scanId: string) => {
     setCards((prev) => prev.filter((entry) => entry.scanId !== scanId));
     dbRemoveCard(scanId).catch((err) =>
@@ -130,7 +142,7 @@ export function ScannedCardsProvider({
 
   return (
     <ScannedCardsContext
-      value={{ cards, isLoading, addCard, removeCard, correctCard, clearCards }}
+      value={{ cards, isLoading, addCard, sendCatchAllBin, removeCard, correctCard, clearCards }}
     >
       {children}
     </ScannedCardsContext>

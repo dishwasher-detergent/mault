@@ -126,17 +126,13 @@ export function ScanStats() {
   }, [cards]);
 
   if (!stats) {
-    return (
-      <div className="p-3 text-center">
-        <p className="text-xs text-muted-foreground">Scan cards to see stats</p>
-      </div>
-    );
+    return null;
   }
 
   const visibleSets = expandedSets ? stats.sets : stats.sets.slice(0, 5);
 
   return (
-    <div className="flex flex-col gap-2 text-sm overflow-y-auto">
+    <div className="flex flex-col gap-2 text-sm overflow-y-auto mt-2">
       <div className="rounded-lg bg-input/20 dark:bg-input/30 border border-input">
         <div className="grid grid-cols-2">
           <StatCard

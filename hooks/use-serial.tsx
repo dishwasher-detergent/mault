@@ -27,21 +27,23 @@ export function SerialProvider({ children }: { children: React.ReactNode }) {
   const [isConnected, setIsConnected] = useState(false);
   const [isReady, setIsReady] = useState(false);
   const portRef = useRef<SerialPort | null>(null);
-  const readerRef = useRef<ReadableStreamDefaultReader<string> | null>(null);
-  const readableRef = useRef<ReadableStream<string> | null>(null);
+  const readerRef = useRef<ReadableStreamDefaultReader<Uint8Array> | null>(null);
   const writableRef = useRef<WritableStream<Uint8Array> | null>(null);
   const bufferRef = useRef("");
   const pendingRef = useRef<Array<(line: string) => void>>([]);
   const listenersRef = useRef(new Set<SerialMessageListener>());
+  const disconnectingRef = useRef<Promise<void> | null>(null);
+
+  const decoderRef = useRef(new TextDecoder());
 
   const startReading = useCallback(
-    async (reader: ReadableStreamDefaultReader<string>) => {
+    async (reader: ReadableStreamDefaultReader<Uint8Array>) => {
       try {
         while (true) {
           const { value, done } = await reader.read();
           if (done) break;
           if (value) {
-            bufferRef.current += value;
+            bufferRef.current += decoderRef.current.decode(value, { stream: true });
             const lines = bufferRef.current.split("\n");
             bufferRef.current = lines.pop() || "";
             for (const line of lines) {
@@ -123,6 +125,11 @@ export function SerialProvider({ children }: { children: React.ReactNode }) {
   }, [sendCommand, waitForLine]);
 
   const connect = useCallback(async () => {
+    // Wait for any in-progress disconnect to finish
+    if (disconnectingRef.current) {
+      await disconnectingRef.current;
+    }
+
     if (portRef.current) return;
 
     let port: SerialPort;
@@ -143,12 +150,9 @@ export function SerialProvider({ children }: { children: React.ReactNode }) {
     portRef.current = port;
     writableRef.current = port.writable;
 
-    const textDecoder = new TextDecoderStream();
-    readableRef.current = port.readable!.pipeThrough(
-      textDecoder as unknown as TransformStream<Uint8Array, string>,
-    );
-    const reader = readableRef.current.getReader();
+    const reader = port.readable!.getReader();
     readerRef.current = reader;
+    decoderRef.current = new TextDecoder();
 
     setIsConnected(true);
 
@@ -169,33 +173,44 @@ export function SerialProvider({ children }: { children: React.ReactNode }) {
     })();
   }, [startReading, waitForLine, sendCommand]);
 
-  const disconnect = useCallback(async () => {
+  const disconnect = useCallback(() => {
     const port = portRef.current;
+    const reader = readerRef.current;
 
+    // Clear refs and state immediately
     portRef.current = null;
+    readerRef.current = null;
     writableRef.current = null;
-    readableRef.current = null;
     setIsConnected(false);
     setIsReady(false);
 
+    // Reject any outstanding waiters
     for (const pending of pendingRef.current) {
       pending("");
     }
     pendingRef.current = [];
     bufferRef.current = "";
 
-    if (readerRef.current) {
-      try {
-        await readerRef.current.cancel();
-      } catch {}
-      readerRef.current = null;
-    }
+    // Async cleanup — stored so connect() can await it
+    const cleanup = (async () => {
+      if (reader) {
+        try {
+          await reader.cancel();
+        } catch {}
+      }
 
-    if (port) {
-      try {
-        await port.close();
-      } catch {}
-    }
+      if (port) {
+        try {
+          await port.close();
+        } catch {}
+      }
+    })();
+
+    disconnectingRef.current = cleanup.finally(() => {
+      disconnectingRef.current = null;
+    });
+
+    return cleanup;
   }, []);
 
   useEffect(() => {

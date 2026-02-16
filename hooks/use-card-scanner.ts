@@ -64,6 +64,7 @@ async function searchCardImage(
 
 export function useCardScanner({
   onSearchResults,
+  onNoMatch,
   onError,
 }: Omit<CardScannerProps, "className"> = {}) {
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -82,6 +83,7 @@ export function useCardScanner({
   const needsCardRemovalRef = useRef(false);
   const isCapturingRef = useRef(false);
   const onSearchResultsRef = useRef(onSearchResults);
+  const onNoMatchRef = useRef(onNoMatch);
   const handleErrorRef = useRef<(msg: string) => void>(() => {});
 
   const [status, setStatus] = useState<ScannerStatus>("initializing");
@@ -112,6 +114,10 @@ export function useCardScanner({
   useEffect(() => {
     onSearchResultsRef.current = onSearchResults;
   }, [onSearchResults]);
+
+  useEffect(() => {
+    onNoMatchRef.current = onNoMatch;
+  }, [onNoMatch]);
 
   useEffect(() => {
     handleErrorRef.current = handleError;
@@ -145,6 +151,7 @@ export function useCardScanner({
           }
         } else {
           playDingSound();
+          onNoMatchRef.current?.();
           updateStatus("no-match");
         }
 
@@ -223,7 +230,7 @@ export function useCardScanner({
         }
       }
 
-      pausedRef.current = false;
+      pausedRef.current = true;
       updateStatus("paused");
     } catch (err) {
       const msg =
@@ -252,13 +259,12 @@ export function useCardScanner({
 
     if (!displayCtx || !overlayCtx || !processingCtx) return;
 
-    displayCtx.drawImage(video, 0, 0);
-
     if (pausedRef.current) {
-      overlayCtx.clearRect(0, 0, overlayCanvas.width, overlayCanvas.height);
       rafRef.current = requestAnimationFrame(detectionLoop);
       return;
     }
+
+    displayCtx.drawImage(video, 0, 0);
 
     const now = performance.now();
     if (now - lastDetectionRef.current >= DETECTION_INTERVAL_MS) {

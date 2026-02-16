@@ -31,6 +31,7 @@ export type ScannerStatus =
 
 export interface CardScannerProps {
   onSearchResults?: (matches: ScryfallCardWithDistance[]) => void;
+  onNoMatch?: () => void;
   onManualAdd?: () => void;
   onError?: (error: string) => void;
   className?: string;

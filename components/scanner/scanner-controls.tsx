@@ -28,30 +28,34 @@ export function ScannerControls({
   return (
     <>
       {status === "no-match" && (
-        <Button onClick={onForceScan} size="sm" variant="outline" disabled={disabled}>
+        <Button onClick={onForceScan} variant="outline" disabled={disabled}>
           <IconFocus2 />
           Scan Again
         </Button>
       )}
       {status === "duplicate" && (
-        <Button onClick={onForceAddDuplicate} size="sm" variant="outline" disabled={disabled}>
+        <Button
+          onClick={onForceAddDuplicate}
+          variant="outline"
+          disabled={disabled}
+        >
           <IconPlus />
           Add Again
         </Button>
       )}
       {(status === "scanning" || status === "captured") && (
-        <Button onClick={onForceScan} size="sm" variant="outline" disabled={disabled}>
+        <Button onClick={onForceScan} variant="outline" disabled={disabled}>
           <IconFocus2 />
           Scan Now
         </Button>
       )}
       {status === "paused" ? (
-        <Button onClick={onResume} size="sm" variant="outline" disabled={disabled}>
+        <Button onClick={onResume} variant="outline" disabled={disabled}>
           <IconPlayerPlay />
           Resume
         </Button>
       ) : (
-        <Button onClick={onPause} size="sm" variant="outline" disabled={disabled}>
+        <Button onClick={onPause} variant="outline" disabled={disabled}>
           <IconPlayerPause />
           Pause
         </Button>

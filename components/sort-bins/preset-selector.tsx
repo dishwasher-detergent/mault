@@ -22,7 +22,11 @@ import { IconPlus, IconTrash } from "@tabler/icons-react";
 import { useCallback, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 
-export function PresetSelector() {
+interface PresetSelectorProps {
+  readOnly?: boolean;
+}
+
+export function PresetSelector({ readOnly }: PresetSelectorProps) {
   const { sets, activateSet, createSet, deleteSet } = useBinConfigs();
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
@@ -77,81 +81,85 @@ export function PresetSelector() {
           ))}
         </SelectContent>
       </Select>
-      <DynamicDialog
-        open={deleteDialogOpen}
-        onOpenChange={setDeleteDialogOpen}
-        title="Delete Set"
-        description={`Are you sure you want to delete "${activeSet?.name}"? This cannot be undone.`}
-        trigger={
-          <Button variant="outline" size="icon" disabled={!activeSet}>
-            <IconTrash />
-          </Button>
-        }
-        footer={
-          <>
-            <Button
-              variant="outline"
-              onClick={() => setDeleteDialogOpen(false)}
-            >
-              Cancel
-            </Button>
-            <Button variant="destructive" onClick={handleDelete}>
-              Delete
-            </Button>
-          </>
-        }
-        footerClassName="flex-col-reverse md:flex-row"
-      />
-      <DynamicDialog
-        open={createDialogOpen}
-        onOpenChange={handleCreateDialogChange}
-        title="New Set"
-        description="Create a new set with 7 empty bins."
-        trigger={
-          <Button variant="outline" size="icon">
-            <IconPlus />
-          </Button>
-        }
-        footer={
-          <>
-            <Button
-              variant="outline"
-              onClick={() => handleCreateDialogChange(false)}
-            >
-              Cancel
-            </Button>
-            <Button
-              onClick={form.handleSubmit(handleCreate)}
-              disabled={!form.formState.isValid}
-            >
-              Create
-            </Button>
-          </>
-        }
-        footerClassName="flex-col-reverse md:flex-row"
-      >
-        <form onSubmit={form.handleSubmit(handleCreate)}>
-          <Controller
-            name="name"
-            control={form.control}
-            render={({ field, fieldState }) => (
-              <Field data-invalid={fieldState.invalid || undefined}>
-                <FieldLabel htmlFor="set-name">Set name</FieldLabel>
-                <Input
-                  {...field}
-                  id="set-name"
-                  placeholder="Set name..."
-                  aria-invalid={fieldState.invalid}
-                  autoFocus
-                />
-                {fieldState.invalid && (
-                  <FieldError errors={[fieldState.error]} />
-                )}
-              </Field>
-            )}
+      {!readOnly && (
+        <>
+          <DynamicDialog
+            open={deleteDialogOpen}
+            onOpenChange={setDeleteDialogOpen}
+            title="Delete Set"
+            description={`Are you sure you want to delete "${activeSet?.name}"? This cannot be undone.`}
+            trigger={
+              <Button variant="outline" size="icon" disabled={!activeSet}>
+                <IconTrash />
+              </Button>
+            }
+            footer={
+              <>
+                <Button
+                  variant="outline"
+                  onClick={() => setDeleteDialogOpen(false)}
+                >
+                  Cancel
+                </Button>
+                <Button variant="destructive" onClick={handleDelete}>
+                  Delete
+                </Button>
+              </>
+            }
+            footerClassName="flex-col-reverse md:flex-row"
           />
-        </form>
-      </DynamicDialog>
+          <DynamicDialog
+            open={createDialogOpen}
+            onOpenChange={handleCreateDialogChange}
+            title="New Set"
+            description="Create a new set with 7 empty bins."
+            trigger={
+              <Button variant="outline" size="icon">
+                <IconPlus />
+              </Button>
+            }
+            footer={
+              <>
+                <Button
+                  variant="outline"
+                  onClick={() => handleCreateDialogChange(false)}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  onClick={form.handleSubmit(handleCreate)}
+                  disabled={!form.formState.isValid}
+                >
+                  Create
+                </Button>
+              </>
+            }
+            footerClassName="flex-col-reverse md:flex-row"
+          >
+            <form onSubmit={form.handleSubmit(handleCreate)}>
+              <Controller
+                name="name"
+                control={form.control}
+                render={({ field, fieldState }) => (
+                  <Field data-invalid={fieldState.invalid || undefined}>
+                    <FieldLabel htmlFor="set-name">Set name</FieldLabel>
+                    <Input
+                      {...field}
+                      id="set-name"
+                      placeholder="Set name..."
+                      aria-invalid={fieldState.invalid}
+                      autoFocus
+                    />
+                    {fieldState.invalid && (
+                      <FieldError errors={[fieldState.error]} />
+                    )}
+                  </Field>
+                )}
+              />
+            </form>
+          </DynamicDialog>
+        </>
+      )}
     </ButtonGroup>
   );
 }

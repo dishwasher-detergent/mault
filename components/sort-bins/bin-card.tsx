@@ -30,7 +30,7 @@ export function BinCard({ config, active, onClick }: BinCardProps) {
   return (
     <Button
       variant={active ? "secondary" : "outline"}
-      className="h-auto transition-colors hover:bg-muted/50 border rounded-lg p-2 flex flex-col justify-start text-start"
+      className="h-auto transition-colors hover:bg-muted/50 border rounded-lg p-2 flex flex-col justify-start text-start font-normal"
       onClick={onClick}
     >
       <div className="flex flex-row justify-between gap-2 items-center w-full">
@@ -45,7 +45,7 @@ export function BinCard({ config, active, onClick }: BinCardProps) {
           )
         )}
       </div>
-      <div className="w-full">
+      <div className="w-full text-xs">
         {config.isCatchAll ? (
           <p className="text-xs text-muted-foreground">All unmatched cards</p>
         ) : isEmpty ? (

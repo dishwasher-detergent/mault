@@ -4,17 +4,18 @@ import { ScannerControls } from "@/components/scanner/scanner-controls";
 import { ScannerOverlay } from "@/components/scanner/scanner-overlay";
 import { Button } from "@/components/ui/button";
 import { ButtonGroup } from "@/components/ui/button-group";
-import { useCardScanner } from "@/hooks/use-card-scanner";
 import { useBinConfigs } from "@/hooks/use-bin-configs";
+import { useCardScanner } from "@/hooks/use-card-scanner";
 import { useScannedCards } from "@/hooks/use-scanned-cards";
-import { useSerial } from "@/hooks/use-serial";
+import { useSerial, useSerialMessage } from "@/hooks/use-serial";
 import type { CardScannerProps } from "@/interfaces/scanner.interface";
 import { cn } from "@/lib/utils";
 import { IconDeviceUsb, IconDeviceUsbFilled } from "@tabler/icons-react";
 import { useEffect, useRef } from "react";
+import { toast } from "sonner";
 
 export function CardScanner({ className }: CardScannerProps) {
-  const { addCard } = useScannedCards();
+  const { addCard, sendCatchAllBin } = useScannedCards();
   const { isConnected, isReady, connect, disconnect } = useSerial();
   const { hasCatchAll } = useBinConfigs();
   const {
@@ -35,9 +36,27 @@ export function CardScanner({ className }: CardScannerProps) {
         addCard(card);
       }
     },
+    onNoMatch: sendCatchAllBin,
   });
 
-  const canScan = isReady && hasCatchAll;
+  useSerialMessage((msg) => {
+    if (
+      typeof msg === "object" &&
+      msg !== null &&
+      "error" in msg &&
+      (msg as Record<string, unknown>).error === "jam"
+    ) {
+      const { module, bin } = msg as Record<string, unknown>;
+      handlePause();
+      toast.error("Card jam detected", {
+        description: `Card stuck at module ${module} (heading to bin ${bin}). Check the sorter and resume.`,
+        duration: Infinity,
+        dismissible: true,
+      });
+    }
+  });
+
+  const canScan = isConnected && isReady && hasCatchAll;
   const wasReadyRef = useRef(canScan);
   useEffect(() => {
     if (!canScan && wasReadyRef.current) {
@@ -74,7 +93,7 @@ export function CardScanner({ className }: CardScannerProps) {
       <ButtonGroup className="mt-2 w-full *:flex-1">
         <Button
           onClick={isConnected ? disconnect : connect}
-          size="icon-sm"
+          size="icon"
           className="flex-none!"
           variant={isConnected ? "default" : "outline"}
         >
