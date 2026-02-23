@@ -1,0 +1,523 @@
+{
+  "id": "6b370a06-bd11-4f42-83d2-24259c1b512f",
+  "prevId": "7a9f7ec2-af86-492d-bb90-3e2556e17d2e",
+  "version": "7",
+  "dialect": "postgresql",
+  "tables": {
+    "public.bin_sets": {
+      "name": "bin_sets",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "guid": {
+          "name": "guid",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "gen_random_uuid()"
+        },
+        "name": {
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "is_active": {
+          "name": "is_active",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        },
+        "user_id": {
+          "name": "user_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "auth.user_id()"
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "bin_sets_guid_idx": {
+          "name": "bin_sets_guid_idx",
+          "nullsNotDistinct": false,
+          "columns": [
+            "guid"
+          ]
+        }
+      },
+      "policies": {
+        "crud-authenticated-policy-select": {
+          "name": "crud-authenticated-policy-select",
+          "as": "PERMISSIVE",
+          "for": "SELECT",
+          "to": [
+            "authenticated"
+          ],
+          "using": "(select auth.user_id() = \"bin_sets\".\"user_id\")"
+        },
+        "crud-authenticated-policy-insert": {
+          "name": "crud-authenticated-policy-insert",
+          "as": "PERMISSIVE",
+          "for": "INSERT",
+          "to": [
+            "authenticated"
+          ],
+          "withCheck": "(select auth.user_id() = \"bin_sets\".\"user_id\")"
+        },
+        "crud-authenticated-policy-update": {
+          "name": "crud-authenticated-policy-update",
+          "as": "PERMISSIVE",
+          "for": "UPDATE",
+          "to": [
+            "authenticated"
+          ],
+          "using": "(select auth.user_id() = \"bin_sets\".\"user_id\")",
+          "withCheck": "(select auth.user_id() = \"bin_sets\".\"user_id\")"
+        },
+        "crud-authenticated-policy-delete": {
+          "name": "crud-authenticated-policy-delete",
+          "as": "PERMISSIVE",
+          "for": "DELETE",
+          "to": [
+            "authenticated"
+          ],
+          "using": "(select auth.user_id() = \"bin_sets\".\"user_id\")"
+        }
+      },
+      "checkConstraints": {},
+      "isRLSEnabled": true
+    },
+    "public.bins": {
+      "name": "bins",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "guid": {
+          "name": "guid",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "gen_random_uuid()"
+        },
+        "rules": {
+          "name": "rules",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "is_catch_all": {
+          "name": "is_catch_all",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        },
+        "bin_number": {
+          "name": "bin_number",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "bin_set": {
+          "name": "bin_set",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "user_id": {
+          "name": "user_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "auth.user_id()"
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "bins_bin_set_bin_sets_id_fk": {
+          "name": "bins_bin_set_bin_sets_id_fk",
+          "tableFrom": "bins",
+          "tableTo": "bin_sets",
+          "columnsFrom": [
+            "bin_set"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "bins_guid_idx": {
+          "name": "bins_guid_idx",
+          "nullsNotDistinct": false,
+          "columns": [
+            "guid"
+          ]
+        }
+      },
+      "policies": {
+        "crud-authenticated-policy-select": {
+          "name": "crud-authenticated-policy-select",
+          "as": "PERMISSIVE",
+          "for": "SELECT",
+          "to": [
+            "authenticated"
+          ],
+          "using": "(select auth.user_id() = \"bins\".\"user_id\")"
+        },
+        "crud-authenticated-policy-insert": {
+          "name": "crud-authenticated-policy-insert",
+          "as": "PERMISSIVE",
+          "for": "INSERT",
+          "to": [
+            "authenticated"
+          ],
+          "withCheck": "(select auth.user_id() = \"bins\".\"user_id\")"
+        },
+        "crud-authenticated-policy-update": {
+          "name": "crud-authenticated-policy-update",
+          "as": "PERMISSIVE",
+          "for": "UPDATE",
+          "to": [
+            "authenticated"
+          ],
+          "using": "(select auth.user_id() = \"bins\".\"user_id\")",
+          "withCheck": "(select auth.user_id() = \"bins\".\"user_id\")"
+        },
+        "crud-authenticated-policy-delete": {
+          "name": "crud-authenticated-policy-delete",
+          "as": "PERMISSIVE",
+          "for": "DELETE",
+          "to": [
+            "authenticated"
+          ],
+          "using": "(select auth.user_id() = \"bins\".\"user_id\")"
+        }
+      },
+      "checkConstraints": {},
+      "isRLSEnabled": true
+    },
+    "public.cards": {
+      "name": "cards",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "guid": {
+          "name": "guid",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "gen_random_uuid()"
+        },
+        "scryfall_id": {
+          "name": "scryfall_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "name": {
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "set_code": {
+          "name": "set_code",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "embedding": {
+          "name": "embedding",
+          "type": "vector(768)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "card_image_vectors_scryfall_face_idx": {
+          "name": "card_image_vectors_scryfall_face_idx",
+          "nullsNotDistinct": false,
+          "columns": [
+            "scryfall_id"
+          ]
+        }
+      },
+      "policies": {
+        "crud-authenticated-policy-select": {
+          "name": "crud-authenticated-policy-select",
+          "as": "PERMISSIVE",
+          "for": "SELECT",
+          "to": [
+            "authenticated"
+          ],
+          "using": "true"
+        },
+        "crud-authenticated-policy-insert": {
+          "name": "crud-authenticated-policy-insert",
+          "as": "PERMISSIVE",
+          "for": "INSERT",
+          "to": [
+            "authenticated"
+          ],
+          "withCheck": "false"
+        },
+        "crud-authenticated-policy-update": {
+          "name": "crud-authenticated-policy-update",
+          "as": "PERMISSIVE",
+          "for": "UPDATE",
+          "to": [
+            "authenticated"
+          ],
+          "using": "false",
+          "withCheck": "false"
+        },
+        "crud-authenticated-policy-delete": {
+          "name": "crud-authenticated-policy-delete",
+          "as": "PERMISSIVE",
+          "for": "DELETE",
+          "to": [
+            "authenticated"
+          ],
+          "using": "false"
+        }
+      },
+      "checkConstraints": {},
+      "isRLSEnabled": true
+    },
+    "public.module_configs": {
+      "name": "module_configs",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "guid": {
+          "name": "guid",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "gen_random_uuid()"
+        },
+        "module_number": {
+          "name": "module_number",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "user_id": {
+          "name": "user_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "auth.user_id()"
+        },
+        "bottom_closed": {
+          "name": "bottom_closed",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 102
+        },
+        "bottom_open": {
+          "name": "bottom_open",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 307
+        },
+        "paddle_left": {
+          "name": "paddle_left",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 102
+        },
+        "paddle_neutral": {
+          "name": "paddle_neutral",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 307
+        },
+        "paddle_right": {
+          "name": "paddle_right",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 512
+        },
+        "pusher_left": {
+          "name": "pusher_left",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 102
+        },
+        "pusher_neutral": {
+          "name": "pusher_neutral",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 307
+        },
+        "pusher_right": {
+          "name": "pusher_right",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 512
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "module_configs_user_module_idx": {
+          "name": "module_configs_user_module_idx",
+          "nullsNotDistinct": false,
+          "columns": [
+            "user_id",
+            "module_number"
+          ]
+        }
+      },
+      "policies": {
+        "crud-authenticated-policy-select": {
+          "name": "crud-authenticated-policy-select",
+          "as": "PERMISSIVE",
+          "for": "SELECT",
+          "to": [
+            "authenticated"
+          ],
+          "using": "(select auth.user_id() = \"module_configs\".\"user_id\")"
+        },
+        "crud-authenticated-policy-insert": {
+          "name": "crud-authenticated-policy-insert",
+          "as": "PERMISSIVE",
+          "for": "INSERT",
+          "to": [
+            "authenticated"
+          ],
+          "withCheck": "(select auth.user_id() = \"module_configs\".\"user_id\")"
+        },
+        "crud-authenticated-policy-update": {
+          "name": "crud-authenticated-policy-update",
+          "as": "PERMISSIVE",
+          "for": "UPDATE",
+          "to": [
+            "authenticated"
+          ],
+          "using": "(select auth.user_id() = \"module_configs\".\"user_id\")",
+          "withCheck": "(select auth.user_id() = \"module_configs\".\"user_id\")"
+        },
+        "crud-authenticated-policy-delete": {
+          "name": "crud-authenticated-policy-delete",
+          "as": "PERMISSIVE",
+          "for": "DELETE",
+          "to": [
+            "authenticated"
+          ],
+          "using": "(select auth.user_id() = \"module_configs\".\"user_id\")"
+        }
+      },
+      "checkConstraints": {},
+      "isRLSEnabled": true
+    }
+  },
+  "enums": {},
+  "schemas": {},
+  "sequences": {},
+  "roles": {},
+  "policies": {},
+  "views": {},
+  "_meta": {
+    "columns": {},
+    "schemas": {},
+    "tables": {}
+  }
+}

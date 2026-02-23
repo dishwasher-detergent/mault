@@ -18,6 +18,7 @@ interface SerialContextValue {
   disconnect: () => Promise<void>;
   sendBin: (binNumber: number) => Promise<unknown | null>;
   sendTest: () => Promise<boolean>;
+  sendCommand: (data: string) => Promise<boolean>;
   subscribe: (listener: SerialMessageListener) => () => void;
 }
 
@@ -29,6 +30,7 @@ export function SerialProvider({ children }: { children: React.ReactNode }) {
   const portRef = useRef<SerialPort | null>(null);
   const readerRef = useRef<ReadableStreamDefaultReader<Uint8Array> | null>(null);
   const writableRef = useRef<WritableStream<Uint8Array> | null>(null);
+  const writeQueueRef = useRef<Promise<void>>(Promise.resolve());
   const bufferRef = useRef("");
   const pendingRef = useRef<Array<(line: string) => void>>([]);
   const listenersRef = useRef(new Set<SerialMessageListener>());
@@ -94,19 +96,23 @@ export function SerialProvider({ children }: { children: React.ReactNode }) {
     });
   }, []);
 
-  const sendCommand = useCallback(async (data: string): Promise<boolean> => {
-    if (!portRef.current || !writableRef.current) return false;
+  const sendCommand = useCallback((data: string): Promise<boolean> => {
+    if (!portRef.current || !writableRef.current) return Promise.resolve(false);
 
-    const encoder = new TextEncoder();
-    const writer = writableRef.current.getWriter();
-    try {
-      await writer.write(encoder.encode(data));
-      return true;
-    } catch {
-      return false;
-    } finally {
-      writer.releaseLock();
-    }
+    return new Promise<boolean>((resolve) => {
+      writeQueueRef.current = writeQueueRef.current.then(async () => {
+        if (!writableRef.current) { resolve(false); return; }
+        const writer = writableRef.current.getWriter();
+        try {
+          await writer.write(new TextEncoder().encode(data));
+          resolve(true);
+        } catch {
+          resolve(false);
+        } finally {
+          writer.releaseLock();
+        }
+      });
+    });
   }, []);
 
   const sendTest = useCallback(async (): Promise<boolean> => {
@@ -181,6 +187,7 @@ export function SerialProvider({ children }: { children: React.ReactNode }) {
     portRef.current = null;
     readerRef.current = null;
     writableRef.current = null;
+    writeQueueRef.current = Promise.resolve();
     setIsConnected(false);
     setIsReady(false);
 
@@ -266,6 +273,10 @@ export function SerialProvider({ children }: { children: React.ReactNode }) {
         disconnect,
         sendBin,
         sendTest,
+        sendCommand: useCallback(
+          async (data: string) => sendCommand(data + "\n"),
+          [sendCommand],
+        ),
         subscribe,
       }}
     >

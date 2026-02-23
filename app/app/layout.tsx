@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Toaster } from "@/components/ui/sonner";
 import { BinConfigsProvider } from "@/hooks/use-bin-configs";
+import { ModuleConfigsProvider } from "@/hooks/use-module-configs";
 import { ScannedCardsProvider } from "@/hooks/use-scanned-cards";
 import { SerialProvider } from "@/hooks/use-serial";
 import { UserButton } from "@neondatabase/auth/react";
@@ -14,6 +15,7 @@ export default function AppLayout({
   return (
     <SerialProvider>
       <BinConfigsProvider>
+        <ModuleConfigsProvider>
         <ScannedCardsProvider>
           <div className="h-dvh w-dvw overflow-hidden flex flex-col">
             <nav className="h-12 flex-none w-full p-1 px-4 border border-b bg-background/50 backdrop-blur-sm flex flex-row justify-between items-center">
@@ -31,6 +33,11 @@ export default function AppLayout({
                   nativeButton={false}
                   render={<Link href="/app/sort">Sort Bins</Link>}
                 />
+                <Button
+                  variant="ghost"
+                  nativeButton={false}
+                  render={<Link href="/app/admin">Admin</Link>}
+                />
                 <UserButton size="icon" />
               </div>
             </nav>
@@ -40,6 +47,7 @@ export default function AppLayout({
             <Toaster />
           </div>
         </ScannedCardsProvider>
+        </ModuleConfigsProvider>
       </BinConfigsProvider>
     </SerialProvider>
   );

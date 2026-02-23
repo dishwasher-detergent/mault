@@ -98,6 +98,38 @@ export const bins = pgTable(
   ],
 ).enableRLS();
 
+export const moduleConfigs = pgTable(
+  "module_configs",
+  {
+    id: serial().primaryKey(),
+    guid: uuid("guid").defaultRandom(),
+    moduleNumber: integer("module_number").notNull(),
+    userId: text("user_id")
+      .notNull()
+      .default(sql`auth.user_id()`),
+    // Bottom paddle
+    bottomClosed: integer("bottom_closed").notNull().default(102),
+    bottomOpen: integer("bottom_open").notNull().default(307),
+    // Paddle
+    paddleClosed: integer("paddle_closed").notNull().default(150),
+    paddleOpen: integer("paddle_open").notNull().default(307),
+    // Pusher
+    pusherLeft: integer("pusher_left").notNull().default(150),
+    pusherNeutral: integer("pusher_neutral").notNull().default(307),
+    pusherRight: integer("pusher_right").notNull().default(460),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+    updatedAt: timestamp("updated_at").defaultNow().notNull(),
+  },
+  (table) => [
+    unique("module_configs_user_module_idx").on(table.userId, table.moduleNumber),
+    crudPolicy({
+      role: authenticatedRole,
+      read: authUid(table.userId),
+      modify: authUid(table.userId),
+    }),
+  ],
+).enableRLS();
+
 export const binSetRelations = relations(binSets, ({ many }) => ({
   bins: many(bins),
 }));

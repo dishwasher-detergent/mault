@@ -4,194 +4,123 @@
 
 Adafruit_PWMServoDriver pwm = Adafruit_PWMServoDriver();
 
-struct RouteStep {
-  int module;         // 1-based module number
-  const char* action; // "LEFT", "RIGHT", or "DOWN"
-};
-
-struct BinRoute {
-  RouteStep steps[3];
-  int stepCount;
-};
-
-// Pulse length constants for 9g micro servos at 50 Hz
-// Safe range: ~10° to ~170° to avoid stalling at mechanical limits
-// 102 = 0°, 307 = 90°, 512 = 180°
-#define SERVO_MIN 125     // ~10°
-#define SERVO_MAX 489     // ~170°
-
-// Servo positions (pulse lengths)
-#define POS_NEUTRAL 307   // 90° center
-#define POS_LEFT    125   // ~10°
-#define POS_RIGHT   489   // ~170°
-#define POS_DOWN    125   // ~10° (gate open)
-
-// Each module has 3 servos on consecutive PWM channels:
-//   base+0 = LEFT servo
-//   base+1 = RIGHT servo
-//   base+2 = DOWN servo
+// 3 modules, each with 3 servos on consecutive PWM channels:
+//   base+0 = Bottom paddle  (closed = resting, open = pass-through)
+//   base+1 = Paddles         (left / neutral / right)
+//   base+2 = Pushers         (left / neutral / right)
 // Module 1: ch0-2, Module 2: ch3-5, Module 3: ch6-8
 #define NUM_MODULES 3
 #define SERVOS_PER_MODULE 3
 
-// Action offsets within a module
-#define ACTION_LEFT  0
-#define ACTION_RIGHT 1
-#define ACTION_DOWN  2
+#define SERVO_BOTTOM 0
+#define SERVO_PADDLE 1
+#define SERVO_PUSHER 2
 
-// IR sensor pins (one per module, analog)
-const int IR_PINS[NUM_MODULES] = { A0, A1, A2 };
-
-// IR sensor threshold — below this value means card is detected
-// Adjust based on your sensor; IR obstacle sensors typically read LOW when triggered
-#define IR_THRESHOLD 512
-
-// Max time (ms) to wait for a card to arrive at a module before reporting a jam
-#define IR_TIMEOUT_MS 3000
-
-// Polling interval (ms) when checking IR sensor
-#define IR_POLL_MS 10
-
-// Get the PWM channel for a given module (1-based) and action offset
-int getChannel(int module, int actionOffset) {
-  return (module - 1) * SERVOS_PER_MODULE + actionOffset;
-}
-
-// Get the action offset from a string
-int getActionOffset(const char* action) {
-  if (strcmp(action, "LEFT") == 0)  return ACTION_LEFT;
-  if (strcmp(action, "RIGHT") == 0) return ACTION_RIGHT;
-  if (strcmp(action, "DOWN") == 0)  return ACTION_DOWN;
-  return -1;
-}
-
-// Get the target pulse for an action offset
-int getActionPulse(int actionOffset) {
-  switch (actionOffset) {
-    case ACTION_LEFT:  return POS_LEFT;
-    case ACTION_RIGHT: return POS_RIGHT;
-    case ACTION_DOWN:  return POS_DOWN;
-    default:           return POS_NEUTRAL;
-  }
-}
-
-// Routes only need module + action; channel is computed at runtime
-const BinRoute BIN_ROUTES[7] = {
-  // Bin 1: M1 LEFT
-  { { {1, "LEFT"} }, 1 },
-  // Bin 2: M1 RIGHT
-  { { {1, "RIGHT"} }, 1 },
-  // Bin 3: M1 DOWN -> M2 LEFT
-  { { {1, "DOWN"}, {2, "LEFT"} }, 2 },
-  // Bin 4: M1 DOWN -> M2 RIGHT
-  { { {1, "DOWN"}, {2, "RIGHT"} }, 2 },
-  // Bin 5: M1 DOWN -> M2 DOWN -> M3 LEFT
-  { { {1, "DOWN"}, {2, "DOWN"}, {3, "LEFT"} }, 3 },
-  // Bin 6: M1 DOWN -> M2 DOWN -> M3 RIGHT
-  { { {1, "DOWN"}, {2, "DOWN"}, {3, "RIGHT"} }, 3 },
-  // Bin 7: M1 DOWN -> M2 DOWN -> M3 DOWN
-  { { {1, "DOWN"}, {2, "DOWN"}, {3, "DOWN"} }, 3 },
+// Per-module calibration — updated at runtime via setConfig command
+struct ModuleConfig {
+  int bottomClosed, bottomOpen;
+  int paddleClosed, paddleOpen;
+  int pusherLeft, pusherNeutral, pusherRight;
 };
+
+// Safe defaults — kept within 120-490 to avoid mechanical stall at hard limits
+ModuleConfig moduleConfig[NUM_MODULES] = {
+  {150, 307, 150, 307, 150, 307, 460},
+  {150, 307, 150, 307, 150, 307, 460},
+  {150, 307, 150, 307, 150, 307, 460},
+};
+
+// IR sensor pins (one per module)
+const int IR_PINS[NUM_MODULES] = { A0, A1, A2 };
+#define IR_THRESHOLD 512
+#define IR_TIMEOUT_MS 3000
+#define IR_POLL_MS 10
 
 String inputBuffer = "";
 
-// Check if the IR sensor for a module (1-based) detects a card
+// Get the PWM channel for a module (1-based) and servo offset
+int getChannel(int module, int servoOffset) {
+  return (module - 1) * SERVOS_PER_MODULE + servoOffset;
+}
+
+// Get servo offset from name
+int getServoOffset(const char* servo) {
+  if (strcmp(servo, "bottom") == 0) return SERVO_BOTTOM;
+  if (strcmp(servo, "paddle") == 0) return SERVO_PADDLE;
+  if (strcmp(servo, "pusher") == 0) return SERVO_PUSHER;
+  return -1;
+}
+
+// Get pulse for a named position using the per-module calibration
+int getPositionPulse(int module, int servoOffset, const char* position) {
+  ModuleConfig& c = moduleConfig[module - 1];
+  if (servoOffset == SERVO_BOTTOM) {
+    if (strcmp(position, "open") == 0)    return c.bottomOpen;
+    if (strcmp(position, "neutral") == 0) return c.bottomClosed;
+    if (strcmp(position, "closed") == 0)  return c.bottomClosed;
+  }
+  if (servoOffset == SERVO_PADDLE) {
+    if (strcmp(position, "open") == 0)    return c.paddleOpen;
+    if (strcmp(position, "neutral") == 0) return c.paddleClosed;
+    if (strcmp(position, "closed") == 0)  return c.paddleClosed;
+  }
+  if (servoOffset == SERVO_PUSHER) {
+    if (strcmp(position, "left") == 0)    return c.pusherLeft;
+    if (strcmp(position, "neutral") == 0) return c.pusherNeutral;
+    if (strcmp(position, "right") == 0)   return c.pusherRight;
+  }
+  return -1;
+}
+
+void setServoPosition(int channel, int pulse) {
+  pulse = constrain(pulse, 120, 490);
+  pwm.setPWM(channel, 0, pulse);
+}
+
+void setModuleNeutral(int module) {
+  ModuleConfig& c = moduleConfig[module - 1];
+  setServoPosition(getChannel(module, SERVO_BOTTOM), c.bottomClosed);
+  setServoPosition(getChannel(module, SERVO_PADDLE), c.paddleClosed);
+  setServoPosition(getChannel(module, SERVO_PUSHER), c.pusherNeutral);
+}
+
+void setAllNeutral() {
+  for (int m = 1; m <= NUM_MODULES; m++) {
+    setModuleNeutral(m);
+  }
+  delay(200);
+}
+
+
 bool isCardAtModule(int module) {
   int val = analogRead(IR_PINS[module - 1]);
   return val < IR_THRESHOLD;
 }
 
-// Wait for a card to arrive at a module. Returns true if detected, false on timeout.
 bool waitForCard(int module) {
   unsigned long start = millis();
   while (millis() - start < IR_TIMEOUT_MS) {
-    if (isCardAtModule(module)) {
-      return true;
-    }
+    if (isCardAtModule(module)) return true;
     delay(IR_POLL_MS);
   }
   return false;
 }
 
-// Wait for the card to leave a module (sensor clears). Returns true if cleared, false on timeout.
 bool waitForCardClear(int module) {
   unsigned long start = millis();
   while (millis() - start < IR_TIMEOUT_MS) {
-    if (!isCardAtModule(module)) {
-      return true;
-    }
+    if (!isCardAtModule(module)) return true;
     delay(IR_POLL_MS);
   }
   return false;
-}
-
-void setServoPosition(int channel, int pulse) {
-  pwm.setPWM(channel, 0, pulse);
-}
-
-void setAllNeutral() {
-  for (int m = 1; m <= NUM_MODULES; m++) {
-    for (int a = 0; a < SERVOS_PER_MODULE; a++) {
-      setServoPosition(getChannel(m, a), POS_NEUTRAL);
-    }
-  }
-  delay(200);
-}
-
-void runTestSweep() {
-  for (int m = 1; m <= NUM_MODULES; m++) {
-    for (int a = 0; a < SERVOS_PER_MODULE; a++) {
-      int ch = getChannel(m, a);
-      int activePos = getActionPulse(a);
-
-      setServoPosition(ch, activePos);
-      delay(300);
-      setServoPosition(ch, POS_NEUTRAL);
-      delay(200);
-    }
-  }
-}
-
-// Execute a route with IR sensor confirmation between modules.
-// Returns 0 on success, or the module number where the jam occurred.
-int executeRoute(const BinRoute& route) {
-  int prevModule = 0;
-  for (int i = 0; i < route.stepCount; i++) {
-    int module = route.steps[i].module;
-    int actionOffset = getActionOffset(route.steps[i].action);
-    int channel = getChannel(module, actionOffset);
-    int pulse = getActionPulse(actionOffset);
-
-    // If moving to a new module, wait for the card to arrive via IR sensor
-    if (prevModule != 0 && module != prevModule) {
-      if (!waitForCard(module)) {
-        // Card didn't arrive — jam detected
-        setAllNeutral();
-        return module;
-      }
-    }
-
-    setServoPosition(channel, pulse);
-    delay(200); // servo movement time
-
-    prevModule = module;
-  }
-
-  // Wait for card to clear the final module
-  int lastModule = route.steps[route.stepCount - 1].module;
-  waitForCardClear(lastModule);
-
-  setAllNeutral();
-  return 0;
 }
 
 void setup() {
   Serial.begin(9600);
   while (!Serial) {
-    ; // Wait for serial port to connect (needed for native USB)
+    ;
   }
 
-  // Set up IR sensor pins
   for (int i = 0; i < NUM_MODULES; i++) {
     pinMode(IR_PINS[i], INPUT);
   }
@@ -214,7 +143,6 @@ void loop() {
       }
     } else {
       inputBuffer += c;
-      // Guard against buffer overflow
       if (inputBuffer.length() > 256) {
         inputBuffer = "";
       }
@@ -231,15 +159,94 @@ void handleCommand(const String& json) {
     return;
   }
 
-  // Handle test command
+  // Handle test command — move all servos to neutral to confirm connection
   if (doc["test"].is<bool>() && doc["test"].as<bool>()) {
-    runTestSweep();
+    setAllNeutral();
     Serial.println("{\"status\":\"test_complete\"}");
     return;
   }
 
+  // Handle neutral command — reset all servos
+  if (doc["neutral"].is<bool>() && doc["neutral"].as<bool>()) {
+    setAllNeutral();
+    Serial.println("{\"status\":\"ok\"}");
+    return;
+  }
+
+  // Handle setConfig command — store per-module calibration
+  // {"setConfig": {"module": 1, "bottomClosed": 102, "bottomOpen": 307, ...}}
+  if (!doc["setConfig"].isNull()) {
+    JsonObject cfg = doc["setConfig"];
+    int module = cfg["module"] | 0;
+
+    if (module < 1 || module > NUM_MODULES) {
+      Serial.println("{\"error\":\"module must be 1-3\"}");
+      return;
+    }
+
+    ModuleConfig& c = moduleConfig[module - 1];
+    c.bottomClosed  = cfg["bottomClosed"]  | c.bottomClosed;
+    c.bottomOpen    = cfg["bottomOpen"]    | c.bottomOpen;
+    c.paddleClosed  = cfg["paddleClosed"]  | c.paddleClosed;
+    c.paddleOpen    = cfg["paddleOpen"]    | c.paddleOpen;
+    c.pusherLeft    = cfg["pusherLeft"]    | c.pusherLeft;
+    c.pusherNeutral = cfg["pusherNeutral"] | c.pusherNeutral;
+    c.pusherRight   = cfg["pusherRight"]   | c.pusherRight;
+
+    JsonDocument response;
+    response["status"] = "ok";
+    response["module"] = module;
+    serializeJson(response, Serial);
+    Serial.println();
+    return;
+  }
+
+  // Handle servo command — move a single servo by position name or raw PWM value
+  // {"servo": "paddle", "module": 1, "position": "left"}
+  // {"servo": "bottom", "module": 1, "value": 220}   ← raw value for calibration preview
+  if (!doc["servo"].isNull()) {
+    const char* servo = doc["servo"];
+    int module = doc["module"] | 0;
+
+    if (module < 1 || module > NUM_MODULES) {
+      Serial.println("{\"error\":\"module must be 1-3\"}");
+      return;
+    }
+
+    int servoOffset = getServoOffset(servo);
+    if (servoOffset < 0) {
+      Serial.println("{\"error\":\"servo must be bottom, paddle, or pusher\"}");
+      return;
+    }
+
+    int pulse;
+    if (doc["value"].is<int>()) {
+      pulse = doc["value"].as<int>();
+    } else {
+      const char* position = doc["position"] | "neutral";
+      pulse = getPositionPulse(module, servoOffset, position);
+      if (pulse < 0) {
+        Serial.println("{\"error\":\"invalid position\"}");
+        return;
+      }
+    }
+
+    int channel = getChannel(module, servoOffset);
+    setServoPosition(channel, pulse);
+    delay(200);
+
+    JsonDocument response;
+    response["status"] = "ok";
+    response["servo"] = servo;
+    response["module"] = module;
+    serializeJson(response, Serial);
+    Serial.println();
+    return;
+  }
+
+  // Handle bin command
   if (!doc["bin"].is<int>()) {
-    Serial.println("{\"error\":\"missing bin number\"}");
+    Serial.println("{\"error\":\"unknown command\"}");
     return;
   }
 
@@ -250,35 +257,6 @@ void handleCommand(const String& json) {
     return;
   }
 
-  const BinRoute& route = BIN_ROUTES[bin - 1];
-
-  // Execute the physical servo movements
-  int jamModule = executeRoute(route);
-
-  if (jamModule != 0) {
-    // Card jam — report to web app
-    JsonDocument response;
-    response["error"] = "jam";
-    response["bin"] = bin;
-    response["module"] = jamModule;
-    serializeJson(response, Serial);
-    Serial.println();
-    return;
-  }
-
-  // Build success response JSON
-  JsonDocument response;
-  response["bin"] = bin;
-  JsonArray routeArray = response["route"].to<JsonArray>();
-
-  for (int i = 0; i < route.stepCount; i++) {
-    int actionOffset = getActionOffset(route.steps[i].action);
-    JsonObject step = routeArray.add<JsonObject>();
-    step["module"] = route.steps[i].module;
-    step["action"] = route.steps[i].action;
-    step["channel"] = getChannel(route.steps[i].module, actionOffset);
-  }
-
-  serializeJson(response, Serial);
-  Serial.println();
+  // TODO: bin routing for new servo setup
+  Serial.println("{\"error\":\"bin routing not yet configured\"}");
 }
