@@ -20,6 +20,7 @@
     "@neondatabase/auth": "0.2.0-beta.1",
     "@neondatabase/serverless": "^1.0.2",
     "@tabler/icons-react": "^3.36.1",
+    "@techstark/opencv-js": "4.12.0-release.1",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "drizzle-orm": "^0.45.1",

@@ -5,20 +5,37 @@ import { useModuleConfigs } from "@/hooks/use-module-configs";
 import { useSerial } from "@/hooks/use-serial";
 import { ServoCalibration } from "@/interfaces/module-configs.interface";
 import { cn } from "@/lib/utils";
+import { IconRotateClockwise } from "@tabler/icons-react";
 import { useCallback, useRef, useState } from "react";
 
 interface ServoConfig {
   name: string;
   label: string;
   positions: string[];
+  defaultPosition: string;
 }
 
 const MODULES = [1, 2, 3] as const;
 
 const SERVOS: ServoConfig[] = [
-  { name: "bottom", label: "Bottom Paddle", positions: ["open"] },
-  { name: "paddle", label: "Paddles", positions: ["open"] },
-  { name: "pusher", label: "Pushers", positions: ["left", "right"] },
+  {
+    name: "bottom",
+    label: "Bottom Paddle",
+    positions: ["open"],
+    defaultPosition: "open",
+  },
+  {
+    name: "paddle",
+    label: "Paddles",
+    positions: ["open"],
+    defaultPosition: "open",
+  },
+  {
+    name: "pusher",
+    label: "Pushers",
+    positions: ["left", "right"],
+    defaultPosition: "neutral",
+  },
 ];
 
 type ActivePositions = Record<string, string | null>;
@@ -72,11 +89,14 @@ function defaultSliderValues(): Record<SliderKey, number> {
 export default function AdminPage() {
   const { isConnected, connect, disconnect, sendCommand } = useSerial();
   const { configs, saveConfig, moveServo } = useModuleConfigs();
-  const [activeTab, setActiveTab] = useState<"control" | "calibrate">("control");
+  const [activeTab, setActiveTab] = useState<"control" | "calibrate">(
+    "control",
+  );
   const [active, setActive] = useState<ActivePositions>({});
   const activeRef = useRef(active);
   activeRef.current = active;
-  const [sliderValues, setSliderValues] = useState<Record<SliderKey, number>>(defaultSliderValues);
+  const [sliderValues, setSliderValues] =
+    useState<Record<SliderKey, number>>(defaultSliderValues);
 
   const handleServo = useCallback(
     (module: number, servo: string, position: string) => {
@@ -94,19 +114,34 @@ export default function AdminPage() {
     [sendCommand],
   );
 
-  const handleResetAll = useCallback(() => {
-    sendCommand(JSON.stringify({ neutral: true }));
-    setActive({});
-    setSliderValues(defaultSliderValues());
-  }, [sendCommand]);
+  const handleResetServo = useCallback(
+    (module: number, servo: ServoConfig) => {
+      sendCommand(
+        JSON.stringify({
+          servo: servo.name,
+          module,
+          position: servo.defaultPosition,
+        }),
+      );
+      setActive((prev) => ({ ...prev, [`${module}:${servo.name}`]: null }));
+    },
+    [sendCommand],
+  );
 
   const servoDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const handleSliderChange = useCallback(
-    (module: 1 | 2 | 3, servo: "bottom" | "paddle" | "pusher", value: number) => {
+    (
+      module: 1 | 2 | 3,
+      servo: "bottom" | "paddle" | "pusher",
+      value: number,
+    ) => {
       setSliderValues((prev) => ({ ...prev, [`${module}:${servo}`]: value }));
       if (servoDebounceRef.current) clearTimeout(servoDebounceRef.current);
-      servoDebounceRef.current = setTimeout(() => moveServo(module, servo, value), 30);
+      servoDebounceRef.current = setTimeout(
+        () => moveServo(module, servo, value),
+        30,
+      );
     },
     [moveServo],
   );
@@ -166,7 +201,9 @@ export default function AdminPage() {
                 <h2 className="text-sm font-bold">Module {module}</h2>
                 {SERVOS.map((servo) => (
                   <div key={servo.name} className="flex flex-col gap-1.5">
-                    <p className="text-xs text-muted-foreground">{servo.label}</p>
+                    <p className="text-xs text-muted-foreground">
+                      {servo.label}
+                    </p>
                     <div className="flex gap-2">
                       {servo.positions.map((position) => {
                         const key = `${module}:${servo.name}`;
@@ -177,7 +214,9 @@ export default function AdminPage() {
                             variant={isActive ? "default" : "outline"}
                             size="lg"
                             disabled={!isConnected}
-                            onClick={() => handleServo(module, servo.name, position)}
+                            onClick={() =>
+                              handleServo(module, servo.name, position)
+                            }
                             className="flex-1"
                           >
                             {position.toUpperCase()}
@@ -190,88 +229,97 @@ export default function AdminPage() {
               </div>
             ))}
           </div>
-
-          <Button
-            variant="secondary"
-            size="lg"
-            disabled={!isConnected}
-            onClick={handleResetAll}
-            className="w-full"
-          >
-            Reset All
-          </Button>
         </>
       )}
 
       {activeTab === "calibrate" && (
         <>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {MODULES.map((module) => {
-            const config = configs.find((c) => c.moduleNumber === module);
-            const cal = config?.calibration;
-            return (
-              <div key={module} className="rounded-lg border p-4 flex flex-col gap-5">
-                <h2 className="text-sm font-bold">Module {module}</h2>
-                {CALIBRATE_SERVOS.map((servo) => {
-                  const sliderKey = `${module}:${servo.name}` as SliderKey;
-                  const sliderValue = sliderValues[sliderKey] ?? 307;
-                  return (
-                    <div key={servo.name} className="flex flex-col gap-2">
-                      <p className="text-xs text-muted-foreground">{servo.label}</p>
-                      <div className="flex items-center gap-2">
-                        <input
-                          type="range"
-                          min={120}
-                          max={490}
-                          step={1}
-                          value={sliderValue}
-                          disabled={!isConnected}
-                          onChange={(e) =>
-                            handleSliderChange(module, servo.name, parseInt(e.target.value))
-                          }
-                          className="flex-1 accent-foreground"
-                        />
-                        <span className="text-xs tabular-nums w-8 text-right">{sliderValue}</span>
-                      </div>
-                      <div className="flex flex-wrap gap-1.5">
-                        {servo.positions.map((pos) => (
-                          <Button
-                            key={pos.key}
-                            size="sm"
-                            variant="outline"
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {MODULES.map((module) => {
+              const config = configs.find((c) => c.moduleNumber === module);
+              const cal = config?.calibration;
+              return (
+                <div
+                  key={module}
+                  className="rounded-lg border p-4 flex flex-col gap-5"
+                >
+                  <h2 className="text-sm font-bold">Module {module}</h2>
+                  {CALIBRATE_SERVOS.map((servo) => {
+                    const sliderKey = `${module}:${servo.name}` as SliderKey;
+                    const sliderValue = sliderValues[sliderKey] ?? 307;
+                    const servoDefault = SERVOS.find(
+                      (s) => s.name === servo.name,
+                    )!;
+                    return (
+                      <div key={servo.name} className="flex flex-col gap-2">
+                        <div className="flex items-center justify-between">
+                          <p className="text-xs text-muted-foreground">
+                            {servo.label}
+                          </p>
+                          <button
                             disabled={!isConnected}
-                            onClick={() => handleSetPosition(module, pos.key, sliderValue)}
+                            onClick={() =>
+                              handleResetServo(module, servoDefault)
+                            }
+                            className="text-muted-foreground hover:text-foreground disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                            title={`Reset to ${servoDefault.defaultPosition}`}
                           >
-                            {pos.label}
-                          </Button>
-                        ))}
-                      </div>
-                      {cal && (
-                        <p className="text-xs text-muted-foreground">
-                          {servo.positions.map((pos, i) => (
-                            <span key={pos.key}>
-                              {i > 0 && "  ·  "}
-                              {pos.label.replace("Set ", "")}={cal[pos.key]}
-                            </span>
+                            <IconRotateClockwise size={12} />
+                          </button>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <input
+                            type="range"
+                            min={120}
+                            max={490}
+                            step={1}
+                            value={sliderValue}
+                            disabled={!isConnected}
+                            onChange={(e) =>
+                              handleSliderChange(
+                                module,
+                                servo.name,
+                                parseInt(e.target.value),
+                              )
+                            }
+                            className="flex-1 accent-foreground"
+                          />
+                          <span className="text-xs tabular-nums w-8 text-right">
+                            {sliderValue}
+                          </span>
+                        </div>
+                        <div className="flex flex-wrap gap-1.5">
+                          {servo.positions.map((pos) => (
+                            <Button
+                              key={pos.key}
+                              size="sm"
+                              variant="outline"
+                              disabled={!isConnected}
+                              onClick={() =>
+                                handleSetPosition(module, pos.key, sliderValue)
+                              }
+                            >
+                              {pos.label}
+                            </Button>
                           ))}
-                        </p>
-                      )}
-                    </div>
-                  );
-                })}
-              </div>
-            );
-          })}
-        </div>
-        <Button
-          variant="secondary"
-          size="lg"
-          disabled={!isConnected}
-          onClick={handleResetAll}
-          className="w-full"
-        >
-          Reset All to Neutral
-        </Button>
+                        </div>
+                        {cal && (
+                          <p className="text-xs text-muted-foreground">
+                            {servo.positions.map((pos, i) => (
+                              <span key={pos.key}>
+                                {i > 0 && "  ·  "}
+                                {pos.label.replace("Set ", "")}={cal[pos.key]}
+                              </span>
+                            ))}
+                          </p>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              );
+            })}
+          </div>
         </>
       )}
     </div>

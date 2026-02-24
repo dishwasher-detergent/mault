@@ -3,6 +3,7 @@ import type {
 	DetectionResult,
 	Point,
 } from "@/interfaces/scanner.interface";
+import { getCv } from "@/lib/opencv-loader";
 
 const MTG_ASPECT_RATIO = 2.5 / 3.5; // ~0.714
 
@@ -66,6 +67,8 @@ function scoreContour(contour: CardContour, frameArea: number): number {
  * Detect an MTG card in an ImageData frame using OpenCV.js contour detection.
  */
 export function detectCard(imageData: ImageData): DetectionResult {
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+	const cv: any = getCv();
 	const noDetection: DetectionResult = {
 		detected: false,
 		contour: null,
@@ -83,7 +86,8 @@ export function detectCard(imageData: ImageData): DetectionResult {
 	const dilated = new cv.Mat();
 	const hierarchy = new cv.Mat();
 	const contours = new cv.MatVector();
-	let kernel: cv.Mat | null = null;
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+	let kernel: any = null;
 
 	try {
 		// Grayscale
@@ -169,6 +173,8 @@ export function extractCardImage(
 	contour: CardContour,
 	outputWidth = 745,
 ): HTMLCanvasElement {
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+	const cv: any = getCv();
 	const outputHeight = Math.round(outputWidth / MTG_ASPECT_RATIO);
 
 	const ctx = sourceCanvas.getContext("2d");
@@ -207,9 +213,11 @@ export function extractCardImage(
 		outputHeight,
 	]);
 
-	let transformMatrix: cv.Mat | null = null;
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+	let transformMatrix: any = null;
 
-	let enhanced: cv.Mat | null = null;
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+	let enhanced: any = null;
 
 	try {
 		transformMatrix = cv.getPerspectiveTransform(srcPts, dstPts);

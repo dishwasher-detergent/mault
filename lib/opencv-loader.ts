@@ -1,9 +1,16 @@
-const OPENCV_CDN_URL = "https://docs.opencv.org/4.10.0/opencv.js";
-
+/* eslint-disable @typescript-eslint/no-explicit-any */
+let cvInstance: any = null;
 let loadPromise: Promise<void> | null = null;
 
 export function isOpenCvReady(): boolean {
-	return typeof window !== "undefined" && !!window.cv?.Mat;
+	return cvInstance !== null;
+}
+
+export function getCv(): any {
+	if (!cvInstance) {
+		throw new Error("OpenCV not initialized. Call loadOpenCv() first.");
+	}
+	return cvInstance;
 }
 
 export function loadOpenCv(): Promise<void> {
@@ -21,26 +28,23 @@ export function loadOpenCv(): Promise<void> {
 		return loadPromise;
 	}
 
-	loadPromise = new Promise<void>((resolve, reject) => {
-		const script = document.createElement("script");
-		script.src = OPENCV_CDN_URL;
-		script.async = true;
-
-		script.onload = () => {
-			// OpenCV.js sets cv as a module factory — wait for it to initialize
-			const waitForCv = () => {
-				if (isOpenCvReady()) {
+	loadPromise = import("@techstark/opencv-js")
+		.then(({ default: cv }) => {
+			return new Promise<void>((resolve, reject) => {
+				if (cv.Mat) {
+					// WASM already initialized
+					cvInstance = cv;
 					resolve();
-				} else if (
-					window.cv &&
-					typeof window.cv === "object" &&
-					"onRuntimeInitialized" in window.cv
-				) {
+					return;
+				}
+
+				if (typeof cv === "object" && "onRuntimeInitialized" in cv) {
 					// WASM runtime not yet initialized
-					const originalCallback = (window.cv as Record<string, unknown>)
+					const originalCallback = (cv as Record<string, unknown>)
 						.onRuntimeInitialized as (() => void) | undefined;
-					(window.cv as Record<string, unknown>).onRuntimeInitialized = () => {
+					(cv as Record<string, unknown>).onRuntimeInitialized = () => {
 						originalCallback?.();
+						cvInstance = cv;
 						resolve();
 					};
 				} else {
@@ -48,8 +52,9 @@ export function loadOpenCv(): Promise<void> {
 					let attempts = 0;
 					const poll = setInterval(() => {
 						attempts++;
-						if (isOpenCvReady()) {
+						if (cv.Mat) {
 							clearInterval(poll);
+							cvInstance = cv;
 							resolve();
 						} else if (attempts > 100) {
 							clearInterval(poll);
@@ -57,17 +62,12 @@ export function loadOpenCv(): Promise<void> {
 						}
 					}, 100);
 				}
-			};
-			waitForCv();
-		};
-
-		script.onerror = () => {
+			});
+		})
+		.catch((err: unknown) => {
 			loadPromise = null;
-			reject(new Error("Failed to load OpenCV.js from CDN"));
-		};
-
-		document.head.appendChild(script);
-	});
+			throw err;
+		});
 
 	return loadPromise;
 }
