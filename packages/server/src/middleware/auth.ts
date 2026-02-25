@@ -1,36 +1,28 @@
-import type { Request, Response, NextFunction } from "express";
-import { auth } from "../auth";
-import { fromNodeHeaders } from "better-auth/node";
+import * as jose from "jose";
+import { createMiddleware } from "hono/factory";
 
-export interface AuthenticatedRequest extends Request {
-  jwtClaims?: string;
-  userId?: string;
-}
+export type AppVariables = { jwtClaims: string; userId: string };
+export type AppEnv = { Variables: AppVariables };
 
-export async function requireAuth(
-  req: AuthenticatedRequest,
-  res: Response,
-  next: NextFunction,
-): Promise<void> {
-  try {
-    const session = await auth.api.getSession({
-      headers: fromNodeHeaders(req.headers),
-    });
-    if (!session?.user) {
-      res.status(401).json({ success: false, message: "Unauthorized" });
-      return;
-    }
+const JWKS = jose.createRemoteJWKSet(
+  new URL(`${process.env.NEON_AUTH_URL}/.well-known/jwks.json`),
+);
 
-    // Build JWT claims payload compatible with Neon RLS (uses sub claim for auth.user_id())
-    const claims = {
-      sub: session.user.id,
-      email: session.user.email,
-      role: "authenticated",
-    };
-    req.jwtClaims = JSON.stringify(claims);
-    req.userId = session.user.id;
-    next();
-  } catch {
-    res.status(401).json({ success: false, message: "Unauthorized" });
+export const requireAuth = createMiddleware<AppEnv>(async (c, next) => {
+  const authHeader = c.req.header("Authorization");
+  if (!authHeader?.startsWith("Bearer ")) {
+    return c.json({ success: false, message: "Unauthorized" }, 401);
   }
-}
+  const token = authHeader.slice(7);
+  try {
+    const { payload } = await jose.jwtVerify(token, JWKS, {
+      issuer: new URL(process.env.NEON_AUTH_URL!).origin,
+    });
+    if (!payload.sub) return c.json({ success: false, message: "Unauthorized" }, 401);
+    c.set("jwtClaims", JSON.stringify({ sub: payload.sub, role: "authenticated" }));
+    c.set("userId", payload.sub);
+    await next();
+  } catch {
+    return c.json({ success: false, message: "Unauthorized" }, 401);
+  }
+});

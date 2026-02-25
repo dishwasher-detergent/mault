@@ -1,13 +1,18 @@
-import { type CardContour, type CardScannerProps, type DetectionResult, type ScannerStatus, type ScryfallCardWithDistance } from "@magic-vault/shared";
+import { Search } from "@/lib/api-card";
+import { SearchById } from "@/lib/api-scryfall";
 import {
   canvasToBlob,
   detectCard,
   drawDetectionOverlay,
   extractCardImage,
 } from "@/lib/card-detection";
-import { Search } from "@/lib/api-card";
-import { loadOpenCv } from "@/lib/opencv-loader";
-import { SearchById } from "@/lib/api-scryfall";
+import {
+  type CardContour,
+  type CardScannerProps,
+  type DetectionResult,
+  type ScannerStatus,
+  type ScryfallCardWithDistance,
+} from "@magic-vault/shared";
 import { useCallback, useEffect, useRef, useState } from "react";
 
 const STABILITY_FRAMES = 5;
@@ -354,7 +359,6 @@ export function useCardScanner({
 
   const initScanner = useCallback(async () => {
     updateStatus("initializing");
-    await loadOpenCv();
     await startCamera();
     rafRef.current = requestAnimationFrame(detectionLoop);
   }, [startCamera, detectionLoop, updateStatus]);

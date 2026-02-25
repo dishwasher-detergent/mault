@@ -1,13 +1,12 @@
-import type { Response } from "express";
-import { Router } from "express";
+import { Hono } from "hono";
 import { authQuery } from "../db";
 import { bins, binSets } from "../db/schema";
 import { BIN_COUNT, type BinConfig, type BinRuleGroup, type BinSet } from "@magic-vault/shared";
 import { eq } from "drizzle-orm";
-import { requireAuth, type AuthenticatedRequest } from "../middleware/auth";
+import { requireAuth, type AppEnv } from "../middleware/auth";
 import type { Transaction } from "../db";
 
-const router = Router();
+const router = new Hono<AppEnv>();
 
 function emptyRules(): BinRuleGroup {
   return {
@@ -73,21 +72,21 @@ async function _loadSets(tx: Transaction) {
 }
 
 // GET /api/sort-bins
-router.get("/", requireAuth, async (req: AuthenticatedRequest, res: Response) => {
+router.get("/", requireAuth, async (c) => {
   try {
-    const result = await authQuery(req.jwtClaims!, _loadSets);
-    res.json(result);
+    const result = await authQuery(c.get("jwtClaims"), _loadSets);
+    return c.json(result);
   } catch (err) {
     console.error(err);
-    res.status(500).json({ success: false, message: "Database error." });
+    return c.json({ success: false, message: "Database error." }, 500);
   }
 });
 
 // POST /api/sort-bins/activate/:guid
-router.post("/activate/:guid", requireAuth, async (req: AuthenticatedRequest, res: Response) => {
-  const { guid } = req.params;
+router.post("/activate/:guid", requireAuth, async (c) => {
+  const guid = c.req.param("guid");
   try {
-    const result = await authQuery(req.jwtClaims!, async (tx) => {
+    const result = await authQuery(c.get("jwtClaims"), async (tx) => {
       const target = await tx.query.binSets.findFirst({
         where: (binSets, { eq }) => eq(binSets.guid, guid),
         columns: { id: true },
@@ -102,18 +101,18 @@ router.post("/activate/:guid", requireAuth, async (req: AuthenticatedRequest, re
 
       return _loadSets(tx);
     });
-    res.json(result);
+    return c.json(result);
   } catch (err) {
     console.error(err);
-    res.status(500).json({ success: false, message: "Database error." });
+    return c.json({ success: false, message: "Database error." }, 500);
   }
 });
 
 // POST /api/sort-bins/create
-router.post("/create", requireAuth, async (req: AuthenticatedRequest, res: Response) => {
-  const { name } = req.body as { name: string };
+router.post("/create", requireAuth, async (c) => {
+  const { name } = await c.req.json<{ name: string }>();
   try {
-    const result = await authQuery(req.jwtClaims!, async (tx) => {
+    const result = await authQuery(c.get("jwtClaims"), async (tx) => {
       const [newBinSet] = await tx
         .insert(binSets)
         .values({ name, isActive: false })
@@ -130,18 +129,18 @@ router.post("/create", requireAuth, async (req: AuthenticatedRequest, res: Respo
 
       return _loadSets(tx);
     });
-    res.json(result);
+    return c.json(result);
   } catch (err) {
     console.error(err);
-    res.status(500).json({ success: false, message: "Database error." });
+    return c.json({ success: false, message: "Database error." }, 500);
   }
 });
 
 // POST /api/sort-bins/save-as
-router.post("/save-as", requireAuth, async (req: AuthenticatedRequest, res: Response) => {
-  const { name } = req.body as { name: string };
+router.post("/save-as", requireAuth, async (c) => {
+  const { name } = await c.req.json<{ name: string }>();
   try {
-    const result = await authQuery(req.jwtClaims!, async (tx) => {
+    const result = await authQuery(c.get("jwtClaims"), async (tx) => {
       const active = await tx.query.binSets.findFirst({
         where: (binSets, { eq }) => eq(binSets.isActive, true),
         columns: { id: true },
@@ -172,46 +171,20 @@ router.post("/save-as", requireAuth, async (req: AuthenticatedRequest, res: Resp
 
       return _loadSets(tx);
     });
-    res.json(result);
+    return c.json(result);
   } catch (err) {
     console.error(err);
-    res.status(500).json({ success: false, message: "Database error." });
-  }
-});
-
-// DELETE /api/sort-bins/:guid
-router.delete("/:guid", requireAuth, async (req: AuthenticatedRequest, res: Response) => {
-  const { guid } = req.params;
-  try {
-    const result = await authQuery(req.jwtClaims!, async (tx) => {
-      const target = await tx.query.binSets.findFirst({
-        where: (binSets, { eq }) => eq(binSets.guid, guid),
-        columns: { id: true },
-      });
-
-      if (!target) {
-        return { message: "Set not found.", success: false };
-      }
-
-      await tx.delete(bins).where(eq(bins.binSet, target.id));
-      await tx.delete(binSets).where(eq(binSets.id, target.id));
-
-      return _loadSets(tx);
-    });
-    res.json(result);
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ success: false, message: "Database error." });
+    return c.json({ success: false, message: "Database error." }, 500);
   }
 });
 
 // PUT /api/sort-bins/bin/:binNumber
-router.put("/bin/:binNumber", requireAuth, async (req: AuthenticatedRequest, res: Response) => {
-  const binNumber = parseInt(req.params.binNumber);
-  const { rules, isCatchAll } = req.body as { rules: BinRuleGroup; isCatchAll?: boolean };
+router.put("/bin/:binNumber", requireAuth, async (c) => {
+  const binNumber = parseInt(c.req.param("binNumber"));
+  const { rules, isCatchAll } = await c.req.json<{ rules: BinRuleGroup; isCatchAll?: boolean }>();
 
   try {
-    const result = await authQuery(req.jwtClaims!, async (tx) => {
+    const result = await authQuery(c.get("jwtClaims"), async (tx) => {
       const activeBinSet = await tx.query.binSets.findFirst({
         where: (binSets, { eq }) => eq(binSets.isActive, true),
         columns: { id: true },
@@ -273,18 +246,18 @@ router.put("/bin/:binNumber", requireAuth, async (req: AuthenticatedRequest, res
         } as BinConfig,
       };
     });
-    res.json(result);
+    return c.json(result);
   } catch (err) {
     console.error(err);
-    res.status(500).json({ success: false, message: "Database error." });
+    return c.json({ success: false, message: "Database error." }, 500);
   }
 });
 
-// DELETE /api/sort-bins/bin/:binNumber
-router.delete("/bin/:binNumber", requireAuth, async (req: AuthenticatedRequest, res: Response) => {
-  const binNumber = parseInt(req.params.binNumber);
+// DELETE /api/sort-bins/bin/:binNumber — must be before DELETE /:guid
+router.delete("/bin/:binNumber", requireAuth, async (c) => {
+  const binNumber = parseInt(c.req.param("binNumber"));
   try {
-    const result = await authQuery(req.jwtClaims!, async (tx) => {
+    const result = await authQuery(c.get("jwtClaims"), async (tx) => {
       const activeBinSet = await tx.query.binSets.findFirst({
         where: (binSets, { eq }) => eq(binSets.isActive, true),
         columns: { id: true },
@@ -306,10 +279,36 @@ router.delete("/bin/:binNumber", requireAuth, async (req: AuthenticatedRequest, 
 
       return { message: "Successfully cleared bin config.", success: true, data: null };
     });
-    res.json(result);
+    return c.json(result);
   } catch (err) {
     console.error(err);
-    res.status(500).json({ success: false, message: "Database error." });
+    return c.json({ success: false, message: "Database error." }, 500);
+  }
+});
+
+// DELETE /api/sort-bins/:guid
+router.delete("/:guid", requireAuth, async (c) => {
+  const guid = c.req.param("guid");
+  try {
+    const result = await authQuery(c.get("jwtClaims"), async (tx) => {
+      const target = await tx.query.binSets.findFirst({
+        where: (binSets, { eq }) => eq(binSets.guid, guid),
+        columns: { id: true },
+      });
+
+      if (!target) {
+        return { message: "Set not found.", success: false };
+      }
+
+      await tx.delete(bins).where(eq(bins.binSet, target.id));
+      await tx.delete(binSets).where(eq(binSets.id, target.id));
+
+      return _loadSets(tx);
+    });
+    return c.json(result);
+  } catch (err) {
+    console.error(err);
+    return c.json({ success: false, message: "Database error." }, 500);
   }
 });
 

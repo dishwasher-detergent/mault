@@ -1,5 +1,4 @@
-import type { Response } from "express";
-import { Router } from "express";
+import { Hono } from "hono";
 import { authQuery } from "../db";
 import { moduleConfigs } from "../db/schema";
 import {
@@ -7,9 +6,9 @@ import {
   type ModuleConfig,
   type ServoCalibration,
 } from "@magic-vault/shared";
-import { requireAuth, type AuthenticatedRequest } from "../middleware/auth";
+import { requireAuth, type AppEnv } from "../middleware/auth";
 
-const router = Router();
+const router = new Hono<AppEnv>();
 
 function toModuleConfig(row: {
   moduleNumber: number;
@@ -45,9 +44,9 @@ function buildConfigs(
 }
 
 // GET /api/modules
-router.get("/", requireAuth, async (req: AuthenticatedRequest, res: Response) => {
+router.get("/", requireAuth, async (c) => {
   try {
-    const result = await authQuery(req.jwtClaims!, async (tx) => {
+    const result = await authQuery(c.get("jwtClaims"), async (tx) => {
       const rows = await tx.query.moduleConfigs.findMany();
       return {
         success: true,
@@ -55,20 +54,20 @@ router.get("/", requireAuth, async (req: AuthenticatedRequest, res: Response) =>
         data: buildConfigs(rows),
       };
     });
-    res.json(result);
+    return c.json(result);
   } catch (err) {
     console.error(err);
-    res.status(500).json({ success: false, message: "Database error." });
+    return c.json({ success: false, message: "Database error." }, 500);
   }
 });
 
 // PUT /api/modules/:moduleNumber
-router.put("/:moduleNumber", requireAuth, async (req: AuthenticatedRequest, res: Response) => {
-  const moduleNumber = parseInt(req.params.moduleNumber) as 1 | 2 | 3;
-  const calibration = req.body as ServoCalibration;
+router.put("/:moduleNumber", requireAuth, async (c) => {
+  const moduleNumber = parseInt(c.req.param("moduleNumber")) as 1 | 2 | 3;
+  const calibration = await c.req.json<ServoCalibration>();
 
   try {
-    const result = await authQuery(req.jwtClaims!, async (tx) => {
+    const result = await authQuery(c.get("jwtClaims"), async (tx) => {
       await tx
         .insert(moduleConfigs)
         .values({ moduleNumber, ...calibration })
@@ -84,10 +83,10 @@ router.put("/:moduleNumber", requireAuth, async (req: AuthenticatedRequest, res:
         data: buildConfigs(rows),
       };
     });
-    res.json(result);
+    return c.json(result);
   } catch (err) {
     console.error(err);
-    res.status(500).json({ success: false, message: "Database error." });
+    return c.json({ success: false, message: "Database error." }, 500);
   }
 });
 
