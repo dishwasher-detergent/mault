@@ -3,11 +3,25 @@ RUN npm install -g corepack && corepack enable && corepack prepare pnpm@latest -
 
 WORKDIR /app
 
+# Set HuggingFace cache to a known path inside the image
+ENV HF_HOME=/app/.cache/huggingface
+
 # Copy manifests for layer caching
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 COPY packages/shared/package.json packages/shared/
 COPY packages/server/package.json packages/server/
 RUN pnpm install --frozen-lockfile
+
+# Pre-download SigLIP model into the image at build time
+# This layer is cached as long as dependencies don't change
+RUN node -e " \
+  const { SiglipVisionModel, AutoProcessor } = require('@huggingface/transformers'); \
+  Promise.all([ \
+    SiglipVisionModel.from_pretrained('Xenova/siglip-base-patch16-512', { dtype: 'q8' }), \
+    AutoProcessor.from_pretrained('Xenova/siglip-base-patch16-512'), \
+  ]).then(() => { console.log('[build] SigLIP model pre-downloaded.'); process.exit(0); }) \
+    .catch(e => { console.error(e); process.exit(1); }); \
+"
 
 # Copy source
 COPY packages/shared/ packages/shared/
