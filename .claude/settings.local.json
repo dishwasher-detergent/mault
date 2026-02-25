@@ -2,7 +2,9 @@
   "permissions": {
     "allow": [
       "Bash(cp:*)",
-      "Bash(cd:*)"
+      "Bash(cd:*)",
+      "Bash(find /c/Users/User/Documents/Coding/magic-vault/packages -maxdepth 3 -name \"package.json\" ! -path \"*/node_modules/*\" | xargs ls 2>/dev/null)",
+      "WebFetch(domain:hono.dev)"
     ]
   }
 }
