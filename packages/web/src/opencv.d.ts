@@ -7,3 +7,8 @@ declare namespace cv {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   type Mat = any;
 }
+
+interface Window {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  cv: any;
+}

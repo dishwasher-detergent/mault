@@ -6,6 +6,7 @@ import {
   drawDetectionOverlay,
   extractCardImage,
 } from "@/lib/card-detection";
+import { loadOpenCv } from "@/lib/opencv-loader";
 import {
   type CardContour,
   type CardScannerProps,
@@ -359,6 +360,7 @@ export function useCardScanner({
 
   const initScanner = useCallback(async () => {
     updateStatus("initializing");
+    await loadOpenCv();
     await startCamera();
     rafRef.current = requestAnimationFrame(detectionLoop);
   }, [startCamera, detectionLoop, updateStatus]);
