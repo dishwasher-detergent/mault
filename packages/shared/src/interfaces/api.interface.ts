@@ -1,4 +1,4 @@
-import type { ScryfallCard } from "@/interfaces/scryfall.interface";
+import type { ScryfallCard } from "./scryfall.interface";
 
 export interface SearchCardMatch {
   id: string;

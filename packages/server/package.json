@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "tsx watch --env-file ../../.env src/index.ts",
-    "build": "tsup src/index.ts --format cjs --dts --out-dir dist",
+    "build": "tsup src/index.ts --format cjs --out-dir dist --noExternal @magic-vault/shared",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
     "db:push": "drizzle-kit push",
