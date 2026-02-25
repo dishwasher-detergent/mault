@@ -1,8 +1,8 @@
 import { Button } from "@/components/ui/button";
 import { useModuleConfigs } from "@/hooks/use-module-configs";
 import { useSerial } from "@/hooks/use-serial";
-import { ServoCalibration } from "-vault/shared";
 import { cn } from "@/lib/utils";
+import { ServoCalibration } from "@magic-vault/shared";
 import { IconRotateClockwise } from "@tabler/icons-react";
 import { useCallback, useRef, useState } from "react";
 

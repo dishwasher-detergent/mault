@@ -5,7 +5,7 @@ export default function AccountPage() {
   const { path } = useParams();
 
   return (
-    <div className="bg-gray-50 flex min-h-screen items-center justify-center p-8">
+    <div>
       <AccountView
         path={path}
         classNames={{

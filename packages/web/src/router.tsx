@@ -1,4 +1,3 @@
-import AccountPage from "@/pages/account";
 import AdminPage from "@/pages/app/admin";
 import ScannerPage from "@/pages/app/index";
 import AppLayout from "@/pages/app/layout";
@@ -7,6 +6,7 @@ import AuthPage from "@/pages/auth";
 import LandingPage from "@/pages/index";
 import { RedirectToSignIn, SignedIn } from "@neondatabase/neon-js/auth/react";
 import { createBrowserRouter, Outlet } from "react-router-dom";
+import AccountPage from "./pages/app/account";
 
 function AuthGuard() {
   return (
@@ -29,10 +29,6 @@ export const router = createBrowserRouter([
     element: <AuthPage />,
   },
   {
-    path: "/account/:path",
-    element: <AccountPage />,
-  },
-  {
     element: <AuthGuard />,
     children: [
       {
@@ -49,6 +45,10 @@ export const router = createBrowserRouter([
           {
             path: "/app/admin",
             element: <AdminPage />,
+          },
+          {
+            path: "/app/account/:path",
+            element: <AccountPage />,
           },
         ],
       },
