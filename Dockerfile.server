@@ -13,8 +13,9 @@ COPY packages/server/package.json packages/server/
 RUN pnpm install --frozen-lockfile
 
 # Pre-download SigLIP model into the image at build time
+# Run from packages/server so pnpm resolves @huggingface/transformers correctly
 # This layer is cached as long as dependencies don't change
-RUN node -e " \
+RUN cd packages/server && node -e " \
   const { SiglipVisionModel, AutoProcessor } = require('@huggingface/transformers'); \
   Promise.all([ \
     SiglipVisionModel.from_pretrained('Xenova/siglip-base-patch16-512', { dtype: 'q8' }), \
