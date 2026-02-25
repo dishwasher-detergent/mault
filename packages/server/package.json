@@ -11,18 +11,20 @@
     "db:studio": "drizzle-kit studio"
   },
   "dependencies": {
-    "@magic-vault/shared": "workspace:*",
     "@hono/node-server": "^1.19.9",
     "@huggingface/transformers": "^3.8.1",
+    "@magic-vault/shared": "workspace:*",
     "@neondatabase/serverless": "^1.0.2",
     "dotenv": "^16.5.0",
     "drizzle-orm": "^0.45.1",
     "hono": "^4.12.2",
     "jose": "^6.1.3",
+    "ws": "^8.19.0",
     "zod": "^4.3.6"
   },
   "devDependencies": {
     "@types/node": "^20",
+    "@types/ws": "^8.18.1",
     "drizzle-kit": "^0.31.9",
     "tsup": "^8.4.0",
     "tsx": "^4.19.3",
