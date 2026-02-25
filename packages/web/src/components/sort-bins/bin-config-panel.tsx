@@ -10,7 +10,7 @@ import {
 } from "@/schemas/sort-bins.schema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useCallback, useEffect } from "react";
-import { Controller, useForm } from "react-hook-form";
+import { Controller, useForm, type Resolver } from "react-hook-form";
 import { Label } from "../ui/label";
 
 function emptyRuleGroup(): BinRuleGroup {
@@ -21,7 +21,7 @@ export function BinConfigPanel() {
   const { selectedConfig: config, save, clear, configs } = useBinConfigs();
 
   const form = useForm<BinConfigFormValues>({
-    resolver: zodResolver(binConfigSchema),
+    resolver: zodResolver(binConfigSchema) as Resolver<BinConfigFormValues>,
     defaultValues: {
       isCatchAll: false,
       rules: emptyRuleGroup(),
