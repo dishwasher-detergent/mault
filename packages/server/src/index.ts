@@ -21,6 +21,6 @@ app.route("/api/card", cardRouter);
 app.route("/api/sort-bins", sortBinsRouter);
 app.route("/api/modules", moduleConfigsRouter);
 
-serve({ fetch: app.fetch, port: PORT }, () => {
+serve({ fetch: app.fetch, port: PORT, hostname: "0.0.0.0" }, () => {
   console.log(`[server] Running on http://localhost:${PORT}`);
 });
