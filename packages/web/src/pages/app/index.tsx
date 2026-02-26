@@ -1,7 +1,7 @@
+import { PresetSelector } from "@/components/bins/preset-selector";
 import { CardGrid } from "@/components/cards/card-grid";
 import { CardScanner } from "@/components/scanner/card-scanner";
 import { ScanStats } from "@/components/scanner/scan-stats";
-import { PresetSelector } from "@/components/sort-bins/preset-selector";
 
 export default function App() {
   return (

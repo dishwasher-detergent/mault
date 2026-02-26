@@ -1,3 +1,4 @@
+import { TooltipProvider } from "@/components/ui/tooltip";
 import { NeonAuthUIProvider } from "@neondatabase/neon-js/auth/react/ui";
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
@@ -15,7 +16,9 @@ createRoot(document.getElementById("root")!).render(
         basePath: "/app/account",
       }}
     >
-      <RouterProvider router={router} />
+      <TooltipProvider>
+        <RouterProvider router={router} />
+      </TooltipProvider>
     </NeonAuthUIProvider>
   </StrictMode>,
 );

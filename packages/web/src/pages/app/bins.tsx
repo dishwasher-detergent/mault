@@ -1,8 +1,8 @@
-import { BinConfigPanel } from "@/components/sort-bins/bin-config-panel";
-import { BinList } from "@/components/sort-bins/bin-list";
-import { PresetSelector } from "@/components/sort-bins/preset-selector";
+import { BinConfigPanel } from "@/components/bins/bin-config-panel";
+import { BinList } from "@/components/bins/bin-list";
+import { PresetSelector } from "@/components/bins/preset-selector";
 
-export default function SortPage() {
+export default function BinsPage() {
   return (
     <div className="grid grid-cols-12 flex-1 min-h-0 overflow-hidden p-4 gap-4">
       <section className="col-span-5 md:col-span-4 lg:col-span-3 overflow-hidden flex flex-col h-full">

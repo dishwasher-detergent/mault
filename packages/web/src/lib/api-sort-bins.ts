@@ -1,24 +1,36 @@
-import type { Result, BinConfig, BinRuleGroup, BinSet } from "@magic-vault/shared";
-import { apiGet, apiPost, apiPut, apiDelete } from "./api";
+import type {
+  BinConfig,
+  BinRuleGroup,
+  BinSet,
+  Result,
+} from "@magic-vault/shared";
+import { apiDelete, apiGet, apiPost, apiPut } from "./api";
 
 export async function loadSets(): Promise<Result<BinSet[]>> {
-  return apiGet<Result<BinSet[]>>("/api/sort-bins");
+  return apiGet<Result<BinSet[]>>("/api/bins");
 }
 
 export async function activateSet(guid: string): Promise<Result<BinSet[]>> {
-  return apiPost<Result<BinSet[]>>(`/api/sort-bins/activate/${guid}`);
+  return apiPut<Result<BinSet[]>>(`/api/bins/${guid}/active`);
 }
 
 export async function createSet(name: string): Promise<Result<BinSet[]>> {
-  return apiPost<Result<BinSet[]>>("/api/sort-bins/create", { name });
+  return apiPost<Result<BinSet[]>>("/api/bins", { name });
 }
 
 export async function saveSet(name: string): Promise<Result<BinSet[]>> {
-  return apiPost<Result<BinSet[]>>("/api/sort-bins/save-as", { name });
+  return apiPost<Result<BinSet[]>>("/api/bins/copies", { name });
+}
+
+export async function renameSet(
+  guid: string,
+  name: string,
+): Promise<Result<BinSet[]>> {
+  return apiPut<Result<BinSet[]>>(`/api/bins/${guid}`, { name });
 }
 
 export async function deleteSet(guid: string): Promise<Result<BinSet[]>> {
-  return apiDelete<Result<BinSet[]>>(`/api/sort-bins/${guid}`);
+  return apiDelete<Result<BinSet[]>>(`/api/bins/${guid}`);
 }
 
 export async function saveBinConfig({
@@ -30,12 +42,12 @@ export async function saveBinConfig({
   rules: BinRuleGroup;
   isCatchAll?: boolean;
 }): Promise<Result<BinConfig>> {
-  return apiPut<Result<BinConfig>>(`/api/sort-bins/bin/${binNumber}`, {
+  return apiPut<Result<BinConfig>>(`/api/bins/bins/${binNumber}`, {
     rules,
     isCatchAll,
   });
 }
 
 export async function clearBinConfig(binNumber: number): Promise<Result<null>> {
-  return apiDelete<Result<null>>(`/api/sort-bins/bin/${binNumber}`);
+  return apiDelete<Result<null>>(`/api/bins/bins/${binNumber}`);
 }

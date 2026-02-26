@@ -2,17 +2,27 @@ import { ScannerControls } from "@/components/scanner/scanner-controls";
 import { ScannerOverlay } from "@/components/scanner/scanner-overlay";
 import { Button } from "@/components/ui/button";
 import { ButtonGroup } from "@/components/ui/button-group";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { useBinConfigs } from "@/hooks/use-bin-configs";
 import { useCardScanner } from "@/hooks/use-card-scanner";
 import { useScannedCards } from "@/hooks/use-scanned-cards";
 import { useSerial, useSerialMessage } from "@/hooks/use-serial";
-import type { CardScannerProps } from "@magic-vault/shared";
 import { cn } from "@/lib/utils";
-import { IconDeviceUsb, IconDeviceUsbFilled } from "@tabler/icons-react";
+import type { CardScannerProps } from "@magic-vault/shared";
+import { IconCamera, IconCameraFilled, IconDeviceUsb, IconDeviceUsbFilled } from "@tabler/icons-react";
 import { useEffect, useRef } from "react";
+import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
+import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
 
 export function CardScanner({ className }: CardScannerProps) {
+  const navigate = useNavigate();
   const { addCard, sendCatchAllBin } = useScannedCards();
   const { isConnected, isReady, connect, disconnect } = useSerial();
   const { hasCatchAll } = useBinConfigs();
@@ -89,22 +99,61 @@ export function CardScanner({ className }: CardScannerProps) {
         />
       </div>
       <ButtonGroup className="mt-2 w-full *:flex-1">
-        <Button
-          onClick={isConnected ? disconnect : connect}
-          size="icon"
-          className="flex-none!"
-          variant={isConnected ? "default" : "outline"}
-        >
-          {isConnected ? <IconDeviceUsbFilled /> : <IconDeviceUsb />}
-        </Button>
-        <ScannerControls
-          status={isReady && hasCatchAll ? status : "paused"}
-          onForceAddDuplicate={handleForceAddDuplicate}
-          onForceScan={handleForceScan}
-          onPause={handlePause}
-          onResume={isReady && hasCatchAll ? handleResume : () => {}}
-          disabled={!isReady || !hasCatchAll}
-        />
+        {status === "error" ? (
+          <Button onClick={handleRetryError} variant="outline" style={{ flex: "1 1 0%" }}>
+            <IconCamera className="mr-2" />
+            Connect Camera
+          </Button>
+        ) : (
+          <Tooltip>
+            <TooltipTrigger
+              render={<Button onClick={handleRetryError} size="icon" variant="outline" style={{ flex: "none" }} />}
+            >
+              <IconCameraFilled />
+            </TooltipTrigger>
+            <TooltipContent>Reconnect Camera</TooltipContent>
+          </Tooltip>
+        )}
+        {isConnected ? (
+          <DropdownMenu>
+            <DropdownMenuTrigger
+              render={<Button size="icon" variant="default" style={{ flex: "none" }} />}
+            >
+              <IconDeviceUsbFilled />
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="start">
+              <DropdownMenuItem onClick={() => navigate("/app/calibrate")}>
+                Calibrate
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem variant="destructive" onClick={disconnect}>
+                Disconnect
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        ) : (
+          <Tooltip>
+            <TooltipTrigger
+              render={
+                <Button onClick={connect} size="icon" variant="outline" style={{ flex: "1 1 0%" }}>
+                  <IconDeviceUsb className="mr-2" />
+                  Connect Device
+                </Button>
+              }
+            />
+            <TooltipContent>Connect Device</TooltipContent>
+          </Tooltip>
+        )}
+        {isConnected && (
+          <ScannerControls
+            status={isReady && hasCatchAll ? status : "paused"}
+            onForceAddDuplicate={handleForceAddDuplicate}
+            onForceScan={handleForceScan}
+            onPause={handlePause}
+            onResume={isReady && hasCatchAll ? handleResume : () => {}}
+            disabled={!isReady || !hasCatchAll}
+          />
+        )}
       </ButtonGroup>
     </div>
   );

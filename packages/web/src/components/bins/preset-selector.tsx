@@ -16,42 +16,69 @@ import {
   type CreateSetFormValues,
 } from "@/schemas/sort-bins.schema";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { IconPlus, IconTrash } from "@tabler/icons-react";
+import { IconEdit, IconPlus, IconTrash } from "@tabler/icons-react";
 import { useCallback, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
+import { Link } from "react-router-dom";
+import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
 
 interface PresetSelectorProps {
   readOnly?: boolean;
 }
 
 export function PresetSelector({ readOnly }: PresetSelectorProps) {
-  const { sets, activateSet, createSet, deleteSet } = useBinConfigs();
+  const { sets, activateSet, createSet, renameSet, deleteSet } =
+    useBinConfigs();
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
+  const [renameDialogOpen, setRenameDialogOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
 
-  const form = useForm<CreateSetFormValues>({
+  const activeSet = sets.find((s) => s.isActive);
+
+  const createForm = useForm<CreateSetFormValues>({
     resolver: zodResolver(createSetSchema),
     defaultValues: { name: "" },
     mode: "onChange",
   });
 
-  const activeSet = sets.find((s) => s.isActive);
+  const renameForm = useForm<CreateSetFormValues>({
+    resolver: zodResolver(createSetSchema),
+    defaultValues: { name: activeSet?.name ?? "" },
+    mode: "onChange",
+  });
 
   const handleCreate = useCallback(
     async (values: CreateSetFormValues) => {
       await createSet(values.name);
-      form.reset();
+      createForm.reset();
       setCreateDialogOpen(false);
     },
-    [createSet, form],
+    [createSet, createForm],
   );
 
   const handleCreateDialogChange = useCallback(
     (open: boolean) => {
       setCreateDialogOpen(open);
-      if (!open) form.reset();
+      if (!open) createForm.reset();
     },
-    [form],
+    [createForm],
+  );
+
+  const handleRename = useCallback(
+    async (values: CreateSetFormValues) => {
+      if (!activeSet) return;
+      await renameSet(activeSet.guid, values.name);
+      setRenameDialogOpen(false);
+    },
+    [activeSet, renameSet],
+  );
+
+  const handleRenameDialogChange = useCallback(
+    (open: boolean) => {
+      setRenameDialogOpen(open);
+      if (open) renameForm.reset({ name: activeSet?.name ?? "" });
+    },
+    [activeSet, renameForm],
   );
 
   const handleDelete = useCallback(async () => {
@@ -63,6 +90,7 @@ export function PresetSelector({ readOnly }: PresetSelectorProps) {
   return (
     <ButtonGroup className="w-full">
       <Select
+        key={activeSet?.guid ?? ""}
         value={activeSet?.guid ?? ""}
         onValueChange={(guid) => activateSet(guid!)}
       >
@@ -79,7 +107,22 @@ export function PresetSelector({ readOnly }: PresetSelectorProps) {
           ))}
         </SelectContent>
       </Select>
-      {!readOnly && (
+      {readOnly ? (
+        <>
+          <Tooltip>
+            <TooltipTrigger
+              render={
+                <Button nativeButton={false} variant="outline" size="icon">
+                  <Link to="bins">
+                    <IconEdit />
+                  </Link>
+                </Button>
+              }
+            ></TooltipTrigger>
+            <TooltipContent>Edit Preset</TooltipContent>
+          </Tooltip>
+        </>
+      ) : (
         <>
           <DynamicDialog
             open={deleteDialogOpen}
@@ -107,6 +150,56 @@ export function PresetSelector({ readOnly }: PresetSelectorProps) {
             footerClassName="flex-col-reverse md:flex-row"
           />
           <DynamicDialog
+            open={renameDialogOpen}
+            onOpenChange={handleRenameDialogChange}
+            title="Rename Set"
+            description="Enter a new name for this set."
+            trigger={
+              <Button variant="outline" size="icon" disabled={!activeSet}>
+                <IconEdit />
+              </Button>
+            }
+            footer={
+              <>
+                <Button
+                  variant="outline"
+                  onClick={() => setRenameDialogOpen(false)}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  onClick={renameForm.handleSubmit(handleRename)}
+                  disabled={!renameForm.formState.isValid}
+                >
+                  Rename
+                </Button>
+              </>
+            }
+            footerClassName="flex-col-reverse md:flex-row"
+          >
+            <form onSubmit={renameForm.handleSubmit(handleRename)}>
+              <Controller
+                name="name"
+                control={renameForm.control}
+                render={({ field, fieldState }) => (
+                  <Field data-invalid={fieldState.invalid || undefined}>
+                    <FieldLabel htmlFor="rename-set-name">Set name</FieldLabel>
+                    <Input
+                      {...field}
+                      id="rename-set-name"
+                      placeholder="Set name..."
+                      aria-invalid={fieldState.invalid}
+                      autoFocus
+                    />
+                    {fieldState.invalid && (
+                      <FieldError errors={[fieldState.error]} />
+                    )}
+                  </Field>
+                )}
+              />
+            </form>
+          </DynamicDialog>
+          <DynamicDialog
             open={createDialogOpen}
             onOpenChange={handleCreateDialogChange}
             title="New Set"
@@ -125,8 +218,8 @@ export function PresetSelector({ readOnly }: PresetSelectorProps) {
                   Cancel
                 </Button>
                 <Button
-                  onClick={form.handleSubmit(handleCreate)}
-                  disabled={!form.formState.isValid}
+                  onClick={createForm.handleSubmit(handleCreate)}
+                  disabled={!createForm.formState.isValid}
                 >
                   Create
                 </Button>
@@ -134,10 +227,10 @@ export function PresetSelector({ readOnly }: PresetSelectorProps) {
             }
             footerClassName="flex-col-reverse md:flex-row"
           >
-            <form onSubmit={form.handleSubmit(handleCreate)}>
+            <form onSubmit={createForm.handleSubmit(handleCreate)}>
               <Controller
                 name="name"
-                control={form.control}
+                control={createForm.control}
                 render={({ field, fieldState }) => (
                   <Field data-invalid={fieldState.invalid || undefined}>
                     <FieldLabel htmlFor="set-name">Set name</FieldLabel>

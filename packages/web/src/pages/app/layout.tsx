@@ -1,4 +1,5 @@
 import { Button } from "@/components/ui/button";
+import { SyncIndicator } from "@/components/sync-indicator";
 import { Toaster } from "@/components/ui/sonner";
 import { BinConfigsProvider } from "@/hooks/use-bin-configs";
 import { ModuleConfigsProvider } from "@/hooks/use-module-configs";
@@ -14,25 +15,14 @@ export default function AppLayout() {
         <ModuleConfigsProvider>
           <ScannedCardsProvider>
             <div className="h-dvh w-dvw overflow-hidden flex flex-col">
-              <nav className="h-12 flex-none w-full p-1 px-4 border border-b bg-background/50 backdrop-blur-sm flex flex-row justify-between items-center">
-                <p className="flex flex-row items-center gap-2 font-bold">
+              <nav className="h-12 flex-none w-full p-1 px-4 flex flex-row justify-between items-center">
+                <Link
+                  to="/app"
+                  className="flex flex-row items-center gap-2 font-bold"
+                >
                   Mault
-                </p>
+                </Link>
                 <div className="flex items-center gap-2">
-                  <Button
-                    variant="ghost"
-                    nativeButton={false}
-                    render={<Link to="/app" />}
-                  >
-                    Scanner
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    nativeButton={false}
-                    render={<Link to="/app/sort" />}
-                  >
-                    Sort Bins
-                  </Button>
                   <Button
                     variant="ghost"
                     nativeButton={false}
@@ -46,6 +36,7 @@ export default function AppLayout() {
               <main className="w-full flex-1 min-h-0 overflow-hidden flex flex-col">
                 <Outlet />
               </main>
+              <SyncIndicator />
               <Toaster />
             </div>
           </ScannedCardsProvider>

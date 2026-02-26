@@ -8,7 +8,7 @@ import { requireAuth, type AppEnv } from "../middleware/auth";
 
 const router = new Hono<AppEnv>();
 
-router.post("/search", requireAuth, async (c) => {
+router.post("/", requireAuth, async (c) => {
   const body = await c.req.parseBody();
   const file = body["image"];
 
@@ -66,8 +66,8 @@ router.post("/search", requireAuth, async (c) => {
   }
 });
 
-// /scryfall/search must be registered before /scryfall/:id to avoid path conflicts
-router.get("/scryfall/search", requireAuth, async (c) => {
+// /scryfall must be registered before /scryfall/:id to avoid path conflicts
+router.get("/scryfall", requireAuth, async (c) => {
   const query = c.req.query("q") ?? "";
   const result = await Search(query);
   return c.json(result);

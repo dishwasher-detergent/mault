@@ -1,4 +1,4 @@
-import { RuleSummary } from "@/components/sort-bins/rule-summary";
+import { RuleSummary } from "@/components/bins/rule-summary";
 import { Badge } from "@/components/ui/badge";
 import { BinConfig, isRuleGroup } from "@magic-vault/shared";
 import { Button } from "../ui/button";

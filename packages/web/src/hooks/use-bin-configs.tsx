@@ -6,6 +6,7 @@ import {
   createSet as createSetAction,
   deleteSet as deleteSetAction,
   loadSets,
+  renameSet as renameSetAction,
   saveBinConfig as saveBinConfigAction,
   saveSet as saveSetAction,
 } from "@/lib/api-sort-bins";
@@ -49,6 +50,7 @@ interface BinConfigsContextValue {
   activateSet: (guid: string) => Promise<void>;
   createSet: (name: string) => Promise<void>;
   saveSet: (name: string) => Promise<void>;
+  renameSet: (guid: string, name: string) => Promise<void>;
   deleteSet: (guid: string) => Promise<void>;
 }
 
@@ -130,6 +132,7 @@ export function BinConfigsProvider({
   const activateSetFn = useCallback(async (guid: string) => {
     const result = await activateSetAction(guid);
     if (result.success && result.data) {
+      setSelectedBin(1);
       applySets(result.data, setSets, setConfigs);
     }
   }, []);
@@ -137,6 +140,7 @@ export function BinConfigsProvider({
   const createSetFn = useCallback(async (name: string) => {
     const result = await createSetAction(name);
     if (result.success && result.data) {
+      setSelectedBin(1);
       applySets(result.data, setSets, setConfigs);
     }
   }, []);
@@ -148,9 +152,17 @@ export function BinConfigsProvider({
     }
   }, []);
 
+  const renameSetFn = useCallback(async (guid: string, name: string) => {
+    const result = await renameSetAction(guid, name);
+    if (result.success && result.data) {
+      applySets(result.data, setSets, setConfigs);
+    }
+  }, []);
+
   const deleteSetFn = useCallback(async (guid: string) => {
     const result = await deleteSetAction(guid);
     if (result.success && result.data) {
+      setSelectedBin(1);
       applySets(result.data, setSets, setConfigs);
     }
   }, []);
@@ -170,6 +182,7 @@ export function BinConfigsProvider({
         activateSet: activateSetFn,
         createSet: createSetFn,
         saveSet: saveSetFn,
+        renameSet: renameSetFn,
         deleteSet: deleteSetFn,
       }}
     >

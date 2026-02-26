@@ -1,11 +1,7 @@
-import { ConditionRow } from "@/components/sort-bins/condition-row";
+import { ConditionRow } from "@/components/bins/condition-row";
 import { Button } from "@/components/ui/button";
 import { ButtonGroup } from "@/components/ui/button-group";
-import {
-  BinCondition,
-  BinRuleGroup,
-  isRuleGroup,
-} from "@magic-vault/shared";
+import { BinCondition, BinRuleGroup, isRuleGroup } from "@magic-vault/shared";
 import { IconPlus, IconTrash } from "@tabler/icons-react";
 import { useCallback } from "react";
 
@@ -85,7 +81,7 @@ export function RuleGroupEditor({
         <ButtonGroup>
           <Button
             type="button"
-            size="xs"
+            size="sm"
             variant={group.combinator === "and" ? "secondary" : "outline"}
             onClick={() => toggleCombinator("and")}
           >
@@ -93,7 +89,7 @@ export function RuleGroupEditor({
           </Button>
           <Button
             type="button"
-            size="xs"
+            size="sm"
             variant={group.combinator === "or" ? "secondary" : "outline"}
             onClick={() => toggleCombinator("or")}
           >
@@ -136,7 +132,7 @@ export function RuleGroupEditor({
 
       <ButtonGroup className="ml-4">
         <Button
-          size="xs"
+          size="sm"
           type="button"
           variant="outline"
           onClick={addCondition}
@@ -144,7 +140,7 @@ export function RuleGroupEditor({
           <IconPlus /> Condition
         </Button>
         {depth < 2 && (
-          <Button size="xs" type="button" variant="outline" onClick={addGroup}>
+          <Button size="sm" type="button" variant="outline" onClick={addGroup}>
             <IconPlus /> Group
           </Button>
         )}

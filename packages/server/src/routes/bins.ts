@@ -82,8 +82,8 @@ router.get("/", requireAuth, async (c) => {
   }
 });
 
-// POST /api/sort-bins/activate/:guid
-router.post("/activate/:guid", requireAuth, async (c) => {
+// PUT /api/sort-bins/:guid/active
+router.put("/:guid/active", requireAuth, async (c) => {
   const guid = c.req.param("guid");
   try {
     const result = await authQuery(c.get("jwtClaims"), async (tx) => {
@@ -108,14 +108,16 @@ router.post("/activate/:guid", requireAuth, async (c) => {
   }
 });
 
-// POST /api/sort-bins/create
-router.post("/create", requireAuth, async (c) => {
+// POST /api/sort-bins
+router.post("/", requireAuth, async (c) => {
   const { name } = await c.req.json<{ name: string }>();
   try {
     const result = await authQuery(c.get("jwtClaims"), async (tx) => {
+      await tx.update(binSets).set({ isActive: false }).where(eq(binSets.isActive, true));
+
       const [newBinSet] = await tx
         .insert(binSets)
-        .values({ name, isActive: false })
+        .values({ name, isActive: true })
         .returning({ id: binSets.id });
 
       await tx.insert(bins).values(
@@ -136,8 +138,8 @@ router.post("/create", requireAuth, async (c) => {
   }
 });
 
-// POST /api/sort-bins/save-as
-router.post("/save-as", requireAuth, async (c) => {
+// POST /api/sort-bins/copies
+router.post("/copies", requireAuth, async (c) => {
   const { name } = await c.req.json<{ name: string }>();
   try {
     const result = await authQuery(c.get("jwtClaims"), async (tx) => {
@@ -178,8 +180,8 @@ router.post("/save-as", requireAuth, async (c) => {
   }
 });
 
-// PUT /api/sort-bins/bin/:binNumber
-router.put("/bin/:binNumber", requireAuth, async (c) => {
+// PUT /api/sort-bins/bins/:binNumber
+router.put("/bins/:binNumber", requireAuth, async (c) => {
   const binNumber = parseInt(c.req.param("binNumber"));
   const { rules, isCatchAll } = await c.req.json<{ rules: BinRuleGroup; isCatchAll?: boolean }>();
 
@@ -253,8 +255,8 @@ router.put("/bin/:binNumber", requireAuth, async (c) => {
   }
 });
 
-// DELETE /api/sort-bins/bin/:binNumber — must be before DELETE /:guid
-router.delete("/bin/:binNumber", requireAuth, async (c) => {
+// DELETE /api/sort-bins/bins/:binNumber — must be before DELETE /:guid
+router.delete("/bins/:binNumber", requireAuth, async (c) => {
   const binNumber = parseInt(c.req.param("binNumber"));
   try {
     const result = await authQuery(c.get("jwtClaims"), async (tx) => {
@@ -278,6 +280,27 @@ router.delete("/bin/:binNumber", requireAuth, async (c) => {
       }
 
       return { message: "Successfully cleared bin config.", success: true, data: null };
+    });
+    return c.json(result);
+  } catch (err) {
+    console.error(err);
+    return c.json({ success: false, message: "Database error." }, 500);
+  }
+});
+
+// PUT /api/sort-bins/:guid
+router.put("/:guid", requireAuth, async (c) => {
+  const guid = c.req.param("guid");
+  const { name } = await c.req.json<{ name: string }>();
+  try {
+    const result = await authQuery(c.get("jwtClaims"), async (tx) => {
+      const target = await tx.query.binSets.findFirst({
+        where: (binSets, { eq }) => eq(binSets.guid, guid),
+        columns: { id: true },
+      });
+      if (!target) return { message: "Set not found.", success: false };
+      await tx.update(binSets).set({ name, updatedAt: new Date() }).where(eq(binSets.id, target.id));
+      return _loadSets(tx);
     });
     return c.json(result);
   } catch (err) {

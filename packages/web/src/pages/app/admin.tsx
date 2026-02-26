@@ -1,324 +1,161 @@
 import { Button } from "@/components/ui/button";
-import { useModuleConfigs } from "@/hooks/use-module-configs";
-import { useSerial } from "@/hooks/use-serial";
+import { cancelSync, createSyncEventSource, startSync } from "@/lib/api-admin";
 import { cn } from "@/lib/utils";
-import { ServoCalibration } from "@magic-vault/shared";
-import { IconRotateClockwise } from "@tabler/icons-react";
-import { useCallback, useRef, useState } from "react";
+import type { SyncState } from "@magic-vault/shared";
+import { useEffect, useRef, useState } from "react";
 
-interface ServoConfig {
-  name: string;
-  label: string;
-  positions: string[];
-  defaultPosition: string;
-}
+const DEFAULT_SYNC_STATE: SyncState = {
+  status: "idle",
+  total: 0,
+  processed: 0,
+  skipped: 0,
+  errors: 0,
+  startedAt: null,
+  logs: [],
+};
 
-const MODULES = [1, 2, 3] as const;
-
-const SERVOS: ServoConfig[] = [
-  {
-    name: "bottom",
-    label: "Bottom Paddle",
-    positions: ["open"],
-    defaultPosition: "open",
-  },
-  {
-    name: "paddle",
-    label: "Paddles",
-    positions: ["open"],
-    defaultPosition: "open",
-  },
-  {
-    name: "pusher",
-    label: "Pushers",
-    positions: ["left", "right"],
-    defaultPosition: "neutral",
-  },
-];
-
-type ActivePositions = Record<string, string | null>;
-
-interface CalibrateServo {
-  name: "bottom" | "paddle" | "pusher";
-  label: string;
-  positions: { label: string; key: keyof ServoCalibration }[];
-}
-
-const CALIBRATE_SERVOS: CalibrateServo[] = [
-  {
-    name: "bottom",
-    label: "Bottom Paddle",
-    positions: [
-      { label: "Set Closed", key: "bottomClosed" },
-      { label: "Set Open", key: "bottomOpen" },
-    ],
-  },
-  {
-    name: "paddle",
-    label: "Paddles",
-    positions: [
-      { label: "Set Closed", key: "paddleClosed" },
-      { label: "Set Open", key: "paddleOpen" },
-    ],
-  },
-  {
-    name: "pusher",
-    label: "Pusher",
-    positions: [
-      { label: "Set Left", key: "pusherLeft" },
-      { label: "Set Neutral", key: "pusherNeutral" },
-      { label: "Set Right", key: "pusherRight" },
-    ],
-  },
-];
-
-type SliderKey = `${1 | 2 | 3}:${"bottom" | "paddle" | "pusher"}`;
-
-function defaultSliderValues(): Record<SliderKey, number> {
-  const vals = {} as Record<SliderKey, number>;
-  for (const m of MODULES) {
-    vals[`${m}:bottom`] = 307;
-    vals[`${m}:paddle`] = 307;
-    vals[`${m}:pusher`] = 307;
-  }
-  return vals;
-}
+const STATUS_COLORS: Record<SyncState["status"], string> = {
+  idle: "text-muted-foreground",
+  running: "text-blue-500",
+  completed: "text-green-500",
+  failed: "text-red-500",
+  cancelled: "text-yellow-500",
+};
 
 export default function AdminPage() {
-  const { isConnected, connect, disconnect, sendCommand } = useSerial();
-  const { configs, saveConfig, moveServo } = useModuleConfigs();
-  const [activeTab, setActiveTab] = useState<"control" | "calibrate">(
-    "control",
-  );
-  const [active, setActive] = useState<ActivePositions>({});
-  const activeRef = useRef(active);
-  activeRef.current = active;
-  const [sliderValues, setSliderValues] =
-    useState<Record<SliderKey, number>>(defaultSliderValues);
+  const [syncState, setSyncState] = useState<SyncState>(DEFAULT_SYNC_STATE);
+  const [isStarting, setIsStarting] = useState(false);
+  const logRef = useRef<HTMLDivElement>(null);
 
-  const handleServo = useCallback(
-    (module: number, servo: string, position: string) => {
-      const key = `${module}:${servo}`;
-      const current = activeRef.current[key];
+  useEffect(() => {
+    let es: EventSource | null = null;
+    let cancelled = false;
 
-      if (current === position) {
-        sendCommand(JSON.stringify({ servo, module, position: "neutral" }));
-        setActive((prev) => ({ ...prev, [key]: null }));
-      } else {
-        sendCommand(JSON.stringify({ servo, module, position }));
-        setActive((prev) => ({ ...prev, [key]: position }));
+    async function connect() {
+      try {
+        es = await createSyncEventSource();
+        if (cancelled) {
+          es.close();
+          return;
+        }
+
+        es.addEventListener("status", (e: MessageEvent) => {
+          setSyncState(JSON.parse(e.data) as SyncState);
+        });
+
+        es.addEventListener("progress", (e: MessageEvent) => {
+          const update = JSON.parse(e.data) as Partial<SyncState>;
+          setSyncState((prev) => ({ ...prev, ...update }));
+        });
+
+        es.addEventListener("done", (e: MessageEvent) => {
+          const update = JSON.parse(e.data) as Partial<SyncState>;
+          setSyncState((prev) => ({ ...prev, ...update }));
+        });
+
+        es.addEventListener("error", (e: MessageEvent) => {
+          if (e.data) {
+            const update = JSON.parse(e.data) as { message: string };
+            setSyncState((prev) => ({
+              ...prev,
+              status: "failed",
+              logs: [...prev.logs.slice(-199), `Error: ${update.message}`],
+            }));
+          }
+        });
+      } catch {
+        // ignore connection errors
       }
-    },
-    [sendCommand],
-  );
+    }
 
-  const handleResetServo = useCallback(
-    (module: number, servo: ServoConfig) => {
-      sendCommand(
-        JSON.stringify({
-          servo: servo.name,
-          module,
-          position: servo.defaultPosition,
-        }),
-      );
-      setActive((prev) => ({ ...prev, [`${module}:${servo.name}`]: null }));
-    },
-    [sendCommand],
-  );
+    connect();
 
-  const servoDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+    return () => {
+      cancelled = true;
+      es?.close();
+    };
+  }, []);
 
-  const handleSliderChange = useCallback(
-    (
-      module: 1 | 2 | 3,
-      servo: "bottom" | "paddle" | "pusher",
-      value: number,
-    ) => {
-      setSliderValues((prev) => ({ ...prev, [`${module}:${servo}`]: value }));
-      if (servoDebounceRef.current) clearTimeout(servoDebounceRef.current);
-      servoDebounceRef.current = setTimeout(
-        () => moveServo(module, servo, value),
-        30,
-      );
-    },
-    [moveServo],
-  );
+  useEffect(() => {
+    if (logRef.current) {
+      logRef.current.scrollTop = logRef.current.scrollHeight;
+    }
+  }, [syncState.logs]);
 
-  const handleSetPosition = useCallback(
-    (module: 1 | 2 | 3, posKey: keyof ServoCalibration, value: number) => {
-      const config = configs.find((c) => c.moduleNumber === module);
-      if (!config) return;
-      saveConfig(module, { ...config.calibration, [posKey]: value });
-    },
-    [configs, saveConfig],
-  );
+  const handleStart = async () => {
+    setIsStarting(true);
+    try {
+      await startSync();
+    } finally {
+      setIsStarting(false);
+    }
+  };
+
+  const total = syncState.total;
+  const done = syncState.processed + syncState.skipped;
+  const progress = total > 0 ? Math.min(100, (done / total) * 100) : 0;
+  const isRunning = syncState.status === "running";
 
   return (
     <div className="flex flex-col gap-6 p-6 max-w-4xl mx-auto">
-      <div className="flex items-center justify-between">
-        <div className="flex gap-1 border-b border-border">
-          <button
-            onClick={() => setActiveTab("control")}
-            className={cn(
-              "px-4 py-2 text-sm font-medium -mb-px border-b-2 transition-colors",
-              activeTab === "control"
-                ? "border-foreground text-foreground"
-                : "border-transparent text-muted-foreground hover:text-foreground",
+      <div className="rounded-lg border p-4 flex flex-col gap-4">
+        <div className="flex items-center justify-between">
+          <div className="flex flex-col gap-0.5">
+            <p className="text-sm font-medium">Card Image Vectors</p>
+            <p className={cn("text-xs font-medium", STATUS_COLORS[syncState.status])}>
+              {syncState.status.charAt(0).toUpperCase() + syncState.status.slice(1)}
+            </p>
+          </div>
+          <div className="flex gap-2">
+            {isRunning && (
+              <Button variant="outline" size="sm" onClick={() => cancelSync()}>
+                Cancel
+              </Button>
             )}
-          >
-            Control
-          </button>
-          <button
-            onClick={() => setActiveTab("calibrate")}
-            className={cn(
-              "px-4 py-2 text-sm font-medium -mb-px border-b-2 transition-colors",
-              activeTab === "calibrate"
-                ? "border-foreground text-foreground"
-                : "border-transparent text-muted-foreground hover:text-foreground",
-            )}
-          >
-            Calibrate
-          </button>
+            <Button size="sm" disabled={isRunning || isStarting} onClick={handleStart}>
+              {isStarting ? "Starting..." : "Start Sync"}
+            </Button>
+          </div>
         </div>
-        <Button
-          variant={isConnected ? "destructive" : "default"}
-          onClick={isConnected ? disconnect : connect}
-        >
-          {isConnected ? "Disconnect" : "Connect USB"}
-        </Button>
+
+        {total > 0 && (
+          <div className="flex flex-col gap-1.5">
+            <div className="h-2 rounded-full bg-muted overflow-hidden">
+              <div
+                className="h-full bg-foreground transition-all duration-300"
+                style={{ width: `${progress}%` }}
+              />
+            </div>
+            <div className="flex gap-4 text-xs text-muted-foreground tabular-nums">
+              <span>
+                {done} / {total}
+              </span>
+              <span>{syncState.processed} vectorized</span>
+              <span>{syncState.skipped} skipped</span>
+              {syncState.errors > 0 && (
+                <span className="text-red-500">{syncState.errors} errors</span>
+              )}
+            </div>
+          </div>
+        )}
       </div>
 
-      {activeTab === "control" && (
-        <>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {MODULES.map((module) => (
-              <div
-                key={module}
-                className="rounded-lg border p-4 flex flex-col gap-4"
-              >
-                <h2 className="text-sm font-bold">Module {module}</h2>
-                {SERVOS.map((servo) => (
-                  <div key={servo.name} className="flex flex-col gap-1.5">
-                    <p className="text-xs text-muted-foreground">
-                      {servo.label}
-                    </p>
-                    <div className="flex gap-2">
-                      {servo.positions.map((position) => {
-                        const key = `${module}:${servo.name}`;
-                        const isActive = active[key] === position;
-                        return (
-                          <Button
-                            key={position}
-                            variant={isActive ? "default" : "outline"}
-                            size="lg"
-                            disabled={!isConnected}
-                            onClick={() =>
-                              handleServo(module, servo.name, position)
-                            }
-                            className="flex-1"
-                          >
-                            {position.toUpperCase()}
-                          </Button>
-                        );
-                      })}
-                    </div>
-                  </div>
-                ))}
-              </div>
+      {syncState.logs.length > 0 && (
+        <div className="rounded-lg border overflow-hidden">
+          <div className="px-3 py-2 border-b bg-muted/30">
+            <p className="text-xs font-medium text-muted-foreground">Log</p>
+          </div>
+          <div
+            ref={logRef}
+            className="h-64 overflow-y-auto p-3 font-mono text-xs leading-relaxed space-y-0.5"
+          >
+            {syncState.logs.map((line, i) => (
+              <p key={i} className="text-muted-foreground whitespace-pre-wrap break-all">
+                {line}
+              </p>
             ))}
           </div>
-        </>
-      )}
-
-      {activeTab === "calibrate" && (
-        <>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {MODULES.map((module) => {
-              const config = configs.find((c) => c.moduleNumber === module);
-              const cal = config?.calibration;
-              return (
-                <div
-                  key={module}
-                  className="rounded-lg border p-4 flex flex-col gap-5"
-                >
-                  <h2 className="text-sm font-bold">Module {module}</h2>
-                  {CALIBRATE_SERVOS.map((servo) => {
-                    const sliderKey = `${module}:${servo.name}` as SliderKey;
-                    const sliderValue = sliderValues[sliderKey] ?? 307;
-                    const servoDefault = SERVOS.find(
-                      (s) => s.name === servo.name,
-                    )!;
-                    return (
-                      <div key={servo.name} className="flex flex-col gap-2">
-                        <div className="flex items-center justify-between">
-                          <p className="text-xs text-muted-foreground">
-                            {servo.label}
-                          </p>
-                          <button
-                            disabled={!isConnected}
-                            onClick={() =>
-                              handleResetServo(module, servoDefault)
-                            }
-                            className="text-muted-foreground hover:text-foreground disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
-                            title={`Reset to ${servoDefault.defaultPosition}`}
-                          >
-                            <IconRotateClockwise size={12} />
-                          </button>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <input
-                            type="range"
-                            min={120}
-                            max={490}
-                            step={1}
-                            value={sliderValue}
-                            disabled={!isConnected}
-                            onChange={(e) =>
-                              handleSliderChange(
-                                module,
-                                servo.name,
-                                parseInt(e.target.value),
-                              )
-                            }
-                            className="flex-1 accent-foreground"
-                          />
-                          <span className="text-xs tabular-nums w-8 text-right">
-                            {sliderValue}
-                          </span>
-                        </div>
-                        <div className="flex flex-wrap gap-1.5">
-                          {servo.positions.map((pos) => (
-                            <Button
-                              key={pos.key}
-                              size="sm"
-                              variant="outline"
-                              disabled={!isConnected}
-                              onClick={() =>
-                                handleSetPosition(module, pos.key, sliderValue)
-                              }
-                            >
-                              {pos.label}
-                            </Button>
-                          ))}
-                        </div>
-                        {cal && (
-                          <p className="text-xs text-muted-foreground">
-                            {servo.positions.map((pos, i) => (
-                              <span key={pos.key}>
-                                {i > 0 && "  ·  "}
-                                {pos.label.replace("Set ", "")}={cal[pos.key]}
-                              </span>
-                            ))}
-                          </p>
-                        )}
-                      </div>
-                    );
-                  })}
-                </div>
-              );
-            })}
-          </div>
-        </>
+        </div>
       )}
     </div>
   );

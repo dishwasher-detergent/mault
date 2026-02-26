@@ -1,4 +1,4 @@
-import { BinCard } from "@/components/sort-bins/bin-card";
+import { BinCard } from "@/components/bins/bin-card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useBinConfigs } from "@/hooks/use-bin-configs";
 import { ButtonGroup } from "../ui/button-group";

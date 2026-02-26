@@ -1,14 +1,14 @@
-import { RuleGroupEditor } from "@/components/sort-bins/rule-group-editor";
+import { RuleGroupEditor } from "@/components/bins/rule-group-editor";
 import { Button } from "@/components/ui/button";
 import { FieldError } from "@/components/ui/field";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useBinConfigs } from "@/hooks/use-bin-configs";
-import { BinRuleGroup } from "@magic-vault/shared";
 import {
   binConfigSchema,
   type BinConfigFormValues,
 } from "@/schemas/sort-bins.schema";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { BinRuleGroup } from "@magic-vault/shared";
 import { useCallback, useEffect } from "react";
 import { Controller, useForm, type Resolver } from "react-hook-form";
 import { Label } from "../ui/label";
@@ -32,9 +32,7 @@ export function BinConfigPanel() {
     form.reset({
       isCatchAll: config.isCatchAll ?? false,
       rules:
-        config.rules.conditions.length > 0
-          ? config.rules
-          : emptyRuleGroup(),
+        config.rules.conditions.length > 0 ? config.rules : emptyRuleGroup(),
     });
   }, [config, form]);
 
@@ -73,35 +71,35 @@ export function BinConfigPanel() {
   const isCatchAll = form.watch("isCatchAll");
 
   return (
-    <div className="flex flex-col h-full gap-2">
-      <div className="flex items-center justify-between">
+    <div className="flex flex-col h-full">
+      <div className="flex items-center gap-4 mb-4">
         <h2 className="font-semibold">Bin {config.binNumber}</h2>
+        <Controller
+          name="isCatchAll"
+          control={form.control}
+          render={({ field }) => (
+            <div className="flex items-center gap-2">
+              <Button
+                type="button"
+                variant={field.value ? "default" : "outline"}
+                size="sm"
+                onClick={() => field.onChange(!field.value)}
+              >
+                {field.value ? "Catch-all enabled" : "Set as catch-all"}
+              </Button>
+              {field.value && (
+                <p className="text-xs text-muted-foreground">
+                  Cards that don&apos;t match any other bin will go here.
+                </p>
+              )}
+            </div>
+          )}
+        />
       </div>
-      <Controller
-        name="isCatchAll"
-        control={form.control}
-        render={({ field }) => (
-          <div className="flex items-center gap-2">
-            <Button
-              type="button"
-              variant={field.value ? "default" : "outline"}
-              size="sm"
-              onClick={() => field.onChange(!field.value)}
-            >
-              {field.value ? "Catch-all enabled" : "Set as catch-all"}
-            </Button>
-            {field.value && (
-              <p className="text-xs text-muted-foreground">
-                Cards that don&apos;t match any other bin will go here.
-              </p>
-            )}
-          </div>
-        )}
-      />
       {!isCatchAll && (
         <ScrollArea>
-          <div className="flex flex-col gap-2">
-            <Label>Rules</Label>
+          <Label className="mb-2">Rules</Label>
+          <div className="flex flex-col gap-2 border rounded-lg bg-sidebar p-2">
             <Controller
               name="rules"
               control={form.control}
@@ -121,7 +119,7 @@ export function BinConfigPanel() {
       {form.formState.errors.rules && (
         <FieldError errors={[form.formState.errors.rules]} />
       )}
-      <div className="flex gap-1.5">
+      <div className="flex gap-2 mt-2">
         <Button type="button" variant="destructive" onClick={handleClear}>
           Clear
         </Button>
