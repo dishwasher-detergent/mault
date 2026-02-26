@@ -5,10 +5,17 @@ import type {
   Result,
 } from "@magic-vault/shared";
 import { apiDelete, apiGet, apiPost, apiPut } from "@/lib/api/client";
+import { queryOptions } from "@tanstack/react-query";
 
 export async function loadSets(): Promise<Result<BinSet[]>> {
   return apiGet<Result<BinSet[]>>("/api/bins");
 }
+
+export const binsQueryOptions = queryOptions({
+  queryKey: ["bins"] as const,
+  queryFn: () => loadSets().then((r) => r.data ?? []),
+  staleTime: Infinity,
+});
 
 export async function activateSet(guid: string): Promise<Result<BinSet[]>> {
   return apiPut<Result<BinSet[]>>(`/api/bins/${guid}/active`);

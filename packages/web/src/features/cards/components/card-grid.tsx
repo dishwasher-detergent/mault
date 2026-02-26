@@ -1,12 +1,13 @@
 import { CardToolbar } from "./card-toolbar";
 import { ScannedCardItem } from "./scanned-card-item";
+import { Skeleton } from "@/components/ui/skeleton";
 import { useCardFilterSort } from "../api/use-card-filter-sort";
 import { useScannedCards } from "@/features/scanner/api/use-scanned-cards";
 import { exportToManabox } from "../lib/export-manabox";
 import { useCallback } from "react";
 
 export function CardGrid() {
-  const { cards, removeCard, clearCards } = useScannedCards();
+  const { cards, removeCard, clearCards, isLoading } = useScannedCards();
   const {
     filteredAndSorted,
     searchQuery,
@@ -18,6 +19,23 @@ export function CardGrid() {
   const handleExport = useCallback(() => {
     exportToManabox(cards);
   }, [cards]);
+
+  if (isLoading) {
+    return (
+      <div className="grid grid-cols-2 @sm:grid-cols-3 @md:grid-cols-2 @lg:grid-cols-3 @xl:grid-cols-4 @2xl:grid-cols-6 gap-2 p-2">
+        {Array.from({ length: 6 }).map((_, i) => (
+          <div key={i} className="rounded-lg p-1 bg-muted border border-border">
+            <Skeleton className="aspect-[2.5/3.5] rounded-lg" />
+            <div className="flex items-center gap-2 px-1 py-1">
+              <Skeleton className="size-3 rounded-full shrink-0" />
+              <Skeleton className="h-3 w-8 rounded" />
+              <Skeleton className="h-3 w-6 rounded" />
+            </div>
+          </div>
+        ))}
+      </div>
+    );
+  }
 
   if (cards.length === 0) {
     return (

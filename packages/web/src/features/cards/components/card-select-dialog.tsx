@@ -1,4 +1,8 @@
-import { QUERY_MIN_LENGTH, type ScryfallCard, type ScryfallCardWithDistance } from "@magic-vault/shared";
+import {
+  QUERY_MIN_LENGTH,
+  type ScryfallCard,
+  type ScryfallCardWithDistance,
+} from "@magic-vault/shared";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { DynamicDialog } from "@/components/ui/responsive-dialog";
@@ -19,6 +23,7 @@ import {
   IconSearch,
   IconTrash,
 } from "@tabler/icons-react";
+import { useQuery } from "@tanstack/react-query";
 import { useCallback, useMemo, useRef, useState } from "react";
 
 function formatManaCost(manaCost: string): string {
@@ -49,29 +54,26 @@ export function CardSelectDialog({
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState(!currentCard);
   const [query, setQuery] = useState<string>("");
-  const [results, setResults] = useState<ScryfallCard[]>([]);
-  const [loading, setLoading] = useState<boolean>(false);
+  const [debouncedQuery, setDebouncedQuery] = useState<string>("");
   const [selectedSet, setSelectedSet] = useState<string | null>("all");
   const debounceRef = useRef<ReturnType<typeof setTimeout>>(null);
 
   const { addCard, correctCard } = useScannedCards();
-  const search = useCallback(async (q: string) => {
-    if (q.trim().length < QUERY_MIN_LENGTH) {
-      setResults([]);
-      return;
-    }
 
-    setLoading(true);
-    const response = await Search(q);
-    setResults(response.data ?? []);
-    setLoading(false);
-  }, []);
+  const isQueryReady = debouncedQuery.trim().length >= QUERY_MIN_LENGTH;
+
+  const { data: results = [], isFetching: loading } = useQuery({
+    queryKey: ["scryfall", "search", debouncedQuery],
+    queryFn: () => Search(debouncedQuery).then((r) => r.data ?? []),
+    enabled: isQueryReady,
+    staleTime: 60_000,
+  });
 
   const handleInputChange = (value: string) => {
     setQuery(value);
     setSelectedSet("all");
     if (debounceRef.current) clearTimeout(debounceRef.current);
-    debounceRef.current = setTimeout(() => search(value), 300);
+    debounceRef.current = setTimeout(() => setDebouncedQuery(value), 300);
   };
 
   const handleSelect = useCallback(
@@ -91,7 +93,7 @@ export function CardSelectDialog({
       setOpen(isOpen);
       if (!isOpen) {
         setQuery("");
-        setResults([]);
+        setDebouncedQuery("");
         setSelectedSet("all");
         setEditing(!currentCard);
       }

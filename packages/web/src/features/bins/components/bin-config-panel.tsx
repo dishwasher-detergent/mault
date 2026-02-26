@@ -1,6 +1,7 @@
 import { RuleGroupEditor } from "./rule-group-editor";
 import { Button } from "@/components/ui/button";
 import { FieldError } from "@/components/ui/field";
+import { IconLoader2 } from "@tabler/icons-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useBinConfigs } from "../api/use-bin-configs";
 import {
@@ -18,7 +19,7 @@ function emptyRuleGroup(): BinRuleGroup {
 }
 
 export function BinConfigPanel() {
-  const { selectedConfig: config, save, clear, configs } = useBinConfigs();
+  const { selectedConfig: config, save, clear, configs, isPending } = useBinConfigs();
 
   const form = useForm<BinConfigFormValues>({
     resolver: zodResolver(binConfigSchema) as Resolver<BinConfigFormValues>,
@@ -120,10 +121,11 @@ export function BinConfigPanel() {
         <FieldError errors={[form.formState.errors.rules]} />
       )}
       <div className="flex gap-2 mt-2 justify-end">
-        <Button type="button" variant="destructive" onClick={handleClear}>
+        <Button type="button" variant="destructive" onClick={handleClear} disabled={isPending}>
           Clear
         </Button>
-        <Button type="button" onClick={form.handleSubmit(handleSave)}>
+        <Button type="button" onClick={form.handleSubmit(handleSave)} disabled={isPending}>
+          {isPending && <IconLoader2 className="size-4 animate-spin" />}
           Save
         </Button>
       </div>

@@ -4,26 +4,33 @@ import {
   ModuleConfig,
   ServoCalibration,
 } from "@magic-vault/shared";
-import {
-  getModuleConfigs,
-  saveModuleConfig,
-} from "./module-configs";
+import { modulesQueryOptions, saveModuleConfig } from "./module-configs";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   createContext,
   useCallback,
   useContext,
   useEffect,
   useRef,
-  useState,
 } from "react";
+import { toast } from "sonner";
 
 interface ModuleConfigsContextValue {
   configs: ModuleConfig[];
-  saveConfig: (moduleNumber: 1 | 2 | 3, calibration: ServoCalibration) => Promise<void>;
-  moveServo: (module: 1 | 2 | 3, servo: "bottom" | "paddle" | "pusher", value: number) => void;
+  saveConfig: (
+    moduleNumber: 1 | 2 | 3,
+    calibration: ServoCalibration,
+  ) => Promise<void>;
+  moveServo: (
+    module: 1 | 2 | 3,
+    servo: "bottom" | "paddle" | "pusher",
+    value: number,
+  ) => void;
 }
 
-const ModuleConfigsContext = createContext<ModuleConfigsContextValue | null>(null);
+const ModuleConfigsContext = createContext<ModuleConfigsContextValue | null>(
+  null,
+);
 
 function defaultConfigs(): ModuleConfig[] {
   return ([1, 2, 3] as const).map((n) => ({
@@ -32,23 +39,20 @@ function defaultConfigs(): ModuleConfig[] {
   }));
 }
 
-export function ModuleConfigsProvider({ children }: { children: React.ReactNode }) {
+export function ModuleConfigsProvider({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  const queryClient = useQueryClient();
   const { isReady, sendCommand } = useSerial();
-  const [configs, setConfigs] = useState<ModuleConfig[]>(defaultConfigs);
-  const configsRef = useRef(configs);
-  configsRef.current = configs;
 
+  const { data: configs = defaultConfigs() } = useQuery(modulesQueryOptions);
+
+  const configsRef = useRef(configs);
   useEffect(() => {
-    let cancelled = false;
-    getModuleConfigs().then((result) => {
-      if (!cancelled && result.success && result.data) {
-        setConfigs(result.data);
-      }
-    });
-    return () => {
-      cancelled = true;
-    };
-  }, []);
+    configsRef.current = configs;
+  }, [configs]);
 
   useEffect(() => {
     if (!isReady) return;
@@ -63,25 +67,52 @@ export function ModuleConfigsProvider({ children }: { children: React.ReactNode 
     })();
   }, [isReady, sendCommand]);
 
+  const saveConfigMutation = useMutation({
+    mutationFn: ({
+      moduleNumber,
+      calibration,
+    }: {
+      moduleNumber: 1 | 2 | 3;
+      calibration: ServoCalibration;
+    }) => saveModuleConfig(moduleNumber, calibration),
+    onMutate: async ({ moduleNumber, calibration }) => {
+      await queryClient.cancelQueries({ queryKey: ["modules"] });
+      const previous = queryClient.getQueryData<ModuleConfig[]>(["modules"]);
+      queryClient.setQueryData<ModuleConfig[]>(["modules"], (old = defaultConfigs()) =>
+        old.map((c) =>
+          c.moduleNumber === moduleNumber ? { ...c, calibration } : c,
+        ),
+      );
+      return { previous };
+    },
+    onError: (_err, _vars, context) => {
+      if (context?.previous)
+        queryClient.setQueryData(["modules"], context.previous);
+      toast.error("Failed to save module config");
+    },
+    onSuccess: (result, { moduleNumber, calibration }) => {
+      if (result.success && result.data) {
+        queryClient.setQueryData(["modules"], result.data);
+      }
+      sendCommand(
+        JSON.stringify({ setConfig: { module: moduleNumber, ...calibration } }),
+      );
+    },
+  });
+
   const saveConfig = useCallback(
     async (moduleNumber: 1 | 2 | 3, calibration: ServoCalibration) => {
-      setConfigs((prev) =>
-        prev.map((c) => (c.moduleNumber === moduleNumber ? { ...c, calibration } : c)),
-      );
-
-      const result = await saveModuleConfig(moduleNumber, calibration);
-      if (result.success && result.data) {
-        setConfigs(result.data);
-        sendCommand(
-          JSON.stringify({ setConfig: { module: moduleNumber, ...calibration } }),
-        );
-      }
+      await saveConfigMutation.mutateAsync({ moduleNumber, calibration });
     },
-    [sendCommand],
+    [saveConfigMutation],
   );
 
   const moveServo = useCallback(
-    (module: 1 | 2 | 3, servo: "bottom" | "paddle" | "pusher", value: number) => {
+    (
+      module: 1 | 2 | 3,
+      servo: "bottom" | "paddle" | "pusher",
+      value: number,
+    ) => {
       sendCommand(JSON.stringify({ servo, module, value }));
     },
     [sendCommand],
@@ -97,7 +128,9 @@ export function ModuleConfigsProvider({ children }: { children: React.ReactNode 
 export function useModuleConfigs() {
   const context = useContext(ModuleConfigsContext);
   if (!context) {
-    throw new Error("useModuleConfigs must be used within a ModuleConfigsProvider");
+    throw new Error(
+      "useModuleConfigs must be used within a ModuleConfigsProvider",
+    );
   }
   return context;
 }

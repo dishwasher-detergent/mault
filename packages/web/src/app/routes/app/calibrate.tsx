@@ -1,5 +1,8 @@
 import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
+import { modulesQueryOptions } from "@/features/calibration/api/module-configs";
 import { useModuleConfigs } from "@/features/calibration/api/use-module-configs";
+import { useQuery } from "@tanstack/react-query";
 import { useSerial } from "@/features/scanner/api/use-serial";
 import type { ServoCalibration } from "@magic-vault/shared";
 import { IconRotateClockwise } from "@tabler/icons-react";
@@ -65,6 +68,7 @@ function defaultSliderValues(): Record<SliderKey, number> {
 export default function CalibratePage() {
   const { isConnected, sendCommand } = useSerial();
   const { configs, saveConfig, moveServo } = useModuleConfigs();
+  const { isLoading } = useQuery(modulesQueryOptions);
   const [active, setActive] = useState<ActivePositions>({});
   const activeRef = useRef(active);
   activeRef.current = active;
@@ -212,7 +216,9 @@ export default function CalibratePage() {
                         </Button>
                       ))}
                     </div>
-                    {cal && (
+                    {isLoading ? (
+                      <Skeleton className="h-3 w-32 rounded" />
+                    ) : cal ? (
                       <p className="text-xs text-muted-foreground">
                         {servo.calibrationPositions.map((pos, i) => (
                           <span key={pos.key}>
@@ -221,7 +227,7 @@ export default function CalibratePage() {
                           </span>
                         ))}
                       </p>
-                    )}
+                    ) : null}
                   </div>
                 );
               })}

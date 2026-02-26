@@ -1,5 +1,8 @@
 import { Button } from "@/components/ui/button";
 import { ButtonGroup } from "@/components/ui/button-group";
+import { Skeleton } from "@/components/ui/skeleton";
+import { binsQueryOptions } from "../api/sort-bins";
+import { useQuery } from "@tanstack/react-query";
 import { Field, FieldError, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { DynamicDialog } from "@/components/ui/responsive-dialog";
@@ -21,7 +24,7 @@ import {
   type CreateSetFormValues,
 } from "@/schemas/sort-bins.schema";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { IconEdit, IconPlus, IconTrash } from "@tabler/icons-react";
+import { IconEdit, IconLoader2, IconPlus, IconTrash } from "@tabler/icons-react";
 import { useCallback, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { Link } from "react-router-dom";
@@ -31,8 +34,17 @@ interface PresetSelectorProps {
 }
 
 export function PresetSelector({ readOnly }: PresetSelectorProps) {
-  const { sets, activateSet, createSet, renameSet, deleteSet, selectedSet } =
-    useBinConfigs();
+  const {
+    sets,
+    activateSet,
+    createSet,
+    renameSet,
+    deleteSet,
+    selectedSet,
+    isActivating,
+    isPresetMutating,
+  } = useBinConfigs();
+  const { isLoading } = useQuery(binsQueryOptions);
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
   const [renameDialogOpen, setRenameDialogOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
@@ -89,6 +101,23 @@ export function PresetSelector({ readOnly }: PresetSelectorProps) {
     setDeleteDialogOpen(false);
   }, [selectedSet, deleteSet]);
 
+  if (isLoading) {
+    return (
+      <ButtonGroup className="w-full">
+        <Skeleton className="h-9 flex-1 rounded-md" />
+        {readOnly ? (
+          <Skeleton className="size-9 shrink-0" />
+        ) : (
+          <>
+            <Skeleton className="size-9 shrink-0" />
+            <Skeleton className="size-9 shrink-0" />
+            <Skeleton className="size-9 shrink-0" />
+          </>
+        )}
+      </ButtonGroup>
+    );
+  }
+
   return (
     <ButtonGroup className="w-full">
       <Select
@@ -96,9 +125,14 @@ export function PresetSelector({ readOnly }: PresetSelectorProps) {
         value={selectedSet?.guid ?? ""}
         onValueChange={(guid) => activateSet(guid!)}
       >
-        <SelectTrigger className="flex-1 overflow-hidden">
+        <SelectTrigger className="flex-1 overflow-hidden" disabled={isActivating}>
           <SelectValue placeholder="Select a set...">
-            <span className="truncate">{selectedSet?.name}</span>
+            <span className="flex items-center gap-1.5 min-w-0">
+              {isActivating && (
+                <IconLoader2 className="size-3 animate-spin shrink-0 text-muted-foreground" />
+              )}
+              <span className="truncate">{selectedSet?.name}</span>
+            </span>
           </SelectValue>
         </SelectTrigger>
         <SelectContent>
@@ -132,7 +166,7 @@ export function PresetSelector({ readOnly }: PresetSelectorProps) {
             title="Delete Set"
             description={`Are you sure you want to delete "${selectedSet?.name}"? This cannot be undone.`}
             trigger={
-              <Button variant="outline" size="icon" disabled={!selectedSet}>
+              <Button variant="outline" size="icon" disabled={!selectedSet || isPresetMutating}>
                 <IconTrash />
               </Button>
             }
@@ -144,7 +178,8 @@ export function PresetSelector({ readOnly }: PresetSelectorProps) {
                 >
                   Cancel
                 </Button>
-                <Button variant="destructive" onClick={handleDelete}>
+                <Button variant="destructive" onClick={handleDelete} disabled={isPresetMutating}>
+                  {isPresetMutating && <IconLoader2 className="size-4 animate-spin" />}
                   Delete
                 </Button>
               </>
@@ -157,7 +192,7 @@ export function PresetSelector({ readOnly }: PresetSelectorProps) {
             title="Rename Set"
             description="Enter a new name for this set."
             trigger={
-              <Button variant="outline" size="icon" disabled={!selectedSet}>
+              <Button variant="outline" size="icon" disabled={!selectedSet || isPresetMutating}>
                 <IconEdit />
               </Button>
             }
@@ -171,8 +206,9 @@ export function PresetSelector({ readOnly }: PresetSelectorProps) {
                 </Button>
                 <Button
                   onClick={renameForm.handleSubmit(handleRename)}
-                  disabled={!renameForm.formState.isValid}
+                  disabled={!renameForm.formState.isValid || isPresetMutating}
                 >
+                  {isPresetMutating && <IconLoader2 className="size-4 animate-spin" />}
                   Rename
                 </Button>
               </>
@@ -207,7 +243,7 @@ export function PresetSelector({ readOnly }: PresetSelectorProps) {
             title="New Set"
             description="Create a new set with 7 empty bins."
             trigger={
-              <Button variant="outline" size="icon">
+              <Button variant="outline" size="icon" disabled={isPresetMutating}>
                 <IconPlus />
               </Button>
             }
@@ -221,8 +257,9 @@ export function PresetSelector({ readOnly }: PresetSelectorProps) {
                 </Button>
                 <Button
                   onClick={createForm.handleSubmit(handleCreate)}
-                  disabled={!createForm.formState.isValid}
+                  disabled={!createForm.formState.isValid || isPresetMutating}
                 >
+                  {isPresetMutating && <IconLoader2 className="size-4 animate-spin" />}
                   Create
                 </Button>
               </>

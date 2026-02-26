@@ -2,6 +2,7 @@ import { Button } from "@/components/ui/button";
 import { cancelSync, createSyncEventSource, startSync } from "@/lib/api/admin";
 import { cn } from "@/lib/utils";
 import type { SyncState } from "@magic-vault/shared";
+import { useMutation } from "@tanstack/react-query";
 import { useEffect, useRef, useState } from "react";
 
 const DEFAULT_SYNC_STATE: SyncState = {
@@ -24,7 +25,6 @@ const STATUS_COLORS: Record<SyncState["status"], string> = {
 
 export default function AdminPage() {
   const [syncState, setSyncState] = useState<SyncState>(DEFAULT_SYNC_STATE);
-  const [isStarting, setIsStarting] = useState(false);
   const logRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -82,14 +82,8 @@ export default function AdminPage() {
     }
   }, [syncState.logs]);
 
-  const handleStart = async () => {
-    setIsStarting(true);
-    try {
-      await startSync();
-    } finally {
-      setIsStarting(false);
-    }
-  };
+  const startSyncMutation = useMutation({ mutationFn: startSync });
+  const cancelSyncMutation = useMutation({ mutationFn: cancelSync });
 
   const total = syncState.total;
   const done = syncState.processed + syncState.skipped;
@@ -114,16 +108,21 @@ export default function AdminPage() {
           </div>
           <div className="flex gap-2">
             {isRunning && (
-              <Button variant="outline" size="sm" onClick={() => cancelSync()}>
-                Cancel
+              <Button
+                variant="outline"
+                size="sm"
+                disabled={cancelSyncMutation.isPending}
+                onClick={() => cancelSyncMutation.mutate()}
+              >
+                {cancelSyncMutation.isPending ? "Cancelling..." : "Cancel"}
               </Button>
             )}
             <Button
               size="sm"
-              disabled={isRunning || isStarting}
-              onClick={handleStart}
+              disabled={isRunning || startSyncMutation.isPending}
+              onClick={() => startSyncMutation.mutate()}
             >
-              {isStarting ? "Starting..." : "Start Sync"}
+              {startSyncMutation.isPending ? "Starting..." : "Start Sync"}
             </Button>
           </div>
         </div>
