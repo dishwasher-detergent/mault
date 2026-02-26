@@ -97,7 +97,7 @@ export default function AdminPage() {
   const isRunning = syncState.status === "running";
 
   return (
-    <div className="flex flex-col gap-6 p-6 max-w-4xl mx-auto">
+    <div className="flex flex-col gap-6 p-6 max-w-4xl mx-auto w-full">
       <div className="rounded-lg border p-4 flex flex-col gap-4">
         <div className="flex items-center justify-between">
           <div className="flex flex-col gap-0.5">

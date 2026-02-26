@@ -57,7 +57,7 @@ export function SyncIndicator() {
       cancelled = true;
       es?.close();
     };
-  }, []);
+  }, [isAdmin]);
 
   const { status, total, processed, skipped } = syncState;
   const done = processed + skipped;
@@ -80,7 +80,7 @@ export function SyncIndicator() {
       ? `${done.toLocaleString()} / ${total.toLocaleString()}`
       : status.charAt(0).toUpperCase() + status.slice(1);
 
-  if (isAdmin) return null;
+  if (!isAdmin) return null;
 
   return (
     <button

@@ -1,4 +1,9 @@
-import { BIN_COUNT, BinConfig, BinRuleGroup, BinSet } from "@magic-vault/shared";
+import {
+  BIN_COUNT,
+  BinConfig,
+  BinRuleGroup,
+  BinSet,
+} from "@magic-vault/shared";
 
 import {
   activateSet as activateSetAction,
@@ -43,6 +48,7 @@ interface BinConfigsContextValue {
   isPending: boolean;
   hasCatchAll: boolean;
   selectedBin: number;
+  selectedSet?: BinSet;
   setSelectedBin: (bin: number) => void;
   selectedConfig: BinConfig;
   save: (binNumber: number, rules: BinRuleGroup, isCatchAll?: boolean) => void;
@@ -60,9 +66,11 @@ function applySets(
   sets: BinSet[],
   setSets: (s: BinSet[]) => void,
   setConfigs: (c: BinConfig[]) => void,
+  setSelectedSet: (c: BinSet | undefined) => void,
 ) {
   setSets(sets);
-  const active = sets.find((s) => s.isActive);
+  const active = sets.find((s) => s.isActive) ?? sets[0];
+  setSelectedSet(active);
   setConfigs(configsFromSet(active));
 }
 
@@ -71,21 +79,27 @@ export function BinConfigsProvider({
 }: {
   children: React.ReactNode;
 }) {
-  const [configs, setConfigs] = useState<BinConfig[]>(() => configsFromSet(undefined));
+  const [configs, setConfigs] = useState<BinConfig[]>(() =>
+    configsFromSet(undefined),
+  );
   const [sets, setSets] = useState<BinSet[]>([]);
   const [isPending, startTransition] = useTransition();
   const [selectedBin, setSelectedBin] = useState(1);
+  const [selectedSet, setSelectedSet] = useState<BinSet | undefined>();
 
   const selectedConfig =
     configs.find((c) => c.binNumber === selectedBin) ?? configs[0];
 
-  const hasCatchAll = useMemo(() => configs.some((c) => c.isCatchAll), [configs]);
+  const hasCatchAll = useMemo(
+    () => configs.some((c) => c.isCatchAll),
+    [configs],
+  );
 
   useEffect(() => {
     let cancelled = false;
     loadSets().then((result) => {
       if (!cancelled && result.success && result.data) {
-        applySets(result.data, setSets, setConfigs);
+        applySets(result.data, setSets, setConfigs, setSelectedSet);
       }
     });
     return () => {
@@ -133,7 +147,7 @@ export function BinConfigsProvider({
     const result = await activateSetAction(guid);
     if (result.success && result.data) {
       setSelectedBin(1);
-      applySets(result.data, setSets, setConfigs);
+      applySets(result.data, setSets, setConfigs, setSelectedSet);
     }
   }, []);
 
@@ -141,21 +155,21 @@ export function BinConfigsProvider({
     const result = await createSetAction(name);
     if (result.success && result.data) {
       setSelectedBin(1);
-      applySets(result.data, setSets, setConfigs);
+      applySets(result.data, setSets, setConfigs, setSelectedSet);
     }
   }, []);
 
   const saveSetFn = useCallback(async (name: string) => {
     const result = await saveSetAction(name);
     if (result.success && result.data) {
-      applySets(result.data, setSets, setConfigs);
+      applySets(result.data, setSets, setConfigs, setSelectedSet);
     }
   }, []);
 
   const renameSetFn = useCallback(async (guid: string, name: string) => {
     const result = await renameSetAction(guid, name);
     if (result.success && result.data) {
-      applySets(result.data, setSets, setConfigs);
+      applySets(result.data, setSets, setConfigs, setSelectedSet);
     }
   }, []);
 
@@ -163,7 +177,7 @@ export function BinConfigsProvider({
     const result = await deleteSetAction(guid);
     if (result.success && result.data) {
       setSelectedBin(1);
-      applySets(result.data, setSets, setConfigs);
+      applySets(result.data, setSets, setConfigs, setSelectedSet);
     }
   }, []);
 
@@ -177,6 +191,7 @@ export function BinConfigsProvider({
         selectedBin,
         setSelectedBin,
         selectedConfig,
+        selectedSet,
         save,
         clear,
         activateSet: activateSetFn,

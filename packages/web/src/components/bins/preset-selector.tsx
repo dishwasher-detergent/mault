@@ -10,6 +10,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { useBinConfigs } from "@/hooks/use-bin-configs";
 import {
   createSetSchema,
@@ -20,20 +25,17 @@ import { IconEdit, IconPlus, IconTrash } from "@tabler/icons-react";
 import { useCallback, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { Link } from "react-router-dom";
-import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
 
 interface PresetSelectorProps {
   readOnly?: boolean;
 }
 
 export function PresetSelector({ readOnly }: PresetSelectorProps) {
-  const { sets, activateSet, createSet, renameSet, deleteSet } =
+  const { sets, activateSet, createSet, renameSet, deleteSet, selectedSet } =
     useBinConfigs();
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
   const [renameDialogOpen, setRenameDialogOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-
-  const activeSet = sets.find((s) => s.isActive);
 
   const createForm = useForm<CreateSetFormValues>({
     resolver: zodResolver(createSetSchema),
@@ -43,7 +45,7 @@ export function PresetSelector({ readOnly }: PresetSelectorProps) {
 
   const renameForm = useForm<CreateSetFormValues>({
     resolver: zodResolver(createSetSchema),
-    defaultValues: { name: activeSet?.name ?? "" },
+    defaultValues: { name: selectedSet?.name ?? "" },
     mode: "onChange",
   });
 
@@ -66,37 +68,37 @@ export function PresetSelector({ readOnly }: PresetSelectorProps) {
 
   const handleRename = useCallback(
     async (values: CreateSetFormValues) => {
-      if (!activeSet) return;
-      await renameSet(activeSet.guid, values.name);
+      if (!selectedSet) return;
+      await renameSet(selectedSet.guid, values.name);
       setRenameDialogOpen(false);
     },
-    [activeSet, renameSet],
+    [selectedSet, renameSet],
   );
 
   const handleRenameDialogChange = useCallback(
     (open: boolean) => {
       setRenameDialogOpen(open);
-      if (open) renameForm.reset({ name: activeSet?.name ?? "" });
+      if (open) renameForm.reset({ name: selectedSet?.name ?? "" });
     },
-    [activeSet, renameForm],
+    [selectedSet, renameForm],
   );
 
   const handleDelete = useCallback(async () => {
-    if (!activeSet) return;
-    await deleteSet(activeSet.guid);
+    if (!selectedSet) return;
+    await deleteSet(selectedSet.guid);
     setDeleteDialogOpen(false);
-  }, [activeSet, deleteSet]);
+  }, [selectedSet, deleteSet]);
 
   return (
     <ButtonGroup className="w-full">
       <Select
-        key={activeSet?.guid ?? ""}
-        value={activeSet?.guid ?? ""}
+        key={selectedSet?.guid ?? ""}
+        value={selectedSet?.guid ?? ""}
         onValueChange={(guid) => activateSet(guid!)}
       >
         <SelectTrigger className="flex-1 overflow-hidden">
           <SelectValue placeholder="Select a set...">
-            <span className="truncate">{activeSet?.name}</span>
+            <span className="truncate">{selectedSet?.name}</span>
           </SelectValue>
         </SelectTrigger>
         <SelectContent>
@@ -128,9 +130,9 @@ export function PresetSelector({ readOnly }: PresetSelectorProps) {
             open={deleteDialogOpen}
             onOpenChange={setDeleteDialogOpen}
             title="Delete Set"
-            description={`Are you sure you want to delete "${activeSet?.name}"? This cannot be undone.`}
+            description={`Are you sure you want to delete "${selectedSet?.name}"? This cannot be undone.`}
             trigger={
-              <Button variant="outline" size="icon" disabled={!activeSet}>
+              <Button variant="outline" size="icon" disabled={!selectedSet}>
                 <IconTrash />
               </Button>
             }
@@ -155,7 +157,7 @@ export function PresetSelector({ readOnly }: PresetSelectorProps) {
             title="Rename Set"
             description="Enter a new name for this set."
             trigger={
-              <Button variant="outline" size="icon" disabled={!activeSet}>
+              <Button variant="outline" size="icon" disabled={!selectedSet}>
                 <IconEdit />
               </Button>
             }
