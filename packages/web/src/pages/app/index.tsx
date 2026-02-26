@@ -47,7 +47,7 @@ export default function App() {
       </nav>
     </div>
   ) : (
-    <div className="grid grid-cols-12 flex-1 min-h-0 overflow-hidden p-4 gap-4">
+    <div className="grid grid-cols-12 flex-1 min-h-0 overflow-hidden p-4 gap-2">
       <section className="col-span-5 md:col-span-5 lg:col-span-4 xl:col-span-3 overflow-hidden flex flex-col h-full">
         <div className="w-full overflow-hidden flex flex-col border rounded-lg p-2 bg-sidebar">
           <PresetSelector readOnly />
@@ -58,7 +58,9 @@ export default function App() {
         </div>
       </section>
       <section className="col-span-7 md:col-span-7 lg:col-span-8 xl:col-span-9 overflow-y-auto h-full @container">
-        <CardGrid />
+        <div className="border rounded-lg bg-sidebar">
+          <CardGrid />
+        </div>
       </section>
     </div>
   );

@@ -71,7 +71,7 @@ export function BinConfigPanel() {
   const isCatchAll = form.watch("isCatchAll");
 
   return (
-    <div className="flex flex-col h-full">
+    <div className="flex flex-col">
       <div className="flex items-center gap-4 mb-4">
         <h2 className="font-semibold">Bin {config.binNumber}</h2>
         <Controller
@@ -99,7 +99,7 @@ export function BinConfigPanel() {
       {!isCatchAll && (
         <ScrollArea>
           <Label className="mb-2">Rules</Label>
-          <div className="flex flex-col gap-2 border rounded-lg bg-sidebar p-2">
+          <div className="flex flex-col gap-2 border rounded-lg bg-background p-2">
             <Controller
               name="rules"
               control={form.control}
