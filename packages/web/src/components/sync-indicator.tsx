@@ -1,5 +1,5 @@
 import { useRole } from "@/hooks/use-role";
-import { createSyncEventSource } from "@/lib/api-admin";
+import { createSyncEventSource } from "@/lib/api/admin";
 import { cn } from "@/lib/utils";
 import type { SyncState } from "@magic-vault/shared";
 import { useEffect, useState } from "react";
