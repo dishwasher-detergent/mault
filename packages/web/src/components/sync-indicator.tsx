@@ -1,3 +1,4 @@
+import { useRole } from "@/hooks/use-role";
 import { createSyncEventSource } from "@/lib/api-admin";
 import { cn } from "@/lib/utils";
 import type { SyncState } from "@magic-vault/shared";
@@ -18,6 +19,7 @@ export function SyncIndicator() {
   const [syncState, setSyncState] = useState<SyncState>(DEFAULT);
   const navigate = useNavigate();
   const { pathname } = useLocation();
+  const { isAdmin } = useRole();
 
   useEffect(() => {
     let es: EventSource | null = null;
@@ -48,7 +50,9 @@ export function SyncIndicator() {
       }
     }
 
-    connect();
+    if (isAdmin) {
+      connect();
+    }
     return () => {
       cancelled = true;
       es?.close();
@@ -75,6 +79,8 @@ export function SyncIndicator() {
     status === "running" && total > 0
       ? `${done.toLocaleString()} / ${total.toLocaleString()}`
       : status.charAt(0).toUpperCase() + status.slice(1);
+
+  if (isAdmin) return null;
 
   return (
     <button

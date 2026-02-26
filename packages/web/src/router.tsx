@@ -1,10 +1,11 @@
+import { useRole } from "@/hooks/use-role";
 import AdminPage from "@/pages/app/admin";
 import ScannerPage from "@/pages/app/index";
 import AppLayout from "@/pages/app/layout";
 import AuthPage from "@/pages/auth";
 import LandingPage from "@/pages/index";
 import { RedirectToSignIn, SignedIn } from "@neondatabase/neon-js/auth/react";
-import { createBrowserRouter, Outlet } from "react-router-dom";
+import { createBrowserRouter, Navigate, Outlet } from "react-router-dom";
 import AccountPage from "./pages/app/account";
 import BinsPage from "./pages/app/bins";
 import CalibratePage from "./pages/app/calibrate";
@@ -18,6 +19,13 @@ function AuthGuard() {
       <RedirectToSignIn />
     </>
   );
+}
+
+function AdminGuard() {
+  const { isAdmin, isPending } = useRole();
+  if (isPending) return null;
+  if (!isAdmin) return <Navigate to="/app" replace />;
+  return <Outlet />;
 }
 
 export const router = createBrowserRouter([
@@ -48,8 +56,13 @@ export const router = createBrowserRouter([
             element: <CalibratePage />,
           },
           {
-            path: "/app/admin",
-            element: <AdminPage />,
+            element: <AdminGuard />,
+            children: [
+              {
+                path: "/app/admin",
+                element: <AdminPage />,
+              },
+            ],
           },
           {
             path: "/app/account/:path",

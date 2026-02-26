@@ -1,14 +1,17 @@
-import { Button } from "@/components/ui/button";
 import { SyncIndicator } from "@/components/sync-indicator";
+import { Button } from "@/components/ui/button";
 import { Toaster } from "@/components/ui/sonner";
 import { BinConfigsProvider } from "@/hooks/use-bin-configs";
 import { ModuleConfigsProvider } from "@/hooks/use-module-configs";
+import { useRole } from "@/hooks/use-role";
 import { ScannedCardsProvider } from "@/hooks/use-scanned-cards";
 import { SerialProvider } from "@/hooks/use-serial";
 import { UserButton } from "@neondatabase/neon-js/auth/react";
 import { Link, Outlet } from "react-router-dom";
 
 export default function AppLayout() {
+  const { isAdmin } = useRole();
+
   return (
     <SerialProvider>
       <BinConfigsProvider>
@@ -23,13 +26,15 @@ export default function AppLayout() {
                   Mault
                 </Link>
                 <div className="flex items-center gap-2">
-                  <Button
-                    variant="ghost"
-                    nativeButton={false}
-                    render={<Link to="/app/admin" />}
-                  >
-                    Admin
-                  </Button>
+                  {isAdmin && (
+                    <Button
+                      variant="ghost"
+                      nativeButton={false}
+                      render={<Link to="/app/admin" />}
+                    >
+                      Admin
+                    </Button>
+                  )}
                   <UserButton size="icon" />
                 </div>
               </nav>

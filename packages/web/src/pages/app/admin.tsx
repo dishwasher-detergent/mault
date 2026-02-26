@@ -102,8 +102,14 @@ export default function AdminPage() {
         <div className="flex items-center justify-between">
           <div className="flex flex-col gap-0.5">
             <p className="text-sm font-medium">Card Image Vectors</p>
-            <p className={cn("text-xs font-medium", STATUS_COLORS[syncState.status])}>
-              {syncState.status.charAt(0).toUpperCase() + syncState.status.slice(1)}
+            <p
+              className={cn(
+                "text-xs font-medium",
+                STATUS_COLORS[syncState.status],
+              )}
+            >
+              {syncState.status.charAt(0).toUpperCase() +
+                syncState.status.slice(1)}
             </p>
           </div>
           <div className="flex gap-2">
@@ -112,7 +118,11 @@ export default function AdminPage() {
                 Cancel
               </Button>
             )}
-            <Button size="sm" disabled={isRunning || isStarting} onClick={handleStart}>
+            <Button
+              size="sm"
+              disabled={isRunning || isStarting}
+              onClick={handleStart}
+            >
               {isStarting ? "Starting..." : "Start Sync"}
             </Button>
           </div>
@@ -150,7 +160,10 @@ export default function AdminPage() {
             className="h-64 overflow-y-auto p-3 font-mono text-xs leading-relaxed space-y-0.5"
           >
             {syncState.logs.map((line, i) => (
-              <p key={i} className="text-muted-foreground whitespace-pre-wrap break-all">
+              <p
+                key={i}
+                className="text-muted-foreground whitespace-pre-wrap break-all"
+              >
                 {line}
               </p>
             ))}
