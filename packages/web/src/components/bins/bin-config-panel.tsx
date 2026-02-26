@@ -119,7 +119,7 @@ export function BinConfigPanel() {
       {form.formState.errors.rules && (
         <FieldError errors={[form.formState.errors.rules]} />
       )}
-      <div className="flex gap-2 mt-2">
+      <div className="flex gap-2 mt-2 justify-end">
         <Button type="button" variant="destructive" onClick={handleClear}>
           Clear
         </Button>

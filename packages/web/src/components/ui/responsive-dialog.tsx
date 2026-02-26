@@ -88,7 +88,7 @@ export function DynamicDialog({
                 </DrawerDescription>
               )}
             </DrawerHeader>
-            <div className="p-4 pt-0 flex flex-col gap-2">{children}</div>
+            <div className="p-4 pt-2 flex flex-col gap-2">{children}</div>
             {footer && (
               <DrawerFooter className={cn("pt-0", footerClassName)}>
                 {footer}

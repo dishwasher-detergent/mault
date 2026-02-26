@@ -1,14 +1,3 @@
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -20,6 +9,8 @@ import {
 } from "@/components/ui/select";
 import { IconDownload, IconTrash } from "@tabler/icons-react";
 import { useState } from "react";
+import { ButtonGroup } from "../ui/button-group";
+import { DynamicDialog } from "../ui/responsive-dialog";
 
 interface CardToolbarProps {
   searchQuery: string;
@@ -82,42 +73,46 @@ export function CardToolbar({
           <SelectItem value="edhrec-desc">Rank (Worst First)</SelectItem>
         </SelectContent>
       </Select>
-      <Button
-        variant="outline"
-        size="icon"
-        onClick={onExport}
-        disabled={!hasCards}
-        className="shrink-0"
-      >
-        <IconDownload className="size-4" />
-      </Button>
-      <AlertDialog
-        open={clearAllDialogOpen}
-        onOpenChange={setClearAllDialogOpen}
-      >
-        <AlertDialogTrigger
-          render={
+      <ButtonGroup>
+        <Button
+          variant="outline"
+          size="icon"
+          onClick={onExport}
+          disabled={!hasCards}
+          className="shrink-0"
+        >
+          <IconDownload className="size-4" />
+        </Button>
+        <DynamicDialog
+          open={clearAllDialogOpen}
+          onOpenChange={setClearAllDialogOpen}
+          title="Delete Scanned Cards"
+          description={`This will permanently delete all cards from your collection. This action cannot be undone.`}
+          trigger={
             <Button variant="outline" size="icon" title="Clear all cards">
               <IconTrash className="size-4" />
             </Button>
           }
-        ></AlertDialogTrigger>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Clear all scanned cards?</AlertDialogTitle>
-            <AlertDialogDescription>
-              This will permanently delete all cards from your collection. This
-              action cannot be undone.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={handleClear} disabled={isClearing}>
-              {isClearing ? "Clearing..." : "Clear All"}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+          footer={
+            <>
+              <Button
+                variant="outline"
+                onClick={() => setClearAllDialogOpen(false)}
+              >
+                Cancel
+              </Button>
+              <Button
+                variant="destructive"
+                onClick={handleClear}
+                disabled={isClearing}
+              >
+                {isClearing ? "Clearing..." : "Clear All"}
+              </Button>
+            </>
+          }
+          footerClassName="flex-col-reverse md:flex-row"
+        />
+      </ButtonGroup>
     </div>
   );
 }

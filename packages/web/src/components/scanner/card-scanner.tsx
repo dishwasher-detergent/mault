@@ -15,7 +15,12 @@ import { useScannedCards } from "@/hooks/use-scanned-cards";
 import { useSerial, useSerialMessage } from "@/hooks/use-serial";
 import { cn } from "@/lib/utils";
 import type { CardScannerProps } from "@magic-vault/shared";
-import { IconCamera, IconCameraFilled, IconDeviceUsb, IconDeviceUsbFilled } from "@tabler/icons-react";
+import {
+  IconCamera,
+  IconCameraFilled,
+  IconDeviceUsb,
+  IconDeviceUsbFilled,
+} from "@tabler/icons-react";
 import { useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
@@ -77,8 +82,13 @@ export function CardScanner({ className }: CardScannerProps) {
   }, [canScan, handlePause, handleResume, status]);
 
   return (
-    <div className={cn("flex flex-col overflow-hidden", className)}>
-      <div className="relative overflow-hidden bg-background aspect-[2.5/3.5] max-w-full rounded-lg border">
+    <div
+      className={cn(
+        "flex flex-col-reverse md:flex-col overflow-hidden gap-2",
+        className,
+      )}
+    >
+      <div className="relative overflow-hidden bg-background w-full h-full md:aspect-[2.5/3.5] max-w-full rounded-lg border">
         <video ref={videoRef} className="hidden" playsInline muted />
         <canvas ref={processingCanvasRef} className="hidden" />
         <canvas
@@ -98,16 +108,27 @@ export function CardScanner({ className }: CardScannerProps) {
           onRetryError={handleRetryError}
         />
       </div>
-      <ButtonGroup className="mt-2 w-full *:flex-1">
+      <ButtonGroup className="w-full *:flex-1">
         {status === "error" ? (
-          <Button onClick={handleRetryError} variant="outline" style={{ flex: "1 1 0%" }}>
+          <Button
+            onClick={handleRetryError}
+            variant="outline"
+            style={{ flex: "1 1 0%" }}
+          >
             <IconCamera className="mr-2" />
             Connect Camera
           </Button>
         ) : (
           <Tooltip>
             <TooltipTrigger
-              render={<Button onClick={handleRetryError} size="icon" variant="outline" style={{ flex: "none" }} />}
+              render={
+                <Button
+                  onClick={handleRetryError}
+                  size="icon"
+                  variant="outline"
+                  style={{ flex: "none" }}
+                />
+              }
             >
               <IconCameraFilled />
             </TooltipTrigger>
@@ -117,7 +138,13 @@ export function CardScanner({ className }: CardScannerProps) {
         {isConnected ? (
           <DropdownMenu>
             <DropdownMenuTrigger
-              render={<Button size="icon" variant="default" style={{ flex: "none" }} />}
+              render={
+                <Button
+                  size="icon"
+                  variant="default"
+                  style={{ flex: "none" }}
+                />
+              }
             >
               <IconDeviceUsbFilled />
             </DropdownMenuTrigger>
@@ -135,7 +162,12 @@ export function CardScanner({ className }: CardScannerProps) {
           <Tooltip>
             <TooltipTrigger
               render={
-                <Button onClick={connect} size="icon" variant="outline" style={{ flex: "1 1 0%" }}>
+                <Button
+                  onClick={connect}
+                  size="icon"
+                  variant="outline"
+                  style={{ flex: "1 1 0%" }}
+                >
                   <IconDeviceUsb className="mr-2" />
                   Connect Device
                 </Button>
