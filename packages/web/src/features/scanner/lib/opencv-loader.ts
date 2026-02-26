@@ -1,4 +1,4 @@
-import { OPENCV_CDN_URL } from "../constants";
+import { OPENCV_CDN_URL } from "@/features/scanner/constants";
 
 let loadPromise: Promise<void> | null = null;
 

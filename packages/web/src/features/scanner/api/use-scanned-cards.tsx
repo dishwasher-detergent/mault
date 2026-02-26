@@ -8,6 +8,7 @@ import {
 
 import { useBinConfigs } from "@/features/bins/api/use-bin-configs";
 import { useSerial } from "@/features/scanner/api/use-serial";
+import type { ScannedCardsContextValue } from "@/features/scanner/types";
 import {
   clearCards as dbClearCards,
   removeCard as dbRemoveCard,
@@ -24,7 +25,6 @@ import {
   useRef,
   useState,
 } from "react";
-import type { ScannedCardsContextValue } from "../types";
 
 const ScannedCardsContext = createContext<ScannedCardsContextValue | null>(
   null,

@@ -1,3 +1,7 @@
+import type {
+  SerialContextValue,
+  SerialMessageListener,
+} from "@/features/scanner/types";
 import {
   createContext,
   useCallback,
@@ -6,9 +10,8 @@ import {
   useRef,
   useState,
 } from "react";
-import type { SerialContextValue, SerialMessageListener } from "../types";
 
-export type { SerialMessageListener } from "../types";
+export type { SerialMessageListener } from "@/features/scanner/types";
 
 const SerialContext = createContext<SerialContextValue | null>(null);
 
@@ -16,7 +19,9 @@ export function SerialProvider({ children }: { children: React.ReactNode }) {
   const [isConnected, setIsConnected] = useState(false);
   const [isReady, setIsReady] = useState(false);
   const portRef = useRef<SerialPort | null>(null);
-  const readerRef = useRef<ReadableStreamDefaultReader<Uint8Array> | null>(null);
+  const readerRef = useRef<ReadableStreamDefaultReader<Uint8Array> | null>(
+    null,
+  );
   const writableRef = useRef<WritableStream<Uint8Array> | null>(null);
   const writeQueueRef = useRef<Promise<void>>(Promise.resolve());
   const bufferRef = useRef("");
@@ -33,7 +38,9 @@ export function SerialProvider({ children }: { children: React.ReactNode }) {
           const { value, done } = await reader.read();
           if (done) break;
           if (value) {
-            bufferRef.current += decoderRef.current.decode(value, { stream: true });
+            bufferRef.current += decoderRef.current.decode(value, {
+              stream: true,
+            });
             const lines = bufferRef.current.split("\n");
             bufferRef.current = lines.pop() || "";
             for (const line of lines) {
@@ -89,7 +96,10 @@ export function SerialProvider({ children }: { children: React.ReactNode }) {
 
     return new Promise<boolean>((resolve) => {
       writeQueueRef.current = writeQueueRef.current.then(async () => {
-        if (!writableRef.current) { resolve(false); return; }
+        if (!writableRef.current) {
+          resolve(false);
+          return;
+        }
         const writer = writableRef.current.getWriter();
         try {
           await writer.write(new TextEncoder().encode(data));

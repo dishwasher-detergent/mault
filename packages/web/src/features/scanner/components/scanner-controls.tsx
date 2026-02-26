@@ -1,11 +1,11 @@
 import { Button } from "@/components/ui/button";
+import type { ScannerControlsProps } from "@/features/scanner/types";
 import {
   IconFocus2,
   IconPlayerPause,
   IconPlayerPlay,
   IconPlus,
 } from "@tabler/icons-react";
-import type { ScannerControlsProps } from "../types";
 
 export function ScannerControls({
   status,

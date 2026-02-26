@@ -1,10 +1,10 @@
+import type { BinConfigsContextValue } from "@/features/bins/types";
 import {
   BIN_COUNT,
   BinConfig,
   BinRuleGroup,
   BinSet,
 } from "@magic-vault/shared";
-import type { BinConfigsContextValue } from "../types";
 
 import {
   activateSet as activateSetAction,

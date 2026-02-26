@@ -2,6 +2,7 @@ import {
   modulesQueryOptions,
   saveModuleConfig,
 } from "@/features/calibration/api/module-configs";
+import type { ModuleConfigsContextValue } from "@/features/calibration/types";
 import { useSerial } from "@/features/scanner/api/use-serial";
 import {
   DEFAULT_CALIBRATION,
@@ -17,7 +18,6 @@ import {
   useRef,
 } from "react";
 import { toast } from "sonner";
-import type { ModuleConfigsContextValue } from "../types";
 
 const ModuleConfigsContext = createContext<ModuleConfigsContextValue | null>(
   null,

@@ -2,6 +2,11 @@ import { Search } from "@/features/cards/api/card";
 import { SearchById } from "@/features/cards/api/scryfall";
 import { useCameraContext } from "@/features/scanner/api/use-camera";
 import {
+  DETECTION_INTERVAL_MS,
+  SCANNABLE_STATUSES,
+  STABILITY_FRAMES,
+} from "@/features/scanner/constants";
+import {
   canvasToBlob,
   detectCard,
   drawDetectionOverlay,
@@ -16,11 +21,6 @@ import {
   type ScryfallCardWithDistance,
 } from "@magic-vault/shared";
 import { useCallback, useEffect, useRef, useState } from "react";
-import {
-  DETECTION_INTERVAL_MS,
-  SCANNABLE_STATUSES,
-  STABILITY_FRAMES,
-} from "../constants";
 
 function playDingSound() {
   const ctx = new AudioContext();

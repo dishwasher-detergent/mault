@@ -3,10 +3,15 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { modulesQueryOptions } from "@/features/calibration/api/module-configs";
 import { useModuleConfigs } from "@/features/calibration/api/use-module-configs";
 import { MODULES, SERVOS } from "@/features/calibration/constants";
-import type { ActivePositions, SliderKey } from "@/features/calibration/types";
-import { useQuery } from "@tanstack/react-query";
+import type {
+  ActivePositions,
+  ServoConfig,
+  SliderKey,
+} from "@/features/calibration/types";
 import { useSerial } from "@/features/scanner/api/use-serial";
+import { ServoCalibration } from "@magic-vault/shared";
 import { IconRotateClockwise } from "@tabler/icons-react";
+import { useQuery } from "@tanstack/react-query";
 import { useCallback, useRef, useState } from "react";
 
 function defaultSliderValues(): Record<SliderKey, number> {

@@ -1,7 +1,7 @@
 import { useScannedCards } from "@/features/scanner/api/use-scanned-cards";
+import { RARITY_LABELS, RARITY_ORDER } from "@/features/scanner/constants";
+import type { SetStats } from "@/features/scanner/types";
 import { useMemo, useState } from "react";
-import { RARITY_LABELS, RARITY_ORDER } from "../constants";
-import type { SetStats } from "../types";
 
 function formatUsd(value: number): string {
   return `$${value.toFixed(2)}`;

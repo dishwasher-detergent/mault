@@ -18,6 +18,7 @@ import {
 } from "@/components/ui/tooltip";
 import { binsQueryOptions } from "@/features/bins/api/sort-bins";
 import { useBinConfigs } from "@/features/bins/api/use-bin-configs";
+import type { PresetSelectorProps } from "@/features/bins/types";
 import {
   createSetSchema,
   type CreateSetFormValues,
@@ -33,8 +34,6 @@ import { useQuery } from "@tanstack/react-query";
 import { useCallback, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { Link } from "react-router-dom";
-import type { PresetSelectorProps } from "../types";
-
 
 export function PresetSelector({ readOnly }: PresetSelectorProps) {
   const {

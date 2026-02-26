@@ -1,5 +1,5 @@
+import { MTG_ASPECT_RATIO } from "@/features/scanner/constants";
 import type { CardContour, DetectionResult, Point } from "@magic-vault/shared";
-import { MTG_ASPECT_RATIO } from "../constants";
 
 /**
  * Order four points clockwise: topLeft, topRight, bottomRight, bottomLeft.

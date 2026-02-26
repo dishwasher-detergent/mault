@@ -1,8 +1,7 @@
 import { Badge } from "@/components/ui/badge";
 import { CardSelectDialog } from "@/features/cards/components/card-select-dialog";
-import type { ScryfallCardWithDistance } from "@magic-vault/shared";
+import type { ScannedCardItemProps } from "@/features/cards/types";
 import { memo } from "react";
-import type { ScannedCardItemProps } from "../types";
 
 export const ScannedCardItem = memo(function ScannedCardItem({
   card,

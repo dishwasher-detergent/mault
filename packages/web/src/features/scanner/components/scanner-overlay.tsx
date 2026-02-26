@@ -1,4 +1,5 @@
 import { Button } from "@/components/ui/button";
+import type { ScannerOverlayProps } from "@/features/scanner/types";
 import {
   IconAlertTriangle,
   IconCamera,
@@ -6,7 +7,6 @@ import {
   IconLoader2,
   IconRefresh,
 } from "@tabler/icons-react";
-import type { ScannerOverlayProps } from "../types";
 
 export function ScannerOverlay({
   status,

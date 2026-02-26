@@ -9,9 +9,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import type { CardToolbarProps } from "@/features/cards/types";
 import { IconDownload, IconTrash } from "@tabler/icons-react";
 import { useState } from "react";
-import type { CardToolbarProps } from "../types";
 
 export function CardToolbar({
   searchQuery,

@@ -1,4 +1,8 @@
 import { loadOpenCv } from "@/features/scanner/lib/opencv-loader";
+import type {
+  CameraContextValue,
+  CameraStatus,
+} from "@/features/scanner/types";
 import {
   createContext,
   useCallback,
@@ -7,7 +11,6 @@ import {
   useRef,
   useState,
 } from "react";
-import type { CameraContextValue, CameraStatus } from "../types";
 
 const CameraContext = createContext<CameraContextValue | null>(null);
 

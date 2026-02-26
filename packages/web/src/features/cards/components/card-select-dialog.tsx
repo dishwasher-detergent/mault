@@ -10,12 +10,9 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Search } from "@/features/cards/api/scryfall";
+import type { CardSelectDialogProps } from "@/features/cards/types";
 import { useScannedCards } from "@/features/scanner/api/use-scanned-cards";
-import {
-  QUERY_MIN_LENGTH,
-  type ScryfallCard,
-  type ScryfallCardWithDistance,
-} from "@magic-vault/shared";
+import { QUERY_MIN_LENGTH, type ScryfallCard } from "@magic-vault/shared";
 import {
   IconExternalLink,
   IconLoader2,
@@ -25,7 +22,6 @@ import {
 } from "@tabler/icons-react";
 import { useQuery } from "@tanstack/react-query";
 import { useCallback, useMemo, useRef, useState } from "react";
-import type { CardSelectDialogProps } from "../types";
 
 function formatManaCost(manaCost: string): string {
   return manaCost.replace(/[{}]/g, " ").trim().replace(/\s+/g, " ");

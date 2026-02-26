@@ -1,5 +1,12 @@
-import { CONDITION_NUMERIC_MAX, CONDITION_STRING_MAX_LENGTH, FIELD_DEFINITIONS, BinCondition, ConditionField, ConditionOperator, FieldMeta } from "@magic-vault/shared";
-import type { ConditionRowProps } from "../types";
+import type { ConditionRowProps } from "@/features/bins/types";
+import {
+  CONDITION_NUMERIC_MAX,
+  CONDITION_STRING_MAX_LENGTH,
+  ConditionField,
+  ConditionOperator,
+  FIELD_DEFINITIONS,
+  FieldMeta,
+} from "@magic-vault/shared";
 
 import { Button, buttonVariants } from "@/components/ui/button";
 import {
