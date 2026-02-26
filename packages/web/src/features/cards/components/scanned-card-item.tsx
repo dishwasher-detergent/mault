@@ -1,5 +1,5 @@
-import { CardSelectDialog } from "./card-select-dialog";
 import { Badge } from "@/components/ui/badge";
+import { CardSelectDialog } from "@/features/cards/components/card-select-dialog";
 import type { ScryfallCardWithDistance } from "@magic-vault/shared";
 import { memo } from "react";
 

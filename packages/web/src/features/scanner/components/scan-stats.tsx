@@ -1,4 +1,4 @@
-import { useScannedCards } from "../api/use-scanned-cards";
+import { useScannedCards } from "@/features/scanner/api/use-scanned-cards";
 import { useMemo, useState } from "react";
 
 interface SetStats {

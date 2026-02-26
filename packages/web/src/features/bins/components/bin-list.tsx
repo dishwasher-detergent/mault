@@ -1,9 +1,9 @@
-import { BinCard } from "./bin-card";
+import { ButtonGroup } from "@/components/ui/button-group";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useBinConfigs } from "../api/use-bin-configs";
-import { binsQueryOptions } from "../api/sort-bins";
-import { ButtonGroup } from "../../../components/ui/button-group";
+import { binsQueryOptions } from "@/features/bins/api/sort-bins";
+import { useBinConfigs } from "@/features/bins/api/use-bin-configs";
+import { BinCard } from "@/features/bins/components/bin-card";
 import { useQuery } from "@tanstack/react-query";
 
 export function BinList() {

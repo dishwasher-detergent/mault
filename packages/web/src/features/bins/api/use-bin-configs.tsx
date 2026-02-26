@@ -14,7 +14,7 @@ import {
   renameSet as renameSetAction,
   saveBinConfig as saveBinConfigAction,
   saveSet as saveSetAction,
-} from "./sort-bins";
+} from "@/features/bins/api/sort-bins";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   createContext,
@@ -153,7 +153,10 @@ export function BinConfigsProvider({
       queryClient.setQueryData<BinSet[]>(["bins"], (old = []) =>
         old.map((set) =>
           set.isActive
-            ? { ...set, bins: set.bins.filter((b) => b.binNumber !== binNumber) }
+            ? {
+                ...set,
+                bins: set.bins.filter((b) => b.binNumber !== binNumber),
+              }
             : set,
         ),
       );

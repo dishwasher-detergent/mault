@@ -1,5 +1,3 @@
-import { ScannerControls } from "./scanner-controls";
-import { ScannerOverlay } from "./scanner-overlay";
 import { Button } from "@/components/ui/button";
 import { ButtonGroup } from "@/components/ui/button-group";
 import {
@@ -9,10 +7,17 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { useBinConfigs } from "@/features/bins/api/use-bin-configs";
-import { useCardScanner } from "../api/use-card-scanner";
-import { useScannedCards } from "../api/use-scanned-cards";
-import { useSerial, useSerialMessage } from "../api/use-serial";
+import { useCardScanner } from "@/features/scanner/api/use-card-scanner";
+import { useScannedCards } from "@/features/scanner/api/use-scanned-cards";
+import { useSerial, useSerialMessage } from "@/features/scanner/api/use-serial";
+import { ScannerControls } from "@/features/scanner/components/scanner-controls";
+import { ScannerOverlay } from "@/features/scanner/components/scanner-overlay";
 import { cn } from "@/lib/utils";
 import type { CardScannerProps } from "@magic-vault/shared";
 import {
@@ -24,7 +29,6 @@ import {
 import { useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
-import { Tooltip, TooltipContent, TooltipTrigger } from "../../../components/ui/tooltip";
 
 export function CardScanner({ className }: CardScannerProps) {
   const navigate = useNavigate();

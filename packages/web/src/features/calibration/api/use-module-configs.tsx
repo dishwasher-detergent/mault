@@ -1,10 +1,13 @@
+import {
+  modulesQueryOptions,
+  saveModuleConfig,
+} from "@/features/calibration/api/module-configs";
 import { useSerial } from "@/features/scanner/api/use-serial";
 import {
   DEFAULT_CALIBRATION,
   ModuleConfig,
   ServoCalibration,
 } from "@magic-vault/shared";
-import { modulesQueryOptions, saveModuleConfig } from "./module-configs";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   createContext,
@@ -78,10 +81,12 @@ export function ModuleConfigsProvider({
     onMutate: async ({ moduleNumber, calibration }) => {
       await queryClient.cancelQueries({ queryKey: ["modules"] });
       const previous = queryClient.getQueryData<ModuleConfig[]>(["modules"]);
-      queryClient.setQueryData<ModuleConfig[]>(["modules"], (old = defaultConfigs()) =>
-        old.map((c) =>
-          c.moduleNumber === moduleNumber ? { ...c, calibration } : c,
-        ),
+      queryClient.setQueryData<ModuleConfig[]>(
+        ["modules"],
+        (old = defaultConfigs()) =>
+          old.map((c) =>
+            c.moduleNumber === moduleNumber ? { ...c, calibration } : c,
+          ),
       );
       return { previous };
     },

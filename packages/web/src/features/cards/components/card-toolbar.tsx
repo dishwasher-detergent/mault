@@ -1,5 +1,7 @@
 import { Button } from "@/components/ui/button";
+import { ButtonGroup } from "@/components/ui/button-group";
 import { Input } from "@/components/ui/input";
+import { DynamicDialog } from "@/components/ui/responsive-dialog";
 import {
   Select,
   SelectContent,
@@ -9,8 +11,6 @@ import {
 } from "@/components/ui/select";
 import { IconDownload, IconTrash } from "@tabler/icons-react";
 import { useState } from "react";
-import { ButtonGroup } from "../../../components/ui/button-group";
-import { DynamicDialog } from "../../../components/ui/responsive-dialog";
 
 interface CardToolbarProps {
   searchQuery: string;

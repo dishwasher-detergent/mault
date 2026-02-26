@@ -1,7 +1,7 @@
-import { RuleSummary } from "./rule-summary";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { RuleSummary } from "@/features/bins/components/rule-summary";
 import { BinConfig, isRuleGroup } from "@magic-vault/shared";
-import { Button } from "../../../components/ui/button";
 
 interface BinCardProps {
   config: BinConfig;

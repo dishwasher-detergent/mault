@@ -1,6 +1,6 @@
-import { ConditionRow } from "./condition-row";
 import { Button } from "@/components/ui/button";
 import { ButtonGroup } from "@/components/ui/button-group";
+import { ConditionRow } from "@/features/bins/components/condition-row";
 import { BinCondition, BinRuleGroup, isRuleGroup } from "@magic-vault/shared";
 import { IconPlus, IconTrash } from "@tabler/icons-react";
 import { useCallback } from "react";

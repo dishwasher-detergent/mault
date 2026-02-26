@@ -1,12 +1,13 @@
 import { Search } from "@/features/cards/api/card";
 import { SearchById } from "@/features/cards/api/scryfall";
+import { useCameraContext } from "@/features/scanner/api/use-camera";
 import {
   canvasToBlob,
   detectCard,
   drawDetectionOverlay,
   extractCardImage,
-} from "../lib/card-detection";
-import { loadOpenCv } from "../lib/opencv-loader";
+} from "@/features/scanner/lib/card-detection";
+import { loadOpenCv } from "@/features/scanner/lib/opencv-loader";
 import {
   type CardContour,
   type CardScannerProps,
@@ -45,7 +46,6 @@ function playDingSound() {
   oscillator.onended = () => ctx.close();
 }
 
-/** Search for a card by capturing a region (or full frame) from a canvas. */
 async function searchCardImage(
   canvas: HTMLCanvasElement,
   contour?: CardContour | null,
@@ -67,11 +67,17 @@ export function useCardScanner({
   onNoMatch,
   onError,
 }: Omit<CardScannerProps, "className"> = {}) {
+  const {
+    stream,
+    status: cameraStatus,
+    errorMessage: cameraError,
+    retryCamera,
+  } = useCameraContext();
+
   const videoRef = useRef<HTMLVideoElement>(null);
   const displayCanvasRef = useRef<HTMLCanvasElement>(null);
   const overlayCanvasRef = useRef<HTMLCanvasElement>(null);
   const processingCanvasRef = useRef<HTMLCanvasElement>(null);
-  const streamRef = useRef<MediaStream | null>(null);
   const rafRef = useRef<number>(0);
   const lastDetectionRef = useRef<number>(0);
   const stableCountRef = useRef<number>(0);
@@ -123,11 +129,19 @@ export function useCardScanner({
     handleErrorRef.current = handleError;
   }, [handleError]);
 
-  /**
-   * Shared capture-and-search logic used by both auto-capture and force scan.
-   * @param checkDuplicate - When true, compares against lastScannedCardId.
-   * @param contour - Card contour for extraction; null uses full canvas.
-   */
+  // Sync camera-level status/errors into scanner status
+  useEffect(() => {
+    if (cameraStatus === "requesting") {
+      updateStatus("requesting-camera");
+    } else if (cameraStatus === "error") {
+      updateStatus("error");
+      setErrorMessage(cameraError);
+    } else if (cameraStatus === "idle") {
+      updateStatus("initializing");
+    }
+    // 'ready' is handled by the stream attachment effect below
+  }, [cameraStatus, cameraError, updateStatus]);
+
   const performCapture = useCallback(
     async (checkDuplicate: boolean, contour?: CardContour | null) => {
       const canvas = displayCanvasRef.current;
@@ -166,80 +180,6 @@ export function useCardScanner({
     },
     [updateStatus],
   );
-
-  const stopCamera = useCallback(() => {
-    if (streamRef.current) {
-      for (const track of streamRef.current.getTracks()) {
-        track.stop();
-      }
-      streamRef.current = null;
-    }
-    if (rafRef.current) {
-      cancelAnimationFrame(rafRef.current);
-      rafRef.current = 0;
-    }
-  }, []);
-
-  const startCamera = useCallback(async () => {
-    updateStatus("requesting-camera");
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({
-        video: {
-          facingMode: { ideal: "environment" },
-          width: { ideal: 1280 },
-          height: { ideal: 720 },
-        },
-      });
-      streamRef.current = stream;
-
-      const track = stream.getVideoTracks()[0];
-      if (track) {
-        try {
-          const capabilities =
-            track.getCapabilities() as MediaTrackCapabilities & {
-              focusMode?: string[];
-            };
-          if (capabilities.focusMode?.includes("continuous")) {
-            await track.applyConstraints({
-              advanced: [
-                { focusMode: "continuous" } as MediaTrackConstraintSet,
-              ],
-            });
-          }
-        } catch {
-          console.error("Failed to set camera focus mode");
-        }
-      }
-
-      const video = videoRef.current;
-      if (!video) return;
-
-      video.srcObject = stream;
-      await video.play();
-
-      const { videoWidth: width, videoHeight: height } = video;
-      for (const canvasRef of [
-        displayCanvasRef,
-        overlayCanvasRef,
-        processingCanvasRef,
-      ]) {
-        const canvas = canvasRef.current;
-        if (canvas) {
-          canvas.width = width;
-          canvas.height = height;
-        }
-      }
-
-      pausedRef.current = true;
-      updateStatus("paused");
-    } catch (err) {
-      const msg =
-        err instanceof DOMException && err.name === "NotAllowedError"
-          ? "Camera permission denied. Please allow camera access and try again."
-          : "Could not access camera. Please check your device.";
-      handleError(msg);
-    }
-  }, [handleError, updateStatus]);
 
   const detectionLoop = useCallback(() => {
     const video = videoRef.current;
@@ -320,6 +260,62 @@ export function useCardScanner({
     rafRef.current = requestAnimationFrame(detectionLoop);
   }, [updateStatus, performCapture]);
 
+  // Attach stream to video/canvases and start the detection loop.
+  // Re-runs if the stream is replaced (e.g. after retryCamera).
+  // On unmount: cancels the RAF loop but does NOT stop the stream tracks —
+  // the CameraProvider owns the stream lifetime.
+  useEffect(() => {
+    if (!stream) return;
+
+    let cancelled = false;
+    const video = videoRef.current;
+    if (!video) return;
+
+    updateStatus("initializing");
+    video.srcObject = stream;
+
+    (async () => {
+      try {
+        await video.play();
+        if (cancelled) return;
+
+        const { videoWidth: width, videoHeight: height } = video;
+        for (const ref of [
+          displayCanvasRef,
+          overlayCanvasRef,
+          processingCanvasRef,
+        ]) {
+          if (ref.current) {
+            ref.current.width = width;
+            ref.current.height = height;
+          }
+        }
+
+        // Wait for OpenCV to finish loading before starting detection
+        await loadOpenCv();
+        if (cancelled) return;
+
+        pausedRef.current = true;
+        updateStatus("paused");
+        rafRef.current = requestAnimationFrame(detectionLoop);
+      } catch (err) {
+        if (!cancelled) {
+          handleErrorRef.current(
+            err instanceof Error ? err.message : "Failed to start video",
+          );
+        }
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+      cancelAnimationFrame(rafRef.current);
+      rafRef.current = 0;
+      video.srcObject = null;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [stream]);
+
   const handleForceAddDuplicate = useCallback(() => {
     if (duplicateCard) {
       onSearchResultsRef.current?.([duplicateCard]);
@@ -358,34 +354,14 @@ export function useCardScanner({
     updateStatus("scanning");
   }, [updateStatus, resetStability]);
 
-  const initScanner = useCallback(async () => {
-    updateStatus("initializing");
-    await loadOpenCv();
-    await startCamera();
-    rafRef.current = requestAnimationFrame(detectionLoop);
-  }, [startCamera, detectionLoop, updateStatus]);
-
   const handleRetryError = useCallback(async () => {
     setErrorMessage("");
     try {
-      await initScanner();
+      await retryCamera();
     } catch {
-      handleError("Failed to reinitialize scanner");
+      handleErrorRef.current("Failed to reinitialize camera");
     }
-  }, [initScanner, handleError]);
-
-  useEffect(() => {
-    let cancelled = false;
-
-    initScanner().catch(() => {
-      if (!cancelled) handleError("Failed to initialize scanner");
-    });
-
-    return () => {
-      cancelled = true;
-      stopCamera();
-    };
-  }, [initScanner, stopCamera, handleError]);
+  }, [retryCamera]);
 
   return {
     status,

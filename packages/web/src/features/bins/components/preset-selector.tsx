@@ -1,8 +1,5 @@
 import { Button } from "@/components/ui/button";
 import { ButtonGroup } from "@/components/ui/button-group";
-import { Skeleton } from "@/components/ui/skeleton";
-import { binsQueryOptions } from "../api/sort-bins";
-import { useQuery } from "@tanstack/react-query";
 import { Field, FieldError, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { DynamicDialog } from "@/components/ui/responsive-dialog";
@@ -13,18 +10,26 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { useBinConfigs } from "../api/use-bin-configs";
+import { binsQueryOptions } from "@/features/bins/api/sort-bins";
+import { useBinConfigs } from "@/features/bins/api/use-bin-configs";
 import {
   createSetSchema,
   type CreateSetFormValues,
 } from "@/schemas/sort-bins.schema";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { IconEdit, IconLoader2, IconPlus, IconTrash } from "@tabler/icons-react";
+import {
+  IconEdit,
+  IconLoader2,
+  IconPlus,
+  IconTrash,
+} from "@tabler/icons-react";
+import { useQuery } from "@tanstack/react-query";
 import { useCallback, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { Link } from "react-router-dom";
@@ -125,7 +130,10 @@ export function PresetSelector({ readOnly }: PresetSelectorProps) {
         value={selectedSet?.guid ?? ""}
         onValueChange={(guid) => activateSet(guid!)}
       >
-        <SelectTrigger className="flex-1 overflow-hidden" disabled={isActivating}>
+        <SelectTrigger
+          className="flex-1 overflow-hidden"
+          disabled={isActivating}
+        >
           <SelectValue placeholder="Select a set...">
             <span className="flex items-center gap-1.5 min-w-0">
               {isActivating && (
@@ -166,7 +174,11 @@ export function PresetSelector({ readOnly }: PresetSelectorProps) {
             title="Delete Set"
             description={`Are you sure you want to delete "${selectedSet?.name}"? This cannot be undone.`}
             trigger={
-              <Button variant="outline" size="icon" disabled={!selectedSet || isPresetMutating}>
+              <Button
+                variant="outline"
+                size="icon"
+                disabled={!selectedSet || isPresetMutating}
+              >
                 <IconTrash />
               </Button>
             }
@@ -178,8 +190,14 @@ export function PresetSelector({ readOnly }: PresetSelectorProps) {
                 >
                   Cancel
                 </Button>
-                <Button variant="destructive" onClick={handleDelete} disabled={isPresetMutating}>
-                  {isPresetMutating && <IconLoader2 className="size-4 animate-spin" />}
+                <Button
+                  variant="destructive"
+                  onClick={handleDelete}
+                  disabled={isPresetMutating}
+                >
+                  {isPresetMutating && (
+                    <IconLoader2 className="size-4 animate-spin" />
+                  )}
                   Delete
                 </Button>
               </>
@@ -192,7 +210,11 @@ export function PresetSelector({ readOnly }: PresetSelectorProps) {
             title="Rename Set"
             description="Enter a new name for this set."
             trigger={
-              <Button variant="outline" size="icon" disabled={!selectedSet || isPresetMutating}>
+              <Button
+                variant="outline"
+                size="icon"
+                disabled={!selectedSet || isPresetMutating}
+              >
                 <IconEdit />
               </Button>
             }
@@ -208,7 +230,9 @@ export function PresetSelector({ readOnly }: PresetSelectorProps) {
                   onClick={renameForm.handleSubmit(handleRename)}
                   disabled={!renameForm.formState.isValid || isPresetMutating}
                 >
-                  {isPresetMutating && <IconLoader2 className="size-4 animate-spin" />}
+                  {isPresetMutating && (
+                    <IconLoader2 className="size-4 animate-spin" />
+                  )}
                   Rename
                 </Button>
               </>
@@ -259,7 +283,9 @@ export function PresetSelector({ readOnly }: PresetSelectorProps) {
                   onClick={createForm.handleSubmit(handleCreate)}
                   disabled={!createForm.formState.isValid || isPresetMutating}
                 >
-                  {isPresetMutating && <IconLoader2 className="size-4 animate-spin" />}
+                  {isPresetMutating && (
+                    <IconLoader2 className="size-4 animate-spin" />
+                  )}
                   Create
                 </Button>
               </>

@@ -1,25 +1,31 @@
-import { RuleGroupEditor } from "./rule-group-editor";
 import { Button } from "@/components/ui/button";
 import { FieldError } from "@/components/ui/field";
-import { IconLoader2 } from "@tabler/icons-react";
+import { Label } from "@/components/ui/label";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { useBinConfigs } from "../api/use-bin-configs";
+import { useBinConfigs } from "@/features/bins/api/use-bin-configs";
+import { RuleGroupEditor } from "@/features/bins/components/rule-group-editor";
 import {
   binConfigSchema,
   type BinConfigFormValues,
 } from "@/schemas/sort-bins.schema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { BinRuleGroup } from "@magic-vault/shared";
+import { IconLoader2 } from "@tabler/icons-react";
 import { useCallback, useEffect } from "react";
 import { Controller, useForm, type Resolver } from "react-hook-form";
-import { Label } from "../../../components/ui/label";
 
 function emptyRuleGroup(): BinRuleGroup {
   return { id: crypto.randomUUID(), combinator: "and", conditions: [] };
 }
 
 export function BinConfigPanel() {
-  const { selectedConfig: config, save, clear, configs, isPending } = useBinConfigs();
+  const {
+    selectedConfig: config,
+    save,
+    clear,
+    configs,
+    isPending,
+  } = useBinConfigs();
 
   const form = useForm<BinConfigFormValues>({
     resolver: zodResolver(binConfigSchema) as Resolver<BinConfigFormValues>,
@@ -121,10 +127,19 @@ export function BinConfigPanel() {
         <FieldError errors={[form.formState.errors.rules]} />
       )}
       <div className="flex gap-2 mt-2 justify-end">
-        <Button type="button" variant="destructive" onClick={handleClear} disabled={isPending}>
+        <Button
+          type="button"
+          variant="destructive"
+          onClick={handleClear}
+          disabled={isPending}
+        >
           Clear
         </Button>
-        <Button type="button" onClick={form.handleSubmit(handleSave)} disabled={isPending}>
+        <Button
+          type="button"
+          onClick={form.handleSubmit(handleSave)}
+          disabled={isPending}
+        >
           {isPending && <IconLoader2 className="size-4 animate-spin" />}
           Save
         </Button>

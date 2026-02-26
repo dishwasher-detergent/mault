@@ -1,14 +1,14 @@
+import AccountPage from "@/app/routes/app/account";
+import AdminPage from "@/app/routes/app/admin";
+import BinsPage from "@/app/routes/app/bins";
+import CalibratePage from "@/app/routes/app/calibrate";
+import ScannerPage from "@/app/routes/app/index";
+import AppLayout from "@/app/routes/app/layout";
+import AuthPage from "@/app/routes/auth";
+import LandingPage from "@/app/routes/index";
 import { useRole } from "@/hooks/use-role";
-import AdminPage from "./routes/app/admin";
-import ScannerPage from "./routes/app/index";
-import AppLayout from "./routes/app/layout";
-import AuthPage from "./routes/auth";
-import LandingPage from "./routes/index";
 import { RedirectToSignIn, SignedIn } from "@neondatabase/neon-js/auth/react";
 import { createBrowserRouter, Navigate, Outlet } from "react-router-dom";
-import AccountPage from "./routes/app/account";
-import BinsPage from "./routes/app/bins";
-import CalibratePage from "./routes/app/calibrate";
 
 function AuthGuard() {
   return (

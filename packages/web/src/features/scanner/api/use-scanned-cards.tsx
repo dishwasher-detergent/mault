@@ -1,7 +1,13 @@
-import { type ScannedCard, type ScryfallCard, type ScryfallCardWithDistance, evaluateCardBin, getCatchAllBin } from "@magic-vault/shared";
+import {
+  type ScannedCard,
+  type ScryfallCard,
+  type ScryfallCardWithDistance,
+  evaluateCardBin,
+  getCatchAllBin,
+} from "@magic-vault/shared";
 
 import { useBinConfigs } from "@/features/bins/api/use-bin-configs";
-import { useSerial } from "./use-serial";
+import { useSerial } from "@/features/scanner/api/use-serial";
 import {
   clearCards as dbClearCards,
   removeCard as dbRemoveCard,
@@ -102,7 +108,11 @@ export function ScannedCardsProvider({
     if (catchAll && serialRef.current.isConnected) {
       serialRef.current.sendBin(catchAll.binNumber).then((response) => {
         if (response) {
-          console.log("[Serial] Route unmatched card to catch-all bin", catchAll.binNumber, response);
+          console.log(
+            "[Serial] Route unmatched card to catch-all bin",
+            catchAll.binNumber,
+            response,
+          );
         }
       });
     }
@@ -136,7 +146,15 @@ export function ScannedCardsProvider({
 
   return (
     <ScannedCardsContext
-      value={{ cards, isLoading, addCard, sendCatchAllBin, removeCard, correctCard, clearCards }}
+      value={{
+        cards,
+        isLoading,
+        addCard,
+        sendCatchAllBin,
+        removeCard,
+        correctCard,
+        clearCards,
+      }}
     >
       {children}
     </ScannedCardsContext>

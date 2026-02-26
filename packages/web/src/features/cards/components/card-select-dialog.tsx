@@ -1,8 +1,3 @@
-import {
-  QUERY_MIN_LENGTH,
-  type ScryfallCard,
-  type ScryfallCardWithDistance,
-} from "@magic-vault/shared";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { DynamicDialog } from "@/components/ui/responsive-dialog";
@@ -14,8 +9,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Search } from "@/features/cards/api/scryfall";
 import { useScannedCards } from "@/features/scanner/api/use-scanned-cards";
-import { Search } from "../api/scryfall";
+import {
+  QUERY_MIN_LENGTH,
+  type ScryfallCard,
+  type ScryfallCardWithDistance,
+} from "@magic-vault/shared";
 import {
   IconExternalLink,
   IconLoader2,
