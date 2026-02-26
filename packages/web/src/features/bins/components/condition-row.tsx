@@ -1,4 +1,5 @@
 import { CONDITION_NUMERIC_MAX, CONDITION_STRING_MAX_LENGTH, FIELD_DEFINITIONS, BinCondition, ConditionField, ConditionOperator, FieldMeta } from "@magic-vault/shared";
+import type { ConditionRowProps } from "../types";
 
 import { Button, buttonVariants } from "@/components/ui/button";
 import {
@@ -18,12 +19,6 @@ import {
 import { cn } from "@/lib/utils";
 import { IconChevronDown, IconX } from "@tabler/icons-react";
 import { useCallback } from "react";
-
-interface ConditionRowProps {
-  condition: BinCondition;
-  onChange: (updated: BinCondition) => void;
-  onRemove: () => void;
-}
 
 function getFieldMeta(field: ConditionField): FieldMeta | undefined {
   return FIELD_DEFINITIONS.find((f) => f.field === field);

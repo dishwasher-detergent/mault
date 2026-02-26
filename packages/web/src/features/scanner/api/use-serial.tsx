@@ -6,19 +6,9 @@ import {
   useRef,
   useState,
 } from "react";
+import type { SerialContextValue, SerialMessageListener } from "../types";
 
-export type SerialMessageListener = (message: unknown) => void;
-
-interface SerialContextValue {
-  isConnected: boolean;
-  isReady: boolean;
-  connect: () => Promise<void>;
-  disconnect: () => Promise<void>;
-  sendBin: (binNumber: number) => Promise<unknown | null>;
-  sendTest: () => Promise<boolean>;
-  sendCommand: (data: string) => Promise<boolean>;
-  subscribe: (listener: SerialMessageListener) => () => void;
-}
+export type { SerialMessageListener } from "../types";
 
 const SerialContext = createContext<SerialContextValue | null>(null);
 

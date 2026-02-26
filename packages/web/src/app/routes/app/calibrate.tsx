@@ -2,58 +2,12 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { modulesQueryOptions } from "@/features/calibration/api/module-configs";
 import { useModuleConfigs } from "@/features/calibration/api/use-module-configs";
+import { MODULES, SERVOS } from "@/features/calibration/constants";
+import type { ActivePositions, SliderKey } from "@/features/calibration/types";
 import { useQuery } from "@tanstack/react-query";
 import { useSerial } from "@/features/scanner/api/use-serial";
-import type { ServoCalibration } from "@magic-vault/shared";
 import { IconRotateClockwise } from "@tabler/icons-react";
 import { useCallback, useRef, useState } from "react";
-
-interface ServoConfig {
-  name: "bottom" | "paddle" | "pusher";
-  label: string;
-  controlPositions: string[];
-  defaultPosition: string;
-  calibrationPositions: { label: string; key: keyof ServoCalibration }[];
-}
-
-const MODULES = [1, 2, 3] as const;
-
-const SERVOS: ServoConfig[] = [
-  {
-    name: "bottom",
-    label: "Bottom Paddle",
-    controlPositions: ["open"],
-    defaultPosition: "open",
-    calibrationPositions: [
-      { label: "Set Closed", key: "bottomClosed" },
-      { label: "Set Open", key: "bottomOpen" },
-    ],
-  },
-  {
-    name: "paddle",
-    label: "Paddles",
-    controlPositions: ["open"],
-    defaultPosition: "open",
-    calibrationPositions: [
-      { label: "Set Closed", key: "paddleClosed" },
-      { label: "Set Open", key: "paddleOpen" },
-    ],
-  },
-  {
-    name: "pusher",
-    label: "Pusher",
-    controlPositions: ["left", "right"],
-    defaultPosition: "neutral",
-    calibrationPositions: [
-      { label: "Set Left", key: "pusherLeft" },
-      { label: "Set Neutral", key: "pusherNeutral" },
-      { label: "Set Right", key: "pusherRight" },
-    ],
-  },
-];
-
-type SliderKey = `${1 | 2 | 3}:${"bottom" | "paddle" | "pusher"}`;
-type ActivePositions = Record<string, string | null>;
 
 function defaultSliderValues(): Record<SliderKey, number> {
   const vals = {} as Record<SliderKey, number>;

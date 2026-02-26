@@ -4,6 +4,7 @@ import {
   BinRuleGroup,
   BinSet,
 } from "@magic-vault/shared";
+import type { BinConfigsContextValue } from "../types";
 
 import {
   activateSet as activateSetAction,
@@ -40,26 +41,6 @@ function configsFromSet(set: BinSet | undefined): BinConfig[] {
     filled.push(existing ?? createEmptyConfig(i));
   }
   return filled;
-}
-
-interface BinConfigsContextValue {
-  configs: BinConfig[];
-  sets: BinSet[];
-  isPending: boolean;
-  isActivating: boolean;
-  isPresetMutating: boolean;
-  hasCatchAll: boolean;
-  selectedBin: number;
-  selectedSet?: BinSet;
-  setSelectedBin: (bin: number) => void;
-  selectedConfig: BinConfig;
-  save: (binNumber: number, rules: BinRuleGroup, isCatchAll?: boolean) => void;
-  clear: (binNumber: number) => void;
-  activateSet: (guid: string) => Promise<void>;
-  createSet: (name: string) => Promise<void>;
-  saveSet: (name: string) => Promise<void>;
-  renameSet: (guid: string, name: string) => Promise<void>;
-  deleteSet: (guid: string) => Promise<void>;
 }
 
 const BinConfigsContext = createContext<BinConfigsContextValue | null>(null);

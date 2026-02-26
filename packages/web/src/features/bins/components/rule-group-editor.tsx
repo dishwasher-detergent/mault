@@ -4,13 +4,7 @@ import { ConditionRow } from "@/features/bins/components/condition-row";
 import { BinCondition, BinRuleGroup, isRuleGroup } from "@magic-vault/shared";
 import { IconPlus, IconTrash } from "@tabler/icons-react";
 import { useCallback } from "react";
-
-interface RuleGroupEditorProps {
-  group: BinRuleGroup;
-  onChange: (updated: BinRuleGroup) => void;
-  onRemove?: () => void;
-  depth?: number;
-}
+import type { RuleGroupEditorProps } from "../types";
 
 function createCondition(): BinCondition {
   return {

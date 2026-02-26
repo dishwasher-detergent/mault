@@ -1,21 +1,11 @@
 import { Button } from "@/components/ui/button";
-import type { ScannerStatus } from "@magic-vault/shared";
 import {
   IconFocus2,
   IconPlayerPause,
   IconPlayerPlay,
   IconPlus,
 } from "@tabler/icons-react";
-
-interface ScannerControlsProps {
-  status: ScannerStatus;
-  duplicateCardName?: string;
-  onForceAddDuplicate: () => void;
-  onForceScan: () => void;
-  onPause: () => void;
-  onResume: () => void;
-  disabled?: boolean;
-}
+import type { ScannerControlsProps } from "../types";
 
 export function ScannerControls({
   status,

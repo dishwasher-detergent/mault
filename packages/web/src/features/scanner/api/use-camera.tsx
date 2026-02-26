@@ -7,15 +7,7 @@ import {
   useRef,
   useState,
 } from "react";
-
-export type CameraStatus = "idle" | "requesting" | "ready" | "error";
-
-interface CameraContextValue {
-  stream: MediaStream | null;
-  status: CameraStatus;
-  errorMessage: string;
-  retryCamera: () => Promise<void>;
-}
+import type { CameraContextValue, CameraStatus } from "../types";
 
 const CameraContext = createContext<CameraContextValue | null>(null);
 

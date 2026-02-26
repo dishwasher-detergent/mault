@@ -11,16 +11,7 @@ import {
 } from "@/components/ui/select";
 import { IconDownload, IconTrash } from "@tabler/icons-react";
 import { useState } from "react";
-
-interface CardToolbarProps {
-  searchQuery: string;
-  onSearchChange: (query: string) => void;
-  sortKey: string | null;
-  onSortChange: (key: string | null) => void;
-  onExport: () => void;
-  onClearAll: () => void;
-  hasCards: boolean;
-}
+import type { CardToolbarProps } from "../types";
 
 export function CardToolbar({
   searchQuery,

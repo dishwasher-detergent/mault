@@ -1,0 +1,49 @@
+import type {
+  BinCondition,
+  BinConfig,
+  BinRuleGroup,
+  BinSet,
+} from "@magic-vault/shared";
+
+export interface BinConfigsContextValue {
+  configs: BinConfig[];
+  sets: BinSet[];
+  isPending: boolean;
+  isActivating: boolean;
+  isPresetMutating: boolean;
+  hasCatchAll: boolean;
+  selectedBin: number;
+  selectedSet?: BinSet;
+  setSelectedBin: (bin: number) => void;
+  selectedConfig: BinConfig;
+  save: (binNumber: number, rules: BinRuleGroup, isCatchAll?: boolean) => void;
+  clear: (binNumber: number) => void;
+  activateSet: (guid: string) => Promise<void>;
+  createSet: (name: string) => Promise<void>;
+  saveSet: (name: string) => Promise<void>;
+  renameSet: (guid: string, name: string) => Promise<void>;
+  deleteSet: (guid: string) => Promise<void>;
+}
+
+export interface BinCardProps {
+  config: BinConfig;
+  active?: boolean;
+  onClick: () => void;
+}
+
+export interface ConditionRowProps {
+  condition: BinCondition;
+  onChange: (updated: BinCondition) => void;
+  onRemove: () => void;
+}
+
+export interface PresetSelectorProps {
+  readOnly?: boolean;
+}
+
+export interface RuleGroupEditorProps {
+  group: BinRuleGroup;
+  onChange: (updated: BinRuleGroup) => void;
+  onRemove?: () => void;
+  depth?: number;
+}

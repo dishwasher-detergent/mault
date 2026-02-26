@@ -24,16 +24,7 @@ import {
   useRef,
   useState,
 } from "react";
-
-interface ScannedCardsContextValue {
-  cards: ScannedCard[];
-  isLoading: boolean;
-  addCard: (card: ScryfallCardWithDistance) => void;
-  sendCatchAllBin: () => void;
-  removeCard: (scanId: string) => void;
-  correctCard: (scanId: string, card: ScryfallCard) => void;
-  clearCards: () => void;
-}
+import type { ScannedCardsContextValue } from "../types";
 
 const ScannedCardsContext = createContext<ScannedCardsContextValue | null>(
   null,

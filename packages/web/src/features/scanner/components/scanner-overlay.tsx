@@ -1,5 +1,4 @@
 import { Button } from "@/components/ui/button";
-import type { ScannerStatus } from "@magic-vault/shared";
 import {
   IconAlertTriangle,
   IconCamera,
@@ -7,15 +6,7 @@ import {
   IconLoader2,
   IconRefresh,
 } from "@tabler/icons-react";
-
-interface ScannerOverlayProps {
-  status: ScannerStatus;
-  errorMessage: string;
-  isConnected: boolean;
-  isReady: boolean;
-  hasCatchAll: boolean;
-  onRetryError: () => void;
-}
+import type { ScannerOverlayProps } from "../types";
 
 export function ScannerOverlay({
   status,

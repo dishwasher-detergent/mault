@@ -25,6 +25,7 @@ import {
 } from "@tabler/icons-react";
 import { useQuery } from "@tanstack/react-query";
 import { useCallback, useMemo, useRef, useState } from "react";
+import type { CardSelectDialogProps } from "../types";
 
 function formatManaCost(manaCost: string): string {
   return manaCost.replace(/[{}]/g, " ").trim().replace(/\s+/g, " ");
@@ -32,15 +33,6 @@ function formatManaCost(manaCost: string): string {
 
 function formatPrice(label: string, value: string | null): string | null {
   return value ? `${label}: $${value}` : null;
-}
-
-interface CardSelectDialogProps {
-  trigger: React.ReactElement;
-  title?: string;
-  description?: string;
-  scanId?: string;
-  onRemove?: () => void;
-  currentCard?: ScryfallCardWithDistance;
 }
 
 export function CardSelectDialog({

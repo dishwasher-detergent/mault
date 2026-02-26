@@ -1,30 +1,7 @@
 import { useScannedCards } from "@/features/scanner/api/use-scanned-cards";
 import { useMemo, useState } from "react";
-
-interface SetStats {
-  code: string;
-  name: string;
-  count: number;
-  value: number;
-}
-
-const RARITY_LABELS: Record<string, string> = {
-  common: "Common",
-  uncommon: "Uncommon",
-  rare: "Rare",
-  mythic: "Mythic",
-  special: "Special",
-  bonus: "Bonus",
-};
-
-const RARITY_ORDER = [
-  "mythic",
-  "rare",
-  "uncommon",
-  "common",
-  "special",
-  "bonus",
-];
+import { RARITY_LABELS, RARITY_ORDER } from "../constants";
+import type { SetStats } from "../types";
 
 function formatUsd(value: number): string {
   return `$${value.toFixed(2)}`;

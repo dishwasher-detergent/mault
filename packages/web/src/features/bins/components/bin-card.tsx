@@ -2,12 +2,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { RuleSummary } from "@/features/bins/components/rule-summary";
 import { BinConfig, isRuleGroup } from "@magic-vault/shared";
-
-interface BinCardProps {
-  config: BinConfig;
-  active?: boolean;
-  onClick: () => void;
-}
+import type { BinCardProps } from "../types";
 
 function countConditions(config: BinConfig): number {
   function count(items: BinConfig["rules"]["conditions"]): number {

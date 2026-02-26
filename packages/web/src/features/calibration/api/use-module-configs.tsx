@@ -17,19 +17,7 @@ import {
   useRef,
 } from "react";
 import { toast } from "sonner";
-
-interface ModuleConfigsContextValue {
-  configs: ModuleConfig[];
-  saveConfig: (
-    moduleNumber: 1 | 2 | 3,
-    calibration: ServoCalibration,
-  ) => Promise<void>;
-  moveServo: (
-    module: 1 | 2 | 3,
-    servo: "bottom" | "paddle" | "pusher",
-    value: number,
-  ) => void;
-}
+import type { ModuleConfigsContextValue } from "../types";
 
 const ModuleConfigsContext = createContext<ModuleConfigsContextValue | null>(
   null,

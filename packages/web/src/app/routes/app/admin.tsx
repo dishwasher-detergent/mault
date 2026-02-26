@@ -1,27 +1,9 @@
 import { Button } from "@/components/ui/button";
 import { cancelSync, createSyncEventSource, startSync } from "@/lib/api/admin";
-import { cn } from "@/lib/utils";
 import type { SyncState } from "@magic-vault/shared";
 import { useMutation } from "@tanstack/react-query";
 import { useEffect, useRef, useState } from "react";
-
-const DEFAULT_SYNC_STATE: SyncState = {
-  status: "idle",
-  total: 0,
-  processed: 0,
-  skipped: 0,
-  errors: 0,
-  startedAt: null,
-  logs: [],
-};
-
-const STATUS_COLORS: Record<SyncState["status"], string> = {
-  idle: "text-muted-foreground",
-  running: "text-blue-500",
-  completed: "text-green-500",
-  failed: "text-red-500",
-  cancelled: "text-yellow-500",
-};
+import { DEFAULT_SYNC_STATE, STATUS_COLORS } from "./admin.constants";
 
 export default function AdminPage() {
   const [syncState, setSyncState] = useState<SyncState>(DEFAULT_SYNC_STATE);
@@ -97,10 +79,8 @@ export default function AdminPage() {
           <div className="flex flex-col gap-0.5">
             <p className="text-sm font-medium">Card Image Vectors</p>
             <p
-              className={cn(
-                "text-xs font-medium",
-                STATUS_COLORS[syncState.status],
-              )}
+              className="text-xs font-medium"
+              style={{ color: STATUS_COLORS[syncState.status] }}
             >
               {syncState.status.charAt(0).toUpperCase() +
                 syncState.status.slice(1)}

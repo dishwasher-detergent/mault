@@ -16,14 +16,11 @@ import {
   type ScryfallCardWithDistance,
 } from "@magic-vault/shared";
 import { useCallback, useEffect, useRef, useState } from "react";
-
-const STABILITY_FRAMES = 5;
-const DETECTION_INTERVAL_MS = 100;
-const SCANNABLE_STATUSES: ScannerStatus[] = [
-  "scanning",
-  "no-match",
-  "duplicate",
-];
+import {
+  DETECTION_INTERVAL_MS,
+  SCANNABLE_STATUSES,
+  STABILITY_FRAMES,
+} from "../constants";
 
 function playDingSound() {
   const ctx = new AudioContext();

@@ -1,4 +1,4 @@
-const OPENCV_CDN_URL = "https://docs.opencv.org/4.10.0/opencv.js";
+import { OPENCV_CDN_URL } from "../constants";
 
 let loadPromise: Promise<void> | null = null;
 
