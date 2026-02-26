@@ -58,10 +58,10 @@ export const requireAuth = createMiddleware<AppEnv>(async (c, next) => {
 });
 
 export function requireRole(...roles: string[]) {
-  return createMiddleware<AppEnv>((c, next) => {
+  return createMiddleware<AppEnv>(async (c, next) => {
     if (!roles.includes(c.get("userRole"))) {
       return c.json({ success: false, message: "Forbidden" }, 403);
     }
-    return next();
+    await next();
   });
 }
