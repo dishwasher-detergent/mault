@@ -221,7 +221,7 @@ export default function CalibratePage() {
                       <Skeleton className="h-3 w-32 rounded" />
                     ) : cal ? (
                       <div className="text-xs text-muted-foreground w-full flex">
-                        {servo.calibrationPositions.map((pos, i) => (
+                        {servo.calibrationPositions.map((pos) => (
                           <p className="flex-1 text-center" key={pos.key}>
                             {cal[pos.key]}
                           </p>
