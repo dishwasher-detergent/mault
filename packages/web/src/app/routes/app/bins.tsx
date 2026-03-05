@@ -1,8 +1,8 @@
+import { Button } from "@/components/ui/button";
+import { DynamicPopover } from "@/components/ui/responsive-popover";
 import { BinConfigPanel } from "@/features/bins/components/bin-config-panel";
 import { BinList } from "@/features/bins/components/bin-list";
 import { PresetSelector } from "@/features/bins/components/preset-selector";
-import { Button } from "@/components/ui/button";
-import { DynamicPopover } from "@/components/ui/responsive-popover";
 import { useIsMobile } from "@/hooks/use-is-mobile";
 import { IconMenu } from "@tabler/icons-react";
 
@@ -30,7 +30,7 @@ export default function BinsPage() {
       </section>
     </div>
   ) : (
-    <div className="grid grid-cols-12 flex-1 min-h-0 overflow-hidden p-4 gap-2">
+    <div className="grid grid-cols-12 flex-1 min-h-0 overflow-hidden gap-2">
       <section className="col-span-5 md:col-span-4 lg:col-span-3 overflow-hidden flex flex-col h-full">
         <div className="w-full overflow-hidden flex flex-col border rounded-lg p-2 bg-sidebar">
           <div className="overflow-y-auto min-h-0 mb-2">

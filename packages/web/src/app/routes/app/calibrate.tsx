@@ -1,4 +1,5 @@
 import { Button } from "@/components/ui/button";
+import { ButtonGroup } from "@/components/ui/button-group";
 import { Skeleton } from "@/components/ui/skeleton";
 import { modulesQueryOptions } from "@/features/calibration/api/module-configs";
 import { useModuleConfigs } from "@/features/calibration/api/use-module-configs";
@@ -90,7 +91,7 @@ export default function CalibratePage() {
   );
 
   return (
-    <div className="flex flex-col gap-6 p-6 max-w-4xl mx-auto">
+    <div className="flex flex-col gap-6">
       <div className="grid grid-cols-1 md:grid-cols-3 rounded-lg border overflow-hidden">
         {MODULES.map((module) => {
           const config = configs.find((c) => c.moduleNumber === module);
@@ -98,7 +99,7 @@ export default function CalibratePage() {
           return (
             <div
               key={module}
-              className="p-4 flex flex-col gap-5 border-b md:border-b-0 md:border-r last:border-0"
+              className="p-4 flex flex-col gap-5 border-b md:border-b-0 md:border-r last:border-0 bg-sidebar"
             >
               <h2 className="text-sm font-bold">Module {module}</h2>
               {SERVOS.map((servo) => {
@@ -119,7 +120,7 @@ export default function CalibratePage() {
                         <IconRotateClockwise size={12} />
                       </button>
                     </div>
-                    <div className="flex gap-1.5">
+                    <ButtonGroup className="w-full">
                       {servo.controlPositions.map((position) => {
                         const key = `${module}:${servo.name}`;
                         const isActive = active[key] === position;
@@ -127,7 +128,6 @@ export default function CalibratePage() {
                           <Button
                             key={position}
                             variant={isActive ? "default" : "outline"}
-                            size="sm"
                             disabled={!isConnected}
                             onClick={() =>
                               handleControl(module, servo.name, position)
@@ -138,54 +138,95 @@ export default function CalibratePage() {
                           </Button>
                         );
                       })}
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <input
-                        type="range"
-                        min={120}
-                        max={490}
-                        step={1}
-                        value={sliderValue}
-                        disabled={!isConnected}
-                        onChange={(e) =>
+                    </ButtonGroup>
+                    <ButtonGroup className="w-full">
+                      <Button
+                        variant="outline"
+                        disabled={!isConnected || sliderValue <= 120}
+                        onClick={() =>
                           handleSliderChange(
                             module,
                             servo.name,
-                            parseInt(e.target.value),
+                            Math.max(120, sliderValue - 10),
                           )
                         }
-                        className="flex-1 accent-foreground"
-                      />
-                      <span className="text-xs tabular-nums w-8 text-right">
-                        {sliderValue}
-                      </span>
-                    </div>
-                    <div className="flex flex-wrap gap-1.5">
+                        className="px-2 text-xs"
+                      >
+                        -10
+                      </Button>
+                      <Button
+                        variant="outline"
+                        disabled={!isConnected || sliderValue <= 120}
+                        onClick={() =>
+                          handleSliderChange(
+                            module,
+                            servo.name,
+                            sliderValue - 1,
+                          )
+                        }
+                        className="px-2"
+                      >
+                        -
+                      </Button>
+                      <div className="flex flex-row flex-1 bg-background border-y justify-between px-2 items-center">
+                        <p className="text-xs text-muted-foreground">120</p>
+                        <p className="font-bold text-sm">{sliderValue}</p>
+                        <p className="text-xs text-muted-foreground">490</p>
+                      </div>
+                      <Button
+                        variant="outline"
+                        disabled={!isConnected || sliderValue >= 490}
+                        onClick={() =>
+                          handleSliderChange(
+                            module,
+                            servo.name,
+                            sliderValue + 1,
+                          )
+                        }
+                        className="px-2"
+                      >
+                        +
+                      </Button>
+                      <Button
+                        variant="outline"
+                        disabled={!isConnected || sliderValue >= 490}
+                        onClick={() =>
+                          handleSliderChange(
+                            module,
+                            servo.name,
+                            Math.min(490, sliderValue + 10),
+                          )
+                        }
+                        className="px-2 text-xs"
+                      >
+                        +10
+                      </Button>
+                    </ButtonGroup>
+                    <ButtonGroup className="w-full">
                       {servo.calibrationPositions.map((pos) => (
                         <Button
                           key={pos.key}
-                          size="sm"
                           variant="outline"
                           disabled={!isConnected}
                           onClick={() =>
                             handleSetPosition(module, pos.key, sliderValue)
                           }
+                          className="flex-1"
                         >
                           {pos.label}
                         </Button>
                       ))}
-                    </div>
+                    </ButtonGroup>
                     {isLoading ? (
                       <Skeleton className="h-3 w-32 rounded" />
                     ) : cal ? (
-                      <p className="text-xs text-muted-foreground">
+                      <div className="text-xs text-muted-foreground w-full flex">
                         {servo.calibrationPositions.map((pos, i) => (
-                          <span key={pos.key}>
-                            {i > 0 && "  ·  "}
-                            {pos.label.replace("Set ", "")}={cal[pos.key]}
-                          </span>
+                          <p className="flex-1 text-center" key={pos.key}>
+                            {cal[pos.key]}
+                          </p>
                         ))}
-                      </p>
+                      </div>
                     ) : null}
                   </div>
                 );

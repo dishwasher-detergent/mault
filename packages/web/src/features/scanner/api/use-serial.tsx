@@ -32,7 +32,10 @@ export function SerialProvider({ children }: { children: React.ReactNode }) {
   const decoderRef = useRef(new TextDecoder());
 
   const startReading = useCallback(
-    async (reader: ReadableStreamDefaultReader<Uint8Array>) => {
+    async (
+      reader: ReadableStreamDefaultReader<Uint8Array>,
+      onEnd?: () => void,
+    ) => {
       try {
         while (true) {
           const { value, done } = await reader.read();
@@ -71,6 +74,8 @@ export function SerialProvider({ children }: { children: React.ReactNode }) {
         if (!(e instanceof DOMException && e.name === "NetworkError")) {
           console.error("[Serial] Read error:", e);
         }
+      } finally {
+        onEnd?.();
       }
     },
     [],
@@ -128,55 +133,6 @@ export function SerialProvider({ children }: { children: React.ReactNode }) {
     }
   }, [sendCommand, waitForLine]);
 
-  const connect = useCallback(async () => {
-    // Wait for any in-progress disconnect to finish
-    if (disconnectingRef.current) {
-      await disconnectingRef.current;
-    }
-
-    if (portRef.current) return;
-
-    let port: SerialPort;
-    try {
-      port = await navigator.serial.requestPort();
-    } catch {
-      // User cancelled the port picker
-      return;
-    }
-
-    try {
-      await port.open({ baudRate: 9600 });
-    } catch (e) {
-      console.error("[Serial] Failed to open port:", e);
-      return;
-    }
-
-    portRef.current = port;
-    writableRef.current = port.writable;
-
-    const reader = port.readable!.getReader();
-    readerRef.current = reader;
-    decoderRef.current = new TextDecoder();
-
-    setIsConnected(true);
-
-    startReading(reader);
-
-    (async () => {
-      const readyLine = await waitForLine(5000);
-      if (readyLine) {
-        try {
-          const parsed = JSON.parse(readyLine);
-          console.log("[Serial] Arduino ready:", parsed);
-        } catch {
-          console.log("[Serial] Initial message:", readyLine);
-        }
-      }
-
-      await sendCommand(JSON.stringify({ test: true }) + "\n");
-    })();
-  }, [startReading, waitForLine, sendCommand]);
-
   const disconnect = useCallback(() => {
     const port = portRef.current;
     const reader = readerRef.current;
@@ -217,6 +173,76 @@ export function SerialProvider({ children }: { children: React.ReactNode }) {
 
     return cleanup;
   }, []);
+
+  const connect = useCallback(async () => {
+    // Wait for any in-progress disconnect to finish
+    if (disconnectingRef.current) {
+      await disconnectingRef.current;
+    }
+
+    if (portRef.current) return;
+
+    let port: SerialPort;
+    try {
+      port = await navigator.serial.requestPort();
+    } catch {
+      // User cancelled the port picker
+      return;
+    }
+
+    try {
+      await port.open({ baudRate: 9600 });
+    } catch (e) {
+      console.error("[Serial] Failed to open port:", e);
+      return;
+    }
+
+    portRef.current = port;
+    writableRef.current = port.writable;
+
+    const reader = port.readable!.getReader();
+    readerRef.current = reader;
+    decoderRef.current = new TextDecoder();
+
+    setIsConnected(true);
+
+    startReading(reader, () => {
+      // Stream ended — physical unplug or unexpected close
+      if (portRef.current === port) {
+        console.warn("[Serial] Stream ended unexpectedly, disconnecting");
+        disconnect();
+      }
+    });
+
+    (async () => {
+      const readyLine = await waitForLine(5000);
+      if (readyLine) {
+        try {
+          const parsed = JSON.parse(readyLine);
+          console.log("[Serial] Arduino ready:", parsed);
+        } catch {
+          console.log("[Serial] Initial message:", readyLine);
+        }
+      }
+
+      await sendCommand(JSON.stringify({ test: true }) + "\n");
+    })();
+  }, [startReading, waitForLine, sendCommand, disconnect]);
+
+  // Detect physical USB unplug
+  useEffect(() => {
+    if (!navigator.serial) return;
+    const handleDisconnect = (event: Event) => {
+      if (portRef.current && portRef.current === (event.target as SerialPort)) {
+        console.warn("[Serial] Device unplugged");
+        disconnect();
+      }
+    };
+    navigator.serial.addEventListener("disconnect", handleDisconnect);
+    return () => {
+      navigator.serial.removeEventListener("disconnect", handleDisconnect);
+    };
+  }, [disconnect]);
 
   useEffect(() => {
     const listener: SerialMessageListener = (msg) => {
