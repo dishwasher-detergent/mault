@@ -7,11 +7,21 @@ import type {
 
 export type CameraStatus = "idle" | "requesting" | "ready" | "error";
 
+export interface ZoomRange {
+  min: number;
+  max: number;
+  step: number;
+}
+
 export interface CameraContextValue {
   stream: MediaStream | null;
   status: CameraStatus;
   errorMessage: string;
+  zoom: number;
+  zoomRange: ZoomRange | null;
+  setZoom: (value: number) => void;
   retryCamera: () => Promise<void>;
+  stopCamera: () => void;
 }
 
 export interface ScannedCardsContextValue {
@@ -50,6 +60,7 @@ export interface ScannerControlsProps {
 export interface ScannerOverlayProps {
   status: ScannerStatus;
   errorMessage: string;
+  isCameraActive: boolean;
   isConnected: boolean;
   isReady: boolean;
   hasCatchAll: boolean;

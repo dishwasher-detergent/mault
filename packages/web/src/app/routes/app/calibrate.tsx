@@ -11,9 +11,31 @@ import type {
 } from "@/features/calibration/types";
 import { useSerial } from "@/features/scanner/api/use-serial";
 import { ServoCalibration } from "@magic-vault/shared";
-import { IconRotateClockwise } from "@tabler/icons-react";
+import {
+  IconBulb,
+  IconBulbFilled,
+  IconDeviceUsb,
+  IconDeviceUsbFilled,
+  IconLayoutAlignCenter,
+  IconRotateClockwise,
+} from "@tabler/icons-react";
 import { useQuery } from "@tanstack/react-query";
 import { useCallback, useRef, useState } from "react";
+import { toast } from "sonner";
+
+function getCalibrationKey(
+  servo: "bottom" | "paddle" | "pusher",
+  position: string,
+): keyof ServoCalibration | null {
+  if (servo === "bottom") return position === "open" ? "bottomOpen" : "bottomClosed";
+  if (servo === "paddle") return position === "open" ? "paddleOpen" : "paddleClosed";
+  if (servo === "pusher") {
+    if (position === "left") return "pusherLeft";
+    if (position === "right") return "pusherRight";
+    return "pusherNeutral";
+  }
+  return null;
+}
 
 function defaultSliderValues(): Record<SliderKey, number> {
   const vals = {} as Record<SliderKey, number>;
@@ -26,26 +48,52 @@ function defaultSliderValues(): Record<SliderKey, number> {
 }
 
 export default function CalibratePage() {
-  const { isConnected, sendCommand } = useSerial();
+  const { isConnected, connect, disconnect, sendCommand, sendBin, sendTest } = useSerial();
   const { configs, saveConfig, moveServo } = useModuleConfigs();
   const { isLoading } = useQuery(modulesQueryOptions);
   const [active, setActive] = useState<ActivePositions>({});
   const activeRef = useRef(active);
   activeRef.current = active;
+  const configsRef = useRef(configs);
+  configsRef.current = configs;
   const [sliderValues, setSliderValues] =
     useState<Record<SliderKey, number>>(defaultSliderValues);
   const servoDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [ledStates, setLedStates] = useState<Record<1 | 2 | 3 | 4, boolean>>({
+    1: false,
+    2: false,
+    3: false,
+    4: false,
+  });
 
   const handleControl = useCallback(
-    (module: number, servo: string, position: string) => {
+    (module: 1 | 2 | 3, servo: "bottom" | "paddle" | "pusher", position: string) => {
       const key = `${module}:${servo}`;
       const current = activeRef.current[key];
       if (current === position) {
         sendCommand(JSON.stringify({ servo, module, position: "neutral" }));
         setActive((prev) => ({ ...prev, [key]: null }));
+
+        // Sync slider to the calibrated neutral/closed value
+        const cal = configsRef.current.find((c) => c.moduleNumber === module)?.calibration;
+        if (cal) {
+          const calKey = getCalibrationKey(servo, "neutral");
+          if (calKey) {
+            setSliderValues((prev) => ({ ...prev, [key]: cal[calKey] }));
+          }
+        }
       } else {
         sendCommand(JSON.stringify({ servo, module, position }));
         setActive((prev) => ({ ...prev, [key]: position }));
+
+        // Sync slider to the calibrated value for this position
+        const cal = configsRef.current.find((c) => c.moduleNumber === module)?.calibration;
+        if (cal) {
+          const calKey = getCalibrationKey(servo, position);
+          if (calKey) {
+            setSliderValues((prev) => ({ ...prev, [key]: cal[calKey] }));
+          }
+        }
       }
     },
     [sendCommand],
@@ -81,6 +129,63 @@ export default function CalibratePage() {
     [moveServo],
   );
 
+  const handleLedToggle = useCallback(
+    (led: 1 | 2 | 3 | 4) => {
+      const next = !ledStates[led];
+      sendCommand(JSON.stringify({ led, on: next }));
+      setLedStates((prev) => ({ ...prev, [led]: next }));
+    },
+    [ledStates, sendCommand],
+  );
+
+  const [activeBin, setActiveBin] = useState<number | null>(null);
+  const [isTesting, setIsTesting] = useState(false);
+
+  const handleTest = useCallback(async () => {
+    setIsTesting(true);
+    toast.info("Running test sequence…");
+    const ok = await sendTest();
+    setIsTesting(false);
+    if (ok) {
+      toast.success("Test complete");
+    } else {
+      toast.error("Test failed", { description: "No response from sorter." });
+    }
+  }, [sendTest]);
+
+  const handleTestBin = useCallback(
+    async (bin: number) => {
+      setActiveBin(bin);
+      try {
+        const response = await sendBin(bin);
+        if (!response) {
+          toast.error(`Bin ${bin} test failed`, {
+            description: "No response from sorter.",
+          });
+        }
+      } finally {
+        setActiveBin(null);
+      }
+    },
+    [sendBin],
+  );
+
+  const handleCenterModule = useCallback(
+    (module: 1 | 2 | 3) => {
+      const CENTER = 307;
+      for (const servo of SERVOS) {
+        moveServo(module, servo.name, CENTER);
+      }
+      setSliderValues((prev) => ({
+        ...prev,
+        [`${module}:bottom`]: CENTER,
+        [`${module}:paddle`]: CENTER,
+        [`${module}:pusher`]: CENTER,
+      }));
+    },
+    [moveServo],
+  );
+
   const handleSetPosition = useCallback(
     (module: 1 | 2 | 3, posKey: keyof ServoCalibration, value: number) => {
       const config = configs.find((c) => c.moduleNumber === module);
@@ -91,7 +196,61 @@ export default function CalibratePage() {
   );
 
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex flex-col gap-2">
+      <div className="flex justify-start gap-2">
+        {isConnected ? (
+          <Button variant="outline" onClick={disconnect}>
+            <IconDeviceUsbFilled />
+            Disconnect
+          </Button>
+        ) : (
+          <Button onClick={connect}>
+            <IconDeviceUsb />
+            Connect Device
+          </Button>
+        )}
+        <Button
+          variant="outline"
+          disabled={!isConnected || isTesting}
+          onClick={handleTest}
+        >
+          {isTesting ? "Testing…" : "Run Test"}
+        </Button>
+      </div>
+      <div className="flex items-center gap-2 rounded-lg border bg-sidebar p-2">
+        {([1, 2, 3, 4] as const).map((led) => (
+          <Button
+            key={led}
+            variant={ledStates[led] ? "default" : "outline"}
+            disabled={!isConnected}
+            onClick={() => handleLedToggle(led)}
+            className="gap-2"
+          >
+            {ledStates[led] ? (
+              <IconBulbFilled size={16} />
+            ) : (
+              <IconBulb size={16} />
+            )}
+            LED {led}
+          </Button>
+        ))}
+      </div>
+      <div className="flex flex-col gap-1.5 rounded-lg border bg-sidebar p-2">
+        <p className="text-xs text-muted-foreground px-1">Test bin routing</p>
+        <ButtonGroup className="w-full">
+          {([1, 2, 3, 4, 5, 6, 7] as const).map((bin) => (
+            <Button
+              key={bin}
+              variant={activeBin === bin ? "default" : "outline"}
+              disabled={!isConnected || activeBin !== null}
+              onClick={() => handleTestBin(bin)}
+              className="flex-1"
+            >
+              {activeBin === bin ? "…" : bin}
+            </Button>
+          ))}
+        </ButtonGroup>
+      </div>
       <div className="grid grid-cols-1 md:grid-cols-3 rounded-lg border overflow-hidden">
         {MODULES.map((module) => {
           const config = configs.find((c) => c.moduleNumber === module);
@@ -99,9 +258,19 @@ export default function CalibratePage() {
           return (
             <div
               key={module}
-              className="p-4 flex flex-col gap-5 border-b md:border-b-0 md:border-r last:border-0 bg-sidebar"
+              className="p-2 flex flex-col gap-5 border-b md:border-b-0 md:border-r last:border-0 bg-sidebar"
             >
-              <h2 className="text-sm font-bold">Module {module}</h2>
+              <div className="flex items-center justify-between">
+                <h2 className="text-sm font-bold">Module {module}</h2>
+                <button
+                  disabled={!isConnected}
+                  onClick={() => handleCenterModule(module)}
+                  className="text-muted-foreground hover:text-foreground disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                  title="Center all servos"
+                >
+                  <IconLayoutAlignCenter size={14} />
+                </button>
+              </div>
               {SERVOS.map((servo) => {
                 const sliderKey = `${module}:${servo.name}` as SliderKey;
                 const sliderValue = sliderValues[sliderKey] ?? 307;
@@ -130,7 +299,7 @@ export default function CalibratePage() {
                             variant={isActive ? "default" : "outline"}
                             disabled={!isConnected}
                             onClick={() =>
-                              handleControl(module, servo.name, position)
+                              handleControl(module as 1 | 2 | 3, servo.name, position)
                             }
                             className="flex-1"
                           >

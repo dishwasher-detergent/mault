@@ -22,134 +22,151 @@ function orderPoints(pts: Point[]): CardContour {
 }
 
 /**
- * Score a quadrilateral by how close its aspect ratio is to an MTG card.
+ * Sample the median pixel value from a grayscale Mat (used for auto-Canny).
+ */
+function medianPixelValue(mat: cv.Mat): number {
+  const data = mat.data as Uint8Array;
+  const step = Math.max(1, Math.floor(data.length / 1000));
+  const sample: number[] = [];
+  for (let i = 0; i < data.length; i += step) sample.push(data[i]);
+  sample.sort((a, b) => a - b);
+  return sample[Math.floor(sample.length / 2)];
+}
+
+/**
+ * Score a quadrilateral by aspect ratio, area, and side symmetry.
  */
 function scoreContour(contour: CardContour, frameArea: number): number {
   const { topLeft, topRight, bottomRight, bottomLeft } = contour;
 
-  const widthTop = Math.hypot(topRight.x - topLeft.x, topRight.y - topLeft.y);
-  const widthBottom = Math.hypot(
-    bottomRight.x - bottomLeft.x,
-    bottomRight.y - bottomLeft.y,
-  );
-  const heightLeft = Math.hypot(
-    bottomLeft.x - topLeft.x,
-    bottomLeft.y - topLeft.y,
-  );
-  const heightRight = Math.hypot(
-    bottomRight.x - topRight.x,
-    bottomRight.y - topRight.y,
-  );
+  const widthTop    = Math.hypot(topRight.x - topLeft.x,     topRight.y - topLeft.y);
+  const widthBottom = Math.hypot(bottomRight.x - bottomLeft.x, bottomRight.y - bottomLeft.y);
+  const heightLeft  = Math.hypot(bottomLeft.x - topLeft.x,   bottomLeft.y - topLeft.y);
+  const heightRight = Math.hypot(bottomRight.x - topRight.x, bottomRight.y - topRight.y);
 
-  const avgWidth = (widthTop + widthBottom) / 2;
+  const avgWidth  = (widthTop + widthBottom) / 2;
   const avgHeight = (heightLeft + heightRight) / 2;
 
-  if (avgHeight === 0) return 0;
+  if (avgHeight === 0 || avgWidth === 0) return 0;
 
+  // How close to the MTG card aspect ratio
   const aspectRatio = avgWidth / avgHeight;
-  const aspectScore =
-    1 - Math.abs(aspectRatio - MTG_ASPECT_RATIO) / MTG_ASPECT_RATIO;
+  const aspectScore = 1 - Math.abs(aspectRatio - MTG_ASPECT_RATIO) / MTG_ASPECT_RATIO;
 
+  // Prefer cards that fill a meaningful portion of the frame
   const area = avgWidth * avgHeight;
-  const areaRatio = area / frameArea;
-  const areaScore = Math.min(areaRatio * 5, 1); // Prefer larger cards
+  const areaScore = Math.min((area / frameArea) * 4, 1);
 
-  return Math.max(0, aspectScore * 0.7 + areaScore * 0.3);
+  // Opposite sides should be roughly the same length (parallelogram check)
+  const widthSym  = 1 - Math.abs(widthTop - widthBottom)   / Math.max(widthTop, widthBottom, 1);
+  const heightSym = 1 - Math.abs(heightLeft - heightRight) / Math.max(heightLeft, heightRight, 1);
+  const symmetryScore = (widthSym + heightSym) / 2;
+
+  return Math.max(0, aspectScore * 0.6 + areaScore * 0.2 + symmetryScore * 0.2);
 }
+
+// Processing width for detection — scale down for speed and noise reduction.
+// Points are scaled back up to original coordinates before returning.
+const PROC_WIDTH = 640;
 
 /**
  * Detect an MTG card in an ImageData frame using OpenCV.js contour detection.
  */
 export function detectCard(imageData: ImageData): DetectionResult {
-  const noDetection: DetectionResult = {
-    detected: false,
-    contour: null,
-    confidence: 0,
-  };
+  const noDetection: DetectionResult = { detected: false, contour: null, confidence: 0 };
 
-  const frameArea = imageData.width * imageData.height;
-  const minArea = frameArea * 0.05;
-  const maxArea = frameArea * 0.95;
+  const scale  = PROC_WIDTH / imageData.width;
+  const procH  = Math.round(imageData.height * scale);
+  const frameArea = PROC_WIDTH * procH;
+  const minArea   = frameArea * 0.05;
+  const maxArea   = frameArea * 0.95;
 
-  const src = cv.matFromImageData(imageData);
-  const gray = new cv.Mat();
-  const blurred = new cv.Mat();
-  const edges = new cv.Mat();
-  const dilated = new cv.Mat();
+  const src      = cv.matFromImageData(imageData);
+  const scaled   = new cv.Mat();
+  const gray     = new cv.Mat();
+  const blurred  = new cv.Mat();
+  const edges    = new cv.Mat();
+  const morphed  = new cv.Mat();
   const hierarchy = new cv.Mat();
-  const contours = new cv.MatVector();
+  const contours  = new cv.MatVector();
   let kernel: cv.Mat | null = null;
 
   try {
-    // Grayscale
-    cv.cvtColor(src, gray, cv.COLOR_RGBA2GRAY);
+    // Scale down — dramatically reduces noise and speeds up processing
+    cv.resize(src, scaled, new cv.Size(PROC_WIDTH, procH));
 
-    // Gaussian blur
+    cv.cvtColor(scaled, gray, cv.COLOR_RGBA2GRAY);
     cv.GaussianBlur(gray, blurred, new cv.Size(5, 5), 0);
 
-    // Canny edge detection
-    cv.Canny(blurred, edges, 50, 150);
+    // Auto-calibrate Canny thresholds from the image's median brightness
+    const median = medianPixelValue(blurred);
+    const sigma  = 0.33;
+    const lower  = Math.max(0,   Math.round((1 - sigma) * median));
+    const upper  = Math.min(255, Math.round((1 + sigma) * median));
+    cv.Canny(blurred, edges, lower, upper);
 
-    // Dilate to close gaps
+    // Morphological close: 2× dilate then erode bridges edge gaps better than dilate alone
     kernel = cv.getStructuringElement(cv.MORPH_RECT, new cv.Size(3, 3));
-    cv.dilate(edges, dilated, kernel);
+    cv.dilate(edges, morphed, kernel, new cv.Point(-1, -1), 2);
+    cv.erode(morphed, morphed, kernel, new cv.Point(-1, -1), 1);
 
-    // Find external contours
-    cv.findContours(
-      dilated,
-      contours,
-      hierarchy,
-      cv.RETR_EXTERNAL,
-      cv.CHAIN_APPROX_SIMPLE,
-    );
+    cv.findContours(morphed, contours, hierarchy, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE);
 
     let bestResult: DetectionResult = noDetection;
 
     for (let i = 0; i < contours.size(); i++) {
       const contour = contours.get(i);
-      const area = cv.contourArea(contour);
-
+      const area    = cv.contourArea(contour);
       if (area < minArea || area > maxArea) continue;
 
       const perimeter = cv.arcLength(contour, true);
-      const approx = new cv.Mat();
+      let approx: cv.Mat | null = null;
 
       try {
-        cv.approxPolyDP(contour, approx, 0.02 * perimeter, true);
+        // Try progressively larger epsilons until we get a quadrilateral
+        for (const eps of [0.02, 0.03, 0.04, 0.06]) {
+          const candidate = new cv.Mat();
+          cv.approxPolyDP(contour, candidate, eps * perimeter, true);
+          if (candidate.rows === 4) {
+            approx = candidate;
+            break;
+          }
+          candidate.delete();
+        }
 
-        // Must be a quadrilateral
-        if (approx.rows !== 4) continue;
+        if (!approx) continue;
 
+        // Cards are convex — skip anything that isn't
+        if (!cv.isContourConvex(approx)) continue;
+
+        // Scale points back to original image coordinates
         const points: Point[] = [];
         for (let j = 0; j < 4; j++) {
           points.push({
-            x: approx.data32S[j * 2],
-            y: approx.data32S[j * 2 + 1],
+            x: approx.data32S[j * 2]     / scale,
+            y: approx.data32S[j * 2 + 1] / scale,
           });
         }
 
-        const ordered = orderPoints(points);
-        const confidence = scoreContour(ordered, frameArea);
+        const ordered    = orderPoints(points);
+        const confidence = scoreContour(ordered, imageData.width * imageData.height);
 
-        if (confidence > bestResult.confidence && confidence > 0.3) {
-          bestResult = {
-            detected: true,
-            contour: ordered,
-            confidence,
-          };
+        if (confidence > bestResult.confidence && confidence > 0.35) {
+          bestResult = { detected: true, contour: ordered, confidence };
         }
       } finally {
-        approx.delete();
+        approx?.delete();
       }
     }
 
     return bestResult;
   } finally {
     src.delete();
+    scaled.delete();
     gray.delete();
     blurred.delete();
     edges.delete();
-    dilated.delete();
+    morphed.delete();
     hierarchy.delete();
     contours.delete();
     kernel?.delete();

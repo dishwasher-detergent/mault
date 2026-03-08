@@ -1,31 +1,13 @@
-import { Button } from "@/components/ui/button";
 import { ButtonGroup } from "@/components/ui/button-group";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
 import { useBinConfigs } from "@/features/bins/api/use-bin-configs";
 import { useCardScanner } from "@/features/scanner/api/use-card-scanner";
 import { useScannedCards } from "@/features/scanner/api/use-scanned-cards";
 import { useSerial, useSerialMessage } from "@/features/scanner/api/use-serial";
 import { ScannerControls } from "@/features/scanner/components/scanner-controls";
+import { ScannerMenu } from "@/features/scanner/components/scanner-menu";
 import { ScannerOverlay } from "@/features/scanner/components/scanner-overlay";
 import { cn } from "@/lib/utils";
 import type { CardScannerProps } from "@magic-vault/shared";
-import {
-  IconCamera,
-  IconCameraFilled,
-  IconDeviceUsb,
-  IconDeviceUsbFilled,
-} from "@tabler/icons-react";
 import { useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
@@ -33,11 +15,12 @@ import { toast } from "sonner";
 export function CardScanner({ className }: CardScannerProps) {
   const navigate = useNavigate();
   const { addCard, sendCatchAllBin } = useScannedCards();
-  const { isConnected, isReady, connect, disconnect } = useSerial();
+  const { isConnected, isReady, connect, disconnect, sendTest } = useSerial();
   const { hasCatchAll } = useBinConfigs();
   const {
     status,
     errorMessage,
+    isCameraActive,
     videoRef,
     displayCanvasRef,
     overlayCanvasRef,
@@ -47,6 +30,10 @@ export function CardScanner({ className }: CardScannerProps) {
     handlePause,
     handleResume,
     handleRetryError,
+    handleStopCamera,
+    zoom,
+    zoomRange,
+    setZoom,
   } = useCardScanner({
     onSearchResults: (cards) => {
       for (const card of cards) {
@@ -73,7 +60,7 @@ export function CardScanner({ className }: CardScannerProps) {
     }
   });
 
-  const canScan = isConnected && isReady && hasCatchAll;
+  const canScan = isConnected && isReady && hasCatchAll && isCameraActive;
   const wasReadyRef = useRef(canScan);
   useEffect(() => {
     if (!canScan && wasReadyRef.current) {
@@ -97,90 +84,39 @@ export function CardScanner({ className }: CardScannerProps) {
         <canvas ref={processingCanvasRef} className="hidden" />
         <canvas
           ref={displayCanvasRef}
-          className="absolute inset-0 w-full h-full object-cover"
+          className="absolute"
+          style={{ transform: "rotate(90deg)" }}
         />
         <canvas
           ref={overlayCanvasRef}
-          className="absolute inset-0 w-full h-full object-cover z-20 pointer-events-none"
+          className="absolute z-20 pointer-events-none"
+          style={{ transform: "rotate(90deg)" }}
         />
         <ScannerOverlay
           status={status}
           errorMessage={errorMessage}
+          isCameraActive={isCameraActive}
           isConnected={isConnected}
           isReady={isReady}
           hasCatchAll={hasCatchAll}
           onRetryError={handleRetryError}
         />
+        <ScannerMenu
+          isCameraActive={isCameraActive}
+          isConnected={isConnected}
+          zoom={zoom}
+          zoomRange={zoomRange}
+          onCameraConnect={handleRetryError}
+          onCameraDisconnect={handleStopCamera}
+          onZoomChange={setZoom}
+          onScannerConnect={connect}
+          onScannerDisconnect={disconnect}
+          onScannerRetry={sendTest}
+          onCalibrate={() => navigate("/app/calibrate")}
+        />
       </div>
-      <ButtonGroup className="w-full *:flex-1">
-        {status === "error" ? (
-          <Button
-            onClick={handleRetryError}
-            variant="outline"
-            style={{ flex: "1 1 0%" }}
-          >
-            <IconCamera className="mr-2" />
-            Connect Camera
-          </Button>
-        ) : (
-          <Tooltip>
-            <TooltipTrigger
-              render={
-                <Button
-                  onClick={handleRetryError}
-                  size="icon"
-                  variant="outline"
-                  style={{ flex: "none" }}
-                />
-              }
-            >
-              <IconCameraFilled />
-            </TooltipTrigger>
-            <TooltipContent>Reconnect Camera</TooltipContent>
-          </Tooltip>
-        )}
-        {isConnected ? (
-          <DropdownMenu>
-            <DropdownMenuTrigger
-              render={
-                <Button
-                  size="icon"
-                  variant="default"
-                  style={{ flex: "none" }}
-                />
-              }
-            >
-              <IconDeviceUsbFilled />
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="start">
-              <DropdownMenuItem onClick={() => navigate("/app/calibrate")}>
-                Calibrate
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem variant="destructive" onClick={disconnect}>
-                Disconnect
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        ) : (
-          <Tooltip>
-            <TooltipTrigger
-              render={
-                <Button
-                  onClick={connect}
-                  size="icon"
-                  variant="outline"
-                  style={{ flex: "1 1 0%" }}
-                >
-                  <IconDeviceUsb className="mr-2" />
-                  Connect Device
-                </Button>
-              }
-            />
-            <TooltipContent>Connect Device</TooltipContent>
-          </Tooltip>
-        )}
-        {isConnected && (
+      {isConnected && isCameraActive && (
+        <ButtonGroup className="w-full *:flex-1">
           <ScannerControls
             status={isReady && hasCatchAll ? status : "paused"}
             onForceAddDuplicate={handleForceAddDuplicate}
@@ -189,8 +125,8 @@ export function CardScanner({ className }: CardScannerProps) {
             onResume={isReady && hasCatchAll ? handleResume : () => {}}
             disabled={!isReady || !hasCatchAll}
           />
-        )}
-      </ButtonGroup>
+        </ButtonGroup>
+      )}
     </div>
   );
 }

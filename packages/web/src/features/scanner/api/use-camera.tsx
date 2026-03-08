@@ -2,6 +2,7 @@ import { loadOpenCv } from "@/features/scanner/lib/opencv-loader";
 import type {
   CameraContextValue,
   CameraStatus,
+  ZoomRange,
 } from "@/features/scanner/types";
 import {
   createContext,
@@ -17,10 +18,10 @@ const CameraContext = createContext<CameraContextValue | null>(null);
 async function acquireStream(): Promise<MediaStream> {
   const stream = await navigator.mediaDevices.getUserMedia({
     video: {
-      facingMode: { ideal: "environment" },
-      width: { ideal: 1280 },
-      height: { ideal: 720 },
-    },
+      width: { ideal: 1920 },
+      height: { ideal: 1080 },
+      zoom: true,
+    } as MediaTrackConstraints,
   });
 
   const track = stream.getVideoTracks()[0];
@@ -28,14 +29,20 @@ async function acquireStream(): Promise<MediaStream> {
     try {
       const capabilities = track.getCapabilities() as MediaTrackCapabilities & {
         focusMode?: string[];
+        zoom?: { min: number; max: number; step: number };
       };
+      const constraints: MediaTrackConstraintSet[] = [];
       if (capabilities.focusMode?.includes("continuous")) {
-        await track.applyConstraints({
-          advanced: [{ focusMode: "continuous" } as MediaTrackConstraintSet],
-        });
+        constraints.push({ focusMode: "continuous" } as MediaTrackConstraintSet);
+      }
+      if (capabilities.zoom) {
+        constraints.push({ zoom: capabilities.zoom.min } as MediaTrackConstraintSet);
+      }
+      if (constraints.length > 0) {
+        await track.applyConstraints({ advanced: constraints });
       }
     } catch {
-      // autofocus not supported, ignore
+      // constraints not supported, ignore
     }
   }
 
@@ -46,6 +53,8 @@ export function CameraProvider({ children }: { children: React.ReactNode }) {
   const [stream, setStream] = useState<MediaStream | null>(null);
   const [status, setStatus] = useState<CameraStatus>("idle");
   const [errorMessage, setErrorMessage] = useState("");
+  const [zoom, setZoomState] = useState(1);
+  const [zoomRange, setZoomRange] = useState<ZoomRange | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
 
   const startCamera = useCallback(async () => {
@@ -56,6 +65,19 @@ export function CameraProvider({ children }: { children: React.ReactNode }) {
       streamRef.current = mediaStream;
       setStream(mediaStream);
       setStatus("ready");
+
+      const track = mediaStream.getVideoTracks()[0];
+      if (track) {
+        const caps = track.getCapabilities() as MediaTrackCapabilities & {
+          zoom?: { min: number; max: number; step: number };
+        };
+        if (caps.zoom) {
+          setZoomRange(caps.zoom);
+          setZoomState(caps.zoom.min);
+        } else {
+          setZoomRange(null);
+        }
+      }
     } catch (err) {
       const msg =
         err instanceof DOMException && err.name === "NotAllowedError"
@@ -66,14 +88,27 @@ export function CameraProvider({ children }: { children: React.ReactNode }) {
     }
   }, []);
 
-  const retryCamera = useCallback(async () => {
+  const setZoom = useCallback((value: number) => {
+    const track = streamRef.current?.getVideoTracks()[0];
+    if (!track) return;
+    track.applyConstraints({ advanced: [{ zoom: value } as MediaTrackConstraintSet] }).catch(() => {});
+    setZoomState(value);
+  }, []);
+
+  const stopCamera = useCallback(() => {
     if (streamRef.current) {
       for (const track of streamRef.current.getTracks()) track.stop();
       streamRef.current = null;
       setStream(null);
     }
+    setStatus("idle");
+    setErrorMessage("");
+  }, []);
+
+  const retryCamera = useCallback(async () => {
+    stopCamera();
     await startCamera();
-  }, [startCamera]);
+  }, [startCamera, stopCamera]);
 
   useEffect(() => {
     loadOpenCv().catch(() => {}); // preload OpenCV in background
@@ -88,7 +123,7 @@ export function CameraProvider({ children }: { children: React.ReactNode }) {
   }, [startCamera]);
 
   return (
-    <CameraContext value={{ stream, status, errorMessage, retryCamera }}>
+    <CameraContext value={{ stream, status, errorMessage, zoom, zoomRange, setZoom, retryCamera, stopCamera }}>
       {children}
     </CameraContext>
   );

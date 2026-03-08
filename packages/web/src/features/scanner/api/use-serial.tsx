@@ -10,6 +10,7 @@ import {
   useRef,
   useState,
 } from "react";
+import { toast } from "sonner";
 
 export type { SerialMessageListener } from "@/features/scanner/types";
 
@@ -83,16 +84,22 @@ export function SerialProvider({ children }: { children: React.ReactNode }) {
 
   const waitForLine = useCallback((timeoutMs: number): Promise<string> => {
     return new Promise<string>((resolve) => {
+      let wrapper: ((line: string) => void) | null = null;
+
       const timeout = setTimeout(() => {
-        const idx = pendingRef.current.indexOf(resolve);
-        if (idx !== -1) pendingRef.current.splice(idx, 1);
+        if (wrapper) {
+          const idx = pendingRef.current.indexOf(wrapper);
+          if (idx !== -1) pendingRef.current.splice(idx, 1);
+        }
         resolve("");
       }, timeoutMs);
 
-      pendingRef.current.push((line: string) => {
+      wrapper = (line: string) => {
         clearTimeout(timeout);
         resolve(line);
-      });
+      };
+
+      pendingRef.current.push(wrapper);
     });
   }, []);
 
@@ -174,27 +181,15 @@ export function SerialProvider({ children }: { children: React.ReactNode }) {
     return cleanup;
   }, []);
 
-  const connect = useCallback(async () => {
-    // Wait for any in-progress disconnect to finish
-    if (disconnectingRef.current) {
-      await disconnectingRef.current;
-    }
-
-    if (portRef.current) return;
-
-    let port: SerialPort;
-    try {
-      port = await navigator.serial.requestPort();
-    } catch {
-      // User cancelled the port picker
-      return;
-    }
-
+  const openPort = useCallback(async (port: SerialPort): Promise<boolean> => {
     try {
       await port.open({ baudRate: 9600 });
     } catch (e) {
-      console.error("[Serial] Failed to open port:", e);
-      return;
+      const msg = e instanceof DOMException && e.name === "InvalidStateError"
+        ? "Port is already open. Unplug and reconnect the device."
+        : "Failed to open port. Make sure no other application is using it.";
+      toast.error("Connection failed", { description: msg });
+      return false;
     }
 
     portRef.current = port;
@@ -207,7 +202,6 @@ export function SerialProvider({ children }: { children: React.ReactNode }) {
     setIsConnected(true);
 
     startReading(reader, () => {
-      // Stream ended — physical unplug or unexpected close
       if (portRef.current === port) {
         console.warn("[Serial] Stream ended unexpectedly, disconnecting");
         disconnect();
@@ -215,19 +209,48 @@ export function SerialProvider({ children }: { children: React.ReactNode }) {
     });
 
     (async () => {
-      const readyLine = await waitForLine(5000);
-      if (readyLine) {
-        try {
-          const parsed = JSON.parse(readyLine);
-          console.log("[Serial] Arduino ready:", parsed);
-        } catch {
-          console.log("[Serial] Initial message:", readyLine);
-        }
+      // Consume the Arduino's boot message before sending the test
+      await waitForLine(5000);
+      toast.info("Testing device…");
+      const ok = await sendTest();
+      if (ok) {
+        toast.success("Device ready");
+      } else {
+        toast.error("Device test failed", {
+          description: "Connected but got no response. Try reconnecting.",
+        });
       }
-
-      await sendCommand(JSON.stringify({ test: true }) + "\n");
     })();
-  }, [startReading, waitForLine, sendCommand, disconnect]);
+
+    return true;
+  }, [startReading, waitForLine, sendTest, disconnect]);
+
+  const connect = useCallback(async () => {
+    if (disconnectingRef.current) {
+      await disconnectingRef.current;
+    }
+    if (portRef.current) return;
+
+    let port: SerialPort;
+    try {
+      port = await navigator.serial.requestPort();
+    } catch {
+      // User cancelled the port picker
+      return;
+    }
+
+    await openPort(port);
+  }, [openPort]);
+
+  // Auto-reconnect any previously granted port on mount
+  useEffect(() => {
+    if (!navigator.serial) return;
+    navigator.serial.getPorts().then(async (ports) => {
+      if (ports.length > 0 && !portRef.current) {
+        await openPort(ports[0]);
+      }
+    }).catch(() => {});
+  }, [openPort]);
 
   // Detect physical USB unplug
   useEffect(() => {
@@ -268,21 +291,29 @@ export function SerialProvider({ children }: { children: React.ReactNode }) {
     };
   }, []);
 
+  const binBusyRef = useRef(false);
+
   const sendBin = useCallback(
     async (binNumber: number): Promise<unknown | null> => {
       if (!portRef.current || !writableRef.current) return null;
+      if (binBusyRef.current) return null;
 
-      const sent = await sendCommand(JSON.stringify({ bin: binNumber }) + "\n");
-      if (!sent) return null;
-
-      const response = await waitForLine(3000);
-      if (!response) return null;
-
+      binBusyRef.current = true;
       try {
-        return JSON.parse(response);
-      } catch {
-        console.warn("[Serial] Non-JSON response:", response);
-        return null;
+        const sent = await sendCommand(JSON.stringify({ bin: binNumber }) + "\n");
+        if (!sent) return null;
+
+        const response = await waitForLine(15000);
+        if (!response) return null;
+
+        try {
+          return JSON.parse(response);
+        } catch {
+          console.warn("[Serial] Non-JSON response:", response);
+          return null;
+        }
+      } finally {
+        binBusyRef.current = false;
       }
     },
     [sendCommand, waitForLine],

@@ -68,7 +68,11 @@ export function useCardScanner({
     stream,
     status: cameraStatus,
     errorMessage: cameraError,
+    zoom,
+    zoomRange,
+    setZoom,
     retryCamera,
+    stopCamera,
   } = useCameraContext();
 
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -196,12 +200,12 @@ export function useCardScanner({
 
     if (!displayCtx || !overlayCtx || !processingCtx) return;
 
+    displayCtx.drawImage(video, 0, 0);
+
     if (pausedRef.current) {
       rafRef.current = requestAnimationFrame(detectionLoop);
       return;
     }
-
-    displayCtx.drawImage(video, 0, 0);
 
     const now = performance.now();
     if (now - lastDetectionRef.current >= DETECTION_INTERVAL_MS) {
@@ -276,15 +280,35 @@ export function useCardScanner({
         await video.play();
         if (cancelled) return;
 
-        const { videoWidth: width, videoHeight: height } = video;
+        const { videoWidth, videoHeight } = video;
         for (const ref of [
           displayCanvasRef,
           overlayCanvasRef,
           processingCanvasRef,
         ]) {
           if (ref.current) {
-            ref.current.width = width;
-            ref.current.height = height;
+            ref.current.width = videoWidth;
+            ref.current.height = videoHeight;
+          }
+        }
+
+        // Size display/overlay canvases so the video appears correctly after 90° CSS rotation.
+        // After rotate(90deg): visual_width = CSS_height, visual_height = CSS_width.
+        // Scale so the rotated video fits within the container (contain behaviour, no squish).
+        const container = displayCanvasRef.current?.parentElement;
+        if (container) {
+          const cw = container.clientWidth;
+          const ch = container.clientHeight;
+          const scale = Math.min(cw / videoHeight, ch / videoWidth);
+          const cssW = Math.round(videoWidth * scale);
+          const cssH = Math.round(videoHeight * scale);
+          for (const ref of [displayCanvasRef, overlayCanvasRef]) {
+            if (ref.current) {
+              ref.current.style.width = `${cssW}px`;
+              ref.current.style.height = `${cssH}px`;
+              ref.current.style.left = `${(cw - cssW) / 2}px`;
+              ref.current.style.top = `${(ch - cssH) / 2}px`;
+            }
           }
         }
 
@@ -374,5 +398,10 @@ export function useCardScanner({
     handlePause,
     handleResume,
     handleRetryError,
+    handleStopCamera: stopCamera,
+    isCameraActive: cameraStatus === "ready",
+    zoom,
+    zoomRange,
+    setZoom,
   };
 }

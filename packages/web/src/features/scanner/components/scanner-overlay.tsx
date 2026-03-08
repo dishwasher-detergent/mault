@@ -11,17 +11,29 @@ import {
 export function ScannerOverlay({
   status,
   errorMessage,
+  isCameraActive,
   isConnected,
   isReady,
   hasCatchAll,
   onRetryError,
 }: ScannerOverlayProps) {
+  if (!isCameraActive) {
+    return (
+      <div className="absolute inset-0 z-30 flex items-center justify-center bg-background/80 backdrop-blur-sm rounded-lg p-4">
+        <div className="text-center text-xs text-muted-foreground">
+          <IconCamera className="mx-auto mb-2 size-5" />
+          <p>Connect a camera to start scanning.</p>
+        </div>
+      </div>
+    );
+  }
+
   if (!isConnected) {
     return (
       <div className="absolute inset-0 z-30 flex items-center justify-center bg-background/80 backdrop-blur-sm rounded-lg p-4">
         <div className="text-center text-xs text-muted-foreground">
           <IconDeviceUsb className="mx-auto mb-2 size-5" />
-          <p>Connect Mault Device to start scanning.</p>
+          <p>Connect scanning device to start scanning.</p>
         </div>
       </div>
     );
@@ -32,7 +44,7 @@ export function ScannerOverlay({
       <div className="absolute inset-0 z-30 flex items-center justify-center bg-background/80 backdrop-blur-sm rounded-lg p-4">
         <div className="text-center text-xs text-muted-foreground">
           <IconLoader2 className="mx-auto mb-2 size-5 animate-spin" />
-          <p>Initializing Mault Device...</p>
+          <p>Initializing scanning Device...</p>
         </div>
       </div>
     );

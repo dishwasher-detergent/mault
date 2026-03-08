@@ -121,198 +121,207 @@ export function PresetSelector({ readOnly }: PresetSelectorProps) {
   }
 
   return (
-    <ButtonGroup className="w-full">
-      <Select
-        key={selectedSet?.guid ?? ""}
-        value={selectedSet?.guid ?? ""}
-        onValueChange={(guid) => activateSet(guid!)}
-      >
-        <SelectTrigger
-          className="flex-1 overflow-hidden"
-          disabled={isActivating}
+    <Field>
+      <FieldLabel>Sort Logic</FieldLabel>
+      <ButtonGroup className="w-full">
+        <Select
+          key={selectedSet?.guid ?? ""}
+          value={selectedSet?.guid ?? ""}
+          onValueChange={(guid) => activateSet(guid!)}
         >
-          <SelectValue placeholder="Select a set...">
-            <span className="flex items-center gap-1.5 min-w-0">
-              {isActivating && (
-                <IconLoader2 className="size-3 animate-spin shrink-0 text-muted-foreground" />
-              )}
-              <span className="truncate">{selectedSet?.name}</span>
-            </span>
-          </SelectValue>
-        </SelectTrigger>
-        <SelectContent>
-          {sets.map((set) => (
-            <SelectItem key={set.guid} value={set.guid}>
-              <span className="truncate">{set.name}</span>
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
-      {readOnly ? (
-        <>
-          <Tooltip>
-            <TooltipTrigger
-              render={
-                <Button nativeButton={false} variant="outline" size="icon">
-                  <Link to="bins">
-                    <IconEdit />
-                  </Link>
+          <SelectTrigger
+            className="flex-1 overflow-hidden"
+            disabled={isActivating}
+          >
+            <SelectValue placeholder="Select a set...">
+              <span className="flex items-center gap-1.5 min-w-0">
+                {isActivating && (
+                  <IconLoader2 className="size-3 animate-spin shrink-0 text-muted-foreground" />
+                )}
+                <span className="truncate">{selectedSet?.name}</span>
+              </span>
+            </SelectValue>
+          </SelectTrigger>
+          <SelectContent>
+            {sets.map((set) => (
+              <SelectItem key={set.guid} value={set.guid}>
+                <span className="truncate">{set.name}</span>
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+        {readOnly ? (
+          <>
+            <Tooltip>
+              <TooltipTrigger
+                render={
+                  <Button nativeButton={false} variant="outline" size="icon">
+                    <Link to="bins">
+                      <IconEdit />
+                    </Link>
+                  </Button>
+                }
+              ></TooltipTrigger>
+              <TooltipContent>Edit Preset</TooltipContent>
+            </Tooltip>
+          </>
+        ) : (
+          <>
+            <DynamicDialog
+              open={deleteDialogOpen}
+              onOpenChange={setDeleteDialogOpen}
+              title="Delete Set"
+              description={`Are you sure you want to delete "${selectedSet?.name}"? This cannot be undone.`}
+              trigger={
+                <Button
+                  variant="outline"
+                  size="icon"
+                  disabled={!selectedSet || isPresetMutating}
+                >
+                  <IconTrash />
                 </Button>
               }
-            ></TooltipTrigger>
-            <TooltipContent>Edit Preset</TooltipContent>
-          </Tooltip>
-        </>
-      ) : (
-        <>
-          <DynamicDialog
-            open={deleteDialogOpen}
-            onOpenChange={setDeleteDialogOpen}
-            title="Delete Set"
-            description={`Are you sure you want to delete "${selectedSet?.name}"? This cannot be undone.`}
-            trigger={
-              <Button
-                variant="outline"
-                size="icon"
-                disabled={!selectedSet || isPresetMutating}
-              >
-                <IconTrash />
-              </Button>
-            }
-            footer={
-              <>
+              footer={
+                <>
+                  <Button
+                    variant="outline"
+                    onClick={() => setDeleteDialogOpen(false)}
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    variant="destructive"
+                    onClick={handleDelete}
+                    disabled={isPresetMutating}
+                  >
+                    {isPresetMutating && (
+                      <IconLoader2 className="size-4 animate-spin" />
+                    )}
+                    Delete
+                  </Button>
+                </>
+              }
+              footerClassName="flex-col-reverse md:flex-row"
+            />
+            <DynamicDialog
+              open={renameDialogOpen}
+              onOpenChange={handleRenameDialogChange}
+              title="Rename Set"
+              description="Enter a new name for this set."
+              trigger={
                 <Button
                   variant="outline"
-                  onClick={() => setDeleteDialogOpen(false)}
+                  size="icon"
+                  disabled={!selectedSet || isPresetMutating}
                 >
-                  Cancel
+                  <IconEdit />
                 </Button>
+              }
+              footer={
+                <>
+                  <Button
+                    variant="outline"
+                    onClick={() => setRenameDialogOpen(false)}
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    onClick={renameForm.handleSubmit(handleRename)}
+                    disabled={!renameForm.formState.isValid || isPresetMutating}
+                  >
+                    {isPresetMutating && (
+                      <IconLoader2 className="size-4 animate-spin" />
+                    )}
+                    Rename
+                  </Button>
+                </>
+              }
+              footerClassName="flex-col-reverse md:flex-row"
+            >
+              <form onSubmit={renameForm.handleSubmit(handleRename)}>
+                <Controller
+                  name="name"
+                  control={renameForm.control}
+                  render={({ field, fieldState }) => (
+                    <Field data-invalid={fieldState.invalid || undefined}>
+                      <FieldLabel htmlFor="rename-set-name">
+                        Set name
+                      </FieldLabel>
+                      <Input
+                        {...field}
+                        id="rename-set-name"
+                        placeholder="Set name..."
+                        aria-invalid={fieldState.invalid}
+                        autoFocus
+                      />
+                      {fieldState.invalid && (
+                        <FieldError errors={[fieldState.error]} />
+                      )}
+                    </Field>
+                  )}
+                />
+              </form>
+            </DynamicDialog>
+            <DynamicDialog
+              open={createDialogOpen}
+              onOpenChange={handleCreateDialogChange}
+              title="New Set"
+              description="Create a new set with 7 empty bins."
+              trigger={
                 <Button
-                  variant="destructive"
-                  onClick={handleDelete}
+                  variant="outline"
+                  size="icon"
                   disabled={isPresetMutating}
                 >
-                  {isPresetMutating && (
-                    <IconLoader2 className="size-4 animate-spin" />
-                  )}
-                  Delete
+                  <IconPlus />
                 </Button>
-              </>
-            }
-            footerClassName="flex-col-reverse md:flex-row"
-          />
-          <DynamicDialog
-            open={renameDialogOpen}
-            onOpenChange={handleRenameDialogChange}
-            title="Rename Set"
-            description="Enter a new name for this set."
-            trigger={
-              <Button
-                variant="outline"
-                size="icon"
-                disabled={!selectedSet || isPresetMutating}
-              >
-                <IconEdit />
-              </Button>
-            }
-            footer={
-              <>
-                <Button
-                  variant="outline"
-                  onClick={() => setRenameDialogOpen(false)}
-                >
-                  Cancel
-                </Button>
-                <Button
-                  onClick={renameForm.handleSubmit(handleRename)}
-                  disabled={!renameForm.formState.isValid || isPresetMutating}
-                >
-                  {isPresetMutating && (
-                    <IconLoader2 className="size-4 animate-spin" />
-                  )}
-                  Rename
-                </Button>
-              </>
-            }
-            footerClassName="flex-col-reverse md:flex-row"
-          >
-            <form onSubmit={renameForm.handleSubmit(handleRename)}>
-              <Controller
-                name="name"
-                control={renameForm.control}
-                render={({ field, fieldState }) => (
-                  <Field data-invalid={fieldState.invalid || undefined}>
-                    <FieldLabel htmlFor="rename-set-name">Set name</FieldLabel>
-                    <Input
-                      {...field}
-                      id="rename-set-name"
-                      placeholder="Set name..."
-                      aria-invalid={fieldState.invalid}
-                      autoFocus
-                    />
-                    {fieldState.invalid && (
-                      <FieldError errors={[fieldState.error]} />
+              }
+              footer={
+                <>
+                  <Button
+                    variant="outline"
+                    onClick={() => handleCreateDialogChange(false)}
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    onClick={createForm.handleSubmit(handleCreate)}
+                    disabled={!createForm.formState.isValid || isPresetMutating}
+                  >
+                    {isPresetMutating && (
+                      <IconLoader2 className="size-4 animate-spin" />
                     )}
-                  </Field>
-                )}
-              />
-            </form>
-          </DynamicDialog>
-          <DynamicDialog
-            open={createDialogOpen}
-            onOpenChange={handleCreateDialogChange}
-            title="New Set"
-            description="Create a new set with 7 empty bins."
-            trigger={
-              <Button variant="outline" size="icon" disabled={isPresetMutating}>
-                <IconPlus />
-              </Button>
-            }
-            footer={
-              <>
-                <Button
-                  variant="outline"
-                  onClick={() => handleCreateDialogChange(false)}
-                >
-                  Cancel
-                </Button>
-                <Button
-                  onClick={createForm.handleSubmit(handleCreate)}
-                  disabled={!createForm.formState.isValid || isPresetMutating}
-                >
-                  {isPresetMutating && (
-                    <IconLoader2 className="size-4 animate-spin" />
+                    Create
+                  </Button>
+                </>
+              }
+              footerClassName="flex-col-reverse md:flex-row"
+            >
+              <form onSubmit={createForm.handleSubmit(handleCreate)}>
+                <Controller
+                  name="name"
+                  control={createForm.control}
+                  render={({ field, fieldState }) => (
+                    <Field data-invalid={fieldState.invalid || undefined}>
+                      <FieldLabel htmlFor="set-name">Set name</FieldLabel>
+                      <Input
+                        {...field}
+                        id="set-name"
+                        placeholder="Set name..."
+                        aria-invalid={fieldState.invalid}
+                        autoFocus
+                      />
+                      {fieldState.invalid && (
+                        <FieldError errors={[fieldState.error]} />
+                      )}
+                    </Field>
                   )}
-                  Create
-                </Button>
-              </>
-            }
-            footerClassName="flex-col-reverse md:flex-row"
-          >
-            <form onSubmit={createForm.handleSubmit(handleCreate)}>
-              <Controller
-                name="name"
-                control={createForm.control}
-                render={({ field, fieldState }) => (
-                  <Field data-invalid={fieldState.invalid || undefined}>
-                    <FieldLabel htmlFor="set-name">Set name</FieldLabel>
-                    <Input
-                      {...field}
-                      id="set-name"
-                      placeholder="Set name..."
-                      aria-invalid={fieldState.invalid}
-                      autoFocus
-                    />
-                    {fieldState.invalid && (
-                      <FieldError errors={[fieldState.error]} />
-                    )}
-                  </Field>
-                )}
-              />
-            </form>
-          </DynamicDialog>
-        </>
-      )}
-    </ButtonGroup>
+                />
+              </form>
+            </DynamicDialog>
+          </>
+        )}
+      </ButtonGroup>
+    </Field>
   );
 }

@@ -8,6 +8,7 @@ import {
 
 import { useBinConfigs } from "@/features/bins/api/use-bin-configs";
 import { useSerial } from "@/features/scanner/api/use-serial";
+import { toast } from "sonner";
 import type { ScannedCardsContextValue } from "@/features/scanner/types";
 import {
   clearCards as dbClearCards,
@@ -38,17 +39,17 @@ export function ScannedCardsProvider({
   const [cards, setCards] = useState<ScannedCard[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const { configs: binConfigs } = useBinConfigs();
-  const { sendBin, isConnected } = useSerial();
+  const { sendBin, isConnected, isReady } = useSerial();
   const binConfigsRef = useRef(binConfigs);
-  const serialRef = useRef({ sendBin, isConnected });
+  const serialRef = useRef({ sendBin, isConnected, isReady });
 
   useEffect(() => {
     binConfigsRef.current = binConfigs;
   }, [binConfigs]);
 
   useEffect(() => {
-    serialRef.current = { sendBin, isConnected };
-  }, [sendBin, isConnected]);
+    serialRef.current = { sendBin, isConnected, isReady };
+  }, [sendBin, isConnected, isReady]);
 
   useEffect(() => {
     let cancelled = false;
@@ -85,10 +86,12 @@ export function ScannedCardsProvider({
       console.error("Failed to persist card:", err),
     );
 
-    if (matchedBin && serialRef.current.isConnected) {
+    if (matchedBin && serialRef.current.isConnected && serialRef.current.isReady) {
       serialRef.current.sendBin(matchedBin.binNumber).then((response) => {
-        if (response) {
-          console.log("[Serial] Route for bin", matchedBin.binNumber, response);
+        if (!response) {
+          toast.error("Routing failed", {
+            description: `No response from sorter for bin ${matchedBin.binNumber}.`,
+          });
         }
       });
     }
@@ -96,14 +99,12 @@ export function ScannedCardsProvider({
 
   const sendCatchAllBin = useCallback(() => {
     const catchAll = getCatchAllBin(binConfigsRef.current);
-    if (catchAll && serialRef.current.isConnected) {
+    if (catchAll && serialRef.current.isConnected && serialRef.current.isReady) {
       serialRef.current.sendBin(catchAll.binNumber).then((response) => {
-        if (response) {
-          console.log(
-            "[Serial] Route unmatched card to catch-all bin",
-            catchAll.binNumber,
-            response,
-          );
+        if (!response) {
+          toast.error("Routing failed", {
+            description: `No response from sorter for catch-all bin ${catchAll.binNumber}.`,
+          });
         }
       });
     }

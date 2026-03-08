@@ -1,6 +1,6 @@
 import type { ScannerStatus } from "@magic-vault/shared";
 
-export const STABILITY_FRAMES = 5;
+export const STABILITY_FRAMES = 8;
 export const DETECTION_INTERVAL_MS = 100;
 export const SCANNABLE_STATUSES: ScannerStatus[] = [
   "scanning",
