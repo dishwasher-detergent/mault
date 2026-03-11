@@ -151,11 +151,12 @@ void handleCommand(const String& json) {
 
   // {"test": true} — run a full mechanical test sequence then confirm connection
   if (doc["test"].is<bool>() && doc["test"].as<bool>()) {
-    // Open all paddles
+    // Open all bottoms and paddles
     for (int m = 1; m <= NUM_MODULES; m++) {
+      setServoPosition(getChannel(m, 0), moduleConfig[m - 1].bottomOpen);
       setServoPosition(getChannel(m, 1), moduleConfig[m - 1].paddleOpen);
     }
-    delay(DELAY_PADDLE);
+    delay(DELAY_PUSH);
 
     // Move all pushers left
     for (int m = 1; m <= NUM_MODULES; m++) {
