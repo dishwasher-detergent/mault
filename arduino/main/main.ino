@@ -28,7 +28,7 @@ ModuleConfig moduleConfig[NUM_MODULES] = {
 #define DELAY_PASS_MODULE  400  // time for card to drop through a pass-through module
 #define DELAY_CARD_ENTER   300  // time for card to settle after target bottom opens
 #define DELAY_PADDLE       150  // time for paddle to engage
-#define DELAY_PUSH         500  // time for pusher to complete its stroke
+#define DELAY_PUSH         600  // time for pusher to complete its stroke
 
 String inputBuffer = "";
 
@@ -78,10 +78,13 @@ int getServoOffset(const char* servo) {
 }
 
 // Route a card to the given bin number (1–7).
-//   Bins 1–2 : Module 1 pusher only (left / right)
-//   Bins 3–4 : Module 1 passes through, Module 2 bottom → paddle → push
-//   Bins 5–6 : Modules 1–2 pass through, Module 3 bottom → paddle → push
-//   Bin  7   : Catch-all — all neutral, card exits to default position
+//   Bin 1: open module 1 side paddles, then push left
+//   Bin 2: open module 1 side paddles, then push right
+//   Bin 3: open module 1 bottom, then module 2 side paddles, then push left
+//   Bin 4: open module 1 bottom, then module 2 side paddles, then push right
+//   Bin 5: open module 1 + 2 bottoms, then module 3 side paddles, then push left
+//   Bin 6: open module 1 + 2 bottoms, then module 3 side paddles, then push right
+//   Bin 7: open all bottoms (catch-all)
 void routeCard(int bin) {
   if (bin < 1 || bin > 7) {
     Serial.println("{\"error\":\"bin must be 1-7\"}");
@@ -107,31 +110,46 @@ void routeCard(int bin) {
     setModuleNeutral(1);
     delay(200);
 
-  } else {
-    int targetModule = (bin <= 4) ? 2 : 3;
-    bool pushLeft    = (bin % 2 == 1); // bins 3,5 → left; bins 4,6 → right
+  } else if (bin <= 4) {
+    // Bins 3-4: open module 1 bottom so card passes through, then use module 2 paddles + pusher
+    bool pushLeft = (bin == 3);
 
-    // Open bottoms of all modules before the target so card passes through
-    for (int m = 1; m < targetModule; m++) {
-      setServoPosition(getChannel(m, 0), moduleConfig[m - 1].bottomOpen);
-    }
-    delay(DELAY_PASS_MODULE * (targetModule - 1));
+    // Pass through module 1
+    setServoPosition(getChannel(1, 0), moduleConfig[0].bottomOpen);
+    delay(DELAY_PASS_MODULE);
 
-    // Open target module bottom to catch the card
-    ModuleConfig& c = moduleConfig[targetModule - 1];
-    setServoPosition(getChannel(targetModule, 0), c.bottomOpen);
-    delay(DELAY_CARD_ENTER);
-
-    // Engage paddle
-    setServoPosition(getChannel(targetModule, 1), c.paddleOpen);
+    // Engage module 2 side paddles and push
+    ModuleConfig& c2 = moduleConfig[1];
+    setServoPosition(getChannel(2, 1), c2.paddleOpen);
     delay(DELAY_PADDLE);
-
-    // Push to the correct side
-    setServoPosition(getChannel(targetModule, 2), pushLeft ? c.pusherLeft : c.pusherRight);
+    setServoPosition(getChannel(2, 2), pushLeft ? c2.pusherLeft : c2.pusherRight);
     delay(DELAY_PUSH);
 
-    // Reset all involved modules
-    for (int m = 1; m <= targetModule; m++) setModuleNeutral(m);
+    // Reset involved modules
+    setModuleNeutral(1);
+    setModuleNeutral(2);
+    delay(200);
+
+  } else {
+    // Bins 5-6: open module 1+2 bottoms so card passes through, then use module 3 paddles + pusher
+    bool pushLeft = (bin == 5);
+
+    // Pass through modules 1 and 2
+    setServoPosition(getChannel(1, 0), moduleConfig[0].bottomOpen);
+    setServoPosition(getChannel(2, 0), moduleConfig[1].bottomOpen);
+    delay(DELAY_PASS_MODULE * 2);
+
+    // Engage module 3 side paddles and push
+    ModuleConfig& c3 = moduleConfig[2];
+    setServoPosition(getChannel(3, 1), c3.paddleOpen);
+    delay(DELAY_PADDLE);
+    setServoPosition(getChannel(3, 2), pushLeft ? c3.pusherLeft : c3.pusherRight);
+    delay(DELAY_PUSH);
+
+    // Reset involved modules
+    setModuleNeutral(1);
+    setModuleNeutral(2);
+    setModuleNeutral(3);
     delay(200);
   }
 

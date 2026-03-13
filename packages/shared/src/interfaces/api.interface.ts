@@ -22,4 +22,5 @@ export interface SyncState {
   errors: number;
   startedAt: string | null;
   logs: string[];
+  currentCard?: string;
 }

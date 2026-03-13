@@ -182,14 +182,15 @@ export function SerialProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const openPort = useCallback(async (port: SerialPort): Promise<boolean> => {
-    try {
-      await port.open({ baudRate: 9600 });
-    } catch (e) {
-      const msg = e instanceof DOMException && e.name === "InvalidStateError"
-        ? "Port is already open. Unplug and reconnect the device."
-        : "Failed to open port. Make sure no other application is using it.";
-      toast.error("Connection failed", { description: msg });
-      return false;
+    if (!port.readable || !port.writable) {
+      try {
+        await port.open({ baudRate: 9600 });
+      } catch {
+        toast.error("Connection failed", {
+          description: "Failed to open port. Make sure no other application is using it.",
+        });
+        return false;
+      }
     }
 
     portRef.current = port;

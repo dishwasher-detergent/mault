@@ -1,13 +1,23 @@
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useCardFilterSort } from "@/features/cards/api/use-card-filter-sort";
 import { CardToolbar } from "@/features/cards/components/card-toolbar";
 import { ScannedCardItem } from "@/features/cards/components/scanned-card-item";
 import { exportToManabox } from "@/features/cards/lib/export-manabox";
 import { useScannedCards } from "@/features/scanner/api/use-scanned-cards";
-import { useCallback } from "react";
+import { useCallback, useState } from "react";
 
 export function CardGrid() {
-  const { cards, removeCard, clearCards, isLoading } = useScannedCards();
+  const { cards, removeCard, removeCards, clearCards, isLoading } =
+    useScannedCards();
   const {
     filteredAndSorted,
     searchQuery,
@@ -15,6 +25,24 @@ export function CardGrid() {
     sortKey,
     setSortKey,
   } = useCardFilterSort(cards);
+
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [confirmOpen, setConfirmOpen] = useState(false);
+
+  const toggleSelect = useCallback((scanId: string) => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(scanId)) next.delete(scanId);
+      else next.add(scanId);
+      return next;
+    });
+  }, []);
+
+  const handleBulkDelete = useCallback(() => {
+    removeCards(Array.from(selectedIds));
+    setSelectedIds(new Set());
+    setConfirmOpen(false);
+  }, [removeCards, selectedIds]);
 
   const handleExport = useCallback(() => {
     exportToManabox(cards);
@@ -65,7 +93,7 @@ export function CardGrid() {
           <p className="text-xs">Try adjusting your search or sort options</p>
         </div>
       )}
-      <div className="grid grid-cols-2 @sm:grid-cols-3 @md:grid-cols-2 @lg:grid-cols-3 @xl:grid-cols-4 @2xl:grid-cols-6 gap-2 p-2 pt-0">
+      <div className="grid grid-cols-3 @md:grid-cols-4 @4xl:grid-cols-6 @5xl:grid-cols-8 gap-2 p-2 pt-2">
         {filteredAndSorted.map((card) => (
           <ScannedCardItem
             key={card.scanId}
@@ -73,9 +101,58 @@ export function CardGrid() {
             scanId={card.scanId}
             onRemove={() => removeCard(card.scanId)}
             binNumber={card.binNumber}
+            isSelected={selectedIds.has(card.scanId)}
+            onToggleSelect={() => toggleSelect(card.scanId)}
           />
         ))}
       </div>
+
+      {selectedIds.size > 0 && (
+        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 flex items-center gap-3 rounded-lg border backdrop-blur-sm shadow-lg p-2 bg-sidebar">
+          <span className="text-sm">
+            {selectedIds.size} {selectedIds.size === 1 ? "card" : "cards"}{" "}
+            selected
+          </span>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setSelectedIds(new Set())}
+          >
+            Clear
+          </Button>
+          <Button
+            variant="destructive"
+            size="sm"
+            onClick={() => setConfirmOpen(true)}
+          >
+            Delete
+          </Button>
+        </div>
+      )}
+
+      <Dialog open={confirmOpen} onOpenChange={setConfirmOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>
+              Delete {selectedIds.size}{" "}
+              {selectedIds.size === 1 ? "card" : "cards"}?
+            </DialogTitle>
+            <DialogDescription>
+              This will permanently remove the selected{" "}
+              {selectedIds.size === 1 ? "card" : "cards"} from your collection.
+              This action cannot be undone.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setConfirmOpen(false)}>
+              Cancel
+            </Button>
+            <Button variant="destructive" onClick={handleBulkDelete}>
+              Delete
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </>
   );
 }

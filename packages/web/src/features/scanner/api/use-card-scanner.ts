@@ -10,6 +10,7 @@ import {
   canvasToBlob,
   detectCard,
   drawDetectionOverlay,
+  extractArtRegion,
   extractCardImage,
 } from "@/features/scanner/lib/card-detection";
 import { loadOpenCv } from "@/features/scanner/lib/opencv-loader";
@@ -47,8 +48,9 @@ async function searchCardImage(
   canvas: HTMLCanvasElement,
   contour?: CardContour | null,
 ): Promise<ScryfallCardWithDistance | null> {
-  const sourceCanvas = contour ? extractCardImage(canvas, contour) : canvas;
-  const blob = await canvasToBlob(sourceCanvas);
+  const warpedCanvas = contour ? extractCardImage(canvas, contour) : canvas;
+  const artCanvas = extractArtRegion(warpedCanvas);
+  const blob = await canvasToBlob(artCanvas);
   const formData = new FormData();
   formData.append("image", blob, "card.jpg");
 

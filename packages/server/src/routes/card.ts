@@ -1,9 +1,9 @@
+import type { SearchCardMatch } from "@magic-vault/shared";
+import { sql } from "drizzle-orm";
 import { Hono } from "hono";
 import { authQuery } from "../db";
-import type { SearchCardMatch } from "@magic-vault/shared";
+import { Search, SearchById } from "../lib/scryfall/search";
 import { vectorizeImageFromBuffer } from "../lib/vectorize";
-import { SearchById, Search } from "../lib/scryfall/search";
-import { sql } from "drizzle-orm";
 import { requireAuth, type AppEnv } from "../middleware/auth";
 
 const router = new Hono<AppEnv>();
@@ -17,15 +17,23 @@ router.post("/", requireAuth, async (c) => {
   }
 
   if (!file.type.startsWith("image/")) {
-    return c.json({ success: false, message: "Uploaded file is not an image." }, 400);
+    return c.json(
+      { success: false, message: "Uploaded file is not an image." },
+      400,
+    );
   }
 
   let embedding: number[];
   try {
-    embedding = await vectorizeImageFromBuffer(Buffer.from(await file.arrayBuffer()));
+    embedding = await vectorizeImageFromBuffer(
+      Buffer.from(await file.arrayBuffer()),
+    );
   } catch (err) {
     console.error(err);
-    return c.json({ success: false, message: "Failed to vectorize image." }, 500);
+    return c.json(
+      { success: false, message: "Failed to vectorize image." },
+      500,
+    );
   }
 
   const embeddingStr = `[${embedding.join(",")}]`;

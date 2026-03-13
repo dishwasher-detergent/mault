@@ -20,6 +20,7 @@ const writers = new Set<SseWriter>();
 
 function addLog(msg: string) {
   state = { ...state, logs: [...state.logs.slice(-199), msg] };
+  emit("log", { line: msg });
 }
 
 function emit(event: string, data: unknown) {
@@ -84,7 +85,6 @@ type ScryfallBulkCard = {
 
 async function runSync(): Promise<void> {
   addLog("Fetching Scryfall bulk data catalog...");
-  emit("status", getStatus());
 
   const catalogRes = await fetch("https://api.scryfall.com/bulk-data");
   if (!catalogRes.ok) {
@@ -98,16 +98,15 @@ async function runSync(): Promise<void> {
   if (!artEntry) throw new Error("Could not find unique_artwork bulk data entry");
 
   addLog(`Downloading bulk artwork data...`);
-  emit("status", getStatus());
 
   const bulkRes = await fetch(artEntry.download_uri);
   if (!bulkRes.ok) throw new Error(`Bulk data download failed: ${bulkRes.status}`);
 
   const cards = (await bulkRes.json()) as ScryfallBulkCard[];
   state = { ...state, total: cards.length };
+  emit("status", getStatus());
 
   addLog(`Downloaded ${cards.length} cards. Loading existing IDs from DB...`);
-  emit("status", getStatus());
 
   const existing = await db
     .select({ scryfallId: cardImageVectors.scryfallId })
@@ -117,7 +116,6 @@ async function runSync(): Promise<void> {
   addLog(
     `Found ${existingSet.size} existing cards in DB. Starting vectorization...`,
   );
-  emit("status", getStatus());
 
   for (const card of cards) {
     if (cancelFlag) {

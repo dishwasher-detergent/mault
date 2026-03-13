@@ -1,6 +1,9 @@
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { CardSelectDialog } from "@/features/cards/components/card-select-dialog";
 import type { ScannedCardItemProps } from "@/features/cards/types";
+import { cn } from "@/lib/utils";
+import { IconCheck } from "@tabler/icons-react";
 import { memo } from "react";
 
 export const ScannedCardItem = memo(function ScannedCardItem({
@@ -8,10 +11,15 @@ export const ScannedCardItem = memo(function ScannedCardItem({
   scanId,
   onRemove,
   binNumber,
+  isSelected = false,
+  onToggleSelect,
 }: ScannedCardItemProps) {
   return (
     <div
-      className="relative rounded-lg p-1 bg-muted border"
+      className={cn(
+        "relative rounded-lg p-1 bg-muted border transition-shadow",
+        isSelected && "ring-2 ring-primary ring-offset-1",
+      )}
       style={{ borderColor: `var(--${card.rarity})` }}
     >
       <CardSelectDialog
@@ -21,7 +29,10 @@ export const ScannedCardItem = memo(function ScannedCardItem({
         trigger={
           <button type="button" className="w-full cursor-pointer">
             <div className="aspect-[2.5/3.5] rounded-lg overflow-hidden relative">
-              <div className="absolute bottom-1 left-1 right-1 flex gap-1 items-center justify-between">
+              {isSelected && (
+                <div className="absolute inset-0 bg-primary/30 z-10 rounded-lg" />
+              )}
+              <div className="absolute bottom-1 left-1 right-1 flex gap-1 items-center justify-between z-20">
                 <Badge
                   variant={card.distance < 0.15 ? "default" : "destructive"}
                 >
@@ -43,6 +54,19 @@ export const ScannedCardItem = memo(function ScannedCardItem({
           </button>
         }
       />
+      {onToggleSelect && (
+        <Button
+          size="icon-sm"
+          onClick={(e) => {
+            e.stopPropagation();
+            onToggleSelect();
+          }}
+          variant={isSelected ? "default" : "secondary"}
+          className="absolute top-2 right-2 z-30"
+        >
+          <IconCheck />
+        </Button>
+      )}
       <div className="flex flex-row justify-between items-center pb-1">
         <div className="px-1 flex flex-row items-center gap-2">
           <div

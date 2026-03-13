@@ -254,6 +254,110 @@ export function extractCardImage(
 }
 
 /**
+ * Scan row-wise vertical gradients to find the y-position of a strong
+ * horizontal edge within a vertical band [yMinFrac, yMaxFrac].
+ * Returns the row index and its gradient score.
+ */
+function findEdgeRow(
+  data: Uint8ClampedArray,
+  width: number,
+  height: number,
+  yMinFrac: number,
+  yMaxFrac: number,
+): { row: number; score: number } {
+  const xLeft  = Math.floor(width * 0.10);
+  const xRight = Math.floor(width * 0.90);
+  const span   = xRight - xLeft;
+  const yMin   = Math.floor(height * yMinFrac);
+  const yMax   = Math.floor(height * yMaxFrac);
+
+  let bestRow = Math.floor(height * ((yMinFrac + yMaxFrac) / 2));
+  let bestScore = 0;
+
+  for (let y = yMin; y < yMax && y + 1 < height; y++) {
+    let sum = 0;
+    for (let x = xLeft; x < xRight; x++) {
+      const i = (y * width + x) * 4;
+      const j = ((y + 1) * width + x) * 4;
+      sum +=
+        (Math.abs(data[i]     - data[j])     +
+         Math.abs(data[i + 1] - data[j + 1]) +
+         Math.abs(data[i + 2] - data[j + 2])) / 3;
+    }
+    const score = sum / span;
+    if (score > bestScore) { bestScore = score; bestRow = y; }
+  }
+
+  return { row: bestRow, score: bestScore };
+}
+
+/**
+ * Detect the art region within a warped card canvas.
+ *
+ * Regular cards have a strong horizontal edge at the type-line separator
+ * (~45–65% of card height). Full-art cards lack this edge, so we fall back
+ * to treating almost the entire card face as art.
+ */
+function detectArtBounds(canvas: HTMLCanvasElement): {
+  top: number;
+  left: number;
+  bottom: number;
+  right: number;
+} {
+  const W = canvas.width;
+  const H = canvas.height;
+  const ctx = canvas.getContext("2d");
+  if (!ctx) return { top: 0.12, left: 0.06, bottom: 0.57, right: 0.94 };
+
+  const { data } = ctx.getImageData(0, 0, W, H);
+
+  // Look for the type-line bar that separates art from the text box
+  const typeLine = findEdgeRow(data, W, H, 0.45, 0.65);
+
+  // No strong separator → full-art card
+  if (typeLine.score < 15) {
+    return { top: 0.03, left: 0.03, bottom: 0.97, right: 0.97 };
+  }
+
+  // Find the name-bar bottom edge to set the art top boundary
+  const nameBar = findEdgeRow(data, W, H, 0.08, 0.16);
+
+  return {
+    top:    nameBar.row / H,
+    left:   0.06,
+    bottom: typeLine.row / H,
+    right:  0.94,
+  };
+}
+
+/**
+ * Extract just the art region from a perspective-warped card canvas.
+ * Automatically handles both regular and full-art cards.
+ */
+export function extractArtRegion(warpedCanvas: HTMLCanvasElement): HTMLCanvasElement {
+  const W = warpedCanvas.width;
+  const H = warpedCanvas.height;
+  const { top, left, bottom, right } = detectArtBounds(warpedCanvas);
+
+  const artLeft   = Math.floor(left   * W);
+  const artTop    = Math.floor(top    * H);
+  const artRight  = Math.floor(right  * W);
+  const artBottom = Math.floor(bottom * H);
+  const artW = artRight  - artLeft;
+  const artH = artBottom - artTop;
+
+  const artCanvas = document.createElement("canvas");
+  artCanvas.width  = artW;
+  artCanvas.height = artH;
+  artCanvas.getContext("2d")!.drawImage(
+    warpedCanvas,
+    artLeft, artTop, artW, artH,
+    0, 0, artW, artH,
+  );
+  return artCanvas;
+}
+
+/**
  * Convert a canvas to a JPEG blob for upload.
  */
 export function canvasToBlob(

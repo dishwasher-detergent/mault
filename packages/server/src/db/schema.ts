@@ -121,7 +121,10 @@ export const moduleConfigs = pgTable(
     updatedAt: timestamp("updated_at").defaultNow().notNull(),
   },
   (table) => [
-    unique("module_configs_user_module_idx").on(table.userId, table.moduleNumber),
+    unique("module_configs_user_module_idx").on(
+      table.userId,
+      table.moduleNumber,
+    ),
     crudPolicy({
       role: authenticatedRole,
       read: authUid(table.userId),

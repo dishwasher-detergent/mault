@@ -48,7 +48,7 @@ export default function App() {
     </div>
   ) : (
     <div className="grid grid-cols-12 flex-1 min-h-0 overflow-hidden gap-2">
-      <section className="col-span-5 md:col-span-5 lg:col-span-4 xl:col-span-3 overflow-hidden flex flex-col h-full">
+      <section className="col-span-5 md:col-span-5 lg:col-span-4 xl:col-span-3 2xl:col-span-2 3xl:col-span-1 overflow-hidden flex flex-col h-full">
         <div className="w-full overflow-hidden flex flex-col border rounded-lg p-2 bg-sidebar gap-2">
           <PresetSelector readOnly />
           <CardScanner className="flex-none" />
@@ -57,7 +57,7 @@ export default function App() {
           </div>
         </div>
       </section>
-      <section className="col-span-7 md:col-span-7 lg:col-span-8 xl:col-span-9 overflow-y-auto h-full @container">
+      <section className="col-span-7 md:col-span-7 lg:col-span-8 xl:col-span-9 2xl:col-span-10 3xl:col-span-11 overflow-y-auto h-full @container">
         <div className="border rounded-lg bg-sidebar">
           <CardGrid />
         </div>

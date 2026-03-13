@@ -30,6 +30,7 @@ export interface ScannedCardsContextValue {
   addCard: (card: ScryfallCardWithDistance) => void;
   sendCatchAllBin: () => void;
   removeCard: (scanId: string) => void;
+  removeCards: (scanIds: string[]) => void;
   correctCard: (scanId: string, card: ScryfallCard) => void;
   clearCards: () => void;
 }

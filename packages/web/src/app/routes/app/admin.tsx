@@ -35,6 +35,14 @@ export default function AdminPage() {
           setSyncState((prev) => ({ ...prev, ...update }));
         });
 
+        es.addEventListener("log", (e: MessageEvent) => {
+          const { line } = JSON.parse(e.data) as { line: string };
+          setSyncState((prev) => ({
+            ...prev,
+            logs: [...prev.logs.slice(-199), line],
+          }));
+        });
+
         es.addEventListener("error", (e: MessageEvent) => {
           if (e.data) {
             const update = JSON.parse(e.data) as { message: string };
@@ -125,6 +133,11 @@ export default function AdminPage() {
                 <span className="text-red-500">{syncState.errors} errors</span>
               )}
             </div>
+            {isRunning && syncState.currentCard && (
+              <p className="text-xs text-muted-foreground truncate">
+                {syncState.currentCard}
+              </p>
+            )}
           </div>
         )}
       </div>

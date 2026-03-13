@@ -117,6 +117,14 @@ export function ScannedCardsProvider({
     );
   }, []);
 
+  const removeCards = useCallback((scanIds: string[]) => {
+    const idSet = new Set(scanIds);
+    setCards((prev) => prev.filter((entry) => !idSet.has(entry.scanId)));
+    Promise.all(scanIds.map((id) => dbRemoveCard(id))).catch((err) =>
+      console.error("Failed to remove cards from IndexedDB:", err),
+    );
+  }, []);
+
   const correctCard = useCallback((scanId: string, card: ScryfallCard) => {
     const corrected: ScryfallCardWithDistance = { ...card, distance: 0 };
     setCards((prev) =>
@@ -144,6 +152,7 @@ export function ScannedCardsProvider({
         addCard,
         sendCatchAllBin,
         removeCard,
+        removeCards,
         correctCard,
         clearCards,
       }}
