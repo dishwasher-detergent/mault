@@ -81,8 +81,8 @@ export default function AdminPage() {
   const isRunning = syncState.status === "running";
 
   return (
-    <div className="flex flex-col gap-6 p-6 max-w-4xl mx-auto w-full">
-      <div className="rounded-lg border p-4 flex flex-col gap-4">
+    <div className="flex flex-col p-6 max-w-4xl mx-auto w-full h-full overlflow-hidden">
+      <div className="rounded-lg rounded-b-none border p-4 flex flex-col gap-4">
         <div className="flex items-center justify-between">
           <div className="flex flex-col gap-0.5">
             <p className="text-sm font-medium">Card Image Vectors</p>
@@ -94,25 +94,22 @@ export default function AdminPage() {
                 syncState.status.slice(1)}
             </p>
           </div>
-          <div className="flex gap-2">
-            {isRunning && (
-              <Button
-                variant="outline"
-                size="sm"
-                disabled={cancelSyncMutation.isPending}
-                onClick={() => cancelSyncMutation.mutate()}
-              >
-                {cancelSyncMutation.isPending ? "Cancelling..." : "Cancel"}
-              </Button>
-            )}
+          {isRunning ? (
             <Button
-              size="sm"
+              variant="outline"
+              disabled={cancelSyncMutation.isPending}
+              onClick={() => cancelSyncMutation.mutate()}
+            >
+              {cancelSyncMutation.isPending ? "Cancelling..." : "Cancel"}
+            </Button>
+          ) : (
+            <Button
               disabled={isRunning || startSyncMutation.isPending}
               onClick={() => startSyncMutation.mutate()}
             >
               {startSyncMutation.isPending ? "Starting..." : "Start Sync"}
             </Button>
-          </div>
+          )}
         </div>
 
         {total > 0 && (
@@ -142,26 +139,30 @@ export default function AdminPage() {
         )}
       </div>
 
-      {syncState.logs.length > 0 && (
-        <div className="rounded-lg border overflow-hidden">
-          <div className="px-3 py-2 border-b bg-muted/30">
-            <p className="text-xs font-medium text-muted-foreground">Log</p>
-          </div>
-          <div
-            ref={logRef}
-            className="h-64 overflow-y-auto p-3 font-mono text-xs leading-relaxed space-y-0.5"
-          >
-            {syncState.logs.map((line, i) => (
+      <div className="rounded-lg rounded-t-none border border-t-0 overflow-hidden">
+        <div className="px-3 py-2 border-b bg-muted/30">
+          <p className="text-xs font-medium text-muted-foreground">Log</p>
+        </div>
+        <div
+          ref={logRef}
+          className="max-h-full overflow-y-auto p-3 font-mono text-xs leading-relaxed space-y-0.5"
+        >
+          {syncState.logs.length > 0 ? (
+            syncState.logs.map((line, i) => (
               <p
                 key={i}
                 className="text-muted-foreground whitespace-pre-wrap break-all"
               >
                 {line}
               </p>
-            ))}
-          </div>
+            ))
+          ) : (
+            <p className="text-muted-foreground whitespace-pre-wrap break-all">
+              No Logs
+            </p>
+          )}
         </div>
-      )}
+      </div>
     </div>
   );
 }

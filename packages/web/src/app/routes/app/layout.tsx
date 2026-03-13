@@ -18,9 +18,9 @@ export default function AppLayout() {
           <AppNav />
         </div>
       ) : (
-        <div className="h-dvh w-dvw overflow-hidden flex flex-row">
+        <div className="h-dvh w-dvw overflow-hidden flex flex-row bg-muted">
           <AppNav />
-          <main className="flex-1 min-w-0 overflow-hidden flex flex-col">
+          <main className="flex-1 min-w-0 overflow-hidden flex flex-col m-2 border rounded-lg bg-background">
             <Outlet />
           </main>
         </div>

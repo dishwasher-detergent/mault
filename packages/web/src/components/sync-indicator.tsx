@@ -110,6 +110,11 @@ export function SyncIndicator() {
           />
         </div>
       )}
+      {syncState.currentCard && (
+        <p className="text-xs text-muted-foreground truncate">
+          {syncState.currentCard}
+        </p>
+      )}
     </button>
   );
 }

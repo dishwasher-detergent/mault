@@ -103,3 +103,4 @@
 ; class=Os (2); code=NotFound (-3)
 2026-03-13T15:48:53.491136Z  WARN get_package_file_hashes{include_default_files=true telemetry=None}: turborepo_scm::package_deps: git hashing failed for AnchoredSystemPath("packages\\web") with resource error: Git error on C:\Users\User\Documents\Coding\magic-vault\components.json: could not find 'C:\Users\User\Documents\Coding\magic-vault\components.json' to open: The system cannot find the file specified.
 ; class=Os (2); code=NotFound (-3)
+2026-03-13T20:09:15.887901Z  WARN daemon_server: turborepo_lib::commands::daemon: daemon already running

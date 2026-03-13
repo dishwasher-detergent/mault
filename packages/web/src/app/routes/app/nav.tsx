@@ -1,9 +1,9 @@
+import { ThemeToggle } from "@/components/theme-toggle";
 import { buttonVariants } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import {
   Tooltip,
   TooltipContent,
-  TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { useRole } from "@/hooks/use-role";
@@ -60,9 +60,9 @@ export function AppNav() {
   ];
 
   return (
-    <aside className="flex-none h-full flex flex-col items-center border-r bg-sidebar p-2 gap-2">
-      <TooltipProvider>
-        <div className="w-full aspect-square bg-primary grid place-items-center rounded-lg">
+    <aside className="flex-none h-full p-2 pr-0">
+      <div className="flex flex-col items-center bg-sidebar p-2 gap-2 h-full border rounded-lg">
+        <div className="w-full aspect-square bg-primary grid place-items-center rounded-lg text-primary-foreground font-bold">
           M
         </div>
         <Separator orientation="horizontal" />
@@ -72,10 +72,11 @@ export function AppNav() {
           ))}
         </nav>
         <Separator orientation="horizontal" />
-        <div>
+        <div className="flex flex-col items-center gap-2">
+          <ThemeToggle />
           <UserButton size="icon" side="right" />
         </div>
-      </TooltipProvider>
+      </div>
     </aside>
   );
 }

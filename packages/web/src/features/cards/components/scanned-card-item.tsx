@@ -20,7 +20,6 @@ export const ScannedCardItem = memo(function ScannedCardItem({
         "relative rounded-lg p-1 bg-muted border transition-shadow",
         isSelected && "ring-2 ring-primary ring-offset-1",
       )}
-      style={{ borderColor: `var(--${card.rarity})` }}
     >
       <CardSelectDialog
         scanId={scanId}
@@ -29,9 +28,6 @@ export const ScannedCardItem = memo(function ScannedCardItem({
         trigger={
           <button type="button" className="w-full cursor-pointer">
             <div className="aspect-[2.5/3.5] rounded-lg overflow-hidden relative">
-              {isSelected && (
-                <div className="absolute inset-0 bg-primary/30 z-10 rounded-lg" />
-              )}
               <div className="absolute bottom-1 left-1 right-1 flex gap-1 items-center justify-between z-20">
                 <Badge
                   variant={card.distance < 0.15 ? "default" : "destructive"}
