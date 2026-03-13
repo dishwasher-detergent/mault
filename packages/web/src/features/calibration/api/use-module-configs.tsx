@@ -10,13 +10,7 @@ import {
   ServoCalibration,
 } from "@magic-vault/shared";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import {
-  createContext,
-  useCallback,
-  useContext,
-  useEffect,
-  useRef,
-} from "react";
+import { createContext, useCallback, useContext, useEffect } from "react";
 import { toast } from "sonner";
 
 const ModuleConfigsContext = createContext<ModuleConfigsContextValue | null>(
