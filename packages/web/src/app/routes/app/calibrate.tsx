@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { ButtonGroup } from "@/components/ui/button-group";
+import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
 import { modulesQueryOptions } from "@/features/calibration/api/module-configs";
 import { useModuleConfigs } from "@/features/calibration/api/use-module-configs";
@@ -27,8 +28,10 @@ function getCalibrationKey(
   servo: "bottom" | "paddle" | "pusher",
   position: string,
 ): keyof ServoCalibration | null {
-  if (servo === "bottom") return position === "open" ? "bottomOpen" : "bottomClosed";
-  if (servo === "paddle") return position === "open" ? "paddleOpen" : "paddleClosed";
+  if (servo === "bottom")
+    return position === "open" ? "bottomOpen" : "bottomClosed";
+  if (servo === "paddle")
+    return position === "open" ? "paddleOpen" : "paddleClosed";
   if (servo === "pusher") {
     if (position === "left") return "pusherLeft";
     if (position === "right") return "pusherRight";
@@ -48,7 +51,8 @@ function defaultSliderValues(): Record<SliderKey, number> {
 }
 
 export default function CalibratePage() {
-  const { isConnected, connect, disconnect, sendCommand, sendBin, sendTest } = useSerial();
+  const { isConnected, connect, disconnect, sendCommand, sendBin, sendTest } =
+    useSerial();
   const { configs, saveConfig, moveServo } = useModuleConfigs();
   const { isLoading } = useQuery(modulesQueryOptions);
   const [active, setActive] = useState<ActivePositions>({});
@@ -67,7 +71,11 @@ export default function CalibratePage() {
   });
 
   const handleControl = useCallback(
-    (module: 1 | 2 | 3, servo: "bottom" | "paddle" | "pusher", position: string) => {
+    (
+      module: 1 | 2 | 3,
+      servo: "bottom" | "paddle" | "pusher",
+      position: string,
+    ) => {
       const key = `${module}:${servo}`;
       const current = activeRef.current[key];
       if (current === position) {
@@ -75,7 +83,9 @@ export default function CalibratePage() {
         setActive((prev) => ({ ...prev, [key]: null }));
 
         // Sync slider to the calibrated neutral/closed value
-        const cal = configsRef.current.find((c) => c.moduleNumber === module)?.calibration;
+        const cal = configsRef.current.find(
+          (c) => c.moduleNumber === module,
+        )?.calibration;
         if (cal) {
           const calKey = getCalibrationKey(servo, "neutral");
           if (calKey) {
@@ -87,7 +97,9 @@ export default function CalibratePage() {
         setActive((prev) => ({ ...prev, [key]: position }));
 
         // Sync slider to the calibrated value for this position
-        const cal = configsRef.current.find((c) => c.moduleNumber === module)?.calibration;
+        const cal = configsRef.current.find(
+          (c) => c.moduleNumber === module,
+        )?.calibration;
         if (cal) {
           const calKey = getCalibrationKey(servo, position);
           if (calKey) {
@@ -196,7 +208,7 @@ export default function CalibratePage() {
   );
 
   return (
-    <div className="flex flex-col gap-2">
+    <div className="flex flex-col gap-4 p-4">
       <div className="flex justify-start gap-2">
         {isConnected ? (
           <Button variant="outline" onClick={disconnect}>
@@ -217,26 +229,29 @@ export default function CalibratePage() {
           {isTesting ? "Testing…" : "Run Test"}
         </Button>
       </div>
-      <div className="flex items-center gap-2 rounded-lg border bg-sidebar p-2">
-        {([1, 2, 3, 4] as const).map((led) => (
-          <Button
-            key={led}
-            variant={ledStates[led] ? "default" : "outline"}
-            disabled={!isConnected}
-            onClick={() => handleLedToggle(led)}
-            className="gap-2"
-          >
-            {ledStates[led] ? (
-              <IconBulbFilled size={16} />
-            ) : (
-              <IconBulb size={16} />
-            )}
-            LED {led}
-          </Button>
-        ))}
+      <div className="flex flex-col gap-2">
+        <Label>LEDs</Label>
+        <div className="flex items-center gap-2 ">
+          {([1, 2, 3, 4] as const).map((led) => (
+            <Button
+              key={led}
+              variant={ledStates[led] ? "default" : "outline"}
+              disabled={!isConnected}
+              onClick={() => handleLedToggle(led)}
+              className="gap-2"
+            >
+              {ledStates[led] ? (
+                <IconBulbFilled size={16} />
+              ) : (
+                <IconBulb size={16} />
+              )}
+              LED {led}
+            </Button>
+          ))}
+        </div>
       </div>
-      <div className="flex flex-col gap-1.5 rounded-lg border bg-sidebar p-2">
-        <p className="text-xs text-muted-foreground px-1">Test bin routing</p>
+      <div className="flex flex-col gap-2">
+        <Label>Test bin routing</Label>
         <ButtonGroup className="w-full">
           {([1, 2, 3, 4, 5, 6, 7] as const).map((bin) => (
             <Button
@@ -251,158 +266,165 @@ export default function CalibratePage() {
           ))}
         </ButtonGroup>
       </div>
-      <div className="grid grid-cols-1 md:grid-cols-3 rounded-lg border overflow-hidden">
-        {MODULES.map((module) => {
-          const config = configs.find((c) => c.moduleNumber === module);
-          const cal = config?.calibration;
-          return (
-            <div
-              key={module}
-              className="p-2 flex flex-col gap-5 border-b md:border-b-0 md:border-r last:border-0 bg-sidebar"
-            >
-              <div className="flex items-center justify-between">
-                <h2 className="text-sm font-bold">Module {module}</h2>
-                <button
-                  disabled={!isConnected}
-                  onClick={() => handleCenterModule(module)}
-                  className="text-muted-foreground hover:text-foreground disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
-                  title="Center all servos"
-                >
-                  <IconLayoutAlignCenter size={14} />
-                </button>
-              </div>
-              {SERVOS.map((servo) => {
-                const sliderKey = `${module}:${servo.name}` as SliderKey;
-                const sliderValue = sliderValues[sliderKey] ?? 307;
-                return (
-                  <div key={servo.name} className="flex flex-col gap-2">
-                    <div className="flex items-center justify-between">
-                      <p className="text-xs text-muted-foreground">
-                        {servo.label}
-                      </p>
-                      <button
-                        disabled={!isConnected}
-                        onClick={() => handleReset(module, servo)}
-                        className="text-muted-foreground hover:text-foreground disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
-                        title={`Reset to ${servo.defaultPosition}`}
-                      >
-                        <IconRotateClockwise size={12} />
-                      </button>
-                    </div>
-                    <ButtonGroup className="w-full">
-                      {servo.controlPositions.map((position) => {
-                        const key = `${module}:${servo.name}`;
-                        const isActive = active[key] === position;
-                        return (
+      <div className="flex flex-col gap-2">
+        <Label>Module Calibration</Label>
+        <div className="grid grid-cols-1 md:grid-cols-3 rounded-lg border overflow-hidden">
+          {MODULES.map((module) => {
+            const config = configs.find((c) => c.moduleNumber === module);
+            const cal = config?.calibration;
+            return (
+              <div
+                key={module}
+                className="p-2 flex flex-col gap-5 border-b md:border-b-0 md:border-r last:border-0 bg-sidebar"
+              >
+                <div className="flex items-center justify-between">
+                  <h2 className="text-sm font-bold">Module {module}</h2>
+                  <button
+                    disabled={!isConnected}
+                    onClick={() => handleCenterModule(module)}
+                    className="text-muted-foreground hover:text-foreground disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                    title="Center all servos"
+                  >
+                    <IconLayoutAlignCenter size={14} />
+                  </button>
+                </div>
+                {SERVOS.map((servo) => {
+                  const sliderKey = `${module}:${servo.name}` as SliderKey;
+                  const sliderValue = sliderValues[sliderKey] ?? 307;
+                  return (
+                    <div key={servo.name} className="flex flex-col gap-2">
+                      <div className="flex items-center justify-between">
+                        <p className="text-xs text-muted-foreground">
+                          {servo.label}
+                        </p>
+                        <button
+                          disabled={!isConnected}
+                          onClick={() => handleReset(module, servo)}
+                          className="text-muted-foreground hover:text-foreground disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                          title={`Reset to ${servo.defaultPosition}`}
+                        >
+                          <IconRotateClockwise size={12} />
+                        </button>
+                      </div>
+                      <ButtonGroup className="w-full">
+                        {servo.controlPositions.map((position) => {
+                          const key = `${module}:${servo.name}`;
+                          const isActive = active[key] === position;
+                          return (
+                            <Button
+                              key={position}
+                              variant={isActive ? "default" : "outline"}
+                              disabled={!isConnected}
+                              onClick={() =>
+                                handleControl(
+                                  module as 1 | 2 | 3,
+                                  servo.name,
+                                  position,
+                                )
+                              }
+                              className="flex-1"
+                            >
+                              {position.toUpperCase()}
+                            </Button>
+                          );
+                        })}
+                      </ButtonGroup>
+                      <ButtonGroup className="w-full">
+                        <Button
+                          variant="outline"
+                          disabled={!isConnected || sliderValue <= 120}
+                          onClick={() =>
+                            handleSliderChange(
+                              module,
+                              servo.name,
+                              Math.max(120, sliderValue - 10),
+                            )
+                          }
+                          className="px-2 text-xs"
+                        >
+                          -10
+                        </Button>
+                        <Button
+                          variant="outline"
+                          disabled={!isConnected || sliderValue <= 120}
+                          onClick={() =>
+                            handleSliderChange(
+                              module,
+                              servo.name,
+                              sliderValue - 1,
+                            )
+                          }
+                          className="px-2"
+                        >
+                          -
+                        </Button>
+                        <div className="flex flex-row flex-1 bg-background border-y justify-between px-2 items-center">
+                          <p className="text-xs text-muted-foreground">120</p>
+                          <p className="font-bold text-sm">{sliderValue}</p>
+                          <p className="text-xs text-muted-foreground">490</p>
+                        </div>
+                        <Button
+                          variant="outline"
+                          disabled={!isConnected || sliderValue >= 490}
+                          onClick={() =>
+                            handleSliderChange(
+                              module,
+                              servo.name,
+                              sliderValue + 1,
+                            )
+                          }
+                          className="px-2"
+                        >
+                          +
+                        </Button>
+                        <Button
+                          variant="outline"
+                          disabled={!isConnected || sliderValue >= 490}
+                          onClick={() =>
+                            handleSliderChange(
+                              module,
+                              servo.name,
+                              Math.min(490, sliderValue + 10),
+                            )
+                          }
+                          className="px-2 text-xs"
+                        >
+                          +10
+                        </Button>
+                      </ButtonGroup>
+                      <ButtonGroup className="w-full">
+                        {servo.calibrationPositions.map((pos) => (
                           <Button
-                            key={position}
-                            variant={isActive ? "default" : "outline"}
+                            key={pos.key}
+                            variant="outline"
                             disabled={!isConnected}
                             onClick={() =>
-                              handleControl(module as 1 | 2 | 3, servo.name, position)
+                              handleSetPosition(module, pos.key, sliderValue)
                             }
                             className="flex-1"
                           >
-                            {position.toUpperCase()}
+                            {pos.label}
                           </Button>
-                        );
-                      })}
-                    </ButtonGroup>
-                    <ButtonGroup className="w-full">
-                      <Button
-                        variant="outline"
-                        disabled={!isConnected || sliderValue <= 120}
-                        onClick={() =>
-                          handleSliderChange(
-                            module,
-                            servo.name,
-                            Math.max(120, sliderValue - 10),
-                          )
-                        }
-                        className="px-2 text-xs"
-                      >
-                        -10
-                      </Button>
-                      <Button
-                        variant="outline"
-                        disabled={!isConnected || sliderValue <= 120}
-                        onClick={() =>
-                          handleSliderChange(
-                            module,
-                            servo.name,
-                            sliderValue - 1,
-                          )
-                        }
-                        className="px-2"
-                      >
-                        -
-                      </Button>
-                      <div className="flex flex-row flex-1 bg-background border-y justify-between px-2 items-center">
-                        <p className="text-xs text-muted-foreground">120</p>
-                        <p className="font-bold text-sm">{sliderValue}</p>
-                        <p className="text-xs text-muted-foreground">490</p>
-                      </div>
-                      <Button
-                        variant="outline"
-                        disabled={!isConnected || sliderValue >= 490}
-                        onClick={() =>
-                          handleSliderChange(
-                            module,
-                            servo.name,
-                            sliderValue + 1,
-                          )
-                        }
-                        className="px-2"
-                      >
-                        +
-                      </Button>
-                      <Button
-                        variant="outline"
-                        disabled={!isConnected || sliderValue >= 490}
-                        onClick={() =>
-                          handleSliderChange(
-                            module,
-                            servo.name,
-                            Math.min(490, sliderValue + 10),
-                          )
-                        }
-                        className="px-2 text-xs"
-                      >
-                        +10
-                      </Button>
-                    </ButtonGroup>
-                    <ButtonGroup className="w-full">
-                      {servo.calibrationPositions.map((pos) => (
-                        <Button
-                          key={pos.key}
-                          variant="outline"
-                          disabled={!isConnected}
-                          onClick={() =>
-                            handleSetPosition(module, pos.key, sliderValue)
-                          }
-                          className="flex-1"
-                        >
-                          {pos.label}
-                        </Button>
-                      ))}
-                    </ButtonGroup>
-                    {isLoading ? (
-                      <Skeleton className="h-3 w-32 rounded" />
-                    ) : cal ? (
-                      <div className="text-xs text-muted-foreground w-full flex">
-                        {servo.calibrationPositions.map((pos) => (
-                          <p className="flex-1 text-center" key={pos.key}>
-                            {cal[pos.key]}
-                          </p>
                         ))}
-                      </div>
-                    ) : null}
-                  </div>
-                );
-              })}
-            </div>
-          );
-        })}
+                      </ButtonGroup>
+                      {isLoading ? (
+                        <Skeleton className="h-3 w-32 rounded" />
+                      ) : cal ? (
+                        <div className="text-xs text-muted-foreground w-full flex">
+                          {servo.calibrationPositions.map((pos) => (
+                            <p className="flex-1 text-center" key={pos.key}>
+                              {cal[pos.key]}
+                            </p>
+                          ))}
+                        </div>
+                      ) : null}
+                    </div>
+                  );
+                })}
+              </div>
+            );
+          })}
+        </div>
       </div>
     </div>
   );

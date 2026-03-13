@@ -46,6 +46,7 @@ export interface SerialContextValue {
   sendTest: () => Promise<boolean>;
   sendCommand: (data: string) => Promise<boolean>;
   subscribe: (listener: SerialMessageListener) => () => void;
+  registerPreTestHook: (fn: () => Promise<void>) => void;
 }
 
 export interface ScannerControlsProps {

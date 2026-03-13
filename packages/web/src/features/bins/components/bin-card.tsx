@@ -22,8 +22,8 @@ export function BinCard({ config, active, onClick }: BinCardProps) {
 
   return (
     <Button
-      variant={active ? "secondary" : "outline"}
-      className="h-auto transition-colors hover:bg-muted/50 border rounded-lg p-2 flex flex-col justify-start text-start font-normal"
+      variant={active ? "secondary" : "ghost"}
+      className="h-auto p-2 flex flex-col justify-start text-start w-full"
       onClick={onClick}
     >
       <div className="flex flex-row justify-between gap-2 items-center w-full">

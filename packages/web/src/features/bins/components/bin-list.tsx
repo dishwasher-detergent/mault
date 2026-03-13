@@ -1,4 +1,3 @@
-import { ButtonGroup } from "@/components/ui/button-group";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Skeleton } from "@/components/ui/skeleton";
 import { binsQueryOptions } from "@/features/bins/api/sort-bins";
@@ -28,7 +27,7 @@ export function BinList() {
   return (
     <div className="flex flex-col gap-2">
       <ScrollArea>
-        <ButtonGroup orientation="vertical" className="w-full">
+        <div className="flex flex-col gap-2">
           {configs.map((config) => (
             <BinCard
               key={config.binNumber}
@@ -37,7 +36,7 @@ export function BinList() {
               onClick={() => setSelectedBin(config.binNumber)}
             />
           ))}
-        </ButtonGroup>
+        </div>
       </ScrollArea>
       {!hasCatchAll && (
         <p className="text-xs text-destructive">

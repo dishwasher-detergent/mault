@@ -1,66 +1,18 @@
-import { Button } from "@/components/ui/button";
-import { ButtonGroup } from "@/components/ui/button-group";
-import { DynamicDialog } from "@/components/ui/responsive-dialog";
 import { PresetSelector } from "@/features/bins/components/preset-selector";
 import { CardGrid } from "@/features/cards/components/card-grid";
 import { CardScanner } from "@/features/scanner/components/card-scanner";
 import { ScanStats } from "@/features/scanner/components/scan-stats";
-import { useIsMobile } from "@/hooks/use-is-mobile";
-import { IconCategory2, IconChartAreaLine } from "@tabler/icons-react";
 
 export default function App() {
-  const isMobile = useIsMobile();
-
-  return isMobile ? (
-    <div className="flex-1 relative overflow-y-auto flex flex-col">
-      <section className="w-full flex-1 mb-2">
-        <CardScanner className="w-full h-full" />
-      </section>
-      <nav className="w-full flex items-center justify-center">
-        <ButtonGroup>
-          <DynamicDialog
-            title="Statistics"
-            trigger={
-              <Button size="icon-lg">
-                <IconChartAreaLine />
-              </Button>
-            }
-          >
-            <PresetSelector readOnly />
-            <div className="overflow-y-auto min-h-0">
-              <ScanStats />
-            </div>
-          </DynamicDialog>
-          <DynamicDialog
-            title="Scanned Cards"
-            trigger={
-              <Button size="icon-lg">
-                <IconCategory2 />
-              </Button>
-            }
-          >
-            <div className="overflow-y-auto h-full">
-              <CardGrid />
-            </div>
-          </DynamicDialog>
-        </ButtonGroup>
-      </nav>
-    </div>
-  ) : (
-    <div className="grid grid-cols-12 flex-1 min-h-0 overflow-hidden gap-2">
-      <section className="col-span-5 md:col-span-5 lg:col-span-4 xl:col-span-3 2xl:col-span-2 3xl:col-span-1 overflow-hidden flex flex-col h-full">
-        <div className="w-full overflow-hidden flex flex-col border rounded-lg p-2 bg-sidebar gap-2">
-          <PresetSelector readOnly />
-          <CardScanner className="flex-none" />
-          <div className="overflow-y-auto min-h-0">
-            <ScanStats />
-          </div>
-        </div>
+  return (
+    <div className="grid grid-cols-12 flex-1 min-h-0 overflow-hidden">
+      <section className="col-span-5 md:col-span-5 lg:col-span-4 xl:col-span-3 2xl:col-span-2 3xl:col-span-1 overflow-hidden flex flex-col h-full p-4 border-r gap-2">
+        <PresetSelector readOnly />
+        <CardScanner className="flex-none" />
+        <ScanStats />
       </section>
       <section className="col-span-7 md:col-span-7 lg:col-span-8 xl:col-span-9 2xl:col-span-10 3xl:col-span-11 overflow-y-auto h-full @container">
-        <div className="border rounded-lg bg-sidebar">
-          <CardGrid />
-        </div>
+        <CardGrid />
       </section>
     </div>
   );

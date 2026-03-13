@@ -76,7 +76,7 @@ export function CardGrid() {
 
   return (
     <>
-      <div className="sticky top-0 z-10 bg-sidebar/80 backdrop-blur-2xl p-2">
+      <div className="sticky top-0 z-10 bg-background/80 backdrop-blur-2xl p-4 border-b">
         <CardToolbar
           searchQuery={searchQuery}
           onSearchChange={setSearchQuery}
@@ -93,7 +93,7 @@ export function CardGrid() {
           <p className="text-xs">Try adjusting your search or sort options</p>
         </div>
       )}
-      <div className="grid grid-cols-3 @md:grid-cols-4 @4xl:grid-cols-6 @5xl:grid-cols-8 gap-2 p-2 pt-2">
+      <div className="grid grid-cols-3 @md:grid-cols-4 @4xl:grid-cols-6 @5xl:grid-cols-8 gap-2 p-4">
         {filteredAndSorted.map((card) => (
           <ScannedCardItem
             key={card.scanId}

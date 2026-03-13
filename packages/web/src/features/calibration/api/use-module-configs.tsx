@@ -36,27 +36,22 @@ export function ModuleConfigsProvider({
   children: React.ReactNode;
 }) {
   const queryClient = useQueryClient();
-  const { isReady, sendCommand } = useSerial();
+  const { sendCommand, registerPreTestHook } = useSerial();
 
   const { data: configs = defaultConfigs() } = useQuery(modulesQueryOptions);
 
-  const configsRef = useRef(configs);
   useEffect(() => {
-    configsRef.current = configs;
-  }, [configs]);
-
-  useEffect(() => {
-    if (!isReady) return;
-    (async () => {
-      for (const config of configsRef.current) {
+    registerPreTestHook(async () => {
+      const fresh = await queryClient.fetchQuery(modulesQueryOptions);
+      for (const config of fresh) {
         await sendCommand(
           JSON.stringify({
             setConfig: { module: config.moduleNumber, ...config.calibration },
           }),
         );
       }
-    })();
-  }, [isReady, sendCommand]);
+    });
+  }, [registerPreTestHook, queryClient, sendCommand]);
 
   const saveConfigMutation = useMutation({
     mutationFn: ({

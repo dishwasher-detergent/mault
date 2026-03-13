@@ -106,18 +106,16 @@ export function BinConfigPanel() {
       {!isCatchAll && (
         <ScrollArea>
           <Label className="mb-2">Rules</Label>
-          <div className="flex flex-col gap-2 border rounded-lg bg-background p-2">
-            <Controller
-              name="rules"
-              control={form.control}
-              render={({ field }) => (
-                <RuleGroupEditor
-                  group={field.value as BinRuleGroup}
-                  onChange={field.onChange}
-                />
-              )}
-            />
-          </div>
+          <Controller
+            name="rules"
+            control={form.control}
+            render={({ field }) => (
+              <RuleGroupEditor
+                group={field.value as BinRuleGroup}
+                onChange={field.onChange}
+              />
+            )}
+          />
         </ScrollArea>
       )}
       {form.formState.errors.isCatchAll && (
