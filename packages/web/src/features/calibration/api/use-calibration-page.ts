@@ -1,0 +1,177 @@
+import { modulesQueryOptions } from "@/features/calibration/api/module-configs";
+import { useModuleConfigs } from "@/features/calibration/api/use-module-configs";
+import { SERVOS } from "@/features/calibration/constants";
+import {
+  defaultSliderValues,
+  getCalibrationKey,
+} from "@/features/calibration/lib/calibration-utils";
+import type { ActivePositions, ServoConfig, SliderKey } from "@/features/calibration/types";
+import { useSerial } from "@/features/scanner/api/use-serial";
+import type { ServoCalibration } from "@magic-vault/shared";
+import { useQuery } from "@tanstack/react-query";
+import { useCallback, useRef, useState } from "react";
+import { toast } from "sonner";
+
+export function useCalibrationPage() {
+  const { isConnected, connect, disconnect, sendCommand, sendBin, sendTest } =
+    useSerial();
+  const { configs, saveConfig, moveServo } = useModuleConfigs();
+  const { isLoading } = useQuery(modulesQueryOptions);
+
+  const [active, setActive] = useState<ActivePositions>({});
+  const activeRef = useRef(active);
+  activeRef.current = active;
+
+  const configsRef = useRef(configs);
+  configsRef.current = configs;
+
+  const [sliderValues, setSliderValues] =
+    useState<Record<SliderKey, number>>(defaultSliderValues);
+
+  const servoDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const [ledStates, setLedStates] = useState<Record<1 | 2 | 3 | 4, boolean>>({
+    1: false,
+    2: false,
+    3: false,
+    4: false,
+  });
+
+  const [activeBin, setActiveBin] = useState<number | null>(null);
+  const [isTesting, setIsTesting] = useState(false);
+
+  const handleControl = useCallback(
+    (
+      module: 1 | 2 | 3,
+      servo: "bottom" | "paddle" | "pusher",
+      position: string,
+    ) => {
+      const key = `${module}:${servo}`;
+      const current = activeRef.current[key];
+      const isToggleOff = current === position;
+
+      sendCommand(
+        JSON.stringify({
+          servo,
+          module,
+          position: isToggleOff ? "neutral" : position,
+        }),
+      );
+      setActive((prev) => ({ ...prev, [key]: isToggleOff ? null : position }));
+
+      const cal = configsRef.current.find(
+        (c) => c.moduleNumber === module,
+      )?.calibration;
+      if (cal) {
+        const calKey = getCalibrationKey(servo, isToggleOff ? "neutral" : position);
+        if (calKey) {
+          setSliderValues((prev) => ({ ...prev, [key]: cal[calKey] }));
+        }
+      }
+    },
+    [sendCommand],
+  );
+
+  const handleReset = useCallback(
+    (module: number, servo: ServoConfig) => {
+      sendCommand(
+        JSON.stringify({ servo: servo.name, module, position: servo.defaultPosition }),
+      );
+      setActive((prev) => ({ ...prev, [`${module}:${servo.name}`]: null }));
+    },
+    [sendCommand],
+  );
+
+  const handleSliderChange = useCallback(
+    (module: 1 | 2 | 3, servo: "bottom" | "paddle" | "pusher", value: number) => {
+      setSliderValues((prev) => ({ ...prev, [`${module}:${servo}`]: value }));
+      if (servoDebounceRef.current) clearTimeout(servoDebounceRef.current);
+      servoDebounceRef.current = setTimeout(() => moveServo(module, servo, value), 30);
+    },
+    [moveServo],
+  );
+
+  const handleLedToggle = useCallback(
+    (led: 1 | 2 | 3 | 4) => {
+      const next = !ledStates[led];
+      sendCommand(JSON.stringify({ led, on: next }));
+      setLedStates((prev) => ({ ...prev, [led]: next }));
+    },
+    [ledStates, sendCommand],
+  );
+
+  const handleTest = useCallback(async () => {
+    setIsTesting(true);
+    toast.info("Running test sequence…");
+    const ok = await sendTest();
+    setIsTesting(false);
+    if (ok) {
+      toast.success("Test complete");
+    } else {
+      toast.error("Test failed", { description: "No response from sorter." });
+    }
+  }, [sendTest]);
+
+  const handleTestBin = useCallback(
+    async (bin: number) => {
+      setActiveBin(bin);
+      try {
+        const response = await sendBin(bin);
+        if (!response) {
+          toast.error(`Bin ${bin} test failed`, {
+            description: "No response from sorter.",
+          });
+        }
+      } finally {
+        setActiveBin(null);
+      }
+    },
+    [sendBin],
+  );
+
+  const handleCenterModule = useCallback(
+    (module: 1 | 2 | 3) => {
+      const CENTER = 307;
+      for (const servo of SERVOS) {
+        moveServo(module, servo.name, CENTER);
+      }
+      setSliderValues((prev) => ({
+        ...prev,
+        [`${module}:bottom`]: CENTER,
+        [`${module}:paddle`]: CENTER,
+        [`${module}:pusher`]: CENTER,
+      }));
+    },
+    [moveServo],
+  );
+
+  const handleSetPosition = useCallback(
+    (module: 1 | 2 | 3, posKey: keyof ServoCalibration, value: number) => {
+      const config = configsRef.current.find((c) => c.moduleNumber === module);
+      if (!config) return;
+      saveConfig(module, { ...config.calibration, [posKey]: value });
+    },
+    [saveConfig],
+  );
+
+  return {
+    isConnected,
+    connect,
+    disconnect,
+    configs,
+    isLoading,
+    active,
+    sliderValues,
+    ledStates,
+    activeBin,
+    isTesting,
+    handleControl,
+    handleReset,
+    handleSliderChange,
+    handleLedToggle,
+    handleTest,
+    handleTestBin,
+    handleCenterModule,
+    handleSetPosition,
+  };
+}

@@ -1,4 +1,9 @@
-import { FIELD_DEFINITIONS, BinCondition, BinRuleGroup, isRuleGroup } from "@magic-vault/shared";
+import {
+  BinCondition,
+  BinRuleGroup,
+  FIELD_DEFINITIONS,
+  isRuleGroup,
+} from "@magic-vault/shared";
 
 function formatCondition(condition: BinCondition): string {
   const fieldMeta = FIELD_DEFINITIONS.find((f) => f.field === condition.field);
@@ -44,5 +49,9 @@ function formatGroup(group: BinRuleGroup): string {
 export function RuleSummary({ rules }: { rules: BinRuleGroup }) {
   const text = formatGroup(rules);
 
-  return <p className="text-xs line-clamp-3 wrap-break-words">{text}</p>;
+  return (
+    <p className="text-xs line-clamp-3 wrap-break-words text-muted-foreground truncate">
+      {text}
+    </p>
+  );
 }

@@ -62,7 +62,7 @@ export function AppNav() {
   return (
     <aside className="flex-none h-full flex flex-col items-center border-r bg-sidebar p-2 gap-2">
       <TooltipProvider>
-        <div className="w-full aspect-square bg-orange-500 grid place-items-center rounded-lg">
+        <div className="w-full aspect-square bg-primary grid place-items-center rounded-lg">
           M
         </div>
         <Separator orientation="horizontal" />

@@ -75,10 +75,10 @@ export function ModuleConfigsProvider({
     onSuccess: (result, { moduleNumber, calibration }) => {
       if (result.success && result.data) {
         queryClient.setQueryData(["modules"], result.data);
+        sendCommand(
+          JSON.stringify({ setConfig: { module: moduleNumber, ...calibration } }),
+        );
       }
-      sendCommand(
-        JSON.stringify({ setConfig: { module: moduleNumber, ...calibration } }),
-      );
     },
   });
 

@@ -213,11 +213,14 @@ export function SerialProvider({ children }: { children: React.ReactNode }) {
     (async () => {
       // Consume the Arduino's boot message before sending the test
       await waitForLine(5000);
+      if (!portRef.current) return;
       if (preTestHookRef.current) {
         await preTestHookRef.current();
       }
+      if (!portRef.current) return;
       toast.info("Testing device…");
       const ok = await sendTest();
+      if (!portRef.current) return;
       if (ok) {
         toast.success("Device ready");
       } else {
@@ -300,6 +303,11 @@ export function SerialProvider({ children }: { children: React.ReactNode }) {
     preTestHookRef.current = fn;
   }, []);
 
+  const sendCommandWithNewline = useCallback(
+    (data: string) => sendCommand(data + "\n"),
+    [sendCommand],
+  );
+
   const binBusyRef = useRef(false);
 
   const sendBin = useCallback(
@@ -337,10 +345,7 @@ export function SerialProvider({ children }: { children: React.ReactNode }) {
         disconnect,
         sendBin,
         sendTest,
-        sendCommand: useCallback(
-          async (data: string) => sendCommand(data + "\n"),
-          [sendCommand],
-        ),
+        sendCommand: sendCommandWithNewline,
         subscribe,
         registerPreTestHook,
       }}

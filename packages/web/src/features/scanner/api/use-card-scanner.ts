@@ -23,8 +23,20 @@ import {
 } from "@magic-vault/shared";
 import { useCallback, useEffect, useRef, useState } from "react";
 
+// Singleton AudioContext — browsers cap concurrent contexts (~6).
+// Creating one per scan exhausts the limit quickly.
+let sharedAudioCtx: AudioContext | null = null;
+function getAudioContext(): AudioContext {
+  if (!sharedAudioCtx || sharedAudioCtx.state === "closed") {
+    sharedAudioCtx = new AudioContext();
+  }
+  return sharedAudioCtx;
+}
+
 function playDingSound() {
-  const ctx = new AudioContext();
+  const ctx = getAudioContext();
+  if (ctx.state === "suspended") ctx.resume();
+
   const oscillator = ctx.createOscillator();
   const gain = ctx.createGain();
 
@@ -40,8 +52,6 @@ function playDingSound() {
 
   oscillator.start(ctx.currentTime);
   oscillator.stop(ctx.currentTime + 0.3);
-
-  oscillator.onended = () => ctx.close();
 }
 
 async function searchCardImage(
@@ -58,7 +68,8 @@ async function searchCardImage(
   if (!data) return null;
 
   const { data: scryfallCard } = await SearchById(data.scryfallId);
-  return { ...scryfallCard!, distance: data.distance };
+  if (!scryfallCard) return null;
+  return { ...scryfallCard, distance: data.distance };
 }
 
 export function useCardScanner({

@@ -16,13 +16,16 @@ function getDb(): Promise<IDBPDatabase> {
           db.createObjectStore(STORE_NAME, { keyPath: "scanId" });
         }
       },
+    }).catch((err) => {
+      dbPromise = null; // allow retry on next call
+      throw err;
     });
   }
   return dbPromise;
 }
 
 export function generateScanId(): string {
-  return Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+  return crypto.randomUUID();
 }
 
 export async function getAllCards(): Promise<ScannedCard[]> {

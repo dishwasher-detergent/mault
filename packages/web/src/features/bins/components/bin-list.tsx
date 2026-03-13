@@ -16,7 +16,7 @@ export function BinList() {
           {Array.from({ length: 7 }).map((_, i) => (
             <Skeleton
               key={i}
-              className="h-[52px] rounded-none border-b last:border-b-0"
+              className="h-13 rounded-none border-b last:border-b-0"
             />
           ))}
         </div>

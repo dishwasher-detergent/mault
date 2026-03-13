@@ -127,9 +127,12 @@ export function ScannedCardsProvider({
 
   const correctCard = useCallback((scanId: string, card: ScryfallCard) => {
     const corrected: ScryfallCardWithDistance = { ...card, distance: 0 };
+    const matchedBin = evaluateCardBin(corrected, binConfigsRef.current);
     setCards((prev) =>
       prev.map((entry) =>
-        entry.scanId === scanId ? { ...entry, card: corrected } : entry,
+        entry.scanId === scanId
+          ? { ...entry, card: corrected, binNumber: matchedBin?.binNumber }
+          : entry,
       ),
     );
     dbUpdateCard(scanId, corrected).catch((err) =>
