@@ -183,19 +183,23 @@ export function extractCardImage(
 ): HTMLCanvasElement {
   const outputHeight = Math.round(outputWidth / MTG_ASPECT_RATIO);
 
+  // If the card bounding box is wider than tall, it's landscape in the frame.
+  // Warp to a landscape canvas matching that ratio, then rotate 90° CW to portrait
+  // so extractArtRegion receives a correctly-oriented image and nothing gets squished.
+  const xs = [contour.topLeft.x, contour.topRight.x, contour.bottomRight.x, contour.bottomLeft.x];
+  const ys = [contour.topLeft.y, contour.topRight.y, contour.bottomRight.y, contour.bottomLeft.y];
+  const isLandscape = (Math.max(...xs) - Math.min(...xs)) > (Math.max(...ys) - Math.min(...ys));
+
+  const warpW = isLandscape ? outputHeight : outputWidth;
+  const warpH = isLandscape ? outputWidth : outputHeight;
+
   const ctx = sourceCanvas.getContext("2d");
   if (!ctx) throw new Error("Could not get canvas context");
 
-  const imageData = ctx.getImageData(
-    0,
-    0,
-    sourceCanvas.width,
-    sourceCanvas.height,
-  );
+  const imageData = ctx.getImageData(0, 0, sourceCanvas.width, sourceCanvas.height);
   const src = cv.matFromImageData(imageData);
   const dst = new cv.Mat();
 
-  // Source points (from detected contour)
   const srcPts = cv.matFromArray(4, 1, cv.CV_32FC2, [
     contour.topLeft.x,
     contour.topLeft.y,
@@ -207,41 +211,39 @@ export function extractCardImage(
     contour.bottomLeft.y,
   ]);
 
-  // Destination points (output rectangle)
   const dstPts = cv.matFromArray(4, 1, cv.CV_32FC2, [
-    0,
-    0,
-    outputWidth,
-    0,
-    outputWidth,
-    outputHeight,
-    0,
-    outputHeight,
+    0, 0,
+    warpW, 0,
+    warpW, warpH,
+    0, warpH,
   ]);
 
   let transformMatrix: cv.Mat | null = null;
-
   let enhanced: cv.Mat | null = null;
 
   try {
     transformMatrix = cv.getPerspectiveTransform(srcPts, dstPts);
-    cv.warpPerspective(
-      src,
-      dst,
-      transformMatrix,
-      new cv.Size(outputWidth, outputHeight),
-    );
+    cv.warpPerspective(src, dst, transformMatrix, new cv.Size(warpW, warpH));
 
     // Boost brightness and contrast for better embedding matching
-    // dst(i) = saturate(alpha * src(i) + beta)
     enhanced = new cv.Mat();
     dst.convertTo(enhanced, -1, 1.15, 20);
 
+    const warpCanvas = document.createElement("canvas");
+    warpCanvas.width = warpW;
+    warpCanvas.height = warpH;
+    cv.imshow(warpCanvas, enhanced);
+
+    if (!isLandscape) return warpCanvas;
+
+    // Rotate the landscape warp result 90° CW to produce a portrait canvas.
     const outputCanvas = document.createElement("canvas");
     outputCanvas.width = outputWidth;
     outputCanvas.height = outputHeight;
-    cv.imshow(outputCanvas, enhanced);
-
+    const outCtx = outputCanvas.getContext("2d")!;
+    outCtx.translate(outputWidth / 2, outputHeight / 2);
+    outCtx.rotate(Math.PI / 2);
+    outCtx.drawImage(warpCanvas, -warpW / 2, -warpH / 2);
     return outputCanvas;
   } finally {
     src.delete();

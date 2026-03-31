@@ -46,7 +46,7 @@ router.post("/", requireAuth, async (c) => {
           scryfall_id,
           embedding <=> ${embeddingStr}::vector(768) AS distance
         FROM cards
-        WHERE (embedding <=> ${embeddingStr}::vector(768)) < 0.15
+        WHERE (embedding <=> ${embeddingStr}::vector(768)) < 0.3
         ORDER BY embedding <=> ${embeddingStr}::vector(768)
         LIMIT 1
       `);

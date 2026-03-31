@@ -80,7 +80,7 @@ type ScryfallBulkCard = {
   id: string;
   name: string;
   set: string;
-  image_uris?: { large?: string };
+  image_uris?: { png?: string; large?: string };
 };
 
 async function runSync(): Promise<void> {
@@ -130,7 +130,7 @@ async function runSync(): Promise<void> {
       return;
     }
 
-    const imageUrl = card.image_uris?.large;
+    const imageUrl = card.image_uris?.png ?? card.image_uris?.large;
     if (!imageUrl || existingSet.has(card.id)) {
       state = { ...state, skipped: state.skipped + 1 };
       emit("progress", {

@@ -25,6 +25,10 @@ export async function getSyncStatus(): Promise<{
   return apiGet<{ success: boolean; data: SyncState }>("/api/admin/sync");
 }
 
+export async function dumpCards(): Promise<{ success: boolean; message: string }> {
+  return apiPost<{ success: boolean; message: string }>("/api/admin/cards/dump");
+}
+
 export async function createSyncEventSource(): Promise<EventSource> {
   const { data } = await neon.auth.getSession();
   const token = (data as { session?: { token?: string } } | null)?.session

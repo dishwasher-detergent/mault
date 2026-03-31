@@ -2,9 +2,16 @@ import { Button } from "@/components/ui/button";
 import { ButtonGroup } from "@/components/ui/button-group";
 import { Skeleton } from "@/components/ui/skeleton";
 import { MODULES, SERVOS } from "@/features/calibration/constants";
-import type { ActivePositions, ServoConfig, SliderKey } from "@/features/calibration/types";
+import type {
+  ActivePositions,
+  ServoConfig,
+  SliderKey,
+} from "@/features/calibration/types";
 import type { ModuleConfig, ServoCalibration } from "@magic-vault/shared";
-import { IconLayoutAlignCenter, IconRotateClockwise } from "@tabler/icons-react";
+import {
+  IconLayoutAlignCenter,
+  IconRotateClockwise,
+} from "@tabler/icons-react";
 
 interface ServoControlProps {
   module: 1 | 2 | 3;
@@ -14,10 +21,22 @@ interface ServoControlProps {
   calibration: ServoCalibration | undefined;
   isLoading: boolean;
   isConnected: boolean;
-  onControl: (module: 1 | 2 | 3, servo: "bottom" | "paddle" | "pusher", position: string) => void;
+  onControl: (
+    module: 1 | 2 | 3,
+    servo: "bottom" | "paddle" | "pusher",
+    position: string,
+  ) => void;
   onReset: (module: number, servo: ServoConfig) => void;
-  onSliderChange: (module: 1 | 2 | 3, servo: "bottom" | "paddle" | "pusher", value: number) => void;
-  onSetPosition: (module: 1 | 2 | 3, posKey: keyof ServoCalibration, value: number) => void;
+  onSliderChange: (
+    module: 1 | 2 | 3,
+    servo: "bottom" | "paddle" | "pusher",
+    value: number,
+  ) => void;
+  onSetPosition: (
+    module: 1 | 2 | 3,
+    posKey: keyof ServoCalibration,
+    value: number,
+  ) => void;
 }
 
 function ServoControl({
@@ -51,7 +70,7 @@ function ServoControl({
         {servo.controlPositions.map((position) => (
           <Button
             key={position}
-            variant={activePosition === position ? "default" : "outline"}
+            variant={activePosition === position ? "default" : "secondary"}
             disabled={!isConnected}
             onClick={() => onControl(module, servo.name, position)}
             className="flex-1"
@@ -63,15 +82,17 @@ function ServoControl({
 
       <ButtonGroup className="w-full">
         <Button
-          variant="outline"
+          variant="secondary"
           disabled={!isConnected || sliderValue <= 120}
-          onClick={() => onSliderChange(module, servo.name, Math.max(120, sliderValue - 10))}
+          onClick={() =>
+            onSliderChange(module, servo.name, Math.max(120, sliderValue - 10))
+          }
           className="px-2 text-xs"
         >
           -10
         </Button>
         <Button
-          variant="outline"
+          variant="secondary"
           disabled={!isConnected || sliderValue <= 120}
           onClick={() => onSliderChange(module, servo.name, sliderValue - 1)}
           className="px-2"
@@ -84,7 +105,7 @@ function ServoControl({
           <p className="text-xs text-muted-foreground">490</p>
         </div>
         <Button
-          variant="outline"
+          variant="secondary"
           disabled={!isConnected || sliderValue >= 490}
           onClick={() => onSliderChange(module, servo.name, sliderValue + 1)}
           className="px-2"
@@ -92,9 +113,11 @@ function ServoControl({
           +
         </Button>
         <Button
-          variant="outline"
+          variant="secondary"
           disabled={!isConnected || sliderValue >= 490}
-          onClick={() => onSliderChange(module, servo.name, Math.min(490, sliderValue + 10))}
+          onClick={() =>
+            onSliderChange(module, servo.name, Math.min(490, sliderValue + 10))
+          }
           className="px-2 text-xs"
         >
           +10
@@ -105,7 +128,7 @@ function ServoControl({
         {servo.calibrationPositions.map((pos) => (
           <Button
             key={pos.key}
-            variant="outline"
+            variant="secondary"
             disabled={!isConnected}
             onClick={() => onSetPosition(module, pos.key, sliderValue)}
             className="flex-1"
@@ -136,10 +159,22 @@ interface ModuleCalibrationGridProps {
   sliderValues: Record<SliderKey, number>;
   isLoading: boolean;
   isConnected: boolean;
-  onControl: (module: 1 | 2 | 3, servo: "bottom" | "paddle" | "pusher", position: string) => void;
+  onControl: (
+    module: 1 | 2 | 3,
+    servo: "bottom" | "paddle" | "pusher",
+    position: string,
+  ) => void;
   onReset: (module: number, servo: ServoConfig) => void;
-  onSliderChange: (module: 1 | 2 | 3, servo: "bottom" | "paddle" | "pusher", value: number) => void;
-  onSetPosition: (module: 1 | 2 | 3, posKey: keyof ServoCalibration, value: number) => void;
+  onSliderChange: (
+    module: 1 | 2 | 3,
+    servo: "bottom" | "paddle" | "pusher",
+    value: number,
+  ) => void;
+  onSetPosition: (
+    module: 1 | 2 | 3,
+    posKey: keyof ServoCalibration,
+    value: number,
+  ) => void;
   onCenter: (module: 1 | 2 | 3) => void;
 }
 

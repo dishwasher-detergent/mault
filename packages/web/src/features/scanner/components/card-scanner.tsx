@@ -6,14 +6,22 @@ import { useSerial, useSerialMessage } from "@/features/scanner/api/use-serial";
 import { ScannerControls } from "@/features/scanner/components/scanner-controls";
 import { ScannerMenu } from "@/features/scanner/components/scanner-menu";
 import { ScannerOverlay } from "@/features/scanner/components/scanner-overlay";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { useRole } from "@/hooks/use-role";
 import { cn } from "@/lib/utils";
 import type { CardScannerProps } from "@magic-vault/shared";
+import { IconEye } from "@tabler/icons-react";
 import { useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 
 export function CardScanner({ className }: CardScannerProps) {
   const navigate = useNavigate();
+  const { isAdmin } = useRole();
   const { addCard, sendCatchAllBin } = useScannedCards();
   const { isConnected, isReady, connect, disconnect, sendTest } = useSerial();
   const { hasCatchAll } = useBinConfigs();
@@ -21,6 +29,7 @@ export function CardScanner({ className }: CardScannerProps) {
     status,
     errorMessage,
     isCameraActive,
+    debugImageUrl,
     videoRef,
     displayCanvasRef,
     overlayCanvasRef,
@@ -82,16 +91,24 @@ export function CardScanner({ className }: CardScannerProps) {
       <div className="relative overflow-hidden bg-background w-full h-full md:aspect-[2.5/3.5] max-w-full rounded-lg border">
         <video ref={videoRef} className="hidden" playsInline muted />
         <canvas ref={processingCanvasRef} className="hidden" />
-        <canvas
-          ref={displayCanvasRef}
-          className="absolute"
-          style={{ transform: "rotate(90deg)" }}
-        />
+        <canvas ref={displayCanvasRef} className="absolute" />
         <canvas
           ref={overlayCanvasRef}
           className="absolute z-20 pointer-events-none"
-          style={{ transform: "rotate(90deg)" }}
         />
+        {isAdmin && debugImageUrl && (
+          <Tooltip>
+            <TooltipTrigger className="absolute top-2 left-2 z-30 flex items-center justify-center size-7 rounded-md bg-background/70 text-foreground backdrop-blur-sm hover:bg-background/90 transition-colors">
+              <IconEye size={16} />
+            </TooltipTrigger>
+            <TooltipContent
+              side="right"
+              className="bg-background text-foreground border border-border p-0 shadow-lg max-w-none"
+            >
+              <img src={debugImageUrl} alt="Last search image" className="w-48" />
+            </TooltipContent>
+          </Tooltip>
+        )}
         <ScannerOverlay
           status={status}
           errorMessage={errorMessage}

@@ -1,12 +1,23 @@
 import { Button } from "@/components/ui/button";
-import { cancelSync, createSyncEventSource, startSync } from "@/lib/api/admin";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { cancelSync, createSyncEventSource, dumpCards, startSync } from "@/lib/api/admin";
 import type { SyncState } from "@magic-vault/shared";
 import { useMutation } from "@tanstack/react-query";
 import { useEffect, useRef, useState } from "react";
+import { toast } from "sonner";
 import { DEFAULT_SYNC_STATE, STATUS_COLORS } from "./admin.constants";
 
 export default function AdminPage() {
   const [syncState, setSyncState] = useState<SyncState>(DEFAULT_SYNC_STATE);
+  const [dumpOpen, setDumpOpen] = useState(false);
   const logRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -74,6 +85,16 @@ export default function AdminPage() {
 
   const startSyncMutation = useMutation({ mutationFn: startSync });
   const cancelSyncMutation = useMutation({ mutationFn: cancelSync });
+  const dumpMutation = useMutation({
+    mutationFn: dumpCards,
+    onSuccess: () => {
+      setDumpOpen(false);
+      toast.success("Card database cleared");
+    },
+    onError: (err) => {
+      toast.error(err instanceof Error ? err.message : "Failed to dump database");
+    },
+  });
 
   const total = syncState.total;
   const done = syncState.processed + syncState.skipped;
@@ -162,6 +183,38 @@ export default function AdminPage() {
             </p>
           )}
         </div>
+      </div>
+
+      <div className="rounded-lg border p-4 flex items-center justify-between mt-4">
+        <div className="flex flex-col gap-0.5">
+          <p className="text-sm font-medium">Dump Card Database</p>
+          <p className="text-xs text-muted-foreground">
+            Permanently delete all card image vectors
+          </p>
+        </div>
+        <Dialog open={dumpOpen} onOpenChange={setDumpOpen}>
+          <DialogTrigger render={<Button variant="destructive" disabled={isRunning} />}>
+            Dump
+          </DialogTrigger>
+          <DialogContent showCloseButton={false}>
+            <DialogHeader>
+              <DialogTitle>Dump card database</DialogTitle>
+              <DialogDescription>
+                This will permanently delete all card image vectors and cannot
+                be undone. Are you sure?
+              </DialogDescription>
+            </DialogHeader>
+            <DialogFooter showCloseButton>
+              <Button
+                variant="destructive"
+                disabled={dumpMutation.isPending}
+                onClick={() => dumpMutation.mutate()}
+              >
+                {dumpMutation.isPending ? "Dumping..." : "Dump"}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </div>
     </div>
   );

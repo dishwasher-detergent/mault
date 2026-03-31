@@ -10,7 +10,6 @@ import {
   canvasToBlob,
   detectCard,
   drawDetectionOverlay,
-  extractArtRegion,
   extractCardImage,
 } from "@/features/scanner/lib/card-detection";
 import { loadOpenCv } from "@/features/scanner/lib/opencv-loader";
@@ -57,19 +56,19 @@ function playDingSound() {
 async function searchCardImage(
   canvas: HTMLCanvasElement,
   contour?: CardContour | null,
-): Promise<ScryfallCardWithDistance | null> {
+): Promise<{ card: ScryfallCardWithDistance | null; debugImageUrl: string }> {
   const warpedCanvas = contour ? extractCardImage(canvas, contour) : canvas;
-  const artCanvas = extractArtRegion(warpedCanvas);
-  const blob = await canvasToBlob(artCanvas);
+  const debugImageUrl = warpedCanvas.toDataURL("image/jpeg", 0.8);
+  const blob = await canvasToBlob(warpedCanvas);
   const formData = new FormData();
   formData.append("image", blob, "card.jpg");
 
   const { data } = await Search(formData);
-  if (!data) return null;
+  if (!data) return { card: null, debugImageUrl };
 
   const { data: scryfallCard } = await SearchById(data.scryfallId);
-  if (!scryfallCard) return null;
-  return { ...scryfallCard, distance: data.distance };
+  if (!scryfallCard) return { card: null, debugImageUrl };
+  return { card: { ...scryfallCard, distance: data.distance }, debugImageUrl };
 }
 
 export function useCardScanner({
@@ -111,6 +110,7 @@ export function useCardScanner({
   const [isStable, setIsStable] = useState(false);
   const [duplicateCard, setDuplicateCard] =
     useState<ScryfallCardWithDistance | null>(null);
+  const [debugImageUrl, setDebugImageUrl] = useState<string | null>(null);
 
   const updateStatus = useCallback((newStatus: ScannerStatus) => {
     statusRef.current = newStatus;
@@ -166,7 +166,8 @@ export function useCardScanner({
       }
 
       try {
-        const card = await searchCardImage(canvas, contour);
+        const { card, debugImageUrl } = await searchCardImage(canvas, contour);
+        setDebugImageUrl(debugImageUrl);
 
         if (card) {
           if (checkDuplicate && lastScannedCardIdRef.current === card.id) {
@@ -305,14 +306,12 @@ export function useCardScanner({
           }
         }
 
-        // Size display/overlay canvases so the video appears correctly after 90° CSS rotation.
-        // After rotate(90deg): visual_width = CSS_height, visual_height = CSS_width.
-        // Scale so the rotated video fits within the container (contain behaviour, no squish).
+        // Scale display/overlay canvases to fill the container (contain, no squish).
         const container = displayCanvasRef.current?.parentElement;
         if (container) {
           const cw = container.clientWidth;
           const ch = container.clientHeight;
-          const scale = Math.min(cw / videoHeight, ch / videoWidth);
+          const scale = Math.min(cw / videoWidth, ch / videoHeight);
           const cssW = Math.round(videoWidth * scale);
           const cssH = Math.round(videoHeight * scale);
           for (const ref of [displayCanvasRef, overlayCanvasRef]) {
@@ -402,6 +401,7 @@ export function useCardScanner({
     errorMessage,
     isStable,
     duplicateCard,
+    debugImageUrl,
     videoRef,
     displayCanvasRef,
     overlayCanvasRef,

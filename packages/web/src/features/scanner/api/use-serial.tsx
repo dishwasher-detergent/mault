@@ -250,16 +250,6 @@ export function SerialProvider({ children }: { children: React.ReactNode }) {
     await openPort(port);
   }, [openPort]);
 
-  // Auto-reconnect any previously granted port on mount
-  useEffect(() => {
-    if (!navigator.serial) return;
-    navigator.serial.getPorts().then(async (ports) => {
-      if (ports.length > 0 && !portRef.current) {
-        await openPort(ports[0]);
-      }
-    }).catch(() => {});
-  }, [openPort]);
-
   // Detect physical USB unplug
   useEffect(() => {
     if (!navigator.serial) return;
