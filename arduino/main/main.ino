@@ -5,12 +5,14 @@
 Adafruit_PWMServoDriver pwm = Adafruit_PWMServoDriver();
 
 // PWM channel layout (PCA9685):
-//   ch0-3  = LEDs (1-indexed: LED 1 = ch0 ... LED 4 = ch3)
-//   ch4-6  = Module 1 (bottom, paddle, pusher)
-//   ch7-9  = Module 2
+//   ch0-3   = LEDs (1-indexed: LED 1 = ch0 ... LED 4 = ch3)
+//   ch4-6   = Module 1 (bottom, paddle, pusher)
+//   ch7-9   = Module 2
 //   ch10-12 = Module 3
+//   ch13    = Feeder (360° continuous rotation servo)
 #define NUM_MODULES 3
 #define MODULE_CHANNEL_OFFSET 4
+#define FEEDER_CHANNEL 13
 
 struct ModuleConfig {
   int bottomClosed, bottomOpen;
@@ -23,6 +25,13 @@ ModuleConfig moduleConfig[NUM_MODULES] = {
   {150, 307, 150, 307, 150, 307, 460},
   {150, 307, 150, 307, 150, 307, 460},
 };
+
+struct FeederConfig {
+  int speed;     // PWM pulse for forward motion
+  int duration;  // milliseconds to run before auto-stopping
+};
+
+FeederConfig feederConfig = {400, 100};
 
 // Routing delays (ms) — tune to match your hardware timing
 #define DELAY_PASS_MODULE  400  // time for card to drop through a pass-through module
@@ -47,8 +56,13 @@ void setModuleNeutral(int module) {
   setServoPosition(getChannel(module, 2), c.pusherNeutral);
 }
 
+void stopFeeder() {
+  pwm.setPin(FEEDER_CHANNEL, 0);  // cut PWM signal entirely to stop 360° servo
+}
+
 void setAllNeutral() {
   for (int m = 1; m <= NUM_MODULES; m++) setModuleNeutral(m);
+  stopFeeder();
   delay(200);
 }
 
@@ -192,6 +206,12 @@ void handleCommand(const String& json) {
     setAllNeutral();
     delay(200);
 
+    // Test feeder: spin forward for configured duration then stop
+    setServoPosition(FEEDER_CHANNEL, feederConfig.speed);
+    delay(feederConfig.duration);
+    stopFeeder();
+    delay(200);
+
     // Cycle through LEDs
     for (int led = 1; led <= 4; led++) {
       pwm.setPin(led - 1, 4095);
@@ -286,6 +306,51 @@ void handleCommand(const String& json) {
     JsonDocument res;
     res["status"] = "ok";
     res["module"] = module;
+    serializeJson(res, Serial);
+    Serial.println();
+    return;
+  }
+
+  // {"feeder": true} — run feeder forward for configured duration then stop
+  if (doc["feeder"].is<bool>() && doc["feeder"].as<bool>()) {
+    setServoPosition(FEEDER_CHANNEL, feederConfig.speed);
+    delay(feederConfig.duration);
+    stopFeeder();
+    JsonDocument res;
+    res["status"] = "ok";
+    serializeJson(res, Serial);
+    Serial.println();
+    return;
+  }
+
+  // {"feederValue": N} — set raw PWM (for calibration preview, does not auto-stop)
+  if (doc["feederValue"].is<int>()) {
+    setServoPosition(FEEDER_CHANNEL, doc["feederValue"].as<int>());
+    JsonDocument res;
+    res["status"] = "ok";
+    serializeJson(res, Serial);
+    Serial.println();
+    return;
+  }
+
+  // {"feederStop": true} — stop feeder immediately
+  if (doc["feederStop"].is<bool>() && doc["feederStop"].as<bool>()) {
+    stopFeeder();
+    JsonDocument res;
+    res["status"] = "ok";
+    serializeJson(res, Serial);
+    Serial.println();
+    return;
+  }
+
+  // {"setFeederConfig": {"speed": N, "duration": N}} — update feeder calibration
+  if (!doc["setFeederConfig"].isNull()) {
+    JsonObject cfg = doc["setFeederConfig"];
+    feederConfig.speed    = cfg["speed"]    | feederConfig.speed;
+    feederConfig.duration = cfg["duration"] | feederConfig.duration;
+    stopFeeder();
+    JsonDocument res;
+    res["status"] = "ok";
     serializeJson(res, Serial);
     Serial.println();
     return;

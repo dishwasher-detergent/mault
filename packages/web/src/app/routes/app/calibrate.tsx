@@ -2,6 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { useCalibrationPage } from "@/features/calibration/api/use-calibration-page";
 import { BinRoutingControls } from "@/features/calibration/components/bin-routing-controls";
+import { FeederCalibrationPanel } from "@/features/calibration/components/feeder-calibration-panel";
 import { LedControls } from "@/features/calibration/components/led-controls";
 import { ModuleCalibrationGrid } from "@/features/calibration/components/module-calibration-grid";
 import { IconDeviceUsb, IconDeviceUsbFilled } from "@tabler/icons-react";
@@ -26,6 +27,14 @@ export default function CalibratePage() {
     handleTestBin,
     handleCenterModule,
     handleSetPosition,
+    feederConfig,
+    feederSpeedValue,
+    feederDurationValue,
+    handleFeederSpeedChange,
+    handleFeederDurationChange,
+    handleFeederSetSpeed,
+    handleFeederSetDuration,
+    handleFeed,
   } = useCalibrationPage();
 
   return (
@@ -61,7 +70,23 @@ export default function CalibratePage() {
         activeBin={activeBin}
         isConnected={isConnected}
         onTestBin={handleTestBin}
+        onFeed={handleFeed}
       />
+
+      <div className="flex flex-col gap-2">
+        <Label>Feeder Calibration</Label>
+        <FeederCalibrationPanel
+          speedValue={feederSpeedValue}
+          durationValue={feederDurationValue}
+          calibration={feederConfig}
+          isLoading={isLoading}
+          isConnected={isConnected}
+          onSpeedChange={handleFeederSpeedChange}
+          onDurationChange={handleFeederDurationChange}
+          onSetSpeed={handleFeederSetSpeed}
+          onSetDuration={handleFeederSetDuration}
+        />
+      </div>
 
       <div className="flex flex-col gap-2">
         <Label>Module Calibration</Label>

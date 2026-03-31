@@ -290,7 +290,10 @@ export function SerialProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const registerPreTestHook = useCallback((fn: () => Promise<void>) => {
-    preTestHookRef.current = fn;
+    const previous = preTestHookRef.current;
+    preTestHookRef.current = previous
+      ? async () => { await previous(); await fn(); }
+      : fn;
   }, []);
 
   const sendCommandWithNewline = useCallback(

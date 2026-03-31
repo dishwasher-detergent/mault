@@ -1,4 +1,5 @@
 import { modulesQueryOptions } from "@/features/calibration/api/module-configs";
+import { useFeederConfig } from "@/features/calibration/api/use-feeder-config";
 import { useModuleConfigs } from "@/features/calibration/api/use-module-configs";
 import { SERVOS } from "@/features/calibration/constants";
 import {
@@ -16,6 +17,7 @@ export function useCalibrationPage() {
   const { isConnected, connect, disconnect, sendCommand, sendBin, sendTest } =
     useSerial();
   const { configs, saveConfig, moveServo } = useModuleConfigs();
+  const { feederConfig, saveConfig: saveFeeder, previewSpeed } = useFeederConfig();
   const { isLoading } = useQuery(modulesQueryOptions);
 
   const [active, setActive] = useState<ActivePositions>({});
@@ -39,6 +41,10 @@ export function useCalibrationPage() {
 
   const [activeBin, setActiveBin] = useState<number | null>(null);
   const [isTesting, setIsTesting] = useState(false);
+
+  const [feederSpeedValue, setFeederSpeedValue] = useState(feederConfig.speed);
+  const [feederDurationValue, setFeederDurationValue] = useState(feederConfig.duration);
+  const feederDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const handleControl = useCallback(
     (
@@ -154,6 +160,31 @@ export function useCalibrationPage() {
     [saveConfig],
   );
 
+  const handleFeederSpeedChange = useCallback(
+    (value: number) => {
+      setFeederSpeedValue(value);
+      if (feederDebounceRef.current) clearTimeout(feederDebounceRef.current);
+      feederDebounceRef.current = setTimeout(() => previewSpeed(value), 30);
+    },
+    [previewSpeed],
+  );
+
+  const handleFeederDurationChange = useCallback((value: number) => {
+    setFeederDurationValue(value);
+  }, []);
+
+  const handleFeederSetSpeed = useCallback(() => {
+    saveFeeder({ ...feederConfig, speed: feederSpeedValue });
+  }, [feederConfig, feederSpeedValue, saveFeeder]);
+
+  const handleFeederSetDuration = useCallback(() => {
+    saveFeeder({ ...feederConfig, duration: feederDurationValue });
+  }, [feederConfig, feederDurationValue, saveFeeder]);
+
+  const handleFeed = useCallback(() => {
+    sendCommand(JSON.stringify({ feeder: true }));
+  }, [sendCommand]);
+
   return {
     isConnected,
     connect,
@@ -173,5 +204,13 @@ export function useCalibrationPage() {
     handleTestBin,
     handleCenterModule,
     handleSetPosition,
+    feederConfig,
+    feederSpeedValue,
+    feederDurationValue,
+    handleFeederSpeedChange,
+    handleFeederDurationChange,
+    handleFeederSetSpeed,
+    handleFeederSetDuration,
+    handleFeed,
   };
 }

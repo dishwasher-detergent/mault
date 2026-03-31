@@ -133,6 +133,29 @@ export const moduleConfigs = pgTable(
   ],
 ).enableRLS();
 
+export const feederConfigs = pgTable(
+  "feeder_configs",
+  {
+    id: serial().primaryKey(),
+    guid: uuid("guid").defaultRandom(),
+    userId: text("user_id")
+      .notNull()
+      .default(sql`auth.user_id()`),
+    speed: integer("speed").notNull().default(400),
+    duration: integer("duration").notNull().default(100),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+    updatedAt: timestamp("updated_at").defaultNow().notNull(),
+  },
+  (table) => [
+    unique("feeder_configs_user_idx").on(table.userId),
+    crudPolicy({
+      role: authenticatedRole,
+      read: authUid(table.userId),
+      modify: authUid(table.userId),
+    }),
+  ],
+).enableRLS();
+
 export const binSetRelations = relations(binSets, ({ many }) => ({
   bins: many(bins),
 }));

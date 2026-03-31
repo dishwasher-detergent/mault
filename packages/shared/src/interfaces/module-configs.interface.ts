@@ -22,3 +22,13 @@ export const DEFAULT_CALIBRATION: ServoCalibration = {
   pusherNeutral: 307,
   pusherRight: 460,
 };
+
+export interface FeederCalibration {
+  speed: number;
+  duration: number;
+}
+
+export const DEFAULT_FEEDER_CALIBRATION: FeederCalibration = {
+  speed: 400,
+  duration: 100,
+};
