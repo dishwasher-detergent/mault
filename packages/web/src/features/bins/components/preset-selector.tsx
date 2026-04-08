@@ -106,7 +106,7 @@ export function PresetSelector({ readOnly }: PresetSelectorProps) {
   if (isLoading) {
     return (
       <ButtonGroup className="w-full">
-        <Skeleton className="h-9 flex-1 rounded-md" />
+        <Skeleton className="h-9 flex-1 rounded-lg" />
         {readOnly ? (
           <Skeleton className="size-9 shrink-0" />
         ) : (

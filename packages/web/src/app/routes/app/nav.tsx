@@ -60,22 +60,20 @@ export function AppNav() {
   ];
 
   return (
-    <aside className="flex-none h-full p-2 pr-0">
-      <div className="flex flex-col items-center bg-sidebar p-2 gap-2 h-full border rounded-lg">
-        <div className="w-full aspect-square bg-primary grid place-items-center rounded-lg text-primary-foreground font-bold">
-          M
-        </div>
-        <Separator orientation="horizontal" />
-        <nav className="flex flex-col items-center gap-2 flex-1">
-          {navItems.map((item) => (
-            <SideNavItem key={item.to} {...item} />
-          ))}
-        </nav>
-        <Separator orientation="horizontal" />
-        <div className="flex flex-col items-center gap-2">
-          <ThemeToggle />
-          <UserButton size="icon" side="right" />
-        </div>
+    <aside className="flex-none flex flex-col items-center bg-sidebar p-2 gap-2 h-full border-r">
+      <div className="w-full aspect-square bg-primary grid place-items-center rounded-lg text-primary-foreground font-bold">
+        M
+      </div>
+      <Separator orientation="horizontal" />
+      <nav className="flex flex-col items-center gap-2 flex-1">
+        {navItems.map((item) => (
+          <SideNavItem key={item.to} {...item} />
+        ))}
+      </nav>
+      <Separator orientation="horizontal" />
+      <div className="flex flex-col items-center gap-2">
+        <ThemeToggle />
+        <UserButton size="icon" side="right" />
       </div>
     </aside>
   );

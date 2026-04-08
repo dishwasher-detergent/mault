@@ -8,10 +8,7 @@ import type {
   SliderKey,
 } from "@/features/calibration/types";
 import type { ModuleConfig, ServoCalibration } from "@magic-vault/shared";
-import {
-  IconLayoutAlignCenter,
-  IconRotateClockwise,
-} from "@tabler/icons-react";
+import { IconRotateClockwise } from "@tabler/icons-react";
 
 interface ServoControlProps {
   module: 1 | 2 | 3;
@@ -188,7 +185,6 @@ export function ModuleCalibrationGrid({
   onReset,
   onSliderChange,
   onSetPosition,
-  onCenter,
 }: ModuleCalibrationGridProps) {
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 rounded-lg border overflow-hidden">
@@ -199,17 +195,7 @@ export function ModuleCalibrationGrid({
             key={module}
             className="p-2 flex flex-col gap-5 border-b md:border-b-0 md:border-r last:border-0 bg-sidebar"
           >
-            <div className="flex items-center justify-between">
-              <h2 className="text-sm font-bold">Module {module}</h2>
-              <button
-                disabled={!isConnected}
-                onClick={() => onCenter(module)}
-                className="text-muted-foreground hover:text-foreground disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
-                title="Center all servos"
-              >
-                <IconLayoutAlignCenter size={14} />
-              </button>
-            </div>
+            <h2 className="text-sm font-bold font-heading">Module {module}</h2>
             {SERVOS.map((servo) => {
               const sliderKey = `${module}:${servo.name}` as SliderKey;
               return (

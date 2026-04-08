@@ -8,9 +8,22 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { cancelSync, createSyncEventSource, dumpCards, startSync } from "@/lib/api/admin";
+import { Input } from "@/components/ui/input";
+import {
+  cancelSync,
+  createSyncEventSource,
+  dumpCards,
+  listCards,
+  revectorizeCard,
+  startSync,
+} from "@/lib/api/admin";
 import type { SyncState } from "@magic-vault/shared";
-import { useMutation } from "@tanstack/react-query";
+import {
+  IconChevronLeft,
+  IconChevronRight,
+  IconRefresh,
+} from "@tabler/icons-react";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { DEFAULT_SYNC_STATE, STATUS_COLORS } from "./admin.constants";
@@ -19,6 +32,13 @@ export default function AdminPage() {
   const [syncState, setSyncState] = useState<SyncState>(DEFAULT_SYNC_STATE);
   const [dumpOpen, setDumpOpen] = useState(false);
   const logRef = useRef<HTMLDivElement>(null);
+  const [cardSearch, setCardSearch] = useState("");
+  const [cardSearchInput, setCardSearchInput] = useState("");
+  const [cardPage, setCardPage] = useState(1);
+  const searchDebounceRef = useRef<ReturnType<typeof setTimeout>>(null);
+  const [revectorizingIds, setRevectorizingIds] = useState<Set<string>>(
+    new Set(),
+  );
 
   useEffect(() => {
     let es: EventSource | null = null;
@@ -83,6 +103,42 @@ export default function AdminPage() {
     }
   }, [syncState.logs]);
 
+  const cardsQuery = useQuery({
+    queryKey: ["admin", "cards", cardPage, cardSearch],
+    queryFn: () => listCards(cardPage, cardSearch).then((r) => r.data),
+    staleTime: 30_000,
+  });
+
+  const totalPages = cardsQuery.data
+    ? Math.max(1, Math.ceil(cardsQuery.data.total / cardsQuery.data.limit))
+    : 1;
+
+  function handleSearchInput(value: string) {
+    setCardSearchInput(value);
+    if (searchDebounceRef.current) clearTimeout(searchDebounceRef.current);
+    searchDebounceRef.current = setTimeout(() => {
+      setCardSearch(value);
+      setCardPage(1);
+    }, 300);
+  }
+
+  async function handleRevectorize(scryfallId: string, name: string) {
+    setRevectorizingIds((prev) => new Set(prev).add(scryfallId));
+    try {
+      const result = await revectorizeCard(scryfallId);
+      toast.success(result.message);
+      cardsQuery.refetch();
+    } catch {
+      toast.error(`Failed to re-vectorize ${name}`);
+    } finally {
+      setRevectorizingIds((prev) => {
+        const next = new Set(prev);
+        next.delete(scryfallId);
+        return next;
+      });
+    }
+  }
+
   const startSyncMutation = useMutation({ mutationFn: startSync });
   const cancelSyncMutation = useMutation({ mutationFn: cancelSync });
   const dumpMutation = useMutation({
@@ -92,7 +148,9 @@ export default function AdminPage() {
       toast.success("Card database cleared");
     },
     onError: (err) => {
-      toast.error(err instanceof Error ? err.message : "Failed to dump database");
+      toast.error(
+        err instanceof Error ? err.message : "Failed to dump database",
+      );
     },
   });
 
@@ -185,6 +243,98 @@ export default function AdminPage() {
         </div>
       </div>
 
+      <div className="rounded-lg border mt-4 overflow-hidden flex flex-col flex-none h-96">
+        <div className="px-4 py-3 border-b flex items-center justify-between gap-3">
+          <div className="flex items-center gap-2 min-w-0">
+            <p className="text-sm font-medium shrink-0">Card Database</p>
+            {cardsQuery.data && (
+              <p className="text-xs text-muted-foreground tabular-nums">
+                {cardsQuery.data.total.toLocaleString()} cards
+              </p>
+            )}
+          </div>
+          <Input
+            placeholder="Search by name..."
+            value={cardSearchInput}
+            onChange={(e) => handleSearchInput(e.target.value)}
+            className="h-7 text-xs max-w-48"
+          />
+        </div>
+
+        <div className="divide-y min-h-0 overflow-y-auto">
+          {cardsQuery.isLoading && (
+            <p className="text-xs text-muted-foreground text-center py-6">
+              Loading...
+            </p>
+          )}
+          {cardsQuery.isError && (
+            <p className="text-xs text-destructive text-center py-6">
+              Failed to load cards
+            </p>
+          )}
+          {cardsQuery.data?.cards.map((card) => (
+            <div
+              key={card.scryfallId}
+              className="flex items-center gap-3 px-4 py-2"
+            >
+              <p className="text-xs font-medium flex-1 min-w-0 truncate">
+                {card.name}
+              </p>
+              <p className="text-xs text-muted-foreground uppercase font-mono shrink-0">
+                {card.setCode}
+              </p>
+              <p className="text-xs text-muted-foreground tabular-nums shrink-0 hidden sm:block">
+                {new Date(card.updatedAt).toLocaleDateString()}
+              </p>
+              <Button
+                size="icon-sm"
+                variant="ghost"
+                disabled={revectorizingIds.has(card.scryfallId)}
+                onClick={() => handleRevectorize(card.scryfallId, card.name)}
+                title="Re-vectorize"
+              >
+                <IconRefresh
+                  className={
+                    revectorizingIds.has(card.scryfallId) ? "animate-spin" : ""
+                  }
+                />
+              </Button>
+            </div>
+          ))}
+          {cardsQuery.data?.cards.length === 0 && (
+            <p className="text-xs text-muted-foreground text-center py-6">
+              No cards found
+            </p>
+          )}
+        </div>
+
+        {cardsQuery.data && totalPages > 1 && (
+          <div className="border-t px-4 py-2 flex items-center justify-between">
+            <p className="text-xs text-muted-foreground">
+              Page {cardPage} of {totalPages}
+            </p>
+            <div className="flex gap-1">
+              <Button
+                size="icon-sm"
+                variant="ghost"
+                disabled={cardPage <= 1}
+                onClick={() => setCardPage((p) => p - 1)}
+              >
+                <IconChevronLeft />
+              </Button>
+              <Button
+                size="icon-sm"
+                variant="ghost"
+                disabled={cardPage >= totalPages}
+                onClick={() => setCardPage((p) => p + 1)}
+              >
+                <IconChevronRight />
+              </Button>
+            </div>
+          </div>
+        )}
+      </div>
+
       <div className="rounded-lg border p-4 flex items-center justify-between mt-4">
         <div className="flex flex-col gap-0.5">
           <p className="text-sm font-medium">Dump Card Database</p>
@@ -193,7 +343,9 @@ export default function AdminPage() {
           </p>
         </div>
         <Dialog open={dumpOpen} onOpenChange={setDumpOpen}>
-          <DialogTrigger render={<Button variant="destructive" disabled={isRunning} />}>
+          <DialogTrigger
+            render={<Button variant="destructive" disabled={isRunning} />}
+          >
             Dump
           </DialogTrigger>
           <DialogContent showCloseButton={false}>

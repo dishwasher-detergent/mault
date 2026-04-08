@@ -27,7 +27,9 @@ export function BinCard({ config, active, onClick }: BinCardProps) {
       onClick={onClick}
     >
       <div className="flex flex-row justify-between gap-2 items-center w-full">
-        <p className="font-medium text-sm">Bin {config.binNumber}</p>
+        <p className="font-medium text-sm font-heading">
+          Bin {config.binNumber}
+        </p>
         {config.isCatchAll ? (
           <Badge variant="default">Catch-all</Badge>
         ) : (

@@ -18,11 +18,13 @@ export default function AppLayout() {
           <AppNav />
         </div>
       ) : (
-        <div className="h-dvh w-dvw overflow-hidden flex flex-row bg-muted">
-          <AppNav />
-          <main className="flex-1 min-w-0 overflow-hidden flex flex-col m-2 border rounded-lg bg-background">
-            <Outlet />
-          </main>
+        <div className="h-dvh w-dvw overflow-hidden p-2 bg-muted dark:bg-black">
+          <div className="flex flex-row bg-background border rounded-lg size-full overflow-hidden">
+            <AppNav />
+            <main className="flex-1 min-w-0 overflow-hidden flex flex-col">
+              <Outlet />
+            </main>
+          </div>
         </div>
       )}
       <SyncIndicator />

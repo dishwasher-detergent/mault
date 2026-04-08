@@ -1,4 +1,9 @@
 import { ButtonGroup } from "@/components/ui/button-group";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { useBinConfigs } from "@/features/bins/api/use-bin-configs";
 import { useCardScanner } from "@/features/scanner/api/use-card-scanner";
 import { useScannedCards } from "@/features/scanner/api/use-scanned-cards";
@@ -6,11 +11,6 @@ import { useSerial, useSerialMessage } from "@/features/scanner/api/use-serial";
 import { ScannerControls } from "@/features/scanner/components/scanner-controls";
 import { ScannerMenu } from "@/features/scanner/components/scanner-menu";
 import { ScannerOverlay } from "@/features/scanner/components/scanner-overlay";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
 import { useRole } from "@/hooks/use-role";
 import { cn } from "@/lib/utils";
 import type { CardScannerProps } from "@magic-vault/shared";
@@ -98,14 +98,18 @@ export function CardScanner({ className }: CardScannerProps) {
         />
         {isAdmin && debugImageUrl && (
           <Tooltip>
-            <TooltipTrigger className="absolute top-2 left-2 z-30 flex items-center justify-center size-7 rounded-md bg-background/70 text-foreground backdrop-blur-sm hover:bg-background/90 transition-colors">
+            <TooltipTrigger className="absolute top-2 left-2 z-30 flex items-center justify-center size-7 rounded-lg bg-background/70 text-foreground backdrop-blur-sm hover:bg-background/90 transition-colors">
               <IconEye size={16} />
             </TooltipTrigger>
             <TooltipContent
               side="right"
               className="bg-background text-foreground border border-border p-0 shadow-lg max-w-none"
             >
-              <img src={debugImageUrl} alt="Last search image" className="w-48" />
+              <img
+                src={debugImageUrl}
+                alt="Last search image"
+                className="w-48"
+              />
             </TooltipContent>
           </Tooltip>
         )}

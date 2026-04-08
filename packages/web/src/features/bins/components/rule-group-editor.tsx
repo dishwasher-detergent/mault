@@ -69,7 +69,7 @@ export function RuleGroupEditor({
 
   return (
     <div
-      className={`flex flex-col gap-2 ${depth > 0 ? "rounded-md border border-dashed p-2.5" : ""}`}
+      className={`flex flex-col gap-2 ${depth > 0 ? "rounded-lg border border-dashed p-2.5" : ""}`}
     >
       <div className="flex items-center gap-2">
         <ButtonGroup>
