@@ -1,5 +1,6 @@
 import { AppProviders } from "@/app/providers";
 import { AppNav } from "@/app/routes/app/nav";
+import { EnvBanner } from "@/components/env-banner";
 import { SyncIndicator } from "@/components/sync-indicator";
 import { Toaster } from "@/components/ui/sonner";
 import { useIsMobile } from "@/hooks/use-is-mobile";
@@ -13,6 +14,7 @@ export default function AppLayout() {
       {isMobile ? (
         <div className="h-dvh w-dvw overflow-hidden flex flex-col">
           <main className="flex-1 min-h-0 overflow-hidden flex flex-col">
+            <EnvBanner />
             <Outlet />
           </main>
           <AppNav />
@@ -22,6 +24,7 @@ export default function AppLayout() {
           <div className="flex flex-row bg-background border rounded-lg size-full overflow-hidden">
             <AppNav />
             <main className="flex-1 min-w-0 overflow-hidden flex flex-col">
+              <EnvBanner />
               <Outlet />
             </main>
           </div>
