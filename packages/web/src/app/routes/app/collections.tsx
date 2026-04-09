@@ -36,8 +36,14 @@ export default function CollectionsPage() {
   const { isLoading } = useQuery(collectionsQueryOptions);
 
   const [createOpen, setCreateOpen] = useState(false);
-  const [renameTarget, setRenameTarget] = useState<{ guid: string; name: string } | null>(null);
-  const [deleteTarget, setDeleteTarget] = useState<{ guid: string; name: string } | null>(null);
+  const [renameTarget, setRenameTarget] = useState<{
+    guid: string;
+    name: string;
+  } | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<{
+    guid: string;
+    name: string;
+  } | null>(null);
 
   const createForm = useForm<CreateCollectionFormValues>({
     resolver: zodResolver(createCollectionSchema),
@@ -79,7 +85,7 @@ export default function CollectionsPage() {
     <div className="flex flex-col p-6 max-w-2xl mx-auto w-full gap-4">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-lg font-semibold">Collections</h1>
+          <h1 className="text-lg font-semibold font-heading">Collections</h1>
           <p className="text-xs text-muted-foreground">
             Organize scanned cards into named collections
           </p>
@@ -120,7 +126,9 @@ export default function CollectionsPage() {
               control={createForm.control}
               render={({ field, fieldState }) => (
                 <Field data-invalid={fieldState.invalid || undefined}>
-                  <FieldLabel htmlFor="new-collection-name">Collection name</FieldLabel>
+                  <FieldLabel htmlFor="new-collection-name">
+                    Collection name
+                  </FieldLabel>
                   <Input
                     {...field}
                     id="new-collection-name"
@@ -128,7 +136,9 @@ export default function CollectionsPage() {
                     aria-invalid={fieldState.invalid}
                     autoFocus
                   />
-                  {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+                  {fieldState.invalid && (
+                    <FieldError errors={[fieldState.error]} />
+                  )}
                 </Field>
               )}
             />
@@ -152,20 +162,32 @@ export default function CollectionsPage() {
           <div className="flex flex-col items-center justify-center py-16 gap-2 text-muted-foreground">
             <IconFolders className="size-8" />
             <p className="text-sm font-medium">No collections yet</p>
-            <p className="text-xs">Create a collection to start scanning cards</p>
+            <p className="text-xs">
+              Create a collection to start scanning cards
+            </p>
           </div>
         )}
 
         {collections.map((collection) => {
           const isActive = collection.guid === activeCollection?.guid;
           return (
-            <div key={collection.guid} className="flex items-center gap-3 px-4 py-3">
+            <div
+              key={collection.guid}
+              className="flex items-center gap-3 px-4 py-3"
+            >
               <button
                 type="button"
                 onClick={() => !isActive && activateCollection(collection.guid)}
                 disabled={isActivating || isActive}
                 className="size-8 rounded-md border flex items-center justify-center shrink-0 transition-colors disabled:cursor-default"
-                style={isActive ? { background: "var(--primary)", borderColor: "var(--primary)" } : {}}
+                style={
+                  isActive
+                    ? {
+                        background: "var(--primary)",
+                        borderColor: "var(--primary)",
+                      }
+                    : {}
+                }
                 title={isActive ? "Active collection" : "Set as active"}
               >
                 {isActive ? (
@@ -176,9 +198,12 @@ export default function CollectionsPage() {
               </button>
 
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium truncate">{collection.name}</p>
+                <p className="text-sm font-medium truncate">
+                  {collection.name}
+                </p>
                 <p className="text-xs text-muted-foreground">
-                  {collection.cardCount} {collection.cardCount === 1 ? "card" : "cards"} ·{" "}
+                  {collection.cardCount}{" "}
+                  {collection.cardCount === 1 ? "card" : "cards"} ·{" "}
                   {new Date(collection.createdAt).toLocaleDateString()}
                 </p>
               </div>
@@ -190,16 +215,24 @@ export default function CollectionsPage() {
                   disabled={isMutating}
                   onClick={() => {
                     renameForm.reset({ name: collection.name });
-                    setRenameTarget({ guid: collection.guid, name: collection.name });
+                    setRenameTarget({
+                      guid: collection.guid,
+                      name: collection.name,
+                    });
                   }}
                 >
                   <IconEdit />
                 </Button>
                 <Button
-                  variant="ghost"
+                  variant="destructive"
                   size="icon-sm"
                   disabled={isMutating}
-                  onClick={() => setDeleteTarget({ guid: collection.guid, name: collection.name })}
+                  onClick={() =>
+                    setDeleteTarget({
+                      guid: collection.guid,
+                      name: collection.name,
+                    })
+                  }
                 >
                   <IconTrash className="text-destructive" />
                 </Button>
@@ -212,7 +245,9 @@ export default function CollectionsPage() {
       {/* Rename dialog */}
       <DynamicDialog
         open={!!renameTarget}
-        onOpenChange={(open) => { if (!open) setRenameTarget(null); }}
+        onOpenChange={(open) => {
+          if (!open) setRenameTarget(null);
+        }}
         title="Rename Collection"
         description="Enter a new name for this collection."
         trigger={<span />}
@@ -238,14 +273,18 @@ export default function CollectionsPage() {
             control={renameForm.control}
             render={({ field, fieldState }) => (
               <Field data-invalid={fieldState.invalid || undefined}>
-                <FieldLabel htmlFor="rename-collection-name">Collection name</FieldLabel>
+                <FieldLabel htmlFor="rename-collection-name">
+                  Collection name
+                </FieldLabel>
                 <Input
                   {...field}
                   id="rename-collection-name"
                   aria-invalid={fieldState.invalid}
                   autoFocus
                 />
-                {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+                {fieldState.invalid && (
+                  <FieldError errors={[fieldState.error]} />
+                )}
               </Field>
             )}
           />
@@ -255,7 +294,9 @@ export default function CollectionsPage() {
       {/* Delete dialog */}
       <DynamicDialog
         open={!!deleteTarget}
-        onOpenChange={(open) => { if (!open) setDeleteTarget(null); }}
+        onOpenChange={(open) => {
+          if (!open) setDeleteTarget(null);
+        }}
         title="Delete Collection"
         description={`Are you sure you want to delete "${deleteTarget?.name}"? All ${deleteTarget?.name ? "cards in this collection" : "cards"} will also be deleted. This cannot be undone.`}
         trigger={<span />}
