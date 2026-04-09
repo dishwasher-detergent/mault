@@ -12,10 +12,15 @@ import { useCardFilterSort } from "@/features/cards/api/use-card-filter-sort";
 import { CardToolbar } from "@/features/cards/components/card-toolbar";
 import { ScannedCardItem } from "@/features/cards/components/scanned-card-item";
 import { exportToManabox } from "@/features/cards/lib/export-manabox";
+import { useCollections } from "@/features/collections/api/use-collections";
 import { useScannedCards } from "@/features/scanner/api/use-scanned-cards";
+
+import { IconFolders } from "@tabler/icons-react";
 import { useCallback, useState } from "react";
+import { Link } from "react-router-dom";
 
 export function CardGrid() {
+  const { activeCollection, deleteCollection, isLoading: collectionsLoading } = useCollections();
   const { cards, removeCard, removeCards, clearCards, isLoading } =
     useScannedCards();
   const {
@@ -48,6 +53,12 @@ export function CardGrid() {
     exportToManabox(cards);
   }, [cards]);
 
+  const handleExportAndDelete = useCallback(async () => {
+    if (activeCollection) {
+      await deleteCollection(activeCollection.guid);
+    }
+  }, [activeCollection, deleteCollection]);
+
   if (isLoading) {
     return (
       <div className="grid grid-cols-2 @sm:grid-cols-3 @md:grid-cols-2 @lg:grid-cols-3 @xl:grid-cols-4 @2xl:grid-cols-6 gap-2 p-2">
@@ -61,6 +72,21 @@ export function CardGrid() {
             </div>
           </div>
         ))}
+      </div>
+    );
+  }
+
+  if (!collectionsLoading && !activeCollection) {
+    return (
+      <div className="flex flex-col items-center justify-center py-16 gap-3 text-muted-foreground">
+        <IconFolders className="size-10" />
+        <div className="text-center">
+          <p className="text-sm font-medium">No collection selected</p>
+          <p className="text-xs">Create or select a collection to start scanning</p>
+        </div>
+        <Button variant="outline" size="sm" asChild>
+          <Link to="/app/collections">Manage Collections</Link>
+        </Button>
       </div>
     );
   }
@@ -83,6 +109,8 @@ export function CardGrid() {
           sortKey={sortKey}
           onSortChange={setSortKey}
           onExport={handleExport}
+          onExportAndDelete={activeCollection ? handleExportAndDelete : undefined}
+          collectionName={activeCollection?.name}
           onClearAll={clearCards}
           hasCards={filteredAndSorted.length > 0}
         />

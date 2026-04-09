@@ -156,6 +156,56 @@ export const feederConfigs = pgTable(
   ],
 ).enableRLS();
 
+export const collections = pgTable(
+  "collections",
+  {
+    id: serial().primaryKey(),
+    guid: uuid("guid").defaultRandom(),
+    name: text("name").notNull(),
+    isActive: boolean("is_active").notNull().default(false),
+    userId: text("user_id")
+      .notNull()
+      .default(sql`auth.user_id()`),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+    updatedAt: timestamp("updated_at").defaultNow().notNull(),
+  },
+  (table) => [
+    unique("collections_guid_idx").on(table.guid),
+    crudPolicy({
+      role: authenticatedRole,
+      read: authUid(table.userId),
+      modify: authUid(table.userId),
+    }),
+  ],
+).enableRLS();
+
+export const collectionCards = pgTable(
+  "collection_cards",
+  {
+    id: serial().primaryKey(),
+    guid: uuid("guid").defaultRandom(),
+    collectionId: integer("collection_id")
+      .notNull()
+      .references(() => collections.id, { onDelete: "cascade" }),
+    scryfallId: text("scryfall_id").notNull(),
+    card: jsonb("card").notNull(),
+    scannedAt: timestamp("scanned_at").notNull(),
+    binNumber: integer("bin_number"),
+    userId: text("user_id")
+      .notNull()
+      .default(sql`auth.user_id()`),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+  },
+  (table) => [
+    unique("collection_cards_guid_idx").on(table.guid),
+    crudPolicy({
+      role: authenticatedRole,
+      read: authUid(table.userId),
+      modify: authUid(table.userId),
+    }),
+  ],
+).enableRLS();
+
 export const binSetRelations = relations(binSets, ({ many }) => ({
   bins: many(bins),
 }));
@@ -164,5 +214,16 @@ export const binRelations = relations(bins, ({ one }) => ({
   binSet: one(binSets, {
     fields: [bins.binSet],
     references: [binSets.id],
+  }),
+}));
+
+export const collectionRelations = relations(collections, ({ many }) => ({
+  cards: many(collectionCards),
+}));
+
+export const collectionCardsRelations = relations(collectionCards, ({ one }) => ({
+  collection: one(collections, {
+    fields: [collectionCards.collectionId],
+    references: [collections.id],
   }),
 }));

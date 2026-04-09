@@ -2,6 +2,7 @@ import AccountPage from "@/app/routes/app/account";
 import AdminPage from "@/app/routes/app/admin";
 import BinsPage from "@/app/routes/app/bins";
 import CalibratePage from "@/app/routes/app/calibrate";
+import CollectionsPage from "@/app/routes/app/collections";
 import ScannerPage from "@/app/routes/app/index";
 import AppLayout from "@/app/routes/app/layout";
 import AuthPage from "@/app/routes/auth";
@@ -46,6 +47,10 @@ export const router = createBrowserRouter([
           {
             path: "/app",
             element: <ScannerPage />,
+          },
+          {
+            path: "/app/collections",
+            element: <CollectionsPage />,
           },
           {
             path: "/app/bins",

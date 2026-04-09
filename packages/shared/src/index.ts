@@ -1,5 +1,6 @@
 // Interfaces
 export * from "./interfaces/api.interface";
+export * from "./interfaces/collections.interface";
 export * from "./interfaces/bulk-import.interface";
 export * from "./interfaces/module-configs.interface";
 export * from "./interfaces/result.interface";

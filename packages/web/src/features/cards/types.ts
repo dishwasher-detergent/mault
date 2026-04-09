@@ -16,6 +16,8 @@ export interface CardToolbarProps {
   sortKey: string | null;
   onSortChange: (key: string | null) => void;
   onExport: () => void;
+  onExportAndDelete?: () => Promise<void>;
+  collectionName?: string;
   onClearAll: () => void;
   hasCards: boolean;
 }

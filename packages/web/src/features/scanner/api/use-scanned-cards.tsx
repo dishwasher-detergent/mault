@@ -7,17 +7,19 @@ import {
 } from "@magic-vault/shared";
 
 import { useBinConfigs } from "@/features/bins/api/use-bin-configs";
+import {
+  addCollectionCard,
+  clearCollectionCards,
+  loadCollectionCards,
+  removeCollectionCard,
+  removeCollectionCards,
+  updateCollectionCard,
+} from "@/features/collections/api/collections";
+import { useCollections } from "@/features/collections/api/use-collections";
 import { useSerial } from "@/features/scanner/api/use-serial";
 import { toast } from "sonner";
 import type { ScannedCardsContextValue } from "@/features/scanner/types";
-import {
-  clearCards as dbClearCards,
-  removeCard as dbRemoveCard,
-  updateCard as dbUpdateCard,
-  generateScanId,
-  getAllCards,
-  putCard,
-} from "@/lib/idb";
+import { generateScanId } from "@/lib/idb";
 import {
   createContext,
   useCallback,
@@ -27,9 +29,7 @@ import {
   useState,
 } from "react";
 
-const ScannedCardsContext = createContext<ScannedCardsContextValue | null>(
-  null,
-);
+const ScannedCardsContext = createContext<ScannedCardsContextValue | null>(null);
 
 export function ScannedCardsProvider({
   children,
@@ -40,8 +40,11 @@ export function ScannedCardsProvider({
   const [isLoading, setIsLoading] = useState(true);
   const { configs: binConfigs } = useBinConfigs();
   const { sendBin, isConnected, isReady } = useSerial();
+  const { activeCollection } = useCollections();
+
   const binConfigsRef = useRef(binConfigs);
   const serialRef = useRef({ sendBin, isConnected, isReady });
+  const activeCollectionRef = useRef(activeCollection);
 
   useEffect(() => {
     binConfigsRef.current = binConfigs;
@@ -52,28 +55,46 @@ export function ScannedCardsProvider({
   }, [sendBin, isConnected, isReady]);
 
   useEffect(() => {
+    activeCollectionRef.current = activeCollection;
+  }, [activeCollection]);
+
+  // Reload cards when active collection changes
+  useEffect(() => {
+    if (!activeCollection) {
+      setCards([]);
+      setIsLoading(false);
+      return;
+    }
+
     let cancelled = false;
-    getAllCards()
-      .then((records) => {
-        if (!cancelled) {
-          setCards(records);
-        }
+    setCards([]);
+    setIsLoading(true);
+
+    loadCollectionCards(activeCollection.guid)
+      .then((r) => {
+        if (!cancelled) setCards(r.data ?? []);
       })
       .catch((err) => {
-        console.error("Failed to load cards from IndexedDB:", err);
+        if (!cancelled) console.error("Failed to load collection cards:", err);
       })
       .finally(() => {
-        if (!cancelled) {
-          setIsLoading(false);
-        }
+        if (!cancelled) setIsLoading(false);
       });
 
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [activeCollection?.guid]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const addCard = useCallback((card: ScryfallCardWithDistance) => {
+    const collection = activeCollectionRef.current;
+    if (!collection) {
+      toast.error("No collection selected", {
+        description: "Create or select a collection before scanning.",
+      });
+      return;
+    }
+
     const matchedBin = evaluateCardBin(card, binConfigsRef.current);
     const record: ScannedCard = {
       scanId: generateScanId(),
@@ -81,8 +102,12 @@ export function ScannedCardsProvider({
       scannedAt: Date.now(),
       binNumber: matchedBin?.binNumber,
     };
+
+    // Optimistic update
     setCards((prev) => [record, ...prev]);
-    putCard(record).catch((err) =>
+
+    // Persist to server (fire-and-forget)
+    addCollectionCard(collection.guid, record).catch((err) =>
       console.error("Failed to persist card:", err),
     );
 
@@ -111,21 +136,28 @@ export function ScannedCardsProvider({
   }, []);
 
   const removeCard = useCallback((scanId: string) => {
+    const collection = activeCollectionRef.current;
     setCards((prev) => prev.filter((entry) => entry.scanId !== scanId));
-    dbRemoveCard(scanId).catch((err) =>
-      console.error("Failed to remove card from IndexedDB:", err),
-    );
+    if (collection) {
+      removeCollectionCard(collection.guid, scanId).catch((err) =>
+        console.error("Failed to remove card:", err),
+      );
+    }
   }, []);
 
   const removeCards = useCallback((scanIds: string[]) => {
+    const collection = activeCollectionRef.current;
     const idSet = new Set(scanIds);
     setCards((prev) => prev.filter((entry) => !idSet.has(entry.scanId)));
-    Promise.all(scanIds.map((id) => dbRemoveCard(id))).catch((err) =>
-      console.error("Failed to remove cards from IndexedDB:", err),
-    );
+    if (collection) {
+      removeCollectionCards(collection.guid, scanIds).catch((err) =>
+        console.error("Failed to remove cards:", err),
+      );
+    }
   }, []);
 
   const correctCard = useCallback((scanId: string, card: ScryfallCard) => {
+    const collection = activeCollectionRef.current;
     const corrected: ScryfallCardWithDistance = { ...card, distance: 0 };
     const matchedBin = evaluateCardBin(corrected, binConfigsRef.current);
     setCards((prev) =>
@@ -135,16 +167,21 @@ export function ScannedCardsProvider({
           : entry,
       ),
     );
-    dbUpdateCard(scanId, corrected).catch((err) =>
-      console.error("Failed to update card in IndexedDB:", err),
-    );
+    if (collection) {
+      updateCollectionCard(collection.guid, scanId, corrected, matchedBin?.binNumber).catch(
+        (err) => console.error("Failed to update card:", err),
+      );
+    }
   }, []);
 
   const clearCards = useCallback(() => {
+    const collection = activeCollectionRef.current;
     setCards([]);
-    dbClearCards().catch((err) =>
-      console.error("Failed to clear cards from IndexedDB:", err),
-    );
+    if (collection) {
+      clearCollectionCards(collection.guid).catch((err) =>
+        console.error("Failed to clear cards:", err),
+      );
+    }
   }, []);
 
   return (
