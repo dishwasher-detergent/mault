@@ -27,7 +27,7 @@ export function EnvBanner({ className }: { className?: string }) {
 
   return (
     <div
-      className={`w-full py-0.5 text-center text-[11px] font-semibold tracking-widest uppercase select-none ${colorClass} ${className ?? ""}`}
+      className={`rounded-full px-2 py-0.5 text-center text-[11px] font-semibold tracking-widest uppercase select-none ${colorClass} ${className ?? ""}`}
     >
       {label} Environment
     </div>

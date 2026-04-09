@@ -14,19 +14,21 @@ export default function AppLayout() {
       {isMobile ? (
         <div className="h-dvh w-dvw overflow-hidden flex flex-col">
           <main className="flex-1 min-h-0 overflow-hidden flex flex-col">
-            <EnvBanner />
             <Outlet />
           </main>
           <AppNav />
         </div>
       ) : (
-        <div className="h-dvh w-dvw overflow-hidden p-2 bg-muted dark:bg-black">
+        <div className="h-dvh w-dvw overflow-hidden p-2 pb-6 bg-muted dark:bg-black relative">
           <div className="flex flex-row bg-background border rounded-lg size-full overflow-hidden">
             <AppNav />
             <main className="flex-1 min-w-0 overflow-hidden flex flex-col">
-              <EnvBanner />
               <Outlet />
             </main>
+          </div>
+          <div className="absolute bottom-0 left-0 px-4 text-xs h-6 flex items-center justify-between w-full">
+            <EnvBanner />
+            <p className="text-muted-foreground">v{__APP_VERSION__}</p>
           </div>
         </div>
       )}

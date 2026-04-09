@@ -63,9 +63,12 @@ export function AppNav() {
 
   return (
     <aside className="flex-none flex flex-col items-center bg-sidebar p-2 gap-2 h-full border-r">
-      <div className="w-full aspect-square bg-primary grid place-items-center rounded-lg text-primary-foreground font-bold">
-        M
-      </div>
+      <Tooltip>
+        <TooltipTrigger className="w-full aspect-square bg-primary grid place-items-center rounded-lg text-primary-foreground font-bold cursor-default">
+          M
+        </TooltipTrigger>
+        <TooltipContent side="right">v{__APP_VERSION__}</TooltipContent>
+      </Tooltip>
       <Separator orientation="horizontal" />
       <nav className="flex flex-col items-center gap-2 flex-1">
         {navItems.map((item) => (
