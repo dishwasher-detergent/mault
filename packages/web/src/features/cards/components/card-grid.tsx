@@ -20,7 +20,11 @@ import { useCallback, useState } from "react";
 import { Link } from "react-router-dom";
 
 export function CardGrid() {
-  const { activeCollection, deleteCollection, isLoading: collectionsLoading } = useCollections();
+  const {
+    activeCollection,
+    deleteCollection,
+    isLoading: collectionsLoading,
+  } = useCollections();
   const { cards, removeCard, removeCards, clearCards, isLoading } =
     useScannedCards();
   const {
@@ -82,11 +86,15 @@ export function CardGrid() {
         <IconFolders className="size-10" />
         <div className="text-center">
           <p className="text-sm font-medium">No collection selected</p>
-          <p className="text-xs">Create or select a collection to start scanning</p>
+          <p className="text-xs">
+            Create or select a collection to start scanning
+          </p>
         </div>
-        <Button variant="outline" size="sm" asChild>
-          <Link to="/app/collections">Manage Collections</Link>
-        </Button>
+        <Button
+          variant="outline"
+          size="sm"
+          render={<Link to="/app/collections">Manage Collections</Link>}
+        ></Button>
       </div>
     );
   }
@@ -109,7 +117,9 @@ export function CardGrid() {
           sortKey={sortKey}
           onSortChange={setSortKey}
           onExport={handleExport}
-          onExportAndDelete={activeCollection ? handleExportAndDelete : undefined}
+          onExportAndDelete={
+            activeCollection ? handleExportAndDelete : undefined
+          }
           collectionName={activeCollection?.name}
           onClearAll={clearCards}
           hasCards={filteredAndSorted.length > 0}
