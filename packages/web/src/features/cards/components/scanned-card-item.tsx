@@ -4,6 +4,7 @@ import { CardSelectDialog } from "@/features/cards/components/card-select-dialog
 import type { ScannedCardItemProps } from "@/features/cards/types";
 import { cn } from "@/lib/utils";
 import { IconCheck } from "@tabler/icons-react";
+import { motion } from "framer-motion";
 import { memo } from "react";
 
 export const ScannedCardItem = memo(function ScannedCardItem({
@@ -13,14 +14,42 @@ export const ScannedCardItem = memo(function ScannedCardItem({
   binNumber,
   isSelected = false,
   onToggleSelect,
+  isNew = false,
 }: ScannedCardItemProps) {
   return (
-    <div
+    <motion.div
+      layout
+      initial={
+        isNew
+          ? { opacity: 0, scale: 0.6, rotateY: -25, y: -20 }
+          : { opacity: 0, scale: 0.95 }
+      }
+      animate={{ opacity: 1, scale: 1, rotateY: 0, y: 0 }}
+      exit={{ opacity: 0, scale: 0.85, transition: { duration: 0.15 } }}
+      transition={
+        isNew
+          ? { type: "spring", stiffness: 280, damping: 22, mass: 0.8 }
+          : { duration: 0.18, ease: "easeOut" }
+      }
+      style={{ transformPerspective: 800 }}
       className={cn(
         "relative rounded-lg p-1 bg-muted border transition-shadow",
         isSelected && "ring-2 ring-primary ring-offset-1",
       )}
     >
+      {isNew && (
+        <motion.div
+          className="absolute inset-0 rounded-lg pointer-events-none z-40"
+          initial={{ opacity: 1 }}
+          animate={{ opacity: 0 }}
+          transition={{ duration: 0.9, delay: 0.15, ease: "easeOut" }}
+          style={{
+            background:
+              "radial-gradient(ellipse at 50% 30%, oklch(0.85 0.18 80 / 0.55) 0%, oklch(0.7 0.22 45 / 0.3) 40%, transparent 70%)",
+            boxShadow: "0 0 24px 4px oklch(0.8 0.2 70 / 0.5)",
+          }}
+        />
+      )}
       <CardSelectDialog
         scanId={scanId}
         onRemove={onRemove}
@@ -77,6 +106,6 @@ export const ScannedCardItem = memo(function ScannedCardItem({
           </p>
         </div>
       </div>
-    </div>
+    </motion.div>
   );
 });

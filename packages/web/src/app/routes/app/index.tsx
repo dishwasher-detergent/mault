@@ -2,6 +2,7 @@ import { PresetSelector } from "@/features/bins/components/preset-selector";
 import { CardGrid } from "@/features/cards/components/card-grid";
 import { CollectionSwitcher } from "@/features/collections/components/collection-switcher";
 import { CardScanner } from "@/features/scanner/components/card-scanner";
+import { ScannerDebug } from "@/features/scanner/components/scanner-debug";
 import { ScanStats } from "@/features/scanner/components/scan-stats";
 
 export default function App() {
@@ -11,6 +12,7 @@ export default function App() {
         <CollectionSwitcher />
         <PresetSelector readOnly />
         <CardScanner className="flex-none" />
+        <ScannerDebug />
         <ScanStats />
       </section>
       <section className="col-span-7 md:col-span-7 lg:col-span-8 xl:col-span-9 2xl:col-span-10 3xl:col-span-11 overflow-y-auto h-full @container">

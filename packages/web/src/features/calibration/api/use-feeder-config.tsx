@@ -30,7 +30,7 @@ export function FeederConfigProvider({
   children: React.ReactNode;
 }) {
   const queryClient = useQueryClient();
-  const { sendCommand, registerPreTestHook } = useSerial();
+  const { sendCommand, receiveResponse, registerPreTestHook } = useSerial();
 
   const { data: feederConfig = { ...DEFAULT_FEEDER_CALIBRATION } } =
     useQuery(feederQueryOptions);
@@ -38,9 +38,11 @@ export function FeederConfigProvider({
   useEffect(() => {
     registerPreTestHook(async () => {
       const fresh = await queryClient.fetchQuery(feederQueryOptions);
+      const p = receiveResponse();
       await sendCommand(JSON.stringify({ setFeederConfig: fresh }));
+      await p;
     });
-  }, [registerPreTestHook, queryClient, sendCommand]);
+  }, [registerPreTestHook, queryClient, sendCommand, receiveResponse]);
 
   const saveConfigMutation = useMutation({
     mutationFn: (calibration: FeederCalibration) =>

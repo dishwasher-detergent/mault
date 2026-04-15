@@ -45,6 +45,7 @@ export interface SerialContextValue {
   sendBin: (binNumber: number) => Promise<unknown | null>;
   sendTest: () => Promise<boolean>;
   sendCommand: (data: string) => Promise<boolean>;
+  receiveResponse: (timeoutMs?: number) => Promise<string>;
   subscribe: (listener: SerialMessageListener) => () => void;
   registerPreTestHook: (fn: () => Promise<void>) => void;
 }

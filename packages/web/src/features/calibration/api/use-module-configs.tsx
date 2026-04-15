@@ -30,7 +30,7 @@ export function ModuleConfigsProvider({
   children: React.ReactNode;
 }) {
   const queryClient = useQueryClient();
-  const { sendCommand, registerPreTestHook } = useSerial();
+  const { sendCommand, receiveResponse, registerPreTestHook } = useSerial();
 
   const { data: configs = defaultConfigs() } = useQuery(modulesQueryOptions);
 
@@ -38,14 +38,16 @@ export function ModuleConfigsProvider({
     registerPreTestHook(async () => {
       const fresh = await queryClient.fetchQuery(modulesQueryOptions);
       for (const config of fresh) {
+        const p = receiveResponse();
         await sendCommand(
           JSON.stringify({
             setConfig: { module: config.moduleNumber, ...config.calibration },
           }),
         );
+        await p;
       }
     });
-  }, [registerPreTestHook, queryClient, sendCommand]);
+  }, [registerPreTestHook, queryClient, sendCommand, receiveResponse]);
 
   const saveConfigMutation = useMutation({
     mutationFn: ({

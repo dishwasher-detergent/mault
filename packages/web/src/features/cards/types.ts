@@ -29,4 +29,5 @@ export interface ScannedCardItemProps {
   binNumber?: number;
   isSelected?: boolean;
   onToggleSelect?: () => void;
+  isNew?: boolean;
 }

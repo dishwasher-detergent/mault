@@ -16,7 +16,8 @@ import { useCollections } from "@/features/collections/api/use-collections";
 import { useScannedCards } from "@/features/scanner/api/use-scanned-cards";
 
 import { IconFolders } from "@tabler/icons-react";
-import { useCallback, useState } from "react";
+import { AnimatePresence } from "framer-motion";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 
 export function CardGrid() {
@@ -37,6 +38,18 @@ export function CardGrid() {
 
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [confirmOpen, setConfirmOpen] = useState(false);
+  const [newestScanId, setNewestScanId] = useState<string | null>(null);
+  const prevCardCountRef = useRef(cards.length);
+
+  useEffect(() => {
+    if (cards.length > prevCardCountRef.current && cards.length > 0) {
+      setNewestScanId(cards[0].scanId);
+      const timer = setTimeout(() => setNewestScanId(null), 1200);
+      prevCardCountRef.current = cards.length;
+      return () => clearTimeout(timer);
+    }
+    prevCardCountRef.current = cards.length;
+  }, [cards]);
 
   const toggleSelect = useCallback((scanId: string) => {
     setSelectedIds((prev) => {
@@ -132,17 +145,20 @@ export function CardGrid() {
         </div>
       )}
       <div className="grid grid-cols-3 @md:grid-cols-4 @4xl:grid-cols-6 @5xl:grid-cols-8 gap-2 p-4">
-        {filteredAndSorted.map((card) => (
-          <ScannedCardItem
-            key={card.scanId}
-            card={card.card}
-            scanId={card.scanId}
-            onRemove={() => removeCard(card.scanId)}
-            binNumber={card.binNumber}
-            isSelected={selectedIds.has(card.scanId)}
-            onToggleSelect={() => toggleSelect(card.scanId)}
-          />
-        ))}
+        <AnimatePresence initial={false}>
+          {filteredAndSorted.map((card) => (
+            <ScannedCardItem
+              key={card.scanId}
+              card={card.card}
+              scanId={card.scanId}
+              onRemove={() => removeCard(card.scanId)}
+              binNumber={card.binNumber}
+              isSelected={selectedIds.has(card.scanId)}
+              onToggleSelect={() => toggleSelect(card.scanId)}
+              isNew={card.scanId === newestScanId}
+            />
+          ))}
+        </AnimatePresence>
       </div>
 
       {selectedIds.size > 0 && (

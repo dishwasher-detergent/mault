@@ -105,6 +105,10 @@ void routeCard(int bin) {
     return;
   }
 
+  setServoPosition(FEEDER_CHANNEL, feederConfig.speed); 
+  delay(feederConfig.duration);
+  stopFeeder();
+
   if (bin == 7) {
     // Open bottom on all modules so the card passes through to the catch-all position
     for (int m = 1; m <= NUM_MODULES; m++) {

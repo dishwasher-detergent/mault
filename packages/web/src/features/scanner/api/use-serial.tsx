@@ -339,6 +339,7 @@ export function SerialProvider({ children }: { children: React.ReactNode }) {
         sendBin,
         sendTest,
         sendCommand: sendCommandWithNewline,
+        receiveResponse: (timeoutMs = 5000) => waitForLine(timeoutMs),
         subscribe,
         registerPreTestHook,
       }}
