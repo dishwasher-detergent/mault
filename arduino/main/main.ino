@@ -14,6 +14,28 @@ Adafruit_PWMServoDriver pwm = Adafruit_PWMServoDriver();
 #define MODULE_CHANNEL_OFFSET 4
 #define FEEDER_CHANNEL 13
 
+// IR sensor pins — one per module (active LOW: pin reads LOW when card is present)
+#define IR_PIN_MODULE1 2
+#define IR_PIN_MODULE2 3
+#define IR_PIN_MODULE3 4
+#define IR_TIMEOUT_MS  3000  // max ms to wait for a card before aborting
+
+int irPin(int module) {
+  if (module == 1) return IR_PIN_MODULE1;
+  if (module == 2) return IR_PIN_MODULE2;
+  return IR_PIN_MODULE3;
+}
+
+// Returns true when the IR sensor at 'module' detects a card within timeoutMs.
+bool waitForCard(int module, int timeoutMs = IR_TIMEOUT_MS) {
+  unsigned long start = millis();
+  while (digitalRead(irPin(module)) == HIGH) {
+    if (millis() - start > (unsigned long)timeoutMs) return false;
+    delay(5);
+  }
+  return true;
+}
+
 struct ModuleConfig {
   int bottomClosed, bottomOpen;
   int paddleClosed, paddleOpen;
@@ -27,14 +49,15 @@ ModuleConfig moduleConfig[NUM_MODULES] = {
 };
 
 struct FeederConfig {
-  int speed;     // PWM pulse for forward motion
-  int duration;  // milliseconds to run before auto-stopping
+  int speed;         // PWM pulse for forward motion
+  int duration;      // overall timeout (ms) — max total time before giving up
+  int pulseDuration; // ms to run the motor per pulse
+  int pauseDuration; // ms to pause between pulses (IR checked after each stop)
 };
 
-FeederConfig feederConfig = {400, 100};
+FeederConfig feederConfig = {400, 3000, 80, 50};
 
 // Routing delays (ms) — tune to match your hardware timing
-#define DELAY_PASS_MODULE  400  // time for card to drop through a pass-through module
 #define DELAY_CARD_ENTER   300  // time for card to settle after target bottom opens
 #define DELAY_PADDLE       150  // time for paddle to engage
 #define DELAY_PUSH         600  // time for pusher to complete its stroke
@@ -58,6 +81,21 @@ void setModuleNeutral(int module) {
 
 void stopFeeder() {
   pwm.setPin(FEEDER_CHANNEL, 0);  // cut PWM signal entirely to stop 360° servo
+}
+
+// Runs the feeder in short pulses, checking module 1 IR between each stop.
+// Stops as soon as a card is detected. Returns false if feederConfig.duration
+// elapses with no card detected.
+bool runFeeder() {
+  unsigned long start = millis();
+  while (millis() - start < (unsigned long)feederConfig.duration) {
+    setServoPosition(FEEDER_CHANNEL, feederConfig.speed);
+    delay(feederConfig.pulseDuration);
+    stopFeeder();
+    if (digitalRead(irPin(1)) == LOW) return true;
+    delay(feederConfig.pauseDuration);
+  }
+  return false;
 }
 
 void setAllNeutral() {
@@ -92,25 +130,28 @@ int getServoOffset(const char* servo) {
 }
 
 // Route a card to the given bin number (1–7).
-//   Bin 1: open module 1 side paddles, then push left
-//   Bin 2: open module 1 side paddles, then push right
-//   Bin 3: open module 1 bottom, then module 2 side paddles, then push left
-//   Bin 4: open module 1 bottom, then module 2 side paddles, then push right
-//   Bin 5: open module 1 + 2 bottoms, then module 3 side paddles, then push left
-//   Bin 6: open module 1 + 2 bottoms, then module 3 side paddles, then push right
-//   Bin 7: open all bottoms (catch-all)
+//   Bin 1: wait for card at module 1, open paddle, push left
+//   Bin 2: wait for card at module 1, open paddle, push right
+//   Bin 3: wait for card at module 1, open bottom → wait for module 2, push left
+//   Bin 4: wait for card at module 1, open bottom → wait for module 2, push right
+//   Bin 5: wait for m1, open bottom → wait for m2, open bottom → wait for m3, push left
+//   Bin 6: wait for m1, open bottom → wait for m2, open bottom → wait for m3, push right
+//   Bin 7: wait for card at module 1, open all bottoms (catch-all)
 void routeCard(int bin) {
   if (bin < 1 || bin > 7) {
     Serial.println("{\"error\":\"bin must be 1-7\"}");
     return;
   }
 
-  setServoPosition(FEEDER_CHANNEL, feederConfig.speed); 
-  delay(feederConfig.duration);
-  stopFeeder();
+  // Run feeder until module 1 IR detects the card (or timeout)
+  if (!runFeeder()) {
+    Serial.println("{\"error\":\"timeout: feeder did not deliver card to module 1\"}");
+    setAllNeutral();
+    return;
+  }
 
   if (bin == 7) {
-    // Open bottom on all modules so the card passes through to the catch-all position
+    // Open all bottoms so card passes through to the catch-all position
     for (int m = 1; m <= NUM_MODULES; m++) {
       setServoPosition(getChannel(m, 0), moduleConfig[m - 1].bottomOpen);
     }
@@ -119,7 +160,7 @@ void routeCard(int bin) {
     delay(200);
 
   } else if (bin <= 2) {
-    // Module 1: open paddle first, then push
+    // Module 1: open paddle, then push
     ModuleConfig& c = moduleConfig[0];
     setServoPosition(getChannel(1, 1), c.paddleOpen);
     delay(DELAY_PADDLE);
@@ -129,42 +170,51 @@ void routeCard(int bin) {
     delay(200);
 
   } else if (bin <= 4) {
-    // Bins 3-4: open module 1 bottom so card passes through, then use module 2 paddles + pusher
+    // Open module 1 bottom and wait for card to arrive at module 2
     bool pushLeft = (bin == 3);
-
-    // Pass through module 1
     setServoPosition(getChannel(1, 0), moduleConfig[0].bottomOpen);
-    delay(DELAY_PASS_MODULE);
 
-    // Engage module 2 side paddles and push
+    if (!waitForCard(2)) {
+      Serial.println("{\"error\":\"timeout: no card detected at module 2\"}");
+      setAllNeutral();
+      return;
+    }
+    delay(DELAY_CARD_ENTER);
+
     ModuleConfig& c2 = moduleConfig[1];
     setServoPosition(getChannel(2, 1), c2.paddleOpen);
     delay(DELAY_PADDLE);
     setServoPosition(getChannel(2, 2), pushLeft ? c2.pusherLeft : c2.pusherRight);
     delay(DELAY_PUSH);
-
-    // Reset involved modules
     setModuleNeutral(1);
     setModuleNeutral(2);
     delay(200);
 
   } else {
-    // Bins 5-6: open module 1+2 bottoms so card passes through, then use module 3 paddles + pusher
+    // Open module 1 bottom and wait for card at module 2, then open module 2 bottom
+    // and wait for card at module 3
     bool pushLeft = (bin == 5);
-
-    // Pass through modules 1 and 2
     setServoPosition(getChannel(1, 0), moduleConfig[0].bottomOpen);
-    setServoPosition(getChannel(2, 0), moduleConfig[1].bottomOpen);
-    delay(DELAY_PASS_MODULE * 2);
 
-    // Engage module 3 side paddles and push
+    if (!waitForCard(2)) {
+      Serial.println("{\"error\":\"timeout: no card detected at module 2\"}");
+      setAllNeutral();
+      return;
+    }
+    setServoPosition(getChannel(2, 0), moduleConfig[1].bottomOpen);
+
+    if (!waitForCard(3)) {
+      Serial.println("{\"error\":\"timeout: no card detected at module 3\"}");
+      setAllNeutral();
+      return;
+    }
+    delay(DELAY_CARD_ENTER);
+
     ModuleConfig& c3 = moduleConfig[2];
     setServoPosition(getChannel(3, 1), c3.paddleOpen);
     delay(DELAY_PADDLE);
     setServoPosition(getChannel(3, 2), pushLeft ? c3.pusherLeft : c3.pusherRight);
     delay(DELAY_PUSH);
-
-    // Reset involved modules
     setModuleNeutral(1);
     setModuleNeutral(2);
     setModuleNeutral(3);
@@ -210,9 +260,9 @@ void handleCommand(const String& json) {
     setAllNeutral();
     delay(200);
 
-    // Test feeder: spin forward for configured duration then stop
+    // Test feeder: spin briefly to verify motor movement (no card expected)
     setServoPosition(FEEDER_CHANNEL, feederConfig.speed);
-    delay(feederConfig.duration);
+    delay(500);
     stopFeeder();
     delay(200);
 
@@ -315,13 +365,12 @@ void handleCommand(const String& json) {
     return;
   }
 
-  // {"feeder": true} — run feeder forward for configured duration then stop
+  // {"feeder": true} — run feeder until module 1 IR detects a card (or timeout)
   if (doc["feeder"].is<bool>() && doc["feeder"].as<bool>()) {
-    setServoPosition(FEEDER_CHANNEL, feederConfig.speed);
-    delay(feederConfig.duration);
-    stopFeeder();
+    bool detected = runFeeder();
     JsonDocument res;
     res["status"] = "ok";
+    res["detected"] = detected;
     serializeJson(res, Serial);
     Serial.println();
     return;
@@ -347,14 +396,29 @@ void handleCommand(const String& json) {
     return;
   }
 
-  // {"setFeederConfig": {"speed": N, "duration": N}} — update feeder calibration
+  // {"setFeederConfig": {"speed": N, "duration": N, "pulseDuration": N, "pauseDuration": N}}
   if (!doc["setFeederConfig"].isNull()) {
     JsonObject cfg = doc["setFeederConfig"];
-    feederConfig.speed    = cfg["speed"]    | feederConfig.speed;
-    feederConfig.duration = cfg["duration"] | feederConfig.duration;
+    feederConfig.speed         = cfg["speed"]         | feederConfig.speed;
+    feederConfig.duration      = cfg["duration"]      | feederConfig.duration;
+    feederConfig.pulseDuration = cfg["pulseDuration"] | feederConfig.pulseDuration;
+    feederConfig.pauseDuration = cfg["pauseDuration"] | feederConfig.pauseDuration;
     stopFeeder();
     JsonDocument res;
     res["status"] = "ok";
+    serializeJson(res, Serial);
+    Serial.println();
+    return;
+  }
+
+  // {"readIR": true} — read current IR sensor state for all modules
+  if (doc["readIR"].is<bool>() && doc["readIR"].as<bool>()) {
+    JsonDocument res;
+    res["status"] = "ok";
+    JsonArray ir = res["ir"].to<JsonArray>();
+    for (int m = 1; m <= NUM_MODULES; m++) {
+      ir.add(digitalRead(irPin(m)) == LOW);  // true = card present
+    }
     serializeJson(res, Serial);
     Serial.println();
     return;
@@ -372,6 +436,12 @@ void handleCommand(const String& json) {
 void setup() {
   Serial.begin(9600);
   while (!Serial);
+
+  // IR sensors: active LOW (internal pull-up, sensor pulls LOW when card present)
+  pinMode(IR_PIN_MODULE1, INPUT_PULLUP);
+  pinMode(IR_PIN_MODULE2, INPUT_PULLUP);
+  pinMode(IR_PIN_MODULE3, INPUT_PULLUP);
+
   pwm.begin();
   pwm.setPWMFreq(50);
   delay(10);

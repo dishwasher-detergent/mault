@@ -26,9 +26,13 @@ export const DEFAULT_CALIBRATION: ServoCalibration = {
 export interface FeederCalibration {
   speed: number;
   duration: number;
+  pulseDuration: number;
+  pauseDuration: number;
 }
 
 export const DEFAULT_FEEDER_CALIBRATION: FeederCalibration = {
   speed: 400,
-  duration: 100,
+  duration: 3000,
+  pulseDuration: 80,
+  pauseDuration: 50,
 };

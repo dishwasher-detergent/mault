@@ -10,11 +10,11 @@ import type { ActivePositions, ServoConfig, SliderKey } from "@/features/calibra
 import { useSerial } from "@/features/scanner/api/use-serial";
 import type { ServoCalibration } from "@magic-vault/shared";
 import { useQuery } from "@tanstack/react-query";
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 
 export function useCalibrationPage() {
-  const { isConnected, connect, disconnect, sendCommand, sendBin, sendTest } =
+  const { isConnected, connect, disconnect, sendCommand, sendBin, sendTest, receiveResponse } =
     useSerial();
   const { configs, saveConfig, moveServo } = useModuleConfigs();
   const { feederConfig, saveConfig: saveFeeder, previewSpeed } = useFeederConfig();
@@ -39,11 +39,24 @@ export function useCalibrationPage() {
     4: false,
   });
 
-  const [activeBin, setActiveBin] = useState<number | null>(null);
+  const [activeBin, setActiveBinState] = useState<number | null>(null);
+  const activeBinRef = useRef<number | null>(null);
+  const setActiveBin = useCallback((v: number | null) => {
+    activeBinRef.current = v;
+    setActiveBinState(v);
+  }, []);
+
   const [isTesting, setIsTesting] = useState(false);
+  const [isSampleRunning, setIsSampleRunning] = useState(false);
+
+  const [irStates, setIrStates] = useState<boolean[] | null>(null);
+  const [irMonitoring, setIrMonitoring] = useState(false);
+  const irBusyRef = useRef(false);
 
   const [feederSpeedValue, setFeederSpeedValue] = useState(feederConfig.speed);
   const [feederDurationValue, setFeederDurationValue] = useState(feederConfig.duration);
+  const [feederPulseDurationValue, setFeederPulseDurationValue] = useState(feederConfig.pulseDuration);
+  const [feederPauseDurationValue, setFeederPauseDurationValue] = useState(feederConfig.pauseDuration);
   const feederDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const handleControl = useCallback(
@@ -124,8 +137,12 @@ export function useCalibrationPage() {
       try {
         const response = await sendBin(bin);
         if (!response) {
-          toast.error(`Bin ${bin} test failed`, {
+          toast.error(`Bin ${bin} failed`, {
             description: "No response from sorter.",
+          });
+        } else if (typeof response === "object" && "error" in response) {
+          toast.error(`Bin ${bin} failed`, {
+            description: (response as { error: string }).error,
           });
         }
       } finally {
@@ -134,6 +151,35 @@ export function useCalibrationPage() {
     },
     [sendBin],
   );
+
+  const handleSampleRun = useCallback(async () => {
+    setIsSampleRunning(true);
+    toast.info("Starting sample run…");
+    try {
+      for (let bin = 1; bin <= 7; bin++) {
+        setActiveBin(bin);
+        const response = await sendBin(bin);
+        if (!response) {
+          toast.error(`Sample run stopped at bin ${bin}`, {
+            description: "No response from sorter.",
+          });
+          return;
+        }
+        if (typeof response === "object" && "error" in response) {
+          toast.error(`Sample run stopped at bin ${bin}`, {
+            description: (response as { error: string }).error,
+          });
+          return;
+        }
+        // Brief pause between cards so the mechanism fully resets
+        await new Promise<void>((r) => setTimeout(r, 500));
+      }
+      toast.success("Sample run complete");
+    } finally {
+      setActiveBin(null);
+      setIsSampleRunning(false);
+    }
+  }, [sendBin]);
 
   const handleCenterModule = useCallback(
     (module: 1 | 2 | 3) => {
@@ -173,6 +219,14 @@ export function useCalibrationPage() {
     setFeederDurationValue(value);
   }, []);
 
+  const handleFeederPulseDurationChange = useCallback((value: number) => {
+    setFeederPulseDurationValue(value);
+  }, []);
+
+  const handleFeederPauseDurationChange = useCallback((value: number) => {
+    setFeederPauseDurationValue(value);
+  }, []);
+
   const handleFeederSetSpeed = useCallback(() => {
     saveFeeder({ ...feederConfig, speed: feederSpeedValue });
   }, [feederConfig, feederSpeedValue, saveFeeder]);
@@ -181,9 +235,55 @@ export function useCalibrationPage() {
     saveFeeder({ ...feederConfig, duration: feederDurationValue });
   }, [feederConfig, feederDurationValue, saveFeeder]);
 
+  const handleFeederSetPulseDuration = useCallback(() => {
+    saveFeeder({ ...feederConfig, pulseDuration: feederPulseDurationValue });
+  }, [feederConfig, feederPulseDurationValue, saveFeeder]);
+
+  const handleFeederSetPauseDuration = useCallback(() => {
+    saveFeeder({ ...feederConfig, pauseDuration: feederPauseDurationValue });
+  }, [feederConfig, feederPauseDurationValue, saveFeeder]);
+
   const handleFeed = useCallback(() => {
     sendCommand(JSON.stringify({ feeder: true }));
   }, [sendCommand]);
+
+  const readIR = useCallback(async () => {
+    if (irBusyRef.current || activeBinRef.current !== null) return;
+    irBusyRef.current = true;
+    try {
+      const sent = await sendCommand(JSON.stringify({ readIR: true }));
+      if (!sent) return;
+      const response = await receiveResponse(2000);
+      if (!response) return;
+      const parsed = JSON.parse(response);
+      if (Array.isArray(parsed.ir)) setIrStates(parsed.ir as boolean[]);
+    } catch {
+      // ignore parse errors
+    } finally {
+      irBusyRef.current = false;
+    }
+  }, [sendCommand, receiveResponse]);
+
+  const handleToggleIrMonitor = useCallback(() => {
+    setIrMonitoring((prev) => !prev);
+  }, []);
+
+  // Poll IR sensors every 300 ms while monitoring is active
+  useEffect(() => {
+    if (!irMonitoring || !isConnected) return;
+    const id = setInterval(() => {
+      void readIR();
+    }, 300);
+    return () => clearInterval(id);
+  }, [irMonitoring, isConnected, readIR]);
+
+  // Reset IR state when disconnected
+  useEffect(() => {
+    if (!isConnected) {
+      setIrMonitoring(false);
+      setIrStates(null);
+    }
+  }, [isConnected]);
 
   return {
     isConnected,
@@ -207,10 +307,22 @@ export function useCalibrationPage() {
     feederConfig,
     feederSpeedValue,
     feederDurationValue,
+    feederPulseDurationValue,
+    feederPauseDurationValue,
     handleFeederSpeedChange,
     handleFeederDurationChange,
+    handleFeederPulseDurationChange,
+    handleFeederPauseDurationChange,
     handleFeederSetSpeed,
     handleFeederSetDuration,
+    handleFeederSetPulseDuration,
+    handleFeederSetPauseDuration,
     handleFeed,
+    isSampleRunning,
+    handleSampleRun,
+    irStates,
+    irMonitoring,
+    handleReadIR: readIR,
+    handleToggleIrMonitor,
   };
 }

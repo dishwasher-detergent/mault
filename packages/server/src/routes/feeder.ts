@@ -15,7 +15,7 @@ router.get("/", requireAuth, async (c) => {
     const result = await authQuery(c.get("jwtClaims"), async (tx) => {
       const row = await tx.query.feederConfigs.findFirst();
       const calibration: FeederCalibration = row
-        ? { speed: row.speed, duration: row.duration }
+        ? { speed: row.speed, duration: row.duration, pulseDuration: row.pulseDuration, pauseDuration: row.pauseDuration }
         : { ...DEFAULT_FEEDER_CALIBRATION };
       return { success: true, message: "Loaded feeder config.", data: calibration };
     });
@@ -42,7 +42,7 @@ router.put("/", requireAuth, async (c) => {
 
       const row = await tx.query.feederConfigs.findFirst();
       const saved: FeederCalibration = row
-        ? { speed: row.speed, duration: row.duration }
+        ? { speed: row.speed, duration: row.duration, pulseDuration: row.pulseDuration, pauseDuration: row.pauseDuration }
         : calibration;
       return { success: true, message: "Saved feeder config.", data: saved };
     });

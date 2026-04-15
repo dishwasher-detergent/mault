@@ -142,7 +142,9 @@ export const feederConfigs = pgTable(
       .notNull()
       .default(sql`auth.user_id()`),
     speed: integer("speed").notNull().default(400),
-    duration: integer("duration").notNull().default(100),
+    duration: integer("duration").notNull().default(3000),
+    pulseDuration: integer("pulse_duration").notNull().default(80),
+    pauseDuration: integer("pause_duration").notNull().default(50),
     createdAt: timestamp("created_at").defaultNow().notNull(),
     updatedAt: timestamp("updated_at").defaultNow().notNull(),
   },
