@@ -54,7 +54,7 @@ export function AppNav() {
   const navItems: NavItemDef[] = [
     { to: "/app", icon: <IconCamera />, label: "Scanner", end: true },
     { to: "/app/collections", icon: <IconFolders />, label: "Collections" },
-    { to: "/app/bins", icon: <IconLayoutGrid />, label: "Sort Bins" },
+    { to: "/app/bins", icon: <IconLayoutGrid />, label: "Sorting Logic" },
     { to: "/app/calibrate", icon: <IconAdjustments />, label: "Calibrate" },
     ...(isAdmin
       ? [{ to: "/app/admin", icon: <IconDatabase />, label: "Admin" }]

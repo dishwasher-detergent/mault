@@ -122,7 +122,7 @@ export function PresetSelector({ readOnly }: PresetSelectorProps) {
 
   return (
     <Field>
-      <FieldLabel>Sort Logic</FieldLabel>
+      <FieldLabel>Sorting Logic</FieldLabel>
       <ButtonGroup className="w-full">
         <Select
           key={selectedSet?.guid ?? ""}

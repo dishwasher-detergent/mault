@@ -59,20 +59,42 @@ export default function CollectionsPage() {
 
   const handleCreate = useCallback(
     async (values: CreateCollectionFormValues) => {
+      const isDuplicate = collections.some(
+        (c) => c.name.trim().toLowerCase() === values.name.trim().toLowerCase(),
+      );
+      if (isDuplicate) {
+        createForm.setError("name", {
+          type: "manual",
+          message: "A collection with this name already exists",
+        });
+        return;
+      }
       await createCollection(values.name);
       createForm.reset();
       setCreateOpen(false);
     },
-    [createCollection, createForm],
+    [createCollection, collections, createForm],
   );
 
   const handleRename = useCallback(
     async (values: CreateCollectionFormValues) => {
       if (!renameTarget) return;
+      const isDuplicate = collections.some(
+        (c) =>
+          c.guid !== renameTarget.guid &&
+          c.name.trim().toLowerCase() === values.name.trim().toLowerCase(),
+      );
+      if (isDuplicate) {
+        renameForm.setError("name", {
+          type: "manual",
+          message: "A collection with this name already exists",
+        });
+        return;
+      }
       await renameCollection(renameTarget.guid, values.name);
       setRenameTarget(null);
     },
-    [renameTarget, renameCollection],
+    [renameTarget, renameCollection, collections, renameForm],
   );
 
   const handleDelete = useCallback(async () => {

@@ -1,36 +1,51 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Magic Vault
 
-## Getting Started
+A Magic: The Gathering card scanner and physical sorter. Point a webcam at cards, identify them via AI image embeddings, and automatically route them into bins via an Arduino-controlled servo mechanism.
 
-First, run the development server:
+## How it works
+
+1. Webcam captures card images using OpenCV.js detection
+2. Card image is sent to the server for embedding search (Hugging Face SigLIP)
+3. PostgreSQL vector similarity search identifies the card
+4. Configurable bin rules determine which bin the card goes to
+5. Arduino receives a serial command and physically routes the card
+
+## Stack
+
+- **Web** — React 19, Vite, React Router v7, Tailwind CSS 4
+- **Server** — Hono 4, Drizzle ORM, Neon PostgreSQL (pgvector)
+- **Auth** — Neon Auth (JWT)
+- **Hardware** — Arduino via Web Serial API (9600 baud)
+- **Monorepo** — Turborepo + pnpm workspaces
+
+## Getting started
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+pnpm install
+pnpm dev        # Vite on :5173, Hono on :3001
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### Environment variables
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Root `.env`:
+```
+DATABASE_URL=
+DATABASE_AUTHENTICATED_URL=
+NEON_AUTH_URL=
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+`packages/web/.env`:
+```
+VITE_API_URL=http://localhost:3001
+```
 
-## Learn More
+## Database
 
-To learn more about Next.js, take a look at the following resources:
+```bash
+pnpm --filter @magic-vault/server db:push     # push schema
+pnpm --filter @magic-vault/server db:studio   # open Drizzle Studio
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Arduino
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Upload `arduino/main/main.ino` (requires ArduinoJson library). Communicates via JSON over USB serial — web app sends `{"bin": N}`, Arduino routes the card.

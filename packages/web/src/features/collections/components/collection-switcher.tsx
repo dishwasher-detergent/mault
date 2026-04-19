@@ -49,11 +49,21 @@ export function CollectionSwitcher() {
 
   const handleCreate = useCallback(
     async (values: CreateCollectionFormValues) => {
+      const isDuplicate = collections.some(
+        (c) => c.name.trim().toLowerCase() === values.name.trim().toLowerCase(),
+      );
+      if (isDuplicate) {
+        form.setError("name", {
+          type: "manual",
+          message: "A collection with this name already exists",
+        });
+        return;
+      }
       await createCollection(values.name);
       form.reset();
       setCreateOpen(false);
     },
-    [createCollection, form],
+    [createCollection, collections, form],
   );
 
   const handleCreateDialogChange = useCallback(
