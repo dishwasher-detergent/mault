@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
+  DropdownMenuCheckboxItem,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
@@ -20,6 +21,7 @@ import {
 interface ScannerMenuProps {
   isCameraActive: boolean;
   isConnected: boolean;
+  autoFeed: boolean;
   zoom: number;
   zoomRange: ZoomRange | null;
   onCameraConnect: () => void;
@@ -29,11 +31,13 @@ interface ScannerMenuProps {
   onScannerDisconnect: () => void;
   onScannerRetry: () => void;
   onCalibrate: () => void;
+  onAutoFeedChange: (enabled: boolean) => void;
 }
 
 export function ScannerMenu({
   isCameraActive,
   isConnected,
+  autoFeed,
   zoom,
   zoomRange,
   onCameraConnect,
@@ -43,6 +47,7 @@ export function ScannerMenu({
   onScannerDisconnect,
   onScannerRetry,
   onCalibrate,
+  onAutoFeedChange,
 }: ScannerMenuProps) {
   return (
     <div className="absolute top-2 right-2 z-40">
@@ -107,6 +112,13 @@ export function ScannerMenu({
             <DropdownMenuSubContent>
               {isConnected ? (
                 <>
+                  <DropdownMenuCheckboxItem
+                    checked={autoFeed}
+                    onCheckedChange={onAutoFeedChange}
+                  >
+                    Auto-feed
+                  </DropdownMenuCheckboxItem>
+                  <DropdownMenuSeparator />
                   <DropdownMenuItem onClick={onCalibrate}>
                     Calibrate
                   </DropdownMenuItem>

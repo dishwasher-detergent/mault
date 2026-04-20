@@ -39,20 +39,60 @@ export function ScannedCardsProvider({
   const [cards, setCards] = useState<ScannedCard[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const { configs: binConfigs } = useBinConfigs();
-  const { sendBin, isConnected, isReady } = useSerial();
+  const { sendBin, sendCommand, receiveResponse, isConnected, isReady } = useSerial();
   const { activeCollection } = useCollections();
 
   const binConfigsRef = useRef(binConfigs);
-  const serialRef = useRef({ sendBin, isConnected, isReady });
+  const serialRef = useRef({ sendBin, sendCommand, receiveResponse, isConnected, isReady });
   const activeCollectionRef = useRef(activeCollection);
+  const [autoFeed, setAutoFeedState] = useState(false);
+  const autoFeedRef = useRef(false);
 
   useEffect(() => {
     binConfigsRef.current = binConfigs;
   }, [binConfigs]);
 
   useEffect(() => {
-    serialRef.current = { sendBin, isConnected, isReady };
-  }, [sendBin, isConnected, isReady]);
+    serialRef.current = { sendBin, sendCommand, receiveResponse, isConnected, isReady };
+  }, [sendBin, sendCommand, receiveResponse, isConnected, isReady]);
+
+  const setAutoFeed = useCallback((enabled: boolean) => {
+    autoFeedRef.current = enabled;
+    setAutoFeedState(enabled);
+  }, []);
+
+  const triggerAutoFeed = useCallback(async () => {
+    const sent = await serialRef.current.sendCommand(JSON.stringify({ feeder: true }));
+    if (!sent) {
+      autoFeedRef.current = false;
+      setAutoFeedState(false);
+      toast.error("Auto-feed failed", { description: "Could not send feeder command." });
+      return;
+    }
+    const response = await serialRef.current.receiveResponse(10000);
+    if (!response) {
+      autoFeedRef.current = false;
+      setAutoFeedState(false);
+      toast.error("Auto-feed timeout", { description: "Feeder did not respond in time." });
+      return;
+    }
+    try {
+      const parsed = JSON.parse(response) as Record<string, unknown>;
+      if (parsed.error) {
+        autoFeedRef.current = false;
+        setAutoFeedState(false);
+        toast.error("Feeder error", {
+          description: String(parsed.error),
+          duration: Infinity,
+          dismissible: true,
+        });
+      }
+    } catch {
+      autoFeedRef.current = false;
+      setAutoFeedState(false);
+      toast.error("Auto-feed error", { description: "Unexpected response from feeder." });
+    }
+  }, []);
 
   useEffect(() => {
     activeCollectionRef.current = activeCollection;
@@ -117,10 +157,27 @@ export function ScannedCardsProvider({
           toast.error("Routing failed", {
             description: `No response from sorter for bin ${matchedBin.binNumber}.`,
           });
+          autoFeedRef.current = false;
+          setAutoFeedState(false);
+          return;
+        }
+        const res = response as Record<string, unknown>;
+        if (res.error) {
+          toast.error("Sorter error", {
+            description: String(res.error),
+            duration: Infinity,
+            dismissible: true,
+          });
+          autoFeedRef.current = false;
+          setAutoFeedState(false);
+          return;
+        }
+        if (autoFeedRef.current) {
+          triggerAutoFeed();
         }
       });
     }
-  }, []);
+  }, [triggerAutoFeed]);
 
   const sendCatchAllBin = useCallback(() => {
     const catchAll = getCatchAllBin(binConfigsRef.current);
@@ -130,10 +187,27 @@ export function ScannedCardsProvider({
           toast.error("Routing failed", {
             description: `No response from sorter for catch-all bin ${catchAll.binNumber}.`,
           });
+          autoFeedRef.current = false;
+          setAutoFeedState(false);
+          return;
+        }
+        const res = response as Record<string, unknown>;
+        if (res.error) {
+          toast.error("Sorter error", {
+            description: String(res.error),
+            duration: Infinity,
+            dismissible: true,
+          });
+          autoFeedRef.current = false;
+          setAutoFeedState(false);
+          return;
+        }
+        if (autoFeedRef.current) {
+          triggerAutoFeed();
         }
       });
     }
-  }, []);
+  }, [triggerAutoFeed]);
 
   const removeCard = useCallback((scanId: string) => {
     const collection = activeCollectionRef.current;
@@ -189,6 +263,8 @@ export function ScannedCardsProvider({
       value={{
         cards,
         isLoading,
+        autoFeed,
+        setAutoFeed,
         addCard,
         sendCatchAllBin,
         removeCard,

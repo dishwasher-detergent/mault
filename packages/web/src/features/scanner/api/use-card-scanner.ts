@@ -307,11 +307,13 @@ export function useCardScanner({
         }
 
         // Scale display/overlay canvases to fill the container (contain, no squish).
+        // Canvases are rotated -90° via CSS, so we swap width/height in the scale
+        // calculation — the visual dimensions are transposed relative to the layout box.
         const container = displayCanvasRef.current?.parentElement;
         if (container) {
           const cw = container.clientWidth;
           const ch = container.clientHeight;
-          const scale = Math.min(cw / videoWidth, ch / videoHeight);
+          const scale = Math.max(cw / videoHeight, ch / videoWidth);
           const cssW = Math.round(videoWidth * scale);
           const cssH = Math.round(videoHeight * scale);
           for (const ref of [displayCanvasRef, overlayCanvasRef]) {

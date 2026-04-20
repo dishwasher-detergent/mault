@@ -27,6 +27,8 @@ export interface CameraContextValue {
 export interface ScannedCardsContextValue {
   cards: ScannedCard[];
   isLoading: boolean;
+  autoFeed: boolean;
+  setAutoFeed: (enabled: boolean) => void;
   addCard: (card: ScryfallCardWithDistance) => void;
   sendCatchAllBin: () => void;
   removeCard: (scanId: string) => void;

@@ -1,3 +1,4 @@
+import { Button } from "@/components/ui/button";
 import { ButtonGroup } from "@/components/ui/button-group";
 import {
   Tooltip,
@@ -14,16 +15,25 @@ import { ScannerOverlay } from "@/features/scanner/components/scanner-overlay";
 import { useRole } from "@/hooks/use-role";
 import { cn } from "@/lib/utils";
 import type { CardScannerProps } from "@magic-vault/shared";
-import { IconEye } from "@tabler/icons-react";
-import { useEffect, useRef } from "react";
+import { IconArrowBarToDown, IconEye } from "@tabler/icons-react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 
 export function CardScanner({ className }: CardScannerProps) {
   const navigate = useNavigate();
   const { isAdmin } = useRole();
-  const { addCard, sendCatchAllBin } = useScannedCards();
-  const { isConnected, isReady, connect, disconnect, sendTest } = useSerial();
+  const { addCard, sendCatchAllBin, autoFeed, setAutoFeed } = useScannedCards();
+  const {
+    isConnected,
+    isReady,
+    connect,
+    disconnect,
+    sendTest,
+    sendCommand,
+    receiveResponse,
+  } = useSerial();
+  const [isFeeding, setIsFeeding] = useState(false);
   const { hasCatchAll } = useBinConfigs();
   const {
     status,
@@ -69,6 +79,42 @@ export function CardScanner({ className }: CardScannerProps) {
     }
   });
 
+  const handleFeed = async () => {
+    setIsFeeding(true);
+    try {
+      const sent = await sendCommand(JSON.stringify({ feeder: true }));
+      if (!sent) {
+        toast.error("Feed failed", {
+          description: "Could not send feeder command.",
+        });
+        return;
+      }
+      const response = await receiveResponse(10000);
+      if (!response) {
+        toast.error("Feed timeout", {
+          description: "Feeder did not respond in time.",
+        });
+        return;
+      }
+      try {
+        const parsed = JSON.parse(response) as Record<string, unknown>;
+        if (parsed.error) {
+          toast.error("Feeder error", {
+            description: String(parsed.error),
+            duration: Infinity,
+            dismissible: true,
+          });
+        }
+      } catch {
+        toast.error("Feed error", {
+          description: "Unexpected response from feeder.",
+        });
+      }
+    } finally {
+      setIsFeeding(false);
+    }
+  };
+
   const canScan = isConnected && isReady && hasCatchAll && isCameraActive;
   const wasReadyRef = useRef(canScan);
   useEffect(() => {
@@ -91,10 +137,10 @@ export function CardScanner({ className }: CardScannerProps) {
       <div className="relative overflow-hidden bg-background w-full h-full md:aspect-[2.5/3.5] max-w-full rounded-lg border">
         <video ref={videoRef} className="hidden" playsInline muted />
         <canvas ref={processingCanvasRef} className="hidden" />
-        <canvas ref={displayCanvasRef} className="absolute" />
+        <canvas ref={displayCanvasRef} className="absolute -rotate-90" />
         <canvas
           ref={overlayCanvasRef}
-          className="absolute z-20 pointer-events-none"
+          className="absolute z-20 pointer-events-none -rotate-90"
         />
         {isAdmin && debugImageUrl && (
           <Tooltip>
@@ -125,6 +171,7 @@ export function CardScanner({ className }: CardScannerProps) {
         <ScannerMenu
           isCameraActive={isCameraActive}
           isConnected={isConnected}
+          autoFeed={autoFeed}
           zoom={zoom}
           zoomRange={zoomRange}
           onCameraConnect={handleRetryError}
@@ -134,6 +181,7 @@ export function CardScanner({ className }: CardScannerProps) {
           onScannerDisconnect={disconnect}
           onScannerRetry={sendTest}
           onCalibrate={() => navigate("/app/calibrate")}
+          onAutoFeedChange={setAutoFeed}
         />
       </div>
       {isConnected && isCameraActive && (
@@ -142,10 +190,21 @@ export function CardScanner({ className }: CardScannerProps) {
             status={isReady && hasCatchAll ? status : "paused"}
             onForceAddDuplicate={handleForceAddDuplicate}
             onForceScan={handleForceScan}
-            onPause={handlePause}
+            onPause={() => {
+              setAutoFeed(false);
+              handlePause();
+            }}
             onResume={isReady && hasCatchAll ? handleResume : () => {}}
             disabled={!isReady || !hasCatchAll}
           />
+          <Button
+            onClick={handleFeed}
+            variant="outline"
+            disabled={!isReady || isFeeding}
+          >
+            <IconArrowBarToDown />
+            {isFeeding ? "Feeding…" : "Feed"}
+          </Button>
         </ButtonGroup>
       )}
     </div>
