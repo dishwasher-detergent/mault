@@ -73,6 +73,41 @@ export default function LandingPage() {
           MAGIC VAULT
         </span>
         <div style={{ display: "flex", gap: "0.75rem", alignItems: "center" }}>
+          <a
+            href="https://github.com/dishwasher-detergent/mault"
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{
+              color: "#555",
+              textDecoration: "none",
+              fontSize: "0.8rem",
+              fontFamily: "var(--font-heading)",
+              letterSpacing: "0.08em",
+              transition: "color 0.15s",
+            }}
+            onMouseOver={(e) => (e.currentTarget.style.color = "#fff")}
+            onMouseOut={(e) => (e.currentTarget.style.color = "#555")}
+          >
+            GITHUB
+          </a>
+          <a
+            href="https://makerworld.com/en/models/2484318-horizontal-card-divider-for-storage-box#profileId-2728971"
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{
+              color: "#555",
+              textDecoration: "none",
+              fontSize: "0.8rem",
+              fontFamily: "var(--font-heading)",
+              letterSpacing: "0.08em",
+              transition: "color 0.15s",
+            }}
+            onMouseOver={(e) => (e.currentTarget.style.color = "#fff")}
+            onMouseOut={(e) => (e.currentTarget.style.color = "#555")}
+          >
+            3D MODEL
+          </a>
+          <div style={{ width: "1px", height: "1rem", background: "#2a2a2a" }} />
           {isSignedIn ? (
             <>
               <button
@@ -805,16 +840,52 @@ export default function LandingPage() {
         >
           MAGIC VAULT
         </span>
-        <span
-          style={{
-            fontFamily: "var(--font-heading)",
-            fontSize: "0.65rem",
-            color: "#333",
-            letterSpacing: "0.08em",
-          }}
-        >
-          NOT AFFILIATED WITH WIZARDS OF THE COAST
-        </span>
+        <div style={{ display: "flex", gap: "1.5rem", alignItems: "center" }}>
+          <a
+            href="https://github.com/dishwasher-detergent/mault"
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{
+              fontFamily: "var(--font-heading)",
+              fontSize: "0.65rem",
+              color: "#444",
+              letterSpacing: "0.1em",
+              textDecoration: "none",
+              transition: "color 0.15s",
+            }}
+            onMouseOver={(e) => (e.currentTarget.style.color = "#888")}
+            onMouseOut={(e) => (e.currentTarget.style.color = "#444")}
+          >
+            GITHUB
+          </a>
+          <a
+            href="https://makerworld.com/en/models/2484318-horizontal-card-divider-for-storage-box#profileId-2728971"
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{
+              fontFamily: "var(--font-heading)",
+              fontSize: "0.65rem",
+              color: "#444",
+              letterSpacing: "0.1em",
+              textDecoration: "none",
+              transition: "color 0.15s",
+            }}
+            onMouseOver={(e) => (e.currentTarget.style.color = "#888")}
+            onMouseOut={(e) => (e.currentTarget.style.color = "#444")}
+          >
+            3D MODEL
+          </a>
+          <span
+            style={{
+              fontFamily: "var(--font-heading)",
+              fontSize: "0.65rem",
+              color: "#333",
+              letterSpacing: "0.08em",
+            }}
+          >
+            NOT AFFILIATED WITH WIZARDS OF THE COAST
+          </span>
+        </div>
       </footer>
     </div>
   );
