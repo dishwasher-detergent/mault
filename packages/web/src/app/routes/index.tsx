@@ -8,7 +8,7 @@ const features = [
     body: "Point your webcam at any card. OpenCV detects the border, our AI model identifies it in milliseconds using 768-dimensional image embeddings.",
     bg: "#7C3AED",
     fg: "#fff",
-    accent: "#C4B5FD",
+    accent: "#fff",
   },
   {
     number: "02",
@@ -16,15 +16,15 @@ const features = [
     body: "Define up to 7 physical bins with nested AND/OR rule trees. Filter by color, rarity, CMC, type, set, value — anything on the card.",
     bg: "#F59E0B",
     fg: "#0a0a0a",
-    accent: "#78350F",
+    accent: "#0a0a0a",
   },
   {
     number: "03",
     title: "Hardware Control",
     body: "Paired with an Arduino servo controller over Web Serial API. Sort decisions become physical motion — automatically routed to the right bin.",
-    bg: "#EF4444",
+    bg: "#DC2626",
     fg: "#fff",
-    accent: "#FCA5A5",
+    accent: "#fff",
   },
 ];
 
@@ -35,6 +35,93 @@ const steps = [
   { label: "Rules assign a bin", icon: "◎" },
   { label: "Arduino routes the card", icon: "◆" },
 ];
+
+const responsiveStyles = `
+  @media (max-width: 640px) {
+    .lp-nav {
+      padding: 1rem 1.25rem;
+    }
+    .lp-nav-external {
+      display: none;
+    }
+    .lp-nav-divider {
+      display: none;
+    }
+    .lp-hero {
+      padding: 3rem 1.25rem 2.5rem;
+    }
+    .lp-stats-item {
+      flex: 0 0 50%;
+      padding: 1.75rem 1rem !important;
+      border-right: none !important;
+      border-bottom: 1px solid #1a1a1a;
+      box-sizing: border-box;
+    }
+    .lp-stats-item:nth-child(odd) {
+      border-right: 1px solid #1a1a1a !important;
+    }
+    .lp-stats-item:nth-last-child(-n+2) {
+      border-bottom: none;
+    }
+    .lp-section {
+      padding: 3.5rem 1.25rem;
+    }
+    .lp-features-grid {
+      grid-template-columns: 1fr !important;
+    }
+    .lp-feature-card {
+      padding: 1.75rem !important;
+    }
+    .lp-pipeline-steps {
+      flex-direction: column;
+      align-items: stretch;
+    }
+    .lp-pipeline-step {
+      flex: none !important;
+      min-width: 0 !important;
+      width: 100%;
+      flex-direction: column;
+    }
+    .lp-pipeline-step-inner {
+      flex-direction: row !important;
+      align-items: center !important;
+      text-align: left !important;
+      padding: 0.5rem 0 !important;
+      gap: 1rem !important;
+    }
+    .lp-step-label {
+      text-align: left !important;
+    }
+    .lp-pipeline-connector {
+      width: 1px !important;
+      height: 1.5rem !important;
+      margin-left: 25px !important;
+      margin-top: 0 !important;
+      align-self: auto !important;
+    }
+    .lp-rarity-grid {
+      grid-template-columns: 1fr 1fr !important;
+    }
+    .lp-cta {
+      padding: 4rem 1.25rem;
+    }
+    .lp-footer {
+      padding: 1.5rem 1.25rem;
+      flex-direction: column;
+      align-items: flex-start;
+    }
+    .lp-footer-right {
+      flex-direction: column;
+      gap: 0.6rem !important;
+    }
+  }
+
+  @media (max-width: 400px) {
+    .lp-rarity-grid {
+      grid-template-columns: 1fr !important;
+    }
+  }
+`;
 
 export default function LandingPage() {
   const { data, isPending } = neon.auth.useSession();
@@ -51,8 +138,11 @@ export default function LandingPage() {
       className="min-h-screen"
       style={{ background: "#0a0a0a", color: "#f5f5f5" }}
     >
+      <style>{responsiveStyles}</style>
+
       {/* NAV */}
       <nav
+        className="lp-nav"
         style={{
           display: "flex",
           alignItems: "center",
@@ -67,7 +157,7 @@ export default function LandingPage() {
             fontWeight: 700,
             fontSize: "1rem",
             letterSpacing: "0.12em",
-            color: "#7C3AED",
+            color: "#A78BFA",
           }}
         >
           MAGIC VAULT
@@ -77,8 +167,9 @@ export default function LandingPage() {
             href="https://github.com/dishwasher-detergent/mault"
             target="_blank"
             rel="noopener noreferrer"
+            className="lp-nav-external"
             style={{
-              color: "#555",
+              color: "#999",
               textDecoration: "none",
               fontSize: "0.8rem",
               fontFamily: "var(--font-heading)",
@@ -86,7 +177,7 @@ export default function LandingPage() {
               transition: "color 0.15s",
             }}
             onMouseOver={(e) => (e.currentTarget.style.color = "#fff")}
-            onMouseOut={(e) => (e.currentTarget.style.color = "#555")}
+            onMouseOut={(e) => (e.currentTarget.style.color = "#999")}
           >
             GITHUB
           </a>
@@ -94,8 +185,9 @@ export default function LandingPage() {
             href="https://makerworld.com/en/models/2484318-horizontal-card-divider-for-storage-box#profileId-2728971"
             target="_blank"
             rel="noopener noreferrer"
+            className="lp-nav-external"
             style={{
-              color: "#555",
+              color: "#999",
               textDecoration: "none",
               fontSize: "0.8rem",
               fontFamily: "var(--font-heading)",
@@ -103,11 +195,14 @@ export default function LandingPage() {
               transition: "color 0.15s",
             }}
             onMouseOver={(e) => (e.currentTarget.style.color = "#fff")}
-            onMouseOut={(e) => (e.currentTarget.style.color = "#555")}
+            onMouseOut={(e) => (e.currentTarget.style.color = "#999")}
           >
             3D MODEL
           </a>
-          <div style={{ width: "1px", height: "1rem", background: "#2a2a2a" }} />
+          <div
+            className="lp-nav-divider"
+            style={{ width: "1px", height: "1rem", background: "#2a2a2a" }}
+          />
           {isSignedIn ? (
             <>
               <button
@@ -197,6 +292,7 @@ export default function LandingPage() {
 
       {/* HERO */}
       <section
+        className="lp-hero"
         style={{
           padding: "6rem 2.5rem 5rem",
           maxWidth: "1200px",
@@ -223,7 +319,7 @@ export default function LandingPage() {
         <h1
           style={{
             fontFamily: "var(--font-heading)",
-            fontSize: "clamp(3.5rem, 10vw, 8rem)",
+            fontSize: "clamp(3rem, 10vw, 8rem)",
             fontWeight: 800,
             lineHeight: 0.92,
             letterSpacing: "-0.03em",
@@ -242,11 +338,11 @@ export default function LandingPage() {
 
         <p
           style={{
-            fontSize: "1.15rem",
+            fontSize: "1.05rem",
             color: "#999",
             maxWidth: "520px",
             lineHeight: 1.65,
-            marginBottom: "3rem",
+            marginBottom: "2.5rem",
             fontFamily: "var(--font-sans)",
           }}
         >
@@ -380,7 +476,6 @@ export default function LandingPage() {
           display: "flex",
           justifyContent: "center",
           flexWrap: "wrap",
-          gap: "0",
         }}
       >
         {[
@@ -391,6 +486,7 @@ export default function LandingPage() {
         ].map((stat, i) => (
           <div
             key={i}
+            className="lp-stats-item"
             style={{
               padding: "2.5rem 4rem",
               textAlign: "center",
@@ -413,7 +509,7 @@ export default function LandingPage() {
                 fontFamily: "var(--font-heading)",
                 fontSize: "0.65rem",
                 letterSpacing: "0.15em",
-                color: "#555",
+                color: "#999",
                 marginTop: "0.4rem",
               }}
             >
@@ -425,6 +521,7 @@ export default function LandingPage() {
 
       {/* FEATURES */}
       <section
+        className="lp-section"
         style={{
           padding: "6rem 2.5rem",
           maxWidth: "1200px",
@@ -436,7 +533,7 @@ export default function LandingPage() {
             fontFamily: "var(--font-heading)",
             fontSize: "0.7rem",
             letterSpacing: "0.2em",
-            color: "#555",
+            color: "#999",
             marginBottom: "1rem",
           }}
         >
@@ -459,6 +556,7 @@ export default function LandingPage() {
         </h2>
 
         <div
+          className="lp-features-grid"
           style={{
             display: "grid",
             gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))",
@@ -468,6 +566,7 @@ export default function LandingPage() {
           {features.map((f) => (
             <div
               key={f.number}
+              className="lp-feature-card"
               style={{
                 background: f.bg,
                 color: f.fg,
@@ -497,6 +596,7 @@ export default function LandingPage() {
                   letterSpacing: "-0.01em",
                   lineHeight: 1.15,
                   margin: 0,
+                  color: f.fg,
                 }}
               >
                 {f.title.toUpperCase()}
@@ -506,7 +606,7 @@ export default function LandingPage() {
                   fontFamily: "var(--font-sans)",
                   fontSize: "0.9rem",
                   lineHeight: 1.65,
-                  opacity: 0.85,
+                  color: f.fg,
                   margin: 0,
                 }}
               >
@@ -526,13 +626,16 @@ export default function LandingPage() {
           padding: "6rem 2.5rem",
         }}
       >
-        <div style={{ maxWidth: "1200px", margin: "0 auto" }}>
+        <div
+          className="lp-section"
+          style={{ maxWidth: "1200px", margin: "0 auto" }}
+        >
           <p
             style={{
               fontFamily: "var(--font-heading)",
               fontSize: "0.7rem",
               letterSpacing: "0.2em",
-              color: "#555",
+              color: "#999",
               marginBottom: "1rem",
             }}
           >
@@ -555,25 +658,26 @@ export default function LandingPage() {
           </h2>
 
           <div
+            className="lp-pipeline-steps"
             style={{
               display: "flex",
               alignItems: "center",
               flexWrap: "wrap",
-              gap: "0",
             }}
           >
             {steps.map((step, i) => (
               <div
                 key={i}
+                className="lp-pipeline-step"
                 style={{
                   display: "flex",
                   alignItems: "center",
-                  gap: "0",
                   flex: "1",
                   minWidth: "140px",
                 }}
               >
                 <div
+                  className="lp-pipeline-step-inner"
                   style={{
                     display: "flex",
                     flexDirection: "column",
@@ -587,6 +691,7 @@ export default function LandingPage() {
                     style={{
                       width: "52px",
                       height: "52px",
+                      flexShrink: 0,
                       borderRadius: "50%",
                       background: i === 0 ? "#7C3AED" : "#1a1a1a",
                       border: `2px solid ${i === 0 ? "#7C3AED" : "#2a2a2a"}`,
@@ -595,18 +700,19 @@ export default function LandingPage() {
                       justifyContent: "center",
                       fontFamily: "var(--font-heading)",
                       fontSize: "1.1rem",
-                      color: i === 0 ? "#fff" : "#555",
+                      color: i === 0 ? "#fff" : "#888",
                       fontWeight: 700,
                     }}
                   >
                     {step.icon}
                   </div>
                   <span
+                    className="lp-step-label"
                     style={{
                       fontFamily: "var(--font-heading)",
                       fontSize: "0.65rem",
                       letterSpacing: "0.1em",
-                      color: "#666",
+                      color: "#999",
                       textAlign: "center",
                       lineHeight: 1.4,
                     }}
@@ -616,8 +722,9 @@ export default function LandingPage() {
                 </div>
                 {i < steps.length - 1 && (
                   <div
+                    className="lp-pipeline-connector"
                     style={{
-                      flex: "0 0 auto",
+                      flexShrink: 0,
                       height: "1px",
                       width: "2rem",
                       background: "#2a2a2a",
@@ -634,6 +741,7 @@ export default function LandingPage() {
 
       {/* RARITY COLORS SECTION */}
       <section
+        className="lp-section"
         style={{
           padding: "6rem 2.5rem",
           maxWidth: "1200px",
@@ -645,7 +753,7 @@ export default function LandingPage() {
             fontFamily: "var(--font-heading)",
             fontSize: "0.7rem",
             letterSpacing: "0.2em",
-            color: "#555",
+            color: "#999",
             marginBottom: "1rem",
           }}
         >
@@ -667,6 +775,7 @@ export default function LandingPage() {
           NOT SPREADSHEETS.
         </h2>
         <div
+          className="lp-rarity-grid"
           style={{
             display: "grid",
             gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))",
@@ -744,7 +853,7 @@ export default function LandingPage() {
                 style={{
                   fontFamily: "var(--font-sans)",
                   fontSize: "0.85rem",
-                  color: "#777",
+                  color: "#aaa",
                   lineHeight: 1.55,
                   margin: 0,
                 }}
@@ -758,6 +867,7 @@ export default function LandingPage() {
 
       {/* BOTTOM CTA */}
       <section
+        className="lp-cta"
         style={{
           background: "#7C3AED",
           padding: "6rem 2.5rem",
@@ -783,7 +893,7 @@ export default function LandingPage() {
           style={{
             fontFamily: "var(--font-sans)",
             fontSize: "1.05rem",
-            color: "#C4B5FD",
+            color: "#fff",
             marginBottom: "2.5rem",
             lineHeight: 1.6,
           }}
@@ -820,6 +930,7 @@ export default function LandingPage() {
 
       {/* FOOTER */}
       <footer
+        className="lp-footer"
         style={{
           borderTop: "1px solid #1a1a1a",
           padding: "2rem 2.5rem",
@@ -834,13 +945,16 @@ export default function LandingPage() {
           style={{
             fontFamily: "var(--font-heading)",
             fontSize: "0.75rem",
-            color: "#333",
+            color: "#888",
             letterSpacing: "0.1em",
           }}
         >
           MAGIC VAULT
         </span>
-        <div style={{ display: "flex", gap: "1.5rem", alignItems: "center" }}>
+        <div
+          className="lp-footer-right"
+          style={{ display: "flex", gap: "1.5rem", alignItems: "center" }}
+        >
           <a
             href="https://github.com/dishwasher-detergent/mault"
             target="_blank"
@@ -848,13 +962,13 @@ export default function LandingPage() {
             style={{
               fontFamily: "var(--font-heading)",
               fontSize: "0.65rem",
-              color: "#444",
+              color: "#999",
               letterSpacing: "0.1em",
               textDecoration: "none",
               transition: "color 0.15s",
             }}
-            onMouseOver={(e) => (e.currentTarget.style.color = "#888")}
-            onMouseOut={(e) => (e.currentTarget.style.color = "#444")}
+            onMouseOver={(e) => (e.currentTarget.style.color = "#fff")}
+            onMouseOut={(e) => (e.currentTarget.style.color = "#999")}
           >
             GITHUB
           </a>
@@ -865,13 +979,13 @@ export default function LandingPage() {
             style={{
               fontFamily: "var(--font-heading)",
               fontSize: "0.65rem",
-              color: "#444",
+              color: "#999",
               letterSpacing: "0.1em",
               textDecoration: "none",
               transition: "color 0.15s",
             }}
-            onMouseOver={(e) => (e.currentTarget.style.color = "#888")}
-            onMouseOut={(e) => (e.currentTarget.style.color = "#444")}
+            onMouseOver={(e) => (e.currentTarget.style.color = "#fff")}
+            onMouseOut={(e) => (e.currentTarget.style.color = "#999")}
           >
             3D MODEL
           </a>
@@ -879,7 +993,7 @@ export default function LandingPage() {
             style={{
               fontFamily: "var(--font-heading)",
               fontSize: "0.65rem",
-              color: "#333",
+              color: "#888",
               letterSpacing: "0.08em",
             }}
           >
