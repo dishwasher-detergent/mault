@@ -45,8 +45,8 @@ export function ScannedCardsProvider({
   const binConfigsRef = useRef(binConfigs);
   const serialRef = useRef({ sendBin, sendCommand, receiveResponse, isConnected, isReady });
   const activeCollectionRef = useRef(activeCollection);
-  const [autoFeed, setAutoFeedState] = useState(false);
-  const autoFeedRef = useRef(false);
+  const [autoFeed, setAutoFeedState] = useState(true);
+  const autoFeedRef = useRef(true);
 
   useEffect(() => {
     binConfigsRef.current = binConfigs;

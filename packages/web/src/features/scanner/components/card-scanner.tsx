@@ -53,6 +53,8 @@ export function CardScanner({ className }: CardScannerProps) {
     zoom,
     zoomRange,
     setZoom,
+    allowDuplicates,
+    setAllowDuplicates,
   } = useCardScanner({
     onSearchResults: (cards) => {
       for (const card of cards) {
@@ -172,6 +174,7 @@ export function CardScanner({ className }: CardScannerProps) {
           isCameraActive={isCameraActive}
           isConnected={isConnected}
           autoFeed={autoFeed}
+          allowDuplicates={allowDuplicates}
           zoom={zoom}
           zoomRange={zoomRange}
           onCameraConnect={handleRetryError}
@@ -182,6 +185,7 @@ export function CardScanner({ className }: CardScannerProps) {
           onScannerRetry={sendTest}
           onCalibrate={() => navigate("/app/calibrate")}
           onAutoFeedChange={setAutoFeed}
+          onAllowDuplicatesChange={setAllowDuplicates}
         />
       </div>
       {isConnected && isCameraActive && (
