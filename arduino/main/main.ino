@@ -59,7 +59,7 @@ FeederConfig feederConfig = {400, 3000, 80, 50};
 
 // Routing delays (ms) — tune to match your hardware timing
 #define DELAY_CARD_ENTER   300  // time for card to settle after target bottom opens
-#define DELAY_PADDLE       150  // time for paddle to engage
+#define DELAY_PADDLE       300  // time for paddle to engage
 #define DELAY_PUSH         600  // time for pusher to complete its stroke
 
 String inputBuffer = "";

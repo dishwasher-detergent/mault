@@ -17,10 +17,27 @@ import {
   type CardContour,
   type CardScannerProps,
   type DetectionResult,
+  type Point,
   type ScannerStatus,
   type ScryfallCardWithDistance,
 } from "@magic-vault/shared";
 import { useCallback, useEffect, useRef, useState } from "react";
+
+// Weight given to the newest detection frame (0–1). Higher = tracks faster, less smooth.
+const SMOOTH_ALPHA = 0.35;
+
+function lerpPoint(a: Point, b: Point, t: number): Point {
+  return { x: a.x + (b.x - a.x) * t, y: a.y + (b.y - a.y) * t };
+}
+
+function smoothContour(prev: CardContour, next: CardContour, alpha: number): CardContour {
+  return {
+    topLeft:     lerpPoint(prev.topLeft,     next.topLeft,     alpha),
+    topRight:    lerpPoint(prev.topRight,    next.topRight,    alpha),
+    bottomRight: lerpPoint(prev.bottomRight, next.bottomRight, alpha),
+    bottomLeft:  lerpPoint(prev.bottomLeft,  next.bottomLeft,  alpha),
+  };
+}
 
 // Singleton AudioContext — browsers cap concurrent contexts (~6).
 // Creating one per scan exhausts the limit quickly.
@@ -95,6 +112,7 @@ export function useCardScanner({
   const lastDetectionRef = useRef<number>(0);
   const stableCountRef = useRef<number>(0);
   const lastResultRef = useRef<DetectionResult | null>(null);
+  const smoothedContourRef = useRef<CardContour | null>(null);
 
   const statusRef = useRef<ScannerStatus>("initializing");
   const pausedRef = useRef(true);
@@ -129,6 +147,7 @@ export function useCardScanner({
 
   const resetStability = useCallback(() => {
     stableCountRef.current = 0;
+    smoothedContourRef.current = null;
     setIsStable(false);
   }, []);
 
@@ -236,8 +255,20 @@ export function useCardScanner({
 
       const result = detectCard(imageData);
 
+      // Smooth corner positions to reduce jitter in the overlay
+      if (result.detected && result.contour) {
+        smoothedContourRef.current = smoothedContourRef.current
+          ? smoothContour(smoothedContourRef.current, result.contour, SMOOTH_ALPHA)
+          : result.contour;
+      } else {
+        smoothedContourRef.current = null;
+      }
+
       overlayCtx.clearRect(0, 0, overlayCanvas.width, overlayCanvas.height);
-      drawDetectionOverlay(overlayCtx, result);
+      drawDetectionOverlay(overlayCtx, smoothedContourRef.current
+        ? { detected: true, contour: smoothedContourRef.current, confidence: result.confidence }
+        : result,
+      );
 
       if (result.detected) {
         stableCountRef.current++;

@@ -1,4 +1,7 @@
-import { type ScannedCard, type ScryfallCardWithDistance } from "@magic-vault/shared";
+import {
+  type ScannedCard,
+  type ScryfallCardWithDistance,
+} from "@magic-vault/shared";
 
 function csvEscape(val: string): string {
   return val.includes(",") || val.includes('"')
@@ -40,7 +43,7 @@ export function exportToManabox(cards: ScannedCard[]) {
     card.set.toUpperCase(),
     csvEscape(card.set_name),
     card.collector_number,
-    card.foil ? "foil" : "",
+    "",
     String(quantity),
     card.id,
     "Near Mint",
