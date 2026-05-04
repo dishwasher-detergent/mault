@@ -24,6 +24,7 @@ import {
 } from "@tabler/icons-react";
 import { useQuery } from "@tanstack/react-query";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 
 function formatManaCost(manaCost: string): string {
   return manaCost.replace(/[{}]/g, " ").trim().replace(/\s+/g, " ");
@@ -159,180 +160,189 @@ export function CardSelectDialog({
   const hasNav = onPrev !== undefined || onNext !== undefined;
 
   return (
-    <DynamicDialog
-      trigger={trigger}
-      title={dialogTitle}
-      description={dialogDescription}
-      open={open}
-      onOpenChange={handleOpenChange}
-      className="sm:max-w-lg max-h-[80vh] flex flex-col gap-2"
-      footerClassName="flex-col-reverse"
-      footer={
-        currentCard && !editing ? (
+    <>
+      <DynamicDialog
+        trigger={trigger}
+        title={dialogTitle}
+        description={dialogDescription}
+        open={open}
+        onOpenChange={handleOpenChange}
+        className="sm:max-w-lg max-h-[80vh] flex flex-col gap-2"
+        footerClassName="flex-col-reverse"
+        footer={
+          currentCard && !editing ? (
+            <>
+              <Button variant="destructive" onClick={handleRemove}>
+                <IconTrash className="size-4" />
+                Remove
+              </Button>
+              <Button variant="outline" onClick={() => setEditing(true)}>
+                <IconPencil className="size-4" />
+                Correct Card
+              </Button>
+            </>
+          ) : undefined
+        }
+      >
+        {currentCard && !editing ? (
+          <div className="flex flex-col gap-2">
+            <div className="flex gap-3">
+              <div className="w-28 shrink-0 aspect-[2.5/3.5] rounded-lg overflow-hidden border">
+                <img
+                  src={currentCard.image_uris?.normal || ""}
+                  alt={currentCard.name}
+                  className="w-full h-full object-cover"
+                />
+              </div>
+              <div className="flex flex-col gap-1 min-w-0">
+                {currentCard.mana_cost && (
+                  <p className="text-xs text-muted-foreground">
+                    Mana: {formatManaCost(currentCard.mana_cost)}
+                  </p>
+                )}
+                {currentCard.oracle_text && (
+                  <p className="text-xs whitespace-pre-line leading-relaxed">
+                    {currentCard.oracle_text}
+                  </p>
+                )}
+                {currentCard.power != null && currentCard.toughness != null && (
+                  <p className="text-xs font-semibold">
+                    {currentCard.power}/{currentCard.toughness}
+                  </p>
+                )}
+                <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                  <span className="capitalize">{currentCard.rarity}</span>
+                  <span>·</span>
+                  <span>
+                    {currentCard.set_name} #{currentCard.collector_number}
+                  </span>
+                </div>
+                {prices.length > 0 && (
+                  <p className="text-xs text-muted-foreground">
+                    {prices.join(" · ")}
+                  </p>
+                )}
+                <p className="text-xs text-muted-foreground">
+                  Art by {currentCard.artist}
+                </p>
+                <a
+                  href={currentCard.scryfall_uri}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1 text-xs text-primary hover:underline"
+                >
+                  View on Scryfall
+                  <IconExternalLink className="h-3 w-3" />
+                </a>
+              </div>
+            </div>
+          </div>
+        ) : (
           <>
-            <Button variant="destructive" onClick={handleRemove}>
-              <IconTrash className="size-4" />
-              Remove
-            </Button>
-            <Button variant="outline" onClick={() => setEditing(true)}>
-              <IconPencil className="size-4" />
-              Correct Card
-            </Button>
-          </>
-        ) : undefined
-      }
-    >
-      {currentCard && !editing ? (
-        <div className="flex flex-col gap-2">
-          <div className="flex gap-3">
-            <div className="w-28 shrink-0 aspect-[2.5/3.5] rounded-lg overflow-hidden border">
-              <img
-                src={currentCard.image_uris?.normal || ""}
-                alt={currentCard.name}
-                className="w-full h-full object-cover"
-              />
-            </div>
-            <div className="flex flex-col gap-1 min-w-0">
-              {currentCard.mana_cost && (
-                <p className="text-xs text-muted-foreground">
-                  Mana: {formatManaCost(currentCard.mana_cost)}
-                </p>
-              )}
-              {currentCard.oracle_text && (
-                <p className="text-xs whitespace-pre-line leading-relaxed">
-                  {currentCard.oracle_text}
-                </p>
-              )}
-              {currentCard.power != null && currentCard.toughness != null && (
-                <p className="text-xs font-semibold">
-                  {currentCard.power}/{currentCard.toughness}
-                </p>
-              )}
-              <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                <span className="capitalize">{currentCard.rarity}</span>
-                <span>·</span>
-                <span>
-                  {currentCard.set_name} #{currentCard.collector_number}
-                </span>
+            <div className="flex gap-2">
+              <div className="relative flex-1">
+                <IconSearch className="absolute left-2 top-1/2 -translate-y-1/2 size-3 text-muted-foreground" />
+                <Input
+                  placeholder="Search by card name..."
+                  value={query}
+                  onChange={(e) => handleInputChange(e.target.value)}
+                  className="pl-7"
+                />
               </div>
-              {prices.length > 0 && (
-                <p className="text-xs text-muted-foreground">
-                  {prices.join(" · ")}
-                </p>
-              )}
-              <p className="text-xs text-muted-foreground">
-                Art by {currentCard.artist}
-              </p>
-              <a
-                href={currentCard.scryfall_uri}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-1 text-xs text-primary hover:underline"
-              >
-                View on Scryfall
-                <IconExternalLink className="h-3 w-3" />
-              </a>
-            </div>
-          </div>
-          {hasNav && (
-            <div className="flex items-center justify-between border-t border-border pt-2">
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={onPrev}
-                disabled={!hasPrev}
-              >
-                <IconChevronLeft className="size-4" />
-              </Button>
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={onNext}
-                disabled={!hasNext}
-              >
-                <IconChevronRight className="size-4" />
-              </Button>
-            </div>
-          )}
-        </div>
-      ) : (
-        <>
-          <div className="flex gap-2">
-            <div className="relative flex-1">
-              <IconSearch className="absolute left-2 top-1/2 -translate-y-1/2 size-3 text-muted-foreground" />
-              <Input
-                placeholder="Search by card name..."
-                value={query}
-                onChange={(e) => handleInputChange(e.target.value)}
-                className="pl-7"
-              />
-            </div>
-            {sets.length > 1 && (
-              <Select
-                value={selectedSet}
-                onValueChange={(value) => setSelectedSet(value)}
-              >
-                <SelectTrigger className="w-40 shrink-0">
-                  <SelectValue placeholder="All sets" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">
-                    All sets ({results.length})
-                  </SelectItem>
-                  {sets.map((s) => (
-                    <SelectItem key={s.code} value={s.code}>
-                      {s.name}
+              {sets.length > 1 && (
+                <Select
+                  value={selectedSet}
+                  onValueChange={(value) => setSelectedSet(value)}
+                >
+                  <SelectTrigger className="w-40 shrink-0">
+                    <SelectValue placeholder="All sets" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">
+                      All sets ({results.length})
                     </SelectItem>
+                    {sets.map((s) => (
+                      <SelectItem key={s.code} value={s.code}>
+                        {s.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              )}
+            </div>
+            <ScrollArea className="flex-1 overflow-y-auto min-h-0 max-h-[50vh] border rounded-lg p-1 bg-sidebar">
+              {loading && (
+                <div className="flex items-center justify-center py-8">
+                  <IconLoader2 className="size-5 animate-spin text-muted-foreground" />
+                </div>
+              )}
+              {!loading &&
+                filteredResults.length === 0 &&
+                query.trim().length === 0 && (
+                  <p className="text-center text-sm text-muted-foreground py-8">
+                    Start typing to search for cards
+                  </p>
+                )}
+              {!loading &&
+                filteredResults.length === 0 &&
+                query.trim().length >= 2 && (
+                  <p className="text-center text-sm text-muted-foreground py-8">
+                    No cards found
+                  </p>
+                )}
+              {!loading && filteredResults.length > 0 && (
+                <div className="grid grid-cols-3 gap-1">
+                  {filteredResults.map((card) => (
+                    <Button
+                      key={card.id}
+                      variant="ghost"
+                      className="relative w-full h-auto aspect-[2.5/3.5] p-0 rounded overflow-hidden group"
+                      onClick={() => handleSelect(card)}
+                    >
+                      {card.image_uris?.small ? (
+                        <img
+                          src={card.image_uris.small}
+                          alt={card.name}
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <div className="w-10 h-14 bg-muted rounded shrink-0" />
+                      )}
+                      <div className="absolute bottom-0 inset-x-0 bg-black/70 text-white text-[10px] leading-tight px-1 py-0.5 text-center truncate">
+                        {card.set.toUpperCase()} #{card.collector_number}
+                      </div>
+                    </Button>
                   ))}
-                </SelectContent>
-              </Select>
-            )}
-          </div>
-          <ScrollArea className="flex-1 overflow-y-auto min-h-0 max-h-[50vh] border rounded-lg p-1 bg-sidebar">
-            {loading && (
-              <div className="flex items-center justify-center py-8">
-                <IconLoader2 className="size-5 animate-spin text-muted-foreground" />
-              </div>
-            )}
-            {!loading &&
-              filteredResults.length === 0 &&
-              query.trim().length === 0 && (
-                <p className="text-center text-sm text-muted-foreground py-8">
-                  Start typing to search for cards
-                </p>
+                </div>
               )}
-            {!loading &&
-              filteredResults.length === 0 &&
-              query.trim().length >= 2 && (
-                <p className="text-center text-sm text-muted-foreground py-8">
-                  No cards found
-                </p>
-              )}
-            {!loading && filteredResults.length > 0 && (
-              <div className="grid grid-cols-3 gap-1">
-                {filteredResults.map((card) => (
-                  <Button
-                    key={card.id}
-                    variant="ghost"
-                    className="w-full h-auto aspect-[2.5/3.5] p-0 rounded overflow-hidden"
-                    onClick={() => handleSelect(card)}
-                  >
-                    {card.image_uris?.small ? (
-                      <img
-                        src={card.image_uris.small}
-                        alt={card.name}
-                        className="w-full h-full object-cover"
-                      />
-                    ) : (
-                      <div className="w-10 h-14 bg-muted rounded shrink-0" />
-                    )}
-                  </Button>
-                ))}
-              </div>
-            )}
-          </ScrollArea>
-        </>
-      )}
-    </DynamicDialog>
+            </ScrollArea>
+          </>
+        )}
+      </DynamicDialog>
+      {open &&
+        hasNav &&
+        !editing &&
+        createPortal(
+          <div className="fixed inset-0 pointer-events-none flex items-center justify-between px-4 z-[60]">
+            <Button
+              size="icon"
+              onClick={onPrev}
+              disabled={!hasPrev}
+              className="pointer-events-auto"
+            >
+              <IconChevronLeft className="size-5" />
+            </Button>
+            <Button
+              size="icon"
+              onClick={onNext}
+              disabled={!hasNext}
+              className="pointer-events-auto"
+            >
+              <IconChevronRight className="size-5" />
+            </Button>
+          </div>,
+          document.body,
+        )}
+    </>
   );
 }
