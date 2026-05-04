@@ -9,6 +9,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { CardFilterPopover } from "@/features/cards/components/card-filter-popover";
 import type { CardToolbarProps } from "@/features/cards/types";
 import { IconDownload, IconLoader2, IconTrash } from "@tabler/icons-react";
 import { useState } from "react";
@@ -23,6 +24,9 @@ export function CardToolbar({
   collectionName,
   onClearAll,
   hasCards,
+  activeFilters,
+  onFiltersChange,
+  activeFilterCount,
 }: CardToolbarProps) {
   const [isClearing, setIsClearing] = useState(false);
   const [clearAllDialogOpen, setClearAllDialogOpen] = useState(false);
@@ -94,6 +98,11 @@ export function CardToolbar({
           <SelectItem value="edhrec-desc">Rank (Worst First)</SelectItem>
         </SelectContent>
       </Select>
+      <CardFilterPopover
+        activeFilters={activeFilters}
+        onFiltersChange={onFiltersChange}
+        activeFilterCount={activeFilterCount}
+      />
       <ButtonGroup>
         <DynamicDialog
           open={exportDialogOpen}
@@ -117,7 +126,11 @@ export function CardToolbar({
           }
           footer={
             <>
-              <Button variant="outline" onClick={handleExportOnly} disabled={isDeleting}>
+              <Button
+                variant="outline"
+                onClick={handleExportOnly}
+                disabled={isDeleting}
+              >
                 Export Only
               </Button>
               <Button

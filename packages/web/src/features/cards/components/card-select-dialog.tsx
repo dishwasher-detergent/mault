@@ -14,6 +14,8 @@ import type { CardSelectDialogProps } from "@/features/cards/types";
 import { useScannedCards } from "@/features/scanner/api/use-scanned-cards";
 import { QUERY_MIN_LENGTH, type ScryfallCard } from "@magic-vault/shared";
 import {
+  IconChevronLeft,
+  IconChevronRight,
   IconExternalLink,
   IconLoader2,
   IconPencil,
@@ -21,7 +23,7 @@ import {
   IconTrash,
 } from "@tabler/icons-react";
 import { useQuery } from "@tanstack/react-query";
-import { useCallback, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 function formatManaCost(manaCost: string): string {
   return manaCost.replace(/[{}]/g, " ").trim().replace(/\s+/g, " ");
@@ -38,15 +40,44 @@ export function CardSelectDialog({
   scanId,
   onRemove,
   currentCard,
+  open: controlledOpen,
+  onOpenChange: controlledOnOpenChange,
+  onPrev,
+  onNext,
+  hasPrev,
+  hasNext,
 }: CardSelectDialogProps) {
-  const [open, setOpen] = useState(false);
+  const [internalOpen, setInternalOpen] = useState(false);
+  const isControlled = controlledOpen !== undefined;
+  const open = isControlled ? controlledOpen : internalOpen;
+
   const [editing, setEditing] = useState(!currentCard);
   const [query, setQuery] = useState<string>("");
   const [debouncedQuery, setDebouncedQuery] = useState<string>("");
   const [selectedSet, setSelectedSet] = useState<string | null>("all");
   const debounceRef = useRef<ReturnType<typeof setTimeout>>(null);
+  const prevCardIdRef = useRef(currentCard?.id);
 
   const { addCard, correctCard } = useScannedCards();
+
+  // Reset to view mode when navigating to a different card
+  useEffect(() => {
+    if (currentCard?.id && currentCard.id !== prevCardIdRef.current) {
+      prevCardIdRef.current = currentCard.id;
+      setEditing(false);
+    }
+  }, [currentCard?.id]);
+
+  // Keyboard navigation
+  useEffect(() => {
+    if (!open || editing) return;
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === "ArrowLeft" && hasPrev) onPrev?.();
+      if (e.key === "ArrowRight" && hasNext) onNext?.();
+    };
+    document.addEventListener("keydown", handler);
+    return () => document.removeEventListener("keydown", handler);
+  }, [open, editing, hasPrev, hasNext, onPrev, onNext]);
 
   const isQueryReady = debouncedQuery.trim().length >= QUERY_MIN_LENGTH;
 
@@ -71,14 +102,16 @@ export function CardSelectDialog({
       } else {
         addCard({ ...card, distance: 0 });
       }
-      setOpen(false);
+      handleOpenChange(false);
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [scanId, addCard, correctCard],
   );
 
   const handleOpenChange = useCallback(
     (isOpen: boolean) => {
-      setOpen(isOpen);
+      if (!isControlled) setInternalOpen(isOpen);
+      controlledOnOpenChange?.(isOpen);
       if (!isOpen) {
         setQuery("");
         setDebouncedQuery("");
@@ -86,13 +119,13 @@ export function CardSelectDialog({
         setEditing(!currentCard);
       }
     },
-    [currentCard],
+    [isControlled, controlledOnOpenChange, currentCard],
   );
 
   const handleRemove = useCallback(() => {
     onRemove?.();
-    setOpen(false);
-  }, [onRemove]);
+    handleOpenChange(false);
+  }, [onRemove, handleOpenChange]);
 
   const sets = useMemo(() => {
     const setMap = new Map<string, string>();
@@ -122,6 +155,8 @@ export function CardSelectDialog({
   const dialogTitle = currentCard && !editing ? currentCard.name : title;
   const dialogDescription =
     currentCard && !editing ? currentCard.type_line : description;
+
+  const hasNav = onPrev !== undefined || onNext !== undefined;
 
   return (
     <DynamicDialog
@@ -199,6 +234,26 @@ export function CardSelectDialog({
               </a>
             </div>
           </div>
+          {hasNav && (
+            <div className="flex items-center justify-between border-t border-border pt-2">
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={onPrev}
+                disabled={!hasPrev}
+              >
+                <IconChevronLeft className="size-4" />
+              </Button>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={onNext}
+                disabled={!hasNext}
+              >
+                <IconChevronRight className="size-4" />
+              </Button>
+            </div>
+          )}
         </div>
       ) : (
         <>

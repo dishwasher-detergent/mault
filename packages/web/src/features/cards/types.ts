@@ -2,12 +2,24 @@ import type { ReactElement } from "react";
 import type { ScryfallCardWithDistance } from "@magic-vault/shared";
 
 export interface CardSelectDialogProps {
-  trigger: ReactElement;
+  trigger?: ReactElement;
   title?: string;
   description?: string;
   scanId?: string;
   onRemove?: () => void;
   currentCard?: ScryfallCardWithDistance;
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
+  onPrev?: () => void;
+  onNext?: () => void;
+  hasPrev?: boolean;
+  hasNext?: boolean;
+}
+
+export interface CardFilters {
+  colors: string[];
+  rarities: string[];
+  bins: Array<number | null>;
 }
 
 export interface CardToolbarProps {
@@ -20,12 +32,14 @@ export interface CardToolbarProps {
   collectionName?: string;
   onClearAll: () => void;
   hasCards: boolean;
+  activeFilters: CardFilters;
+  onFiltersChange: (filters: CardFilters) => void;
+  activeFilterCount: number;
 }
 
 export interface ScannedCardItemProps {
   card: ScryfallCardWithDistance;
-  scanId: string;
-  onRemove: () => void;
+  onOpen: () => void;
   binNumber?: number;
   isSelected?: boolean;
   onToggleSelect?: () => void;

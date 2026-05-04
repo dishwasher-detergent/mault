@@ -89,8 +89,21 @@ void stopFeeder() {
 bool runFeeder() {
   unsigned long start = millis();
   while (millis() - start < (unsigned long)feederConfig.duration) {
+    // Check before starting the motor — catches cards that arrived during the pause
+    if (digitalRead(irPin(1)) == LOW) return true;
+
     setServoPosition(FEEDER_CHANNEL, feederConfig.speed);
-    delay(feederConfig.pulseDuration);
+
+    // Poll IR mid-pulse so we stop the moment the card trips the sensor
+    unsigned long pulseStart = millis();
+    while (millis() - pulseStart < (unsigned long)feederConfig.pulseDuration) {
+      if (digitalRead(irPin(1)) == LOW) {
+        stopFeeder();
+        return true;
+      }
+      delay(2);
+    }
+
     stopFeeder();
     if (digitalRead(irPin(1)) == LOW) return true;
     delay(feederConfig.pauseDuration);

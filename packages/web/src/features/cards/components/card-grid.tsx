@@ -9,6 +9,7 @@ import {
 } from "@/components/ui/dialog";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useCardFilterSort } from "@/features/cards/api/use-card-filter-sort";
+import { CardSelectDialog } from "@/features/cards/components/card-select-dialog";
 import { CardToolbar } from "@/features/cards/components/card-toolbar";
 import { ScannedCardItem } from "@/features/cards/components/scanned-card-item";
 import { exportToManabox } from "@/features/cards/lib/export-manabox";
@@ -34,11 +35,15 @@ export function CardGrid() {
     setSearchQuery,
     sortKey,
     setSortKey,
+    filters,
+    setFilters,
+    activeFilterCount,
   } = useCardFilterSort(cards);
 
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [newestScanId, setNewestScanId] = useState<string | null>(null);
+  const [openScanId, setOpenScanId] = useState<string | null>(null);
   const prevCardCountRef = useRef(cards.length);
 
   useEffect(() => {
@@ -50,6 +55,11 @@ export function CardGrid() {
     }
     prevCardCountRef.current = cards.length;
   }, [cards]);
+
+  const openIndex = openScanId
+    ? filteredAndSorted.findIndex((c) => c.scanId === openScanId)
+    : -1;
+  const openEntry = openIndex >= 0 ? filteredAndSorted[openIndex] : null;
 
   const toggleSelect = useCallback((scanId: string) => {
     setSelectedIds((prev) => {
@@ -136,6 +146,9 @@ export function CardGrid() {
           collectionName={activeCollection?.name}
           onClearAll={clearCards}
           hasCards={filteredAndSorted.length > 0}
+          activeFilters={filters}
+          onFiltersChange={setFilters}
+          activeFilterCount={activeFilterCount}
         />
       </div>
       {filteredAndSorted.length === 0 && (
@@ -150,8 +163,7 @@ export function CardGrid() {
             <ScannedCardItem
               key={card.scanId}
               card={card.card}
-              scanId={card.scanId}
-              onRemove={() => removeCard(card.scanId)}
+              onOpen={() => setOpenScanId(card.scanId)}
               binNumber={card.binNumber}
               isSelected={selectedIds.has(card.scanId)}
               onToggleSelect={() => toggleSelect(card.scanId)}
@@ -160,6 +172,25 @@ export function CardGrid() {
           ))}
         </AnimatePresence>
       </div>
+
+      <CardSelectDialog
+        open={openEntry !== null}
+        onOpenChange={(isOpen) => !isOpen && setOpenScanId(null)}
+        currentCard={openEntry?.card}
+        scanId={openEntry?.scanId}
+        onRemove={() => {
+          if (openEntry) removeCard(openEntry.scanId);
+          setOpenScanId(null);
+        }}
+        onPrev={() =>
+          setOpenScanId(filteredAndSorted[openIndex - 1]?.scanId ?? null)
+        }
+        onNext={() =>
+          setOpenScanId(filteredAndSorted[openIndex + 1]?.scanId ?? null)
+        }
+        hasPrev={openIndex > 0}
+        hasNext={openIndex < filteredAndSorted.length - 1}
+      />
 
       {selectedIds.size > 0 && (
         <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 flex items-center gap-3 rounded-lg border backdrop-blur-sm shadow-lg p-2 bg-sidebar">
