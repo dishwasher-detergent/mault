@@ -17,6 +17,7 @@ import {
 } from "@/features/collections/api/collections";
 import { useCollections } from "@/features/collections/api/use-collections";
 import { useSerial } from "@/features/scanner/api/use-serial";
+import { useScanTimer } from "@/features/scanner/api/use-scan-timer";
 import { toast } from "sonner";
 import type { ScannedCardsContextValue } from "@/features/scanner/types";
 import { generateScanId } from "@/lib/idb";
@@ -47,6 +48,9 @@ export function ScannedCardsProvider({
   const activeCollectionRef = useRef(activeCollection);
   const [autoFeed, setAutoFeedState] = useState(true);
   const autoFeedRef = useRef(true);
+  const [timerTrigger, setTimerTrigger] = useState<number | undefined>(undefined);
+  const [timerResetSignal, setTimerResetSignal] = useState(0);
+  const { elapsedMs, isActive: isTimerActive } = useScanTimer(timerTrigger, timerResetSignal);
 
   useEffect(() => {
     binConfigsRef.current = binConfigs;
@@ -145,6 +149,7 @@ export function ScannedCardsProvider({
 
     // Optimistic update
     setCards((prev) => [record, ...prev]);
+    setTimerTrigger(record.scannedAt);
 
     // Persist to server (fire-and-forget)
     addCollectionCard(collection.guid, record).catch((err) =>
@@ -251,6 +256,8 @@ export function ScannedCardsProvider({
   const clearCards = useCallback(() => {
     const collection = activeCollectionRef.current;
     setCards([]);
+    setTimerTrigger(undefined);
+    setTimerResetSignal((s) => s + 1);
     if (collection) {
       clearCollectionCards(collection.guid).catch((err) =>
         console.error("Failed to clear cards:", err),
@@ -264,6 +271,8 @@ export function ScannedCardsProvider({
         cards,
         isLoading,
         autoFeed,
+        elapsedMs,
+        isTimerActive,
         setAutoFeed,
         addCard,
         sendCatchAllBin,

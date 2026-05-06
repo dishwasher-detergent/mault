@@ -7,9 +7,18 @@ function formatUsd(value: number): string {
   return `$${value.toFixed(2)}`;
 }
 
+function formatElapsed(ms: number): string {
+  const s = Math.floor(ms / 1000);
+  const h = Math.floor(s / 3600);
+  const m = Math.floor((s % 3600) / 60);
+  const sec = s % 60;
+  if (h > 0) return `${h}:${String(m).padStart(2, "0")}:${String(sec).padStart(2, "0")}`;
+  return `${m}:${String(sec).padStart(2, "0")}`;
+}
+
 export function ScanStats() {
   const [expandedSets, setExpandedSets] = useState(false);
-  const { cards } = useScannedCards();
+  const { cards, elapsedMs, isTimerActive } = useScannedCards();
 
   const stats = useMemo(() => computeStats(cards), [cards]);
 
@@ -41,9 +50,23 @@ export function ScanStats() {
             <StatCard
               label="Total Value"
               value={formatUsd(stats.totalValue)}
-              className="border-r border-input"
+              className="border-r border-b border-input"
             />
-            <StatCard label="Avg Value" value={formatUsd(stats.avgValue)} />
+            <StatCard
+              label="Avg Value"
+              value={formatUsd(stats.avgValue)}
+              className="border-b border-input"
+            />
+            <StatCard
+              label="Session Time"
+              value={formatElapsed(elapsedMs)}
+              className="border-r border-input"
+              indicator={isTimerActive}
+            />
+            <StatCard
+              label="Cards / hr"
+              value={elapsedMs > 0 ? String(Math.round((cards.length / elapsedMs) * 3_600_000)) : "—"}
+            />
           </div>
           {stats.mostValuable && (
             <div className="p-2 border-t border-input">
@@ -148,16 +171,25 @@ function StatCard({
   label,
   value,
   className,
+  indicator,
 }: {
   label: string;
   value: string;
   className?: string;
+  indicator?: boolean;
 }) {
   return (
     <div className={`p-2 ${className ?? ""}`}>
-      <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-wide">
-        {label}
-      </p>
+      <div className="flex items-center gap-1.5">
+        <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-wide">
+          {label}
+        </p>
+        {indicator !== undefined && (
+          <span
+            className={`size-1.5 rounded-full shrink-0 ${indicator ? "bg-green-500 animate-pulse" : "bg-muted-foreground/40"}`}
+          />
+        )}
+      </div>
       <p className="text-sm font-semibold">{value}</p>
     </div>
   );

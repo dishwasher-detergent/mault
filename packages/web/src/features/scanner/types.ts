@@ -28,6 +28,8 @@ export interface ScannedCardsContextValue {
   cards: ScannedCard[];
   isLoading: boolean;
   autoFeed: boolean;
+  elapsedMs: number;
+  isTimerActive: boolean;
   setAutoFeed: (enabled: boolean) => void;
   addCard: (card: ScryfallCardWithDistance) => void;
   sendCatchAllBin: () => void;
