@@ -77,7 +77,10 @@ export function CardGrid() {
   }, [removeCards, selectedIds]);
 
   const handleExport = useCallback(() => {
-    exportToManabox(cards);
+    exportToManabox(
+      cards,
+      activeCollection?.name.replace(/\s+/g, "-").toLowerCase() ?? "collection",
+    );
   }, [cards]);
 
   const handleExportAndDelete = useCallback(async () => {

@@ -9,7 +9,7 @@ function csvEscape(val: string): string {
     : val;
 }
 
-export function exportToManabox(cards: ScannedCard[]) {
+export function exportToManabox(cards: ScannedCard[], collection: string) {
   if (cards.length === 0) return;
 
   const grouped = new Map<
@@ -56,7 +56,7 @@ export function exportToManabox(cards: ScannedCard[]) {
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
   a.href = url;
-  a.download = `mtg-vault-manabox-${new Date().toISOString().slice(0, 10)}.csv`;
+  a.download = `mtg-vault-manabox-${new Date().toISOString().slice(0, 10)}-${collection}.csv`;
   a.click();
   URL.revokeObjectURL(url);
 }
