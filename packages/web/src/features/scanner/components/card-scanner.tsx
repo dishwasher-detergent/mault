@@ -12,6 +12,7 @@ import { useSerial, useSerialMessage } from "@/features/scanner/api/use-serial";
 import { ScannerControls } from "@/features/scanner/components/scanner-controls";
 import { ScannerMenu } from "@/features/scanner/components/scanner-menu";
 import { ScannerOverlay } from "@/features/scanner/components/scanner-overlay";
+import { useIsMobile } from "@/hooks/use-is-mobile";
 import { useRole } from "@/hooks/use-role";
 import { cn } from "@/lib/utils";
 import type { CardScannerProps } from "@magic-vault/shared";
@@ -23,6 +24,7 @@ import { toast } from "sonner";
 export function CardScanner({ className }: CardScannerProps) {
   const navigate = useNavigate();
   const { isAdmin } = useRole();
+  const isMobile = useIsMobile();
   const { addCard, sendCatchAllBin, autoFeed, setAutoFeed } = useScannedCards();
   const {
     isConnected,
@@ -62,6 +64,7 @@ export function CardScanner({ className }: CardScannerProps) {
       }
     },
     onNoMatch: sendCatchAllBin,
+    rotated: !isMobile,
   });
 
   useSerialMessage((msg) => {
@@ -139,10 +142,10 @@ export function CardScanner({ className }: CardScannerProps) {
       <div className="relative overflow-hidden bg-background w-full h-full md:aspect-[2.5/3.5] max-w-full rounded-lg border">
         <video ref={videoRef} className="hidden" playsInline muted />
         <canvas ref={processingCanvasRef} className="hidden" />
-        <canvas ref={displayCanvasRef} className="absolute rotate-90" />
+        <canvas ref={displayCanvasRef} className={cn("absolute", !isMobile && "rotate-90")} />
         <canvas
           ref={overlayCanvasRef}
-          className="absolute z-20 pointer-events-none rotate-90"
+          className={cn("absolute z-20 pointer-events-none", !isMobile && "rotate-90")}
         />
         {isAdmin && debugImageUrl && (
           <Tooltip>

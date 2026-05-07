@@ -92,7 +92,8 @@ export function useCardScanner({
   onSearchResults,
   onNoMatch,
   onError,
-}: Omit<CardScannerProps, "className"> = {}) {
+  rotated = true,
+}: Omit<CardScannerProps, "className"> & { rotated?: boolean } = {}) {
   const {
     stream,
     status: cameraStatus,
@@ -103,6 +104,9 @@ export function useCardScanner({
     retryCamera,
     stopCamera,
   } = useCameraContext();
+
+  const rotatedRef = useRef(rotated);
+  rotatedRef.current = rotated;
 
   const videoRef = useRef<HTMLVideoElement>(null);
   const displayCanvasRef = useRef<HTMLCanvasElement>(null);
@@ -341,13 +345,15 @@ export function useCardScanner({
         }
 
         // Scale display/overlay canvases to fill the container (contain, no squish).
-        // Canvases are rotated -90° via CSS, so we swap width/height in the scale
-        // calculation — the visual dimensions are transposed relative to the layout box.
+        // When rotated 90° via CSS the visual dimensions are transposed, so we swap
+        // videoWidth/videoHeight in the scale calculation.
         const container = displayCanvasRef.current?.parentElement;
         if (container) {
           const cw = container.clientWidth;
           const ch = container.clientHeight;
-          const scale = Math.max(cw / videoHeight, ch / videoWidth);
+          const scale = rotatedRef.current
+            ? Math.max(cw / videoHeight, ch / videoWidth)
+            : Math.max(cw / videoWidth, ch / videoHeight);
           const cssW = Math.round(videoWidth * scale);
           const cssH = Math.round(videoHeight * scale);
           for (const ref of [displayCanvasRef, overlayCanvasRef]) {
