@@ -6,7 +6,7 @@ import { readFileSync } from "fs";
 import { execSync } from "child_process";
 
 const { version } = JSON.parse(
-  readFileSync(path.resolve(__dirname, "package.json"), "utf-8"),
+  readFileSync(path.resolve(__dirname, "../../package.json"), "utf-8"),
 );
 
 function getGitHash(): string {
