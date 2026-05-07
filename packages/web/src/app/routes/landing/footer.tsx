@@ -20,7 +20,7 @@ export function LandingFooter() {
           letterSpacing: "0.1em",
         }}
       >
-        MAGIC VAULT
+        MAULT
       </span>
 
       <div

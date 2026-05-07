@@ -26,7 +26,7 @@ export function LandingNav({ isSignedIn, onSignOut }: LandingNavProps) {
           color: "#A78BFA",
         }}
       >
-        MAGIC VAULT
+        MAULT
       </span>
 
       <div style={{ display: "flex", gap: "0.75rem", alignItems: "center" }}>
@@ -104,7 +104,9 @@ export function LandingNav({ isSignedIn, onSignOut }: LandingNavProps) {
                 borderRadius: "0.3rem",
                 transition: "background 0.15s",
               }}
-              onMouseOver={(e) => (e.currentTarget.style.background = "#6D28D9")}
+              onMouseOver={(e) =>
+                (e.currentTarget.style.background = "#6D28D9")
+              }
               onMouseOut={(e) => (e.currentTarget.style.background = "#7C3AED")}
             >
               GO TO APP
@@ -140,7 +142,9 @@ export function LandingNav({ isSignedIn, onSignOut }: LandingNavProps) {
                 borderRadius: "0.3rem",
                 transition: "background 0.15s",
               }}
-              onMouseOver={(e) => (e.currentTarget.style.background = "#6D28D9")}
+              onMouseOver={(e) =>
+                (e.currentTarget.style.background = "#6D28D9")
+              }
               onMouseOut={(e) => (e.currentTarget.style.background = "#7C3AED")}
             >
               GET STARTED
