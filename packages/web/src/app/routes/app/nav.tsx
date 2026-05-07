@@ -14,6 +14,7 @@ import {
   IconDatabase,
   IconFolders,
   IconLayoutGrid,
+  IconSettings,
 } from "@tabler/icons-react";
 import { NavLink } from "react-router-dom";
 
@@ -56,6 +57,7 @@ export function AppNav() {
     { to: "/app/collections", icon: <IconFolders />, label: "Collections" },
     { to: "/app/bins", icon: <IconLayoutGrid />, label: "Sorting Logic" },
     { to: "/app/calibrate", icon: <IconAdjustments />, label: "Calibrate" },
+    { to: "/app/settings", icon: <IconSettings />, label: "Settings" },
     ...(isAdmin
       ? [{ to: "/app/admin", icon: <IconDatabase />, label: "Admin" }]
       : []),

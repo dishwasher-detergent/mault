@@ -5,6 +5,7 @@ import CalibratePage from "@/app/routes/app/calibrate";
 import CollectionsPage from "@/app/routes/app/collections";
 import ScannerPage from "@/app/routes/app/index";
 import AppLayout from "@/app/routes/app/layout";
+import SettingsPage from "@/app/routes/app/settings";
 import AuthPage from "@/app/routes/auth";
 import LandingPage from "@/app/routes/index";
 import { useRole } from "@/hooks/use-role";
@@ -59,6 +60,10 @@ export const router = createBrowserRouter([
           {
             path: "/app/calibrate",
             element: <CalibratePage />,
+          },
+          {
+            path: "/app/settings",
+            element: <SettingsPage />,
           },
           {
             element: <AdminGuard />,

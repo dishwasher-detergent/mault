@@ -1,6 +1,7 @@
 import type { SyncState, SyncStatus } from "@magic-vault/shared";
 import { db } from "../db";
 import { cardImageVectors } from "../db/schema";
+import { sendDiscordNotification } from "./discord";
 import { vectorizeImageFromBuffer } from "./vectorize";
 
 type SseWriter = (event: string, data: unknown) => void;
@@ -49,7 +50,7 @@ export function cancelSync(): void {
   }
 }
 
-export function startSync(): void {
+export function startSync(userId?: string): void {
   if (state.status === "running") return;
 
   cancelFlag = false;
@@ -69,6 +70,14 @@ export function startSync(): void {
     const msg = err instanceof Error ? err.message : String(err);
     addLog(`Fatal error: ${msg}`);
     emit("error", { message: msg });
+    if (userId) {
+      void sendDiscordNotification(userId, {
+        title: "Magic Vault — Sync Failed",
+        description: `The card database sync job encountered a fatal error.\n\n**Error:** ${msg}`,
+        color: 0xed4245,
+        timestamp: new Date().toISOString(),
+      });
+    }
   });
 }
 

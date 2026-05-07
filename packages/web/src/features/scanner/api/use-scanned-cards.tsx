@@ -15,6 +15,7 @@ import {
   removeCollectionCards,
   updateCollectionCard,
 } from "@/features/collections/api/collections";
+import { reportSortError } from "@/features/notifications/api/notification-settings";
 import { useCollections } from "@/features/collections/api/use-collections";
 import { useSerial } from "@/features/scanner/api/use-serial";
 import { useScanTimer } from "@/features/scanner/api/use-scan-timer";
@@ -159,20 +160,22 @@ export function ScannedCardsProvider({
     if (matchedBin && serialRef.current.isConnected && serialRef.current.isReady) {
       serialRef.current.sendBin(matchedBin.binNumber).then((response) => {
         if (!response) {
-          toast.error("Routing failed", {
-            description: `No response from sorter for bin ${matchedBin.binNumber}.`,
-          });
+          const errMsg = `No response from sorter for bin ${matchedBin.binNumber}.`;
+          toast.error("Routing failed", { description: errMsg });
+          void reportSortError(card.name, matchedBin.binNumber, errMsg);
           autoFeedRef.current = false;
           setAutoFeedState(false);
           return;
         }
         const res = response as Record<string, unknown>;
         if (res.error) {
+          const errMsg = String(res.error);
           toast.error("Sorter error", {
-            description: String(res.error),
+            description: errMsg,
             duration: Infinity,
             dismissible: true,
           });
+          void reportSortError(card.name, matchedBin.binNumber, errMsg);
           autoFeedRef.current = false;
           setAutoFeedState(false);
           return;

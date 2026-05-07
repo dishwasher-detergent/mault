@@ -28,6 +28,7 @@ pnpm dev        # Vite on :5173, Hono on :3001
 ### Environment variables
 
 Root `.env`:
+
 ```
 DATABASE_URL=
 DATABASE_AUTHENTICATED_URL=
@@ -35,6 +36,7 @@ NEON_AUTH_URL=
 ```
 
 `packages/web/.env`:
+
 ```
 VITE_API_URL=http://localhost:3001
 ```
@@ -49,3 +51,17 @@ pnpm --filter @magic-vault/server db:studio   # open Drizzle Studio
 ## Arduino
 
 Upload `arduino/main/main.ino` (requires ArduinoJson library). Communicates via JSON over USB serial — web app sends `{"bin": N}`, Arduino routes the card.
+
+## Webcam
+
+Using a logitech C920 here are the settings that worked best for me.
+
+Auto Focus: Off
+Focus: 60%
+Auto Exposure: On
+Low Light Compensation: On
+Auto White Balance: On
+Brightness: 140
+Contrast: 170
+Saturation: 180
+Sharpness: 130

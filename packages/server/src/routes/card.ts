@@ -2,6 +2,7 @@ import type { SearchCardMatch } from "@magic-vault/shared";
 import { sql } from "drizzle-orm";
 import { Hono } from "hono";
 import { authQuery } from "../db";
+import { sendDiscordNotification } from "../lib/discord";
 import { Search, SearchById } from "../lib/scryfall/search";
 import { vectorizeImageFromBuffer } from "../lib/vectorize";
 import { requireAuth, type AppEnv } from "../middleware/auth";
@@ -70,6 +71,12 @@ router.post("/", requireAuth, async (c) => {
     return c.json(result);
   } catch (err) {
     console.error(err);
+    void sendDiscordNotification(c.get("userId"), {
+      title: "Magic Vault — Card Search Error",
+      description: "A database error occurred while searching for a card.",
+      color: 0xed4245,
+      timestamp: new Date().toISOString(),
+    });
     return c.json({ success: false, message: "Database error." }, 500);
   }
 });

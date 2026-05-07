@@ -8,6 +8,7 @@ import { cardRouter } from "./routes/card";
 import { collectionsRouter } from "./routes/collections";
 import { feederRouter } from "./routes/feeder";
 import { moduleConfigsRouter } from "./routes/module-configs";
+import { notificationsRouter } from "./routes/notifications";
 
 const app = new Hono<AppEnv>();
 const PORT = parseInt(process.env.PORT ?? "3001");
@@ -25,6 +26,7 @@ app.route("/bins", sortBinsRouter);
 app.route("/collections", collectionsRouter);
 app.route("/modules", moduleConfigsRouter);
 app.route("/feeder", feederRouter);
+app.route("/notifications", notificationsRouter);
 app.route("/admin", adminRouter);
 
 serve({ fetch: app.fetch, port: PORT, hostname: "0.0.0.0" }, () => {

@@ -208,6 +208,28 @@ export const collectionCards = pgTable(
   ],
 ).enableRLS();
 
+export const notificationSettings = pgTable(
+  "notification_settings",
+  {
+    id: serial().primaryKey(),
+    guid: uuid("guid").defaultRandom(),
+    userId: text("user_id")
+      .notNull()
+      .default(sql`auth.user_id()`),
+    discordWebhookUrl: text("discord_webhook_url"),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+    updatedAt: timestamp("updated_at").defaultNow().notNull(),
+  },
+  (table) => [
+    unique("notification_settings_user_idx").on(table.userId),
+    crudPolicy({
+      role: authenticatedRole,
+      read: authUid(table.userId),
+      modify: authUid(table.userId),
+    }),
+  ],
+).enableRLS();
+
 export const binSetRelations = relations(binSets, ({ many }) => ({
   bins: many(bins),
 }));
