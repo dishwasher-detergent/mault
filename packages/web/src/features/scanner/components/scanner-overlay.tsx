@@ -3,7 +3,6 @@ import type { ScannerOverlayProps } from "@/features/scanner/types";
 import {
   IconAlertTriangle,
   IconCamera,
-  IconDeviceUsb,
   IconLoader2,
   IconRefresh,
 } from "@tabler/icons-react";
@@ -28,35 +27,11 @@ export function ScannerOverlay({
     );
   }
 
-  if (!isConnected) {
+  if (isConnected && isReady && !hasCatchAll) {
     return (
-      <div className="absolute inset-0 z-30 flex items-center justify-center bg-background/80 backdrop-blur-sm rounded-lg p-4">
-        <div className="text-center text-xs text-muted-foreground">
-          <IconDeviceUsb className="mx-auto mb-2 size-5" />
-          <p>Connect scanning device to start scanning.</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (!isReady) {
-    return (
-      <div className="absolute inset-0 z-30 flex items-center justify-center bg-background/80 backdrop-blur-sm rounded-lg p-4">
-        <div className="text-center text-xs text-muted-foreground">
-          <IconLoader2 className="mx-auto mb-2 size-5 animate-spin" />
-          <p>Initializing scanning Device...</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (!hasCatchAll) {
-    return (
-      <div className="absolute inset-0 z-30 flex items-center justify-center bg-background/80 backdrop-blur-sm rounded-lg p-4">
-        <div className="text-center text-xs text-muted-foreground">
-          <IconAlertTriangle className="mx-auto mb-2 size-5" />
-          <p>Configure a catch-all bin to start scanning.</p>
-        </div>
+      <div className="absolute bottom-1 left-1 right-1 rounded-lg bg-background/50 backdrop-blur-3xl border text-xs px-2 py-1 flex flex-row gap-1 items-center">
+        <IconAlertTriangle className="size-4 shrink-0" />
+        <span>Configure a catch-all bin for sorting.</span>
       </div>
     );
   }

@@ -61,7 +61,6 @@ export interface ScannerControlsProps {
   onForceScan: () => void;
   onPause: () => void;
   onResume: () => void;
-  disabled?: boolean;
 }
 
 export interface ScannerOverlayProps {

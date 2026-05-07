@@ -117,7 +117,7 @@ export function CardScanner({ className }: CardScannerProps) {
     }
   };
 
-  const canScan = isConnected && isReady && hasCatchAll && isCameraActive;
+  const canScan = isCameraActive;
   const wasReadyRef = useRef(canScan);
   useEffect(() => {
     if (!canScan && wasReadyRef.current) {
@@ -188,27 +188,28 @@ export function CardScanner({ className }: CardScannerProps) {
           onAllowDuplicatesChange={setAllowDuplicates}
         />
       </div>
-      {isConnected && isCameraActive && (
+      {isCameraActive && (
         <ButtonGroup className="w-full *:flex-1">
           <ScannerControls
-            status={isReady && hasCatchAll ? status : "paused"}
+            status={status}
             onForceAddDuplicate={handleForceAddDuplicate}
             onForceScan={handleForceScan}
             onPause={() => {
               setAutoFeed(false);
               handlePause();
             }}
-            onResume={isReady && hasCatchAll ? handleResume : () => {}}
-            disabled={!isReady || !hasCatchAll}
+            onResume={handleResume}
           />
-          <Button
-            onClick={handleFeed}
-            variant="outline"
-            disabled={!isReady || isFeeding}
-          >
-            <IconArrowBarToDown />
-            {isFeeding ? "Feeding…" : "Feed"}
-          </Button>
+          {isConnected && (
+            <Button
+              onClick={handleFeed}
+              variant="outline"
+              disabled={!isReady || isFeeding}
+            >
+              <IconArrowBarToDown />
+              {isFeeding ? "Feeding…" : "Feed"}
+            </Button>
+          )}
         </ButtonGroup>
       )}
     </div>
