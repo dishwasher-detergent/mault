@@ -139,10 +139,10 @@ export function CardScanner({ className }: CardScannerProps) {
       <div className="relative overflow-hidden bg-background w-full h-full md:aspect-[2.5/3.5] max-w-full rounded-lg border">
         <video ref={videoRef} className="hidden" playsInline muted />
         <canvas ref={processingCanvasRef} className="hidden" />
-        <canvas ref={displayCanvasRef} className="absolute -rotate-90" />
+        <canvas ref={displayCanvasRef} className="absolute rotate-90" />
         <canvas
           ref={overlayCanvasRef}
-          className="absolute z-20 pointer-events-none -rotate-90"
+          className="absolute z-20 pointer-events-none rotate-90"
         />
         {isAdmin && debugImageUrl && (
           <Tooltip>

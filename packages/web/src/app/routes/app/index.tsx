@@ -1,15 +1,11 @@
-import {
-  Drawer,
-  DrawerContent,
-  DrawerTrigger,
-} from "@/components/ui/drawer";
+import { Drawer, DrawerContent, DrawerTrigger } from "@/components/ui/drawer";
 import { PresetSelector } from "@/features/bins/components/preset-selector";
 import { CardGrid } from "@/features/cards/components/card-grid";
 import { CollectionSwitcher } from "@/features/collections/components/collection-switcher";
 import { useScannedCards } from "@/features/scanner/api/use-scanned-cards";
 import { CardScanner } from "@/features/scanner/components/card-scanner";
-import { ScannerDebug } from "@/features/scanner/components/scanner-debug";
 import { ScanStats } from "@/features/scanner/components/scan-stats";
+import { ScannerDebug } from "@/features/scanner/components/scanner-debug";
 import { useIsMobile } from "@/hooks/use-is-mobile";
 import { IconCards } from "@tabler/icons-react";
 
@@ -18,12 +14,14 @@ function MobileScanner() {
 
   return (
     <div className="flex-1 min-h-0 relative overflow-hidden">
-      <CardScanner className="h-full w-full" />
+      <div className="p-2 size-full bg-sidebar">
+        <CardScanner className="size-full" />
+      </div>
       <Drawer>
         <DrawerTrigger asChild>
           <button
             type="button"
-            className="absolute bottom-3 left-1/2 -translate-x-1/2 z-10 flex items-center gap-2 bg-background/90 backdrop-blur-sm border rounded-full px-4 py-2 text-sm font-medium shadow-lg"
+            className="absolute bottom-5 left-1/2 -translate-x-1/2 z-10 flex items-center gap-2 bg-background/90 backdrop-blur-sm border rounded-full px-4 py-2 text-sm font-medium shadow-lg"
           >
             <IconCards size={16} />
             {cards.length} {cards.length === 1 ? "card" : "cards"}
