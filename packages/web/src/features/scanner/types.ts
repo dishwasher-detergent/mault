@@ -19,7 +19,10 @@ export interface CameraContextValue {
   errorMessage: string;
   zoom: number;
   zoomRange: ZoomRange | null;
+  cameras: MediaDeviceInfo[];
+  selectedCameraId: string | null;
   setZoom: (value: number) => void;
+  selectCamera: (deviceId: string) => void;
   retryCamera: () => Promise<void>;
   stopCamera: () => void;
 }

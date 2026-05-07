@@ -54,7 +54,10 @@ export function CardScanner({ className }: CardScannerProps) {
     handleStopCamera,
     zoom,
     zoomRange,
+    cameras,
+    selectedCameraId,
     setZoom,
+    selectCamera,
     allowDuplicates,
     setAllowDuplicates,
   } = useCardScanner({
@@ -180,8 +183,11 @@ export function CardScanner({ className }: CardScannerProps) {
           allowDuplicates={allowDuplicates}
           zoom={zoom}
           zoomRange={zoomRange}
+          cameras={cameras}
+          selectedCameraId={selectedCameraId}
           onCameraConnect={handleRetryError}
           onCameraDisconnect={handleStopCamera}
+          onCameraSelect={selectCamera}
           onZoomChange={setZoom}
           onScannerConnect={connect}
           onScannerDisconnect={disconnect}

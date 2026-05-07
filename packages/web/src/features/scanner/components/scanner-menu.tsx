@@ -25,8 +25,11 @@ interface ScannerMenuProps {
   allowDuplicates: boolean;
   zoom: number;
   zoomRange: ZoomRange | null;
+  cameras: MediaDeviceInfo[];
+  selectedCameraId: string | null;
   onCameraConnect: () => void;
   onCameraDisconnect: () => void;
+  onCameraSelect: (deviceId: string) => void;
   onZoomChange: (value: number) => void;
   onScannerConnect: () => void;
   onScannerDisconnect: () => void;
@@ -43,8 +46,11 @@ export function ScannerMenu({
   allowDuplicates,
   zoom,
   zoomRange,
+  cameras,
+  selectedCameraId,
   onCameraConnect,
   onCameraDisconnect,
+  onCameraSelect,
   onZoomChange,
   onScannerConnect,
   onScannerDisconnect,
@@ -68,6 +74,20 @@ export function ScannerMenu({
             <DropdownMenuSubContent>
               {isCameraActive ? (
                 <>
+                  {cameras.length > 1 && (
+                    <>
+                      {cameras.map((cam, i) => (
+                        <DropdownMenuCheckboxItem
+                          key={cam.deviceId}
+                          checked={cam.deviceId === selectedCameraId}
+                          onCheckedChange={() => onCameraSelect(cam.deviceId)}
+                        >
+                          {cam.label || `Camera ${i + 1}`}
+                        </DropdownMenuCheckboxItem>
+                      ))}
+                      <DropdownMenuSeparator />
+                    </>
+                  )}
                   <DropdownMenuItem onClick={onCameraConnect}>
                     Reconnect
                   </DropdownMenuItem>

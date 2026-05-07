@@ -100,7 +100,10 @@ export function useCardScanner({
     errorMessage: cameraError,
     zoom,
     zoomRange,
+    cameras,
+    selectedCameraId,
     setZoom,
+    selectCamera,
     retryCamera,
     stopCamera,
   } = useCameraContext();
@@ -457,7 +460,10 @@ export function useCardScanner({
     isCameraActive: cameraStatus === "ready",
     zoom,
     zoomRange,
+    cameras,
+    selectedCameraId,
     setZoom,
+    selectCamera,
     allowDuplicates,
     setAllowDuplicates,
   };

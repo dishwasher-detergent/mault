@@ -15,9 +15,10 @@ import {
 
 const CameraContext = createContext<CameraContextValue | null>(null);
 
-async function acquireStream(): Promise<MediaStream> {
+async function acquireStream(deviceId?: string): Promise<MediaStream> {
   const stream = await navigator.mediaDevices.getUserMedia({
     video: {
+      ...(deviceId ? { deviceId: { exact: deviceId } } : {}),
       width: { ideal: 1920 },
       height: { ideal: 1080 },
       zoom: true,
@@ -55,19 +56,24 @@ export function CameraProvider({ children }: { children: React.ReactNode }) {
   const [errorMessage, setErrorMessage] = useState("");
   const [zoom, setZoomState] = useState(1);
   const [zoomRange, setZoomRange] = useState<ZoomRange | null>(null);
+  const [cameras, setCameras] = useState<MediaDeviceInfo[]>([]);
+  const [selectedCameraId, setSelectedCameraId] = useState<string | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
 
-  const startCamera = useCallback(async () => {
+  const startCamera = useCallback(async (deviceId?: string) => {
     setStatus("requesting");
     setErrorMessage("");
     try {
-      const mediaStream = await acquireStream();
+      const mediaStream = await acquireStream(deviceId);
       streamRef.current = mediaStream;
       setStream(mediaStream);
       setStatus("ready");
 
       const track = mediaStream.getVideoTracks()[0];
       if (track) {
+        const activeDeviceId = track.getSettings().deviceId ?? null;
+        setSelectedCameraId(activeDeviceId);
+
         const caps = track.getCapabilities() as MediaTrackCapabilities & {
           zoom?: { min: number; max: number; step: number };
         };
@@ -78,6 +84,10 @@ export function CameraProvider({ children }: { children: React.ReactNode }) {
           setZoomRange(null);
         }
       }
+
+      // Enumerate cameras after permission is granted so labels are available
+      const devices = await navigator.mediaDevices.enumerateDevices();
+      setCameras(devices.filter((d) => d.kind === "videoinput"));
     } catch (err) {
       const msg =
         err instanceof DOMException && err.name === "NotAllowedError"
@@ -107,7 +117,12 @@ export function CameraProvider({ children }: { children: React.ReactNode }) {
 
   const retryCamera = useCallback(async () => {
     stopCamera();
-    await startCamera();
+    await startCamera(selectedCameraId ?? undefined);
+  }, [startCamera, stopCamera, selectedCameraId]);
+
+  const selectCamera = useCallback(async (deviceId: string) => {
+    stopCamera();
+    await startCamera(deviceId);
   }, [startCamera, stopCamera]);
 
   useEffect(() => {
@@ -123,7 +138,7 @@ export function CameraProvider({ children }: { children: React.ReactNode }) {
   }, [startCamera]);
 
   return (
-    <CameraContext value={{ stream, status, errorMessage, zoom, zoomRange, setZoom, retryCamera, stopCamera }}>
+    <CameraContext value={{ stream, status, errorMessage, zoom, zoomRange, cameras, selectedCameraId, setZoom, selectCamera, retryCamera, stopCamera }}>
       {children}
     </CameraContext>
   );
