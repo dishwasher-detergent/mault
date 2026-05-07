@@ -6,7 +6,9 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { useIsMobile } from "@/hooks/use-is-mobile";
 import { useRole } from "@/hooks/use-role";
+import { cn } from "@/lib/utils";
 import { UserButton } from "@neondatabase/neon-js/auth/react";
 import {
   IconAdjustments,
@@ -22,6 +24,7 @@ interface NavItemDef {
   to: string;
   icon: React.ReactNode;
   label: string;
+  mobileLabel?: string;
   end?: boolean;
 }
 
@@ -49,19 +52,81 @@ function SideNavItem({ to, icon, label, end }: NavItemDef) {
   );
 }
 
+function BottomNavItem({ to, icon, label, mobileLabel, end }: NavItemDef) {
+  return (
+    <NavLink
+      to={to}
+      end={end}
+      className={({ isActive }) =>
+        cn(
+          "flex flex-col items-center gap-0.5 px-2 py-1 rounded-md transition-colors text-muted-foreground",
+          isActive && "text-foreground",
+        )
+      }
+    >
+      {icon}
+      <span className="text-[10px] leading-none font-medium">
+        {mobileLabel ?? label}
+      </span>
+    </NavLink>
+  );
+}
+
 export function AppNav() {
   const { isAdmin } = useRole();
+  const isMobile = useIsMobile();
 
   const navItems: NavItemDef[] = [
-    { to: "/app", icon: <IconCamera />, label: "Scanner", end: true },
-    { to: "/app/collections", icon: <IconFolders />, label: "Collections" },
-    { to: "/app/bins", icon: <IconLayoutGrid />, label: "Sorting Logic" },
-    { to: "/app/calibrate", icon: <IconAdjustments />, label: "Calibrate" },
-    { to: "/app/settings", icon: <IconSettings />, label: "Settings" },
+    {
+      to: "/app",
+      icon: <IconCamera size={20} />,
+      label: "Scanner",
+      end: true,
+    },
+    {
+      to: "/app/collections",
+      icon: <IconFolders size={20} />,
+      label: "Collections",
+    },
+    {
+      to: "/app/bins",
+      icon: <IconLayoutGrid size={20} />,
+      label: "Sorting Logic",
+      mobileLabel: "Bins",
+    },
+    {
+      to: "/app/calibrate",
+      icon: <IconAdjustments size={20} />,
+      label: "Calibrate",
+    },
+    {
+      to: "/app/settings",
+      icon: <IconSettings size={20} />,
+      label: "Settings",
+    },
     ...(isAdmin
-      ? [{ to: "/app/admin", icon: <IconDatabase />, label: "Admin" }]
+      ? [
+          {
+            to: "/app/admin",
+            icon: <IconDatabase size={20} />,
+            label: "Admin",
+          },
+        ]
       : []),
   ];
+
+  if (isMobile) {
+    return (
+      <nav className="flex-none flex flex-row items-center justify-around bg-sidebar border-t px-1 py-1">
+        {navItems.map((item) => (
+          <BottomNavItem key={item.to} {...item} />
+        ))}
+        <div className="flex flex-col items-center gap-0.5 px-2 py-1">
+          <UserButton size="icon" side="top" />
+        </div>
+      </nav>
+    );
+  }
 
   return (
     <aside className="flex-none flex flex-col items-center bg-sidebar p-2 gap-2 h-full border-r">

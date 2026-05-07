@@ -104,7 +104,7 @@ export default function CollectionsPage() {
   }, [deleteTarget, deleteCollection]);
 
   return (
-    <div className="flex flex-col p-6 max-w-4xl mx-auto w-full gap-4">
+    <div className="flex flex-col p-4 md:p-6 max-w-4xl mx-auto w-full gap-4">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-lg font-semibold font-heading">Collections</h1>
