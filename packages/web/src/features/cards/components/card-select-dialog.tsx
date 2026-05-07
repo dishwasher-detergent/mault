@@ -41,6 +41,7 @@ export function CardSelectDialog({
   scanId,
   onRemove,
   currentCard,
+  capturedImageUrl,
   open: controlledOpen,
   onOpenChange: controlledOnOpenChange,
   onPrev,
@@ -185,56 +186,79 @@ export function CardSelectDialog({
         }
       >
         {currentCard && !editing ? (
-          <div className="flex flex-col gap-2">
-            <div className="flex gap-3">
-              <div className="w-28 shrink-0 aspect-[2.5/3.5] rounded-lg overflow-hidden border">
+          <div className="flex flex-col gap-3">
+            {capturedImageUrl ? (
+              <div className="flex gap-2">
+                <div className="flex flex-col gap-1 items-center flex-1 min-w-0">
+                  <p className="text-xs text-muted-foreground">Scanned</p>
+                  <div className="w-full aspect-[2.5/3.5] rounded-lg overflow-hidden border">
+                    <img
+                      src={capturedImageUrl}
+                      alt="Captured scan"
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                </div>
+                <div className="flex flex-col gap-1 items-center flex-1 min-w-0">
+                  <p className="text-xs text-muted-foreground">Match</p>
+                  <div className="w-full aspect-[2.5/3.5] rounded-lg overflow-hidden border">
+                    <img
+                      src={currentCard.image_uris?.normal || ""}
+                      alt={currentCard.name}
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div className="w-28 shrink-0 aspect-[2.5/3.5] rounded-lg overflow-hidden border self-start">
                 <img
                   src={currentCard.image_uris?.normal || ""}
                   alt={currentCard.name}
                   className="w-full h-full object-cover"
                 />
               </div>
-              <div className="flex flex-col gap-1 min-w-0">
-                {currentCard.mana_cost && (
-                  <p className="text-xs text-muted-foreground">
-                    Mana: {formatManaCost(currentCard.mana_cost)}
-                  </p>
-                )}
-                {currentCard.oracle_text && (
-                  <p className="text-xs whitespace-pre-line leading-relaxed">
-                    {currentCard.oracle_text}
-                  </p>
-                )}
-                {currentCard.power != null && currentCard.toughness != null && (
-                  <p className="text-xs font-semibold">
-                    {currentCard.power}/{currentCard.toughness}
-                  </p>
-                )}
-                <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                  <span className="capitalize">{currentCard.rarity}</span>
-                  <span>·</span>
-                  <span>
-                    {currentCard.set_name} #{currentCard.collector_number}
-                  </span>
-                </div>
-                {prices.length > 0 && (
-                  <p className="text-xs text-muted-foreground">
-                    {prices.join(" · ")}
-                  </p>
-                )}
+            )}
+            <div className="flex flex-col gap-1 min-w-0">
+              {currentCard.mana_cost && (
                 <p className="text-xs text-muted-foreground">
-                  Art by {currentCard.artist}
+                  Mana: {formatManaCost(currentCard.mana_cost)}
                 </p>
-                <a
-                  href={currentCard.scryfall_uri}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1 text-xs text-primary hover:underline"
-                >
-                  View on Scryfall
-                  <IconExternalLink className="h-3 w-3" />
-                </a>
+              )}
+              {currentCard.oracle_text && (
+                <p className="text-xs whitespace-pre-line leading-relaxed">
+                  {currentCard.oracle_text}
+                </p>
+              )}
+              {currentCard.power != null && currentCard.toughness != null && (
+                <p className="text-xs font-semibold">
+                  {currentCard.power}/{currentCard.toughness}
+                </p>
+              )}
+              <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                <span className="capitalize">{currentCard.rarity}</span>
+                <span>·</span>
+                <span>
+                  {currentCard.set_name} #{currentCard.collector_number}
+                </span>
               </div>
+              {prices.length > 0 && (
+                <p className="text-xs text-muted-foreground">
+                  {prices.join(" · ")}
+                </p>
+              )}
+              <p className="text-xs text-muted-foreground">
+                Art by {currentCard.artist}
+              </p>
+              <a
+                href={currentCard.scryfall_uri}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1 text-xs text-primary hover:underline"
+              >
+                View on Scryfall
+                <IconExternalLink className="h-3 w-3" />
+              </a>
             </div>
           </div>
         ) : (

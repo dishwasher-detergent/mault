@@ -39,27 +39,40 @@ function medianPixelValue(mat: cv.Mat): number {
 function scoreContour(contour: CardContour, frameArea: number): number {
   const { topLeft, topRight, bottomRight, bottomLeft } = contour;
 
-  const widthTop    = Math.hypot(topRight.x - topLeft.x,     topRight.y - topLeft.y);
-  const widthBottom = Math.hypot(bottomRight.x - bottomLeft.x, bottomRight.y - bottomLeft.y);
-  const heightLeft  = Math.hypot(bottomLeft.x - topLeft.x,   bottomLeft.y - topLeft.y);
-  const heightRight = Math.hypot(bottomRight.x - topRight.x, bottomRight.y - topRight.y);
+  const widthTop = Math.hypot(topRight.x - topLeft.x, topRight.y - topLeft.y);
+  const widthBottom = Math.hypot(
+    bottomRight.x - bottomLeft.x,
+    bottomRight.y - bottomLeft.y,
+  );
+  const heightLeft = Math.hypot(
+    bottomLeft.x - topLeft.x,
+    bottomLeft.y - topLeft.y,
+  );
+  const heightRight = Math.hypot(
+    bottomRight.x - topRight.x,
+    bottomRight.y - topRight.y,
+  );
 
-  const avgWidth  = (widthTop + widthBottom) / 2;
+  const avgWidth = (widthTop + widthBottom) / 2;
   const avgHeight = (heightLeft + heightRight) / 2;
 
   if (avgHeight === 0 || avgWidth === 0) return 0;
 
   // How close to the MTG card aspect ratio
   const aspectRatio = avgWidth / avgHeight;
-  const aspectScore = 1 - Math.abs(aspectRatio - MTG_ASPECT_RATIO) / MTG_ASPECT_RATIO;
+  const aspectScore =
+    1 - Math.abs(aspectRatio - MTG_ASPECT_RATIO) / MTG_ASPECT_RATIO;
 
   // Prefer cards that fill a meaningful portion of the frame
   const area = avgWidth * avgHeight;
   const areaScore = Math.min((area / frameArea) * 4, 1);
 
   // Opposite sides should be roughly the same length (parallelogram check)
-  const widthSym  = 1 - Math.abs(widthTop - widthBottom)   / Math.max(widthTop, widthBottom, 1);
-  const heightSym = 1 - Math.abs(heightLeft - heightRight) / Math.max(heightLeft, heightRight, 1);
+  const widthSym =
+    1 - Math.abs(widthTop - widthBottom) / Math.max(widthTop, widthBottom, 1);
+  const heightSym =
+    1 -
+    Math.abs(heightLeft - heightRight) / Math.max(heightLeft, heightRight, 1);
   const symmetryScore = (widthSym + heightSym) / 2;
 
   return Math.max(0, aspectScore * 0.6 + areaScore * 0.2 + symmetryScore * 0.2);
@@ -73,22 +86,26 @@ const PROC_WIDTH = 640;
  * Detect an MTG card in an ImageData frame using OpenCV.js contour detection.
  */
 export function detectCard(imageData: ImageData): DetectionResult {
-  const noDetection: DetectionResult = { detected: false, contour: null, confidence: 0 };
+  const noDetection: DetectionResult = {
+    detected: false,
+    contour: null,
+    confidence: 0,
+  };
 
-  const scale  = PROC_WIDTH / imageData.width;
-  const procH  = Math.round(imageData.height * scale);
+  const scale = PROC_WIDTH / imageData.width;
+  const procH = Math.round(imageData.height * scale);
   const frameArea = PROC_WIDTH * procH;
-  const minArea   = frameArea * 0.05;
-  const maxArea   = frameArea * 0.95;
+  const minArea = frameArea * 0.05;
+  const maxArea = frameArea * 0.95;
 
-  const src      = cv.matFromImageData(imageData);
-  const scaled   = new cv.Mat();
-  const gray     = new cv.Mat();
-  const blurred  = new cv.Mat();
-  const edges    = new cv.Mat();
-  const morphed  = new cv.Mat();
+  const src = cv.matFromImageData(imageData);
+  const scaled = new cv.Mat();
+  const gray = new cv.Mat();
+  const blurred = new cv.Mat();
+  const edges = new cv.Mat();
+  const morphed = new cv.Mat();
   const hierarchy = new cv.Mat();
-  const contours  = new cv.MatVector();
+  const contours = new cv.MatVector();
   let kernel: cv.Mat | null = null;
 
   try {
@@ -100,9 +117,9 @@ export function detectCard(imageData: ImageData): DetectionResult {
 
     // Auto-calibrate Canny thresholds from the image's median brightness
     const median = medianPixelValue(blurred);
-    const sigma  = 0.33;
-    const lower  = Math.max(0,   Math.round((1 - sigma) * median));
-    const upper  = Math.min(255, Math.round((1 + sigma) * median));
+    const sigma = 0.33;
+    const lower = Math.max(0, Math.round((1 - sigma) * median));
+    const upper = Math.min(255, Math.round((1 + sigma) * median));
     cv.Canny(blurred, edges, lower, upper);
 
     // Morphological close: 2× dilate then erode bridges edge gaps better than dilate alone
@@ -110,13 +127,19 @@ export function detectCard(imageData: ImageData): DetectionResult {
     cv.dilate(edges, morphed, kernel, new cv.Point(-1, -1), 2);
     cv.erode(morphed, morphed, kernel, new cv.Point(-1, -1), 1);
 
-    cv.findContours(morphed, contours, hierarchy, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE);
+    cv.findContours(
+      morphed,
+      contours,
+      hierarchy,
+      cv.RETR_EXTERNAL,
+      cv.CHAIN_APPROX_SIMPLE,
+    );
 
     let bestResult: DetectionResult = noDetection;
 
     for (let i = 0; i < contours.size(); i++) {
       const contour = contours.get(i);
-      const area    = cv.contourArea(contour);
+      const area = cv.contourArea(contour);
       if (area < minArea || area > maxArea) continue;
 
       const perimeter = cv.arcLength(contour, true);
@@ -143,13 +166,16 @@ export function detectCard(imageData: ImageData): DetectionResult {
         const points: Point[] = [];
         for (let j = 0; j < 4; j++) {
           points.push({
-            x: approx.data32S[j * 2]     / scale,
+            x: approx.data32S[j * 2] / scale,
             y: approx.data32S[j * 2 + 1] / scale,
           });
         }
 
-        const ordered    = orderPoints(points);
-        const confidence = scoreContour(ordered, imageData.width * imageData.height);
+        const ordered = orderPoints(points);
+        const confidence = scoreContour(
+          ordered,
+          imageData.width * imageData.height,
+        );
 
         if (confidence > bestResult.confidence && confidence > 0.35) {
           bestResult = { detected: true, contour: ordered, confidence };
@@ -186,9 +212,20 @@ export function extractCardImage(
   // If the card bounding box is wider than tall, it's landscape in the frame.
   // Warp to a landscape canvas matching that ratio, then rotate 90° CW to portrait
   // so extractArtRegion receives a correctly-oriented image and nothing gets squished.
-  const xs = [contour.topLeft.x, contour.topRight.x, contour.bottomRight.x, contour.bottomLeft.x];
-  const ys = [contour.topLeft.y, contour.topRight.y, contour.bottomRight.y, contour.bottomLeft.y];
-  const isLandscape = (Math.max(...xs) - Math.min(...xs)) > (Math.max(...ys) - Math.min(...ys));
+  const xs = [
+    contour.topLeft.x,
+    contour.topRight.x,
+    contour.bottomRight.x,
+    contour.bottomLeft.x,
+  ];
+  const ys = [
+    contour.topLeft.y,
+    contour.topRight.y,
+    contour.bottomRight.y,
+    contour.bottomLeft.y,
+  ];
+  const isLandscape =
+    Math.max(...xs) - Math.min(...xs) > Math.max(...ys) - Math.min(...ys);
 
   const warpW = isLandscape ? outputHeight : outputWidth;
   const warpH = isLandscape ? outputWidth : outputHeight;
@@ -196,7 +233,12 @@ export function extractCardImage(
   const ctx = sourceCanvas.getContext("2d");
   if (!ctx) throw new Error("Could not get canvas context");
 
-  const imageData = ctx.getImageData(0, 0, sourceCanvas.width, sourceCanvas.height);
+  const imageData = ctx.getImageData(
+    0,
+    0,
+    sourceCanvas.width,
+    sourceCanvas.height,
+  );
   const src = cv.matFromImageData(imageData);
   const dst = new cv.Mat();
 
@@ -212,10 +254,14 @@ export function extractCardImage(
   ]);
 
   const dstPts = cv.matFromArray(4, 1, cv.CV_32FC2, [
-    0, 0,
-    warpW, 0,
-    warpW, warpH,
-    0, warpH,
+    0,
+    0,
+    warpW,
+    0,
+    warpW,
+    warpH,
+    0,
+    warpH,
   ]);
 
   let transformMatrix: cv.Mat | null = null;
@@ -267,11 +313,11 @@ function findEdgeRow(
   yMinFrac: number,
   yMaxFrac: number,
 ): { row: number; score: number } {
-  const xLeft  = Math.floor(width * 0.10);
-  const xRight = Math.floor(width * 0.90);
-  const span   = xRight - xLeft;
-  const yMin   = Math.floor(height * yMinFrac);
-  const yMax   = Math.floor(height * yMaxFrac);
+  const xLeft = Math.floor(width * 0.1);
+  const xRight = Math.floor(width * 0.9);
+  const span = xRight - xLeft;
+  const yMin = Math.floor(height * yMinFrac);
+  const yMax = Math.floor(height * yMaxFrac);
 
   let bestRow = Math.floor(height * ((yMinFrac + yMaxFrac) / 2));
   let bestScore = 0;
@@ -282,12 +328,16 @@ function findEdgeRow(
       const i = (y * width + x) * 4;
       const j = ((y + 1) * width + x) * 4;
       sum +=
-        (Math.abs(data[i]     - data[j])     +
-         Math.abs(data[i + 1] - data[j + 1]) +
-         Math.abs(data[i + 2] - data[j + 2])) / 3;
+        (Math.abs(data[i] - data[j]) +
+          Math.abs(data[i + 1] - data[j + 1]) +
+          Math.abs(data[i + 2] - data[j + 2])) /
+        3;
     }
     const score = sum / span;
-    if (score > bestScore) { bestScore = score; bestRow = y; }
+    if (score > bestScore) {
+      bestScore = score;
+      bestRow = y;
+    }
   }
 
   return { row: bestRow, score: bestScore };
@@ -325,10 +375,10 @@ function detectArtBounds(canvas: HTMLCanvasElement): {
   const nameBar = findEdgeRow(data, W, H, 0.08, 0.16);
 
   return {
-    top:    nameBar.row / H,
-    left:   0.06,
+    top: nameBar.row / H,
+    left: 0.06,
     bottom: typeLine.row / H,
-    right:  0.94,
+    right: 0.94,
   };
 }
 
@@ -336,26 +386,26 @@ function detectArtBounds(canvas: HTMLCanvasElement): {
  * Extract just the art region from a perspective-warped card canvas.
  * Automatically handles both regular and full-art cards.
  */
-export function extractArtRegion(warpedCanvas: HTMLCanvasElement): HTMLCanvasElement {
+export function extractArtRegion(
+  warpedCanvas: HTMLCanvasElement,
+): HTMLCanvasElement {
   const W = warpedCanvas.width;
   const H = warpedCanvas.height;
   const { top, left, bottom, right } = detectArtBounds(warpedCanvas);
 
-  const artLeft   = Math.floor(left   * W);
-  const artTop    = Math.floor(top    * H);
-  const artRight  = Math.floor(right  * W);
+  const artLeft = Math.floor(left * W);
+  const artTop = Math.floor(top * H);
+  const artRight = Math.floor(right * W);
   const artBottom = Math.floor(bottom * H);
-  const artW = artRight  - artLeft;
+  const artW = artRight - artLeft;
   const artH = artBottom - artTop;
 
   const artCanvas = document.createElement("canvas");
-  artCanvas.width  = artW;
+  artCanvas.width = artW;
   artCanvas.height = artH;
-  artCanvas.getContext("2d")!.drawImage(
-    warpedCanvas,
-    artLeft, artTop, artW, artH,
-    0, 0, artW, artH,
-  );
+  artCanvas
+    .getContext("2d")!
+    .drawImage(warpedCanvas, artLeft, artTop, artW, artH, 0, 0, artW, artH);
   return artCanvas;
 }
 
@@ -397,7 +447,7 @@ export function drawDetectionOverlay(
     .trim();
   const color = primaryRaw ? `${primaryRaw}` : "#6d28d9";
 
-  const lineWidth = 6;
+  const lineWidth = 12;
   const radius = 16;
 
   ctx.save();

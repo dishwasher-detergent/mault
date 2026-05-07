@@ -129,6 +129,7 @@ export function useCardScanner({
   const [duplicateCard, setDuplicateCard] =
     useState<ScryfallCardWithDistance | null>(null);
   const [debugImageUrl, setDebugImageUrl] = useState<string | null>(null);
+  const debugImageUrlRef = useRef<string | null>(null);
   const [allowDuplicates, setAllowDuplicates] = useState(true);
 
   const updateStatus = useCallback((newStatus: ScannerStatus) => {
@@ -188,6 +189,7 @@ export function useCardScanner({
       try {
         const { card, debugImageUrl } = await searchCardImage(canvas, contour);
         setDebugImageUrl(debugImageUrl);
+        debugImageUrlRef.current = debugImageUrl;
 
         if (card) {
           if (checkDuplicate && !allowDuplicates && lastScannedCardIdRef.current === card.id) {
@@ -195,7 +197,7 @@ export function useCardScanner({
             updateStatus("duplicate");
           } else {
             lastScannedCardIdRef.current = card.id;
-            onSearchResultsRef.current?.([card]);
+            onSearchResultsRef.current?.([card], debugImageUrl);
             updateStatus("scanning");
           }
         } else {
@@ -385,7 +387,7 @@ export function useCardScanner({
 
   const handleForceAddDuplicate = useCallback(() => {
     if (duplicateCard) {
-      onSearchResultsRef.current?.([duplicateCard]);
+      onSearchResultsRef.current?.([duplicateCard], debugImageUrlRef.current ?? undefined);
       setDuplicateCard(null);
       updateStatus("scanning");
     }

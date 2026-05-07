@@ -56,9 +56,9 @@ export function CardScanner({ className }: CardScannerProps) {
     allowDuplicates,
     setAllowDuplicates,
   } = useCardScanner({
-    onSearchResults: (cards) => {
+    onSearchResults: (cards, capturedImageUrl) => {
       for (const card of cards) {
-        addCard(card);
+        addCard(card, capturedImageUrl);
       }
     },
     onNoMatch: sendCatchAllBin,

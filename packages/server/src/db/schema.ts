@@ -193,6 +193,7 @@ export const collectionCards = pgTable(
     card: jsonb("card").notNull(),
     scannedAt: timestamp("scanned_at").notNull(),
     binNumber: integer("bin_number"),
+    capturedImageDataUrl: text("captured_image_data_url"),
     userId: text("user_id")
       .notNull()
       .default(sql`auth.user_id()`),

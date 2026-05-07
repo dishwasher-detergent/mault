@@ -180,6 +180,7 @@ export function CardGrid() {
         open={openEntry !== null}
         onOpenChange={(isOpen) => !isOpen && setOpenScanId(null)}
         currentCard={openEntry?.card}
+        capturedImageUrl={openEntry?.capturedImageUrl}
         scanId={openEntry?.scanId}
         onRemove={() => {
           if (openEntry) removeCard(openEntry.scanId);

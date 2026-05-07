@@ -30,7 +30,7 @@ export type ScannerStatus =
   | "error";
 
 export interface CardScannerProps {
-  onSearchResults?: (matches: ScryfallCardWithDistance[]) => void;
+  onSearchResults?: (matches: ScryfallCardWithDistance[], capturedImageUrl?: string) => void;
   onNoMatch?: () => void;
   onManualAdd?: () => void;
   onError?: (error: string) => void;
@@ -48,4 +48,5 @@ export interface ScannedCard {
   card: ScryfallCardWithDistance;
   scannedAt: number;
   binNumber?: number;
+  capturedImageUrl?: string;
 }

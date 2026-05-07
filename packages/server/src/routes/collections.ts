@@ -31,12 +31,14 @@ function toScannedCard(row: {
   card: unknown;
   scannedAt: Date;
   binNumber: number | null;
+  capturedImageDataUrl?: string | null;
 }): ScannedCard {
   return {
     scanId: row.guid!,
     card: row.card as ScryfallCardWithDistance,
     scannedAt: row.scannedAt.getTime(),
     binNumber: row.binNumber ?? undefined,
+    capturedImageUrl: row.capturedImageDataUrl ?? undefined,
   };
 }
 
@@ -205,6 +207,7 @@ router.get("/:guid/cards", requireAuth, async (c) => {
           card: collectionCards.card,
           scannedAt: collectionCards.scannedAt,
           binNumber: collectionCards.binNumber,
+          capturedImageDataUrl: collectionCards.capturedImageDataUrl,
         })
         .from(collectionCards)
         .where(eq(collectionCards.collectionId, collection.id))
@@ -222,7 +225,7 @@ router.get("/:guid/cards", requireAuth, async (c) => {
 // POST /collections/:guid/cards — add card
 router.post("/:guid/cards", requireAuth, async (c) => {
   const guid = c.req.param("guid");
-  const { scanId, card, scannedAt, binNumber } = await c.req.json<ScannedCard>();
+  const { scanId, card, scannedAt, binNumber, capturedImageUrl } = await c.req.json<ScannedCard>();
   try {
     const result = await authQuery(c.get("jwtClaims"), async (tx) => {
       const collection = await tx.query.collections.findFirst({
@@ -238,6 +241,7 @@ router.post("/:guid/cards", requireAuth, async (c) => {
         card,
         scannedAt: new Date(scannedAt),
         binNumber: binNumber ?? null,
+        capturedImageDataUrl: capturedImageUrl ?? null,
       }).onConflictDoNothing();
 
       // bump collection updatedAt
@@ -246,7 +250,7 @@ router.post("/:guid/cards", requireAuth, async (c) => {
         .set({ updatedAt: new Date() })
         .where(eq(collections.id, collection.id));
 
-      return { success: true, data: { scanId, card, scannedAt, binNumber } as ScannedCard };
+      return { success: true, data: { scanId, card, scannedAt, binNumber, capturedImageUrl } as ScannedCard };
     });
     return c.json(result);
   } catch (err) {

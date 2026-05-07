@@ -8,6 +8,7 @@ export interface CardSelectDialogProps {
   scanId?: string;
   onRemove?: () => void;
   currentCard?: ScryfallCardWithDistance;
+  capturedImageUrl?: string;
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
   onPrev?: () => void;
