@@ -1,8 +1,6 @@
 import { AppProviders } from "@/app/providers";
 import { AppNav } from "@/app/routes/app/nav";
 import { EnvBanner } from "@/components/env-banner";
-import { SyncIndicator } from "@/components/sync-indicator";
-import { Toaster } from "@/components/ui/sonner";
 import { useIsMobile } from "@/hooks/use-is-mobile";
 import { Outlet } from "react-router-dom";
 
@@ -32,8 +30,6 @@ export default function AppLayout() {
           </div>
         </div>
       )}
-      <SyncIndicator />
-      <Toaster />
     </AppProviders>
   );
 }

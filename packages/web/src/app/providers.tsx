@@ -1,10 +1,11 @@
-import { SerialProvider } from "@/features/scanner/api/use-serial";
+import { SyncIndicator } from "@/components/sync-indicator";
 import { BinConfigsProvider } from "@/features/bins/api/use-bin-configs";
-import { CollectionsProvider } from "@/features/collections/api/use-collections";
 import { FeederConfigProvider } from "@/features/calibration/api/use-feeder-config";
 import { ModuleConfigsProvider } from "@/features/calibration/api/use-module-configs";
-import { ScannedCardsProvider } from "@/features/scanner/api/use-scanned-cards";
+import { CollectionsProvider } from "@/features/collections/api/use-collections";
 import { CameraProvider } from "@/features/scanner/api/use-camera";
+import { ScannedCardsProvider } from "@/features/scanner/api/use-scanned-cards";
+import { SerialProvider } from "@/features/scanner/api/use-serial";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
 const queryClient = new QueryClient({
@@ -25,7 +26,10 @@ export function AppProviders({ children }: { children: React.ReactNode }) {
             <CollectionsProvider>
               <ModuleConfigsProvider>
                 <FeederConfigProvider>
-                  <ScannedCardsProvider>{children}</ScannedCardsProvider>
+                  <ScannedCardsProvider>
+                    {children}
+                    <SyncIndicator />
+                  </ScannedCardsProvider>
                 </FeederConfigProvider>
               </ModuleConfigsProvider>
             </CollectionsProvider>
