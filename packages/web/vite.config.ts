@@ -1,28 +1,17 @@
 import tailwindcss from "@tailwindcss/vite";
 import react from "@vitejs/plugin-react";
+import { readFileSync } from "fs";
 import path from "path";
 import { defineConfig } from "vite";
-import { readFileSync } from "fs";
-import { execSync } from "child_process";
 
 const { version } = JSON.parse(
   readFileSync(path.resolve(__dirname, "../../package.json"), "utf-8"),
 );
 
-function getGitHash(): string {
-  try {
-    return execSync("git rev-parse --short HEAD", { encoding: "utf-8" }).trim();
-  } catch {
-    return "unknown";
-  }
-}
-
-const gitHash = getGitHash();
-
 export default defineConfig({
   plugins: [react(), tailwindcss()],
   define: {
-    __APP_VERSION__: JSON.stringify(`${version}+${gitHash}`),
+    __APP_VERSION__: JSON.stringify(`${version}`),
   },
   envDir: path.resolve(__dirname, "../../"),
   resolve: {
