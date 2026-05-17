@@ -8,6 +8,7 @@ export interface CardSelectDialogProps {
   scanId?: string;
   onRemove?: () => void;
   currentCard?: ScryfallCardWithDistance;
+  alternativeMatches?: ScryfallCardWithDistance[];
   capturedImageUrl?: string;
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
@@ -21,6 +22,7 @@ export interface CardFilters {
   colors: string[];
   rarities: string[];
   bins: Array<number | null>;
+  needsAttention: boolean;
 }
 
 export interface CardToolbarProps {
@@ -45,4 +47,5 @@ export interface ScannedCardItemProps {
   isSelected?: boolean;
   onToggleSelect?: () => void;
   isNew?: boolean;
+  hasAlternatives?: boolean;
 }

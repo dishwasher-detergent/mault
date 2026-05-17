@@ -34,7 +34,7 @@ export interface ScannedCardsContextValue {
   elapsedMs: number;
   isTimerActive: boolean;
   setAutoFeed: (enabled: boolean) => void;
-  addCard: (card: ScryfallCardWithDistance, capturedImageUrl?: string) => void;
+  addCard: (card: ScryfallCardWithDistance, capturedImageUrl?: string, alternativeMatches?: ScryfallCardWithDistance[]) => void;
   sendCatchAllBin: () => void;
   removeCard: (scanId: string) => void;
   removeCards: (scanIds: string[]) => void;

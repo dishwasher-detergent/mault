@@ -41,6 +41,7 @@ export function CardSelectDialog({
   scanId,
   onRemove,
   currentCard,
+  alternativeMatches,
   capturedImageUrl,
   open: controlledOpen,
   onOpenChange: controlledOnOpenChange,
@@ -266,6 +267,34 @@ export function CardSelectDialog({
                 <IconExternalLink className="h-3 w-3" />
               </a>
             </div>
+            {alternativeMatches && alternativeMatches.length > 0 && (
+              <div className="flex flex-col gap-1.5">
+                <p className="text-xs text-muted-foreground font-medium">
+                  Close matches — select if this is the right card:
+                </p>
+                <div className="flex gap-1.5 overflow-x-auto pb-1">
+                  {alternativeMatches.map((alt) => (
+                    <button
+                      key={alt.id}
+                      type="button"
+                      onClick={() => handleSelect(alt)}
+                      className="shrink-0 flex flex-col gap-0.5 rounded overflow-hidden border border-border hover:ring-2 hover:ring-primary transition-all cursor-pointer"
+                    >
+                      <div className="w-16 aspect-[2.5/3.5]">
+                        <img
+                          src={alt.image_uris?.small || ""}
+                          alt={alt.name}
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                      <p className="text-[9px] text-center px-0.5 pb-0.5 text-muted-foreground leading-tight">
+                        {alt.set.toUpperCase()} #{alt.collector_number}
+                      </p>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
         ) : (
           <>

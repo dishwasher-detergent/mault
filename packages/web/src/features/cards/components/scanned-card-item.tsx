@@ -2,7 +2,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import type { ScannedCardItemProps } from "@/features/cards/types";
 import { cn } from "@/lib/utils";
-import { IconCheck } from "@tabler/icons-react";
+import { IconCheck, IconHelpCircle } from "@tabler/icons-react";
 import { motion } from "framer-motion";
 import { memo } from "react";
 
@@ -13,6 +13,7 @@ export const ScannedCardItem = memo(function ScannedCardItem({
   isSelected = false,
   onToggleSelect,
   isNew = false,
+  hasAlternatives = false,
 }: ScannedCardItemProps) {
   return (
     <motion.div
@@ -54,6 +55,11 @@ export const ScannedCardItem = memo(function ScannedCardItem({
         onClick={onOpen}
       >
         <div className="aspect-[2.5/3.5] rounded-lg overflow-hidden relative">
+          {hasAlternatives && (
+            <div className="absolute top-1 left-1 z-20 rounded-full bg-amber-500 p-0.5 shadow-md" title="Multiple close matches — tap to review">
+              <IconHelpCircle className="size-3 text-white" />
+            </div>
+          )}
           <div className="absolute bottom-1 left-1 right-1 flex gap-1 items-center justify-between z-20">
             <Badge
               variant={card.distance < 0.15 ? "default" : "destructive"}

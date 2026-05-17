@@ -3,9 +3,9 @@ import { DynamicPopover } from "@/components/ui/responsive-popover";
 import type { CardFilters } from "@/features/cards/types";
 import { cn } from "@/lib/utils";
 import { BIN_COUNT } from "@magic-vault/shared";
-import { IconFilter } from "@tabler/icons-react";
+import { IconFilter, IconHelpCircle } from "@tabler/icons-react";
 
-const EMPTY_FILTERS: CardFilters = { colors: [], rarities: [], bins: [] };
+const EMPTY_FILTERS: CardFilters = { colors: [], rarities: [], bins: [], needsAttention: false };
 
 const COLORS = ["W", "U", "B", "R", "G", "C"] as const;
 const RARITIES = ["common", "uncommon", "rare", "mythic"] as const;
@@ -174,6 +174,31 @@ export function CardFilterPopover({
               —
             </button>
           </div>
+        </div>
+
+        <div>
+          <p className="text-[11px] font-medium text-muted-foreground uppercase tracking-wide mb-1.5 font-heading">
+            Status
+          </p>
+          <button
+            type="button"
+            onClick={() =>
+              onFiltersChange({
+                ...activeFilters,
+                needsAttention: !activeFilters.needsAttention,
+              })
+            }
+            className={cn(
+              chipBase,
+              "flex items-center gap-1.5 px-2 h-7",
+              activeFilters.needsAttention
+                ? "bg-amber-500 text-white border-amber-600"
+                : chipInactive,
+            )}
+          >
+            <IconHelpCircle className="size-3.5" />
+            Needs attention
+          </button>
         </div>
 
         {activeFilterCount > 0 && (

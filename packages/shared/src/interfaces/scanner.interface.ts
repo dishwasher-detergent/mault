@@ -49,4 +49,5 @@ export interface ScannedCard {
   scannedAt: number;
   binNumber?: number;
   capturedImageUrl?: string;
+  alternativeMatches?: ScryfallCardWithDistance[];
 }

@@ -70,10 +70,12 @@ function playDingSound() {
   oscillator.stop(ctx.currentTime + 0.3);
 }
 
+const CLOSE_MATCH_DELTA = 0.05;
+
 async function searchCardImage(
   canvas: HTMLCanvasElement,
   contour?: CardContour | null,
-): Promise<{ card: ScryfallCardWithDistance | null; debugImageUrl: string }> {
+): Promise<{ card: ScryfallCardWithDistance | null; alternativeMatches: ScryfallCardWithDistance[]; debugImageUrl: string }> {
   const warpedCanvas = contour ? extractCardImage(canvas, contour) : canvas;
   const debugImageUrl = warpedCanvas.toDataURL("image/jpeg", 0.8);
   const blob = await canvasToBlob(warpedCanvas);
@@ -81,11 +83,22 @@ async function searchCardImage(
   formData.append("image", blob, "card.jpg");
 
   const { data } = await Search(formData);
-  if (!data) return { card: null, debugImageUrl };
+  if (!data || data.length === 0) return { card: null, alternativeMatches: [], debugImageUrl };
 
-  const { data: scryfallCard } = await SearchById(data.scryfallId);
-  if (!scryfallCard) return { card: null, debugImageUrl };
-  return { card: { ...scryfallCard, distance: data.distance }, debugImageUrl };
+  const closeMatches = data.filter((m) => m.distance - data[0].distance <= CLOSE_MATCH_DELTA);
+  const resolved = await Promise.all(
+    closeMatches.map((m) =>
+      SearchById(m.scryfallId).then((r) =>
+        r.data ? { ...r.data, distance: m.distance } : null,
+      ),
+    ),
+  );
+
+  const cards = resolved.filter(Boolean) as ScryfallCardWithDistance[];
+  if (cards.length === 0) return { card: null, alternativeMatches: [], debugImageUrl };
+
+  const [card, ...alternativeMatches] = cards;
+  return { card, alternativeMatches, debugImageUrl };
 }
 
 export function useCardScanner({
@@ -194,7 +207,7 @@ export function useCardScanner({
       }
 
       try {
-        const { card, debugImageUrl } = await searchCardImage(canvas, contour);
+        const { card, alternativeMatches, debugImageUrl } = await searchCardImage(canvas, contour);
         setDebugImageUrl(debugImageUrl);
         debugImageUrlRef.current = debugImageUrl;
 
@@ -204,7 +217,7 @@ export function useCardScanner({
             updateStatus("duplicate");
           } else {
             lastScannedCardIdRef.current = card.id;
-            onSearchResultsRef.current?.([card], debugImageUrl);
+            onSearchResultsRef.current?.([card, ...alternativeMatches], debugImageUrl);
             updateStatus("scanning");
           }
         } else {

@@ -131,7 +131,7 @@ export function ScannedCardsProvider({
     };
   }, [activeCollection?.guid]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const addCard = useCallback((card: ScryfallCardWithDistance, capturedImageUrl?: string) => {
+  const addCard = useCallback((card: ScryfallCardWithDistance, capturedImageUrl?: string, alternativeMatches?: ScryfallCardWithDistance[]) => {
     const collection = activeCollectionRef.current;
     if (!collection) {
       toast.error("No collection selected", {
@@ -147,6 +147,7 @@ export function ScannedCardsProvider({
       scannedAt: Date.now(),
       binNumber: matchedBin?.binNumber,
       capturedImageUrl,
+      alternativeMatches: alternativeMatches?.length ? alternativeMatches : undefined,
     };
 
     // Optimistic update

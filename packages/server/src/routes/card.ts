@@ -43,28 +43,24 @@ router.post("/", requireAuth, async (c) => {
     const result = await authQuery(c.get("jwtClaims"), async (tx) => {
       const matches = await tx.execute(sql`
         SELECT
-          id,
           scryfall_id,
           embedding <=> ${embeddingStr}::vector(768) AS distance
         FROM cards
         WHERE (embedding <=> ${embeddingStr}::vector(768)) < 0.3
         ORDER BY embedding <=> ${embeddingStr}::vector(768)
-        LIMIT 1
+        LIMIT 5
       `);
 
-      const match: SearchCardMatch | null =
-        matches.rows.length > 0 && matches.rows[0]
-          ? {
-              id: matches.rows[0].scryfall_id as string,
-              scryfallId: matches.rows[0].scryfall_id as string,
-              distance: matches.rows[0].distance as number,
-            }
-          : null;
+      const matchList: SearchCardMatch[] = matches.rows.map((row) => ({
+        id: row.scryfall_id as string,
+        scryfallId: row.scryfall_id as string,
+        distance: row.distance as number,
+      }));
 
       return {
         message: "Successfully searched for card.",
         success: true,
-        data: match,
+        data: matchList.length > 0 ? matchList : null,
       };
     });
 
