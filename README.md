@@ -57,11 +57,11 @@ Upload `arduino/main/main.ino` (requires ArduinoJson library). Communicates via 
 Using a logitech C920 here are the settings that worked best for me.
 
 Auto Focus: Off
-Focus: 60%
+Focus: 50%
 Auto Exposure: On
 Low Light Compensation: On
 Auto White Balance: On
 Brightness: 140
-Contrast: 170
-Saturation: 180
+Contrast: 140
+Saturation: 160
 Sharpness: 130
