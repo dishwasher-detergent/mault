@@ -265,20 +265,15 @@ export function extractCardImage(
   ]);
 
   let transformMatrix: cv.Mat | null = null;
-  let enhanced: cv.Mat | null = null;
 
   try {
     transformMatrix = cv.getPerspectiveTransform(srcPts, dstPts);
     cv.warpPerspective(src, dst, transformMatrix, new cv.Size(warpW, warpH));
 
-    // Boost brightness and contrast for better embedding matching
-    enhanced = new cv.Mat();
-    dst.convertTo(enhanced, -1, 1.15, 20);
-
     const warpCanvas = document.createElement("canvas");
     warpCanvas.width = warpW;
     warpCanvas.height = warpH;
-    cv.imshow(warpCanvas, enhanced);
+    cv.imshow(warpCanvas, dst);
 
     if (!isLandscape) return warpCanvas;
 
@@ -297,7 +292,6 @@ export function extractCardImage(
     srcPts.delete();
     dstPts.delete();
     transformMatrix?.delete();
-    enhanced?.delete();
   }
 }
 
