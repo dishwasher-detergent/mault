@@ -177,7 +177,13 @@ export function CardSelectDialog({
                 <IconTrash className="size-4" />
                 Remove
               </Button>
-              <Button variant="outline" onClick={() => setEditing(true)}>
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setEditing(true);
+                  if (currentCard) handleInputChange(currentCard.name);
+                }}
+              >
                 <IconPencil className="size-4" />
                 Correct Card
               </Button>

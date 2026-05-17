@@ -129,7 +129,7 @@ export function AppNav() {
   }
 
   return (
-    <aside className="flex-none flex flex-col items-center bg-sidebar p-2 gap-2 h-full border-r">
+    <aside className="flex-none flex flex-col items-center bg-secondary p-2 gap-2 h-full border-r">
       <Tooltip>
         <TooltipTrigger className="w-full aspect-square bg-primary grid place-items-center rounded-lg text-primary-foreground font-bold cursor-default">
           M
