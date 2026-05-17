@@ -13,7 +13,13 @@ import { Search } from "@/features/cards/api/scryfall";
 import type { CardSelectDialogProps } from "@/features/cards/types";
 import { useScannedCards } from "@/features/scanner/api/use-scanned-cards";
 import { cn } from "@/lib/utils";
-import { QUERY_MIN_LENGTH, type ScryfallCard, type ScryfallCardWithDistance } from "@magic-vault/shared";
+import {
+  getCardFaceName,
+  getCardImageUris,
+  QUERY_MIN_LENGTH,
+  type ScryfallCard,
+  type ScryfallCardWithDistance,
+} from "@magic-vault/shared";
 import {
   IconChevronLeft,
   IconChevronRight,
@@ -183,7 +189,7 @@ export function CardSelectDialog({
       ].filter(Boolean)
     : [];
 
-  const dialogTitle = selectedCard && !editing ? selectedCard.name : title;
+  const dialogTitle = selectedCard && !editing ? getCardFaceName(selectedCard) : title;
   const dialogDescription =
     selectedCard && !editing ? selectedCard.type_line : description;
 
@@ -210,7 +216,7 @@ export function CardSelectDialog({
                 variant="outline"
                 onClick={() => {
                   setEditing(true);
-                  if (selectedCard) handleInputChange(selectedCard.name);
+                  if (selectedCard) handleInputChange(getCardFaceName(selectedCard));
                 }}
               >
                 <IconPencil className="size-4" />
@@ -266,7 +272,7 @@ export function CardSelectDialog({
                           )}
                         >
                           <img
-                            src={c.image_uris?.normal || c.image_uris?.small || ""}
+                            src={getCardImageUris(c)?.normal || getCardImageUris(c)?.small || ""}
                             alt={c.name}
                             className="w-full h-full object-cover"
                           />
@@ -299,7 +305,7 @@ export function CardSelectDialog({
                 <div className="shrink-0 flex flex-col gap-2 items-center">
                   <div className="w-28 aspect-[2.5/3.5] rounded-lg overflow-hidden border">
                     <img
-                      src={selectedCard?.image_uris?.normal || ""}
+                      src={(selectedCard ? getCardImageUris(selectedCard) : undefined)?.normal || ""}
                       alt={selectedCard?.name}
                       className="w-full h-full object-cover"
                     />
@@ -320,21 +326,28 @@ export function CardSelectDialog({
               )}
 
               {/* Text info */}
-              {selectedCard && (
+              {selectedCard && (() => {
+                const face = selectedCard.card_faces?.[0];
+                const manaCost = selectedCard.mana_cost ?? face?.mana_cost;
+                const oracleText = selectedCard.oracle_text ?? face?.oracle_text;
+                const power = selectedCard.power ?? face?.power;
+                const toughness = selectedCard.toughness ?? face?.toughness;
+                const artist = selectedCard.artist ?? face?.artist;
+                return (
                 <div className="flex flex-col gap-1.5 min-w-0 text-xs flex-1">
-                  {selectedCard.mana_cost && (
+                  {manaCost && (
                     <p className="text-muted-foreground">
-                      Mana: {formatManaCost(selectedCard.mana_cost)}
+                      Mana: {formatManaCost(manaCost)}
                     </p>
                   )}
-                  {selectedCard.oracle_text && (
+                  {oracleText && (
                     <p className="whitespace-pre-line leading-relaxed">
-                      {selectedCard.oracle_text}
+                      {oracleText}
                     </p>
                   )}
-                  {selectedCard.power != null && selectedCard.toughness != null && (
+                  {power != null && toughness != null && (
                     <p className="font-semibold">
-                      {selectedCard.power}/{selectedCard.toughness}
+                      {power}/{toughness}
                     </p>
                   )}
                   <div className="flex items-center gap-1.5 text-muted-foreground flex-wrap">
@@ -351,7 +364,7 @@ export function CardSelectDialog({
                   {prices.length > 0 && (
                     <p className="text-muted-foreground">{prices.join(" · ")}</p>
                   )}
-                  <p className="text-muted-foreground">Art by {selectedCard.artist}</p>
+                  {artist && <p className="text-muted-foreground">Art by {artist}</p>}
                   <a
                     href={selectedCard.scryfall_uri}
                     target="_blank"
@@ -362,7 +375,8 @@ export function CardSelectDialog({
                     <IconExternalLink className="h-3 w-3" />
                   </a>
                 </div>
-              )}
+                );
+              })()}
             </div>
           </div>
         ) : (
@@ -427,9 +441,9 @@ export function CardSelectDialog({
                       className="relative w-full h-auto aspect-[2.5/3.5] p-0 rounded overflow-hidden group"
                       onClick={() => handleSelect(card)}
                     >
-                      {card.image_uris?.small ? (
+                      {getCardImageUris(card)?.small ? (
                         <img
-                          src={card.image_uris.small}
+                          src={getCardImageUris(card)!.small}
                           alt={card.name}
                           className="w-full h-full object-cover"
                         />

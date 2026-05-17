@@ -2,6 +2,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import type { ScannedCardItemProps } from "@/features/cards/types";
 import { cn } from "@/lib/utils";
+import { getCardImageUris } from "@magic-vault/shared";
 import { IconCheck, IconHelpCircle } from "@tabler/icons-react";
 import { motion } from "framer-motion";
 import { memo } from "react";
@@ -74,7 +75,7 @@ export const ScannedCardItem = memo(function ScannedCardItem({
             </Badge>
           </div>
           <img
-            src={card.image_uris?.normal || ""}
+            src={getCardImageUris(card)?.normal || ""}
             alt={card.name}
             className="w-full h-full object-cover"
           />

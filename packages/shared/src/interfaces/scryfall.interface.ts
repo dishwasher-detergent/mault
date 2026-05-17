@@ -1,10 +1,22 @@
-interface ScryfallImageUris {
+export interface ScryfallImageUris {
   small: string;
   normal: string;
   large: string;
   png: string;
   art_crop: string;
   border_crop: string;
+}
+
+export interface ScryfallCardFace {
+  name: string;
+  mana_cost?: string;
+  type_line?: string;
+  oracle_text?: string;
+  power?: string;
+  toughness?: string;
+  artist?: string;
+  colors?: string[];
+  image_uris?: ScryfallImageUris;
 }
 
 interface ScryfallLegalities {
@@ -58,6 +70,7 @@ export interface ScryfallCard {
   highres_image: boolean;
   image_status: string;
   image_uris?: ScryfallImageUris;
+  card_faces?: ScryfallCardFace[];
   mana_cost?: string;
   cmc: number;
   type_line: string;
