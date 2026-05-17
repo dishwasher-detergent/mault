@@ -12,10 +12,12 @@ import {
 import { Search } from "@/features/cards/api/scryfall";
 import type { CardSelectDialogProps } from "@/features/cards/types";
 import { useScannedCards } from "@/features/scanner/api/use-scanned-cards";
-import { QUERY_MIN_LENGTH, type ScryfallCard } from "@magic-vault/shared";
+import { cn } from "@/lib/utils";
+import { QUERY_MIN_LENGTH, type ScryfallCard, type ScryfallCardWithDistance } from "@magic-vault/shared";
 import {
   IconChevronLeft,
   IconChevronRight,
+  IconCheck,
   IconExternalLink,
   IconLoader2,
   IconPencil,
@@ -59,17 +61,29 @@ export function CardSelectDialog({
   const [debouncedQuery, setDebouncedQuery] = useState<string>("");
   const [selectedSet, setSelectedSet] = useState<string | null>("all");
   const debounceRef = useRef<ReturnType<typeof setTimeout>>(null);
-  const prevCardIdRef = useRef(currentCard?.id);
+
+  // Stable candidates list — built once per scanId, not rebuilt on correction
+  const [candidates, setCandidates] = useState<ScryfallCardWithDistance[]>([]);
+  const [selectedId, setSelectedId] = useState<string | undefined>(undefined);
+  const prevScanIdRef = useRef<string | undefined>(undefined);
 
   const { addCard, correctCard } = useScannedCards();
 
-  // Reset to view mode when navigating to a different card
+  // Rebuild candidates when navigating to a different scan entry
   useEffect(() => {
-    if (currentCard?.id && currentCard.id !== prevCardIdRef.current) {
-      prevCardIdRef.current = currentCard.id;
+    if (!open || !currentCard) return;
+    if (scanId !== prevScanIdRef.current) {
+      prevScanIdRef.current = scanId;
+      const ids = new Set<string>();
+      const all: ScryfallCardWithDistance[] = [];
+      for (const c of [currentCard, ...(alternativeMatches ?? [])]) {
+        if (!ids.has(c.id)) { ids.add(c.id); all.push(c); }
+      }
+      setCandidates(all);
+      setSelectedId(currentCard.id);
       setEditing(false);
     }
-  }, [currentCard?.id]);
+  }, [open, scanId, currentCard, alternativeMatches]);
 
   // Keyboard navigation
   useEffect(() => {
@@ -98,6 +112,7 @@ export function CardSelectDialog({
     debounceRef.current = setTimeout(() => setDebouncedQuery(value), 300);
   };
 
+  // Used by the Scryfall search picker — corrects and closes
   const handleSelect = useCallback(
     (card: ScryfallCard) => {
       if (scanId) {
@@ -111,6 +126,15 @@ export function CardSelectDialog({
     [scanId, addCard, correctCard],
   );
 
+  // Used by the candidates picker — corrects but stays open
+  const handleSelectCandidate = useCallback(
+    (card: ScryfallCardWithDistance) => {
+      setSelectedId(card.id);
+      if (scanId) correctCard(scanId, card);
+    },
+    [scanId, correctCard],
+  );
+
   const handleOpenChange = useCallback(
     (isOpen: boolean) => {
       if (!isControlled) setInternalOpen(isOpen);
@@ -120,6 +144,9 @@ export function CardSelectDialog({
         setDebouncedQuery("");
         setSelectedSet("all");
         setEditing(!currentCard);
+        prevScanIdRef.current = undefined;
+        setCandidates([]);
+        setSelectedId(undefined);
       }
     },
     [isControlled, controlledOnOpenChange, currentCard],
@@ -133,9 +160,7 @@ export function CardSelectDialog({
   const sets = useMemo(() => {
     const setMap = new Map<string, string>();
     for (const card of results) {
-      if (!setMap.has(card.set)) {
-        setMap.set(card.set, card.set_name);
-      }
+      if (!setMap.has(card.set)) setMap.set(card.set, card.set_name);
     }
     return Array.from(setMap.entries())
       .map(([code, name]) => ({ code, name }))
@@ -147,17 +172,20 @@ export function CardSelectDialog({
     return results.filter((card) => card.set === selectedSet);
   }, [results, selectedSet]);
 
-  const prices = currentCard
+  const selectedCard = candidates.find((c) => c.id === selectedId) ?? currentCard;
+  const hasMultipleCandidates = candidates.length > 1;
+
+  const prices = selectedCard
     ? [
-        formatPrice("USD", currentCard.prices.usd),
-        formatPrice("Foil", currentCard.prices.usd_foil),
-        formatPrice("EUR", currentCard.prices.eur),
+        formatPrice("USD", selectedCard.prices.usd),
+        formatPrice("Foil", selectedCard.prices.usd_foil),
+        formatPrice("EUR", selectedCard.prices.eur),
       ].filter(Boolean)
     : [];
 
-  const dialogTitle = currentCard && !editing ? currentCard.name : title;
+  const dialogTitle = selectedCard && !editing ? selectedCard.name : title;
   const dialogDescription =
-    currentCard && !editing ? currentCard.type_line : description;
+    selectedCard && !editing ? selectedCard.type_line : description;
 
   const hasNav = onPrev !== undefined || onNext !== undefined;
 
@@ -169,7 +197,7 @@ export function CardSelectDialog({
         description={dialogDescription}
         open={open}
         onOpenChange={handleOpenChange}
-        className="sm:max-w-lg max-h-[80vh] flex flex-col gap-2"
+        className="sm:max-w-lg max-h-[85vh] flex flex-col gap-2"
         footerClassName="flex-col-reverse"
         footer={
           currentCard && !editing ? (
@@ -182,7 +210,7 @@ export function CardSelectDialog({
                 variant="outline"
                 onClick={() => {
                   setEditing(true);
-                  if (currentCard) handleInputChange(currentCard.name);
+                  if (selectedCard) handleInputChange(selectedCard.name);
                 }}
               >
                 <IconPencil className="size-4" />
@@ -193,108 +221,149 @@ export function CardSelectDialog({
         }
       >
         {currentCard && !editing ? (
-          <div className="flex flex-col gap-3">
-            {capturedImageUrl ? (
-              <div className="flex gap-2">
-                <div className="flex flex-col gap-1 items-center flex-1 min-w-0">
-                  <p className="text-xs text-muted-foreground">Scanned</p>
-                  <div className="w-full aspect-[2.5/3.5] rounded-lg overflow-hidden border">
-                    <img
-                      src={capturedImageUrl}
-                      alt="Captured scan"
-                      className="w-full h-full object-cover"
-                    />
+          <div className="flex flex-col gap-4 overflow-y-auto">
+
+            {/* ── Candidates picker (only when multiple close matches) ── */}
+            {hasMultipleCandidates && (
+              <div className="flex flex-col gap-2">
+                {capturedImageUrl && (
+                  <div className="flex items-center gap-2 mb-1">
+                    <div className="w-12 aspect-[2.5/3.5] rounded overflow-hidden border shrink-0">
+                      <img
+                        src={capturedImageUrl}
+                        alt="Scanned"
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                    <p className="text-xs text-muted-foreground leading-snug">
+                      Your scanned card — select the correct version below
+                    </p>
                   </div>
+                )}
+                {!capturedImageUrl && (
+                  <p className="text-xs text-muted-foreground font-medium">
+                    Multiple close matches — select the correct version:
+                  </p>
+                )}
+                <div className="flex gap-2 overflow-x-auto pb-1">
+                  {candidates.map((c) => {
+                    const isSelected = c.id === selectedId;
+                    return (
+                      <button
+                        key={c.id}
+                        type="button"
+                        onClick={() => handleSelectCandidate(c)}
+                        className={cn(
+                          "shrink-0 flex flex-col gap-1 items-center cursor-pointer group",
+                        )}
+                      >
+                        <div
+                          className={cn(
+                            "w-28 aspect-[2.5/3.5] rounded-lg overflow-hidden border-2 transition-all",
+                            isSelected
+                              ? "border-primary shadow-md"
+                              : "border-border group-hover:border-primary/60",
+                          )}
+                        >
+                          <img
+                            src={c.image_uris?.normal || c.image_uris?.small || ""}
+                            alt={c.name}
+                            className="w-full h-full object-cover"
+                          />
+                        </div>
+                        <div className="flex items-center gap-1">
+                          {isSelected && (
+                            <IconCheck className="size-3 text-primary shrink-0" />
+                          )}
+                          <p
+                            className={cn(
+                              "text-[10px] font-medium",
+                              isSelected ? "text-primary" : "text-muted-foreground",
+                            )}
+                          >
+                            {c.set.toUpperCase()} #{c.collector_number}
+                          </p>
+                        </div>
+                      </button>
+                    );
+                  })}
                 </div>
-                <div className="flex flex-col gap-1 items-center flex-1 min-w-0">
-                  <p className="text-xs text-muted-foreground">Match</p>
-                  <div className="w-full aspect-[2.5/3.5] rounded-lg overflow-hidden border">
-                    <img
-                      src={currentCard.image_uris?.normal || ""}
-                      alt={currentCard.name}
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
-                </div>
-              </div>
-            ) : (
-              <div className="w-28 shrink-0 aspect-[2.5/3.5] rounded-lg overflow-hidden border self-start">
-                <img
-                  src={currentCard.image_uris?.normal || ""}
-                  alt={currentCard.name}
-                  className="w-full h-full object-cover"
-                />
+                <div className="border-t" />
               </div>
             )}
-            <div className="flex flex-col gap-1 min-w-0">
-              {currentCard.mana_cost && (
-                <p className="text-xs text-muted-foreground">
-                  Mana: {formatManaCost(currentCard.mana_cost)}
-                </p>
-              )}
-              {currentCard.oracle_text && (
-                <p className="text-xs whitespace-pre-line leading-relaxed">
-                  {currentCard.oracle_text}
-                </p>
-              )}
-              {currentCard.power != null && currentCard.toughness != null && (
-                <p className="text-xs font-semibold">
-                  {currentCard.power}/{currentCard.toughness}
-                </p>
-              )}
-              <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                <span className="capitalize">{currentCard.rarity}</span>
-                <span>·</span>
-                <span>
-                  {currentCard.set_name} #{currentCard.collector_number}
-                </span>
-              </div>
-              {prices.length > 0 && (
-                <p className="text-xs text-muted-foreground">
-                  {prices.join(" · ")}
-                </p>
-              )}
-              <p className="text-xs text-muted-foreground">
-                Art by {currentCard.artist}
-              </p>
-              <a
-                href={currentCard.scryfall_uri}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-1 text-xs text-primary hover:underline"
-              >
-                View on Scryfall
-                <IconExternalLink className="h-3 w-3" />
-              </a>
-            </div>
-            {alternativeMatches && alternativeMatches.length > 0 && (
-              <div className="flex flex-col gap-1.5">
-                <p className="text-xs text-muted-foreground font-medium">
-                  Close matches — select if this is the right card:
-                </p>
-                <div className="flex gap-1.5 overflow-x-auto pb-1">
-                  {alternativeMatches.map((alt) => (
-                    <button
-                      key={alt.id}
-                      type="button"
-                      onClick={() => handleSelect(alt)}
-                      className="shrink-0 flex flex-col gap-0.5 rounded overflow-hidden border border-border hover:ring-2 hover:ring-primary transition-all cursor-pointer"
-                    >
-                      <div className="w-16 aspect-[2.5/3.5]">
+
+            {/* ── Card detail view ── */}
+            <div className={cn("flex gap-3", hasMultipleCandidates && "pt-0")}>
+              {/* Image (only shown when no picker, since picker already shows it) */}
+              {!hasMultipleCandidates && (
+                <div className="shrink-0 flex flex-col gap-2 items-center">
+                  <div className="w-28 aspect-[2.5/3.5] rounded-lg overflow-hidden border">
+                    <img
+                      src={selectedCard?.image_uris?.normal || ""}
+                      alt={selectedCard?.name}
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                  {capturedImageUrl && (
+                    <>
+                      <p className="text-[10px] text-muted-foreground">Scanned</p>
+                      <div className="w-28 aspect-[2.5/3.5] rounded-lg overflow-hidden border">
                         <img
-                          src={alt.image_uris?.small || ""}
-                          alt={alt.name}
+                          src={capturedImageUrl}
+                          alt="Scanned"
                           className="w-full h-full object-cover"
                         />
                       </div>
-                      <p className="text-[9px] text-center px-0.5 pb-0.5 text-muted-foreground leading-tight">
-                        {alt.set.toUpperCase()} #{alt.collector_number}
-                      </p>
-                    </button>
-                  ))}
+                    </>
+                  )}
                 </div>
-              </div>
-            )}
+              )}
+
+              {/* Text info */}
+              {selectedCard && (
+                <div className="flex flex-col gap-1.5 min-w-0 text-xs flex-1">
+                  {selectedCard.mana_cost && (
+                    <p className="text-muted-foreground">
+                      Mana: {formatManaCost(selectedCard.mana_cost)}
+                    </p>
+                  )}
+                  {selectedCard.oracle_text && (
+                    <p className="whitespace-pre-line leading-relaxed">
+                      {selectedCard.oracle_text}
+                    </p>
+                  )}
+                  {selectedCard.power != null && selectedCard.toughness != null && (
+                    <p className="font-semibold">
+                      {selectedCard.power}/{selectedCard.toughness}
+                    </p>
+                  )}
+                  <div className="flex items-center gap-1.5 text-muted-foreground flex-wrap">
+                    <div
+                      className="size-2 rounded-full shrink-0"
+                      style={{ backgroundColor: `var(--${selectedCard.rarity})` }}
+                    />
+                    <span className="capitalize">{selectedCard.rarity}</span>
+                    <span>·</span>
+                    <span>
+                      {selectedCard.set_name} #{selectedCard.collector_number}
+                    </span>
+                  </div>
+                  {prices.length > 0 && (
+                    <p className="text-muted-foreground">{prices.join(" · ")}</p>
+                  )}
+                  <p className="text-muted-foreground">Art by {selectedCard.artist}</p>
+                  <a
+                    href={selectedCard.scryfall_uri}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1 text-primary hover:underline w-fit"
+                  >
+                    View on Scryfall
+                    <IconExternalLink className="h-3 w-3" />
+                  </a>
+                </div>
+              )}
+            </div>
           </div>
         ) : (
           <>
