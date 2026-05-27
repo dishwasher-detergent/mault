@@ -1,6 +1,10 @@
-import type { Result, ModuleConfig, ServoCalibration } from "@magic-vault/shared";
+import { apiGet, apiPost, apiPut } from "@/lib/api/client";
+import type {
+  ModuleConfig,
+  Result,
+  ServoCalibration,
+} from "@magic-vault/shared";
 import { DEFAULT_CALIBRATION } from "@magic-vault/shared";
-import { apiGet, apiPut } from "@/lib/api/client";
 import { queryOptions } from "@tanstack/react-query";
 
 function defaultModuleConfigs(): ModuleConfig[] {
@@ -12,7 +16,8 @@ function defaultModuleConfigs(): ModuleConfig[] {
 
 export const modulesQueryOptions = queryOptions({
   queryKey: ["modules"] as const,
-  queryFn: () => getModuleConfigs().then((r) => r.data ?? defaultModuleConfigs()),
+  queryFn: () =>
+    getModuleConfigs().then((r) => r.data ?? defaultModuleConfigs()),
   staleTime: Infinity,
 });
 
@@ -24,7 +29,10 @@ export async function saveModuleConfig(
   moduleNumber: 1 | 2 | 3,
   calibration: ServoCalibration,
 ): Promise<Result<ModuleConfig[]>> {
-  return apiPut<Result<ModuleConfig[]>>(`/api/modules/${moduleNumber}`, calibration);
+  return apiPut<Result<ModuleConfig[]>>(
+    `/api/modules/${moduleNumber}`,
+    calibration,
+  );
 }
 
 export interface ModuleConfigAuditEntry {
@@ -34,10 +42,14 @@ export interface ModuleConfigAuditEntry {
   createdAt: string;
 }
 
-export async function getModuleHistory(): Promise<Result<ModuleConfigAuditEntry[]>> {
+export async function getModuleHistory(): Promise<
+  Result<ModuleConfigAuditEntry[]>
+> {
   return apiGet<Result<ModuleConfigAuditEntry[]>>("/api/modules/history");
 }
 
-export async function revertModuleConfig(guid: string): Promise<Result<ModuleConfig[]>> {
+export async function revertModuleConfig(
+  guid: string,
+): Promise<Result<ModuleConfig[]>> {
   return apiPost<Result<ModuleConfig[]>>(`/api/modules/history/${guid}/revert`);
 }

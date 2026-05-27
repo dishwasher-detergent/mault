@@ -30,6 +30,7 @@ import {
   type CreateSetFormValues,
 } from "@/schemas/sort-bins.schema";
 import { zodResolver } from "@hookform/resolvers/zod";
+import type { BinConfig, BinRuleGroup, BinSet } from "@magic-vault/shared";
 import {
   IconClockHour3,
   IconEdit,
@@ -37,7 +38,6 @@ import {
   IconPlus,
   IconTrash,
 } from "@tabler/icons-react";
-import type { BinConfig, BinRuleGroup, BinSet } from "@magic-vault/shared";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useCallback, useMemo, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
@@ -105,7 +105,9 @@ export function PresetSelector({ readOnly }: PresetSelectorProps) {
     onSuccess: (result) => {
       if (result.success && result.data) {
         queryClient.setQueryData<BinSet[]>(["bins"], result.data);
-        queryClient.invalidateQueries({ queryKey: ["bins", "history", selectedSet?.guid] });
+        queryClient.invalidateQueries({
+          queryKey: ["bins", "history", selectedSet?.guid],
+        });
         setHistoryOpen(false);
         toast.success("Reverted to previous bin set state");
       }
@@ -391,16 +393,18 @@ export function PresetSelector({ readOnly }: PresetSelectorProps) {
               </form>
             </DynamicDialog>
             <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  variant="outline"
-                  size="icon"
-                  disabled={!selectedSet}
-                  onClick={() => setHistoryOpen(true)}
-                >
-                  <IconClockHour3 />
-                </Button>
-              </TooltipTrigger>
+              <TooltipTrigger
+                render={
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    disabled={!selectedSet}
+                    onClick={() => setHistoryOpen(true)}
+                  >
+                    <IconClockHour3 />
+                  </Button>
+                }
+              ></TooltipTrigger>
               <TooltipContent>View History</TooltipContent>
             </Tooltip>
           </>
