@@ -162,7 +162,7 @@ export function CardGrid() {
 
   return (
     <>
-      <div className="sticky top-0 z-10 bg-background/80 backdrop-blur-2xl p-4 border-b">
+      <div className="sticky top-0 z-10 bg-background/80 backdrop-blur-2xl p-2 border-b">
         <CardToolbar
           searchQuery={searchQuery}
           onSearchChange={setSearchQuery}
