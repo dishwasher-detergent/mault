@@ -58,3 +58,18 @@ export async function saveBinConfig({
 export async function clearBinConfig(binNumber: number): Promise<Result<null>> {
   return apiDelete<Result<null>>(`/api/bins/bins/${binNumber}`);
 }
+
+export interface BinSetAuditEntry {
+  guid: string;
+  binSetGuid: string;
+  snapshot: BinConfig[];
+  createdAt: string;
+}
+
+export async function getBinSetHistory(setGuid: string): Promise<Result<BinSetAuditEntry[]>> {
+  return apiGet<Result<BinSetAuditEntry[]>>(`/api/bins/history?setGuid=${encodeURIComponent(setGuid)}`);
+}
+
+export async function revertBinSet(guid: string): Promise<Result<BinSet[]>> {
+  return apiPost<Result<BinSet[]>>(`/api/bins/history/${guid}/revert`);
+}

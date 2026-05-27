@@ -1,6 +1,6 @@
 import { Hono } from "hono";
 import { authQuery } from "../db";
-import { moduleConfigs } from "../db/schema";
+import { moduleConfigAudit, moduleConfigs } from "../db/schema";
 import {
   DEFAULT_CALIBRATION,
   type ModuleConfig,
@@ -76,10 +76,90 @@ router.put("/:moduleNumber", requireAuth, async (c) => {
           set: { ...calibration, updatedAt: new Date() },
         });
 
+      await tx.insert(moduleConfigAudit).values({ moduleNumber, ...calibration });
+
       const rows = await tx.query.moduleConfigs.findMany();
       return {
         success: true,
         message: "Saved module config.",
+        data: buildConfigs(rows),
+      };
+    });
+    return c.json(result);
+  } catch (err) {
+    console.error(err);
+    return c.json({ success: false, message: "Database error." }, 500);
+  }
+});
+
+// GET /api/modules/history
+router.get("/history", requireAuth, async (c) => {
+  try {
+    const result = await authQuery(c.get("jwtClaims"), async (tx) => {
+      const rows = await tx.query.moduleConfigAudit.findMany({
+        orderBy: (t, { desc }) => [desc(t.createdAt)],
+        limit: 30,
+      });
+      return {
+        success: true,
+        message: "Loaded history.",
+        data: rows.map((r) => ({
+          guid: r.guid!,
+          moduleNumber: r.moduleNumber as 1 | 2 | 3,
+          calibration: {
+            bottomClosed: r.bottomClosed,
+            bottomOpen: r.bottomOpen,
+            paddleClosed: r.paddleClosed,
+            paddleOpen: r.paddleOpen,
+            pusherLeft: r.pusherLeft,
+            pusherNeutral: r.pusherNeutral,
+            pusherRight: r.pusherRight,
+          } satisfies ServoCalibration,
+          createdAt: r.createdAt.toISOString(),
+        })),
+      };
+    });
+    return c.json(result);
+  } catch (err) {
+    console.error(err);
+    return c.json({ success: false, message: "Database error." }, 500);
+  }
+});
+
+// POST /api/modules/history/:guid/revert
+router.post("/history/:guid/revert", requireAuth, async (c) => {
+  const guid = c.req.param("guid");
+  try {
+    const result = await authQuery(c.get("jwtClaims"), async (tx) => {
+      const entry = await tx.query.moduleConfigAudit.findFirst({
+        where: (t, { eq }) => eq(t.guid, guid),
+      });
+      if (!entry) return { success: false, message: "Audit record not found." };
+
+      const calibration: ServoCalibration = {
+        bottomClosed: entry.bottomClosed,
+        bottomOpen: entry.bottomOpen,
+        paddleClosed: entry.paddleClosed,
+        paddleOpen: entry.paddleOpen,
+        pusherLeft: entry.pusherLeft,
+        pusherNeutral: entry.pusherNeutral,
+        pusherRight: entry.pusherRight,
+      };
+
+      await tx
+        .insert(moduleConfigs)
+        .values({ moduleNumber: entry.moduleNumber, ...calibration })
+        .onConflictDoUpdate({
+          target: [moduleConfigs.userId, moduleConfigs.moduleNumber],
+          set: { ...calibration, updatedAt: new Date() },
+        });
+
+      await tx.insert(moduleConfigAudit).values({ moduleNumber: entry.moduleNumber, ...calibration });
+
+      const rows = await tx.query.moduleConfigs.findMany();
+      return {
+        success: true,
+        message: "Reverted module config.",
         data: buildConfigs(rows),
       };
     });

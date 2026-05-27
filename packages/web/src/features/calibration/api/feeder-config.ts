@@ -19,3 +19,17 @@ export async function saveFeederConfig(
 ): Promise<Result<FeederCalibration>> {
   return apiPut<Result<FeederCalibration>>("/api/feeder", calibration);
 }
+
+export interface FeederConfigAuditEntry {
+  guid: string;
+  calibration: FeederCalibration;
+  createdAt: string;
+}
+
+export async function getFeederHistory(): Promise<Result<FeederConfigAuditEntry[]>> {
+  return apiGet<Result<FeederConfigAuditEntry[]>>("/api/feeder/history");
+}
+
+export async function revertFeederConfig(guid: string): Promise<Result<FeederCalibration>> {
+  return apiPost<Result<FeederCalibration>>(`/api/feeder/history/${guid}/revert`);
+}

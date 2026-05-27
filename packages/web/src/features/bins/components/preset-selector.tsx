@@ -1,3 +1,4 @@
+import { AuditDrawer, type AuditEntry } from "@/components/audit-drawer";
 import { Button } from "@/components/ui/button";
 import { ButtonGroup } from "@/components/ui/button-group";
 import { Field, FieldError, FieldLabel } from "@/components/ui/field";
@@ -16,7 +17,12 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { binsQueryOptions } from "@/features/bins/api/sort-bins";
+import {
+  binsQueryOptions,
+  getBinSetHistory,
+  revertBinSet,
+  type BinSetAuditEntry,
+} from "@/features/bins/api/sort-bins";
 import { useBinConfigs } from "@/features/bins/api/use-bin-configs";
 import type { PresetSelectorProps } from "@/features/bins/types";
 import {
@@ -25,15 +31,49 @@ import {
 } from "@/schemas/sort-bins.schema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
+  IconClockHour3,
   IconEdit,
   IconLoader2,
   IconPlus,
   IconTrash,
 } from "@tabler/icons-react";
-import { useQuery } from "@tanstack/react-query";
-import { useCallback, useState } from "react";
+import type { BinConfig, BinRuleGroup, BinSet } from "@magic-vault/shared";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useCallback, useMemo, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { Link } from "react-router-dom";
+import { toast } from "sonner";
+
+function countConditions(group: BinRuleGroup): number {
+  return group.conditions.reduce((n, c) => {
+    if ("combinator" in c) return n + countConditions(c as BinRuleGroup);
+    return n + 1;
+  }, 0);
+}
+
+function BinSnapshotSummary({ snapshot }: { snapshot: BinConfig[] }) {
+  return (
+    <div className="flex flex-col gap-0.5">
+      {snapshot.map((bin) => {
+        const count = countConditions(bin.rules);
+        return (
+          <div key={bin.binNumber} className="flex gap-2">
+            <span className="w-10 shrink-0 text-muted-foreground">
+              Bin {bin.binNumber}
+            </span>
+            <span>
+              {bin.isCatchAll
+                ? "catch-all"
+                : count === 0
+                  ? "no rules"
+                  : `${count} condition${count !== 1 ? "s" : ""}`}
+            </span>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
 
 export function PresetSelector({ readOnly }: PresetSelectorProps) {
   const {
@@ -46,10 +86,40 @@ export function PresetSelector({ readOnly }: PresetSelectorProps) {
     isActivating,
     isPresetMutating,
   } = useBinConfigs();
+  const queryClient = useQueryClient();
   const { isLoading } = useQuery(binsQueryOptions);
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
   const [renameDialogOpen, setRenameDialogOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [historyOpen, setHistoryOpen] = useState(false);
+
+  const { data: historyResult, isLoading: historyLoading } = useQuery({
+    queryKey: ["bins", "history", selectedSet?.guid],
+    queryFn: () => getBinSetHistory(selectedSet!.guid),
+    enabled: historyOpen && !!selectedSet?.guid,
+    staleTime: 0,
+  });
+
+  const revertMutation = useMutation({
+    mutationFn: revertBinSet,
+    onSuccess: (result) => {
+      if (result.success && result.data) {
+        queryClient.setQueryData<BinSet[]>(["bins"], result.data);
+        queryClient.invalidateQueries({ queryKey: ["bins", "history", selectedSet?.guid] });
+        setHistoryOpen(false);
+        toast.success("Reverted to previous bin set state");
+      }
+    },
+    onError: () => toast.error("Failed to revert"),
+  });
+
+  const historyEntries = useMemo((): AuditEntry[] => {
+    return (historyResult?.data ?? []).map((entry: BinSetAuditEntry) => ({
+      guid: entry.guid,
+      createdAt: entry.createdAt,
+      body: <BinSnapshotSummary snapshot={entry.snapshot} />,
+    }));
+  }, [historyResult]);
 
   const createForm = useForm<CreateSetFormValues>({
     resolver: zodResolver(createSetSchema),
@@ -111,6 +181,7 @@ export function PresetSelector({ readOnly }: PresetSelectorProps) {
           <Skeleton className="size-9 shrink-0" />
         ) : (
           <>
+            <Skeleton className="size-9 shrink-0" />
             <Skeleton className="size-9 shrink-0" />
             <Skeleton className="size-9 shrink-0" />
             <Skeleton className="size-9 shrink-0" />
@@ -319,9 +390,32 @@ export function PresetSelector({ readOnly }: PresetSelectorProps) {
                 />
               </form>
             </DynamicDialog>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="outline"
+                  size="icon"
+                  disabled={!selectedSet}
+                  onClick={() => setHistoryOpen(true)}
+                >
+                  <IconClockHour3 />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>View History</TooltipContent>
+            </Tooltip>
           </>
         )}
       </ButtonGroup>
+
+      <AuditDrawer
+        open={historyOpen}
+        onOpenChange={setHistoryOpen}
+        title="Bin Set History"
+        entries={historyEntries}
+        isLoading={historyLoading}
+        onRevert={(guid) => revertMutation.mutate(guid)}
+        isReverting={revertMutation.isPending}
+      />
     </Field>
   );
 }

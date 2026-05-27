@@ -231,6 +231,80 @@ export const notificationSettings = pgTable(
   ],
 ).enableRLS();
 
+export const binSetAudit = pgTable(
+  "bin_set_audit",
+  {
+    id: serial().primaryKey(),
+    guid: uuid("guid").defaultRandom(),
+    binSetGuid: text("bin_set_guid").notNull(),
+    snapshot: jsonb("snapshot").notNull(),
+    userId: text("user_id")
+      .notNull()
+      .default(sql`auth.user_id()`),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+  },
+  (table) => [
+    unique("bin_set_audit_guid_idx").on(table.guid),
+    crudPolicy({
+      role: authenticatedRole,
+      read: authUid(table.userId),
+      modify: authUid(table.userId),
+    }),
+  ],
+).enableRLS();
+
+export const moduleConfigAudit = pgTable(
+  "module_config_audit",
+  {
+    id: serial().primaryKey(),
+    guid: uuid("guid").defaultRandom(),
+    moduleNumber: integer("module_number").notNull(),
+    userId: text("user_id")
+      .notNull()
+      .default(sql`auth.user_id()`),
+    bottomClosed: integer("bottom_closed").notNull(),
+    bottomOpen: integer("bottom_open").notNull(),
+    paddleClosed: integer("paddle_closed").notNull(),
+    paddleOpen: integer("paddle_open").notNull(),
+    pusherLeft: integer("pusher_left").notNull(),
+    pusherNeutral: integer("pusher_neutral").notNull(),
+    pusherRight: integer("pusher_right").notNull(),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+  },
+  (table) => [
+    unique("module_config_audit_guid_idx").on(table.guid),
+    crudPolicy({
+      role: authenticatedRole,
+      read: authUid(table.userId),
+      modify: authUid(table.userId),
+    }),
+  ],
+).enableRLS();
+
+export const feederConfigAudit = pgTable(
+  "feeder_config_audit",
+  {
+    id: serial().primaryKey(),
+    guid: uuid("guid").defaultRandom(),
+    userId: text("user_id")
+      .notNull()
+      .default(sql`auth.user_id()`),
+    speed: integer("speed").notNull(),
+    duration: integer("duration").notNull(),
+    pulseDuration: integer("pulse_duration").notNull(),
+    pauseDuration: integer("pause_duration").notNull(),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+  },
+  (table) => [
+    unique("feeder_config_audit_guid_idx").on(table.guid),
+    crudPolicy({
+      role: authenticatedRole,
+      read: authUid(table.userId),
+      modify: authUid(table.userId),
+    }),
+  ],
+).enableRLS();
+
 export const binSetRelations = relations(binSets, ({ many }) => ({
   bins: many(bins),
 }));

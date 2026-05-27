@@ -26,3 +26,18 @@ export async function saveModuleConfig(
 ): Promise<Result<ModuleConfig[]>> {
   return apiPut<Result<ModuleConfig[]>>(`/api/modules/${moduleNumber}`, calibration);
 }
+
+export interface ModuleConfigAuditEntry {
+  guid: string;
+  moduleNumber: 1 | 2 | 3;
+  calibration: ServoCalibration;
+  createdAt: string;
+}
+
+export async function getModuleHistory(): Promise<Result<ModuleConfigAuditEntry[]>> {
+  return apiGet<Result<ModuleConfigAuditEntry[]>>("/api/modules/history");
+}
+
+export async function revertModuleConfig(guid: string): Promise<Result<ModuleConfig[]>> {
+  return apiPost<Result<ModuleConfig[]>>(`/api/modules/history/${guid}/revert`);
+}
