@@ -9,7 +9,7 @@ import {
 } from "@/components/ui/dialog";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useCardFilterSort } from "@/features/cards/api/use-card-filter-sort";
-import { CardSelectDialog } from "@/features/cards/components/card-select-dialog";
+import { CardDetailPanel } from "@/features/cards/components/card-detail-panel";
 import { CardToolbar } from "@/features/cards/components/card-toolbar";
 import { ScannedCardItem } from "@/features/cards/components/scanned-card-item";
 import { exportToManabox } from "@/features/cards/lib/export-manabox";
@@ -134,6 +134,32 @@ export function CardGrid() {
     );
   }
 
+  if (openEntry) {
+    return (
+      <CardDetailPanel
+        scanId={openEntry.scanId}
+        currentCard={openEntry.card}
+        alternativeMatches={openEntry.alternativeMatches}
+        capturedImageUrl={openEntry.capturedImageUrl}
+        onClose={() => setOpenScanId(null)}
+        onRemove={() => {
+          removeCard(openEntry.scanId);
+          setOpenScanId(null);
+        }}
+        onPrev={() =>
+          setOpenScanId(filteredAndSorted[openIndex - 1]?.scanId ?? null)
+        }
+        onNext={() =>
+          setOpenScanId(filteredAndSorted[openIndex + 1]?.scanId ?? null)
+        }
+        hasPrev={openIndex > 0}
+        hasNext={openIndex < filteredAndSorted.length - 1}
+        currentIndex={openIndex}
+        total={filteredAndSorted.length}
+      />
+    );
+  }
+
   return (
     <>
       <div className="sticky top-0 z-10 bg-background/80 backdrop-blur-2xl p-4 border-b">
@@ -176,27 +202,6 @@ export function CardGrid() {
           ))}
         </AnimatePresence>
       </div>
-
-      <CardSelectDialog
-        open={openEntry !== null}
-        onOpenChange={(isOpen) => !isOpen && setOpenScanId(null)}
-        currentCard={openEntry?.card}
-        alternativeMatches={openEntry?.alternativeMatches}
-        capturedImageUrl={openEntry?.capturedImageUrl}
-        scanId={openEntry?.scanId}
-        onRemove={() => {
-          if (openEntry) removeCard(openEntry.scanId);
-          setOpenScanId(null);
-        }}
-        onPrev={() =>
-          setOpenScanId(filteredAndSorted[openIndex - 1]?.scanId ?? null)
-        }
-        onNext={() =>
-          setOpenScanId(filteredAndSorted[openIndex + 1]?.scanId ?? null)
-        }
-        hasPrev={openIndex > 0}
-        hasNext={openIndex < filteredAndSorted.length - 1}
-      />
 
       {selectedIds.size > 0 && (
         <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 flex items-center gap-3 rounded-lg border backdrop-blur-sm shadow-lg p-2 bg-sidebar">
