@@ -195,16 +195,20 @@ export function OrgSettings() {
                     )}
                   </div>
                   {canManage && m.role !== "owner" ? (
-                    <select
-                      className="text-xs bg-transparent border border-border rounded px-1.5 py-0.5"
+                    <Select
                       value={m.role}
-                      onChange={(e) =>
-                        handleChangeRole(m.id, e.target.value as OrgRole)
+                      onValueChange={(e) =>
+                        handleChangeRole(m.id, e as OrgRole)
                       }
                     >
-                      <option value="admin">Admin</option>
-                      <option value="member">Member</option>
-                    </select>
+                      <SelectTrigger className="w-28 shrink-0">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="admin">Admin</SelectItem>
+                        <SelectItem value="member">Member</SelectItem>
+                      </SelectContent>
+                    </Select>
                   ) : (
                     <span className="text-xs text-muted-foreground shrink-0">
                       {ROLE_LABELS[m.role as OrgRole]}
@@ -213,10 +217,10 @@ export function OrgSettings() {
                   {isOwner && m.role !== "owner" && (
                     <Button
                       variant="ghost"
-                      size="sm"
+                      size="icon"
                       onClick={() => handleRemoveMember(m.id)}
                     >
-                      <IconTrash size={14} />
+                      <IconTrash />
                     </Button>
                   )}
                 </div>
