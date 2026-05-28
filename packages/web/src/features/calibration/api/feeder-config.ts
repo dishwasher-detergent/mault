@@ -1,6 +1,6 @@
+import { apiGet, apiPost, apiPut } from "@/lib/api/client";
 import type { FeederCalibration, Result } from "@magic-vault/shared";
 import { DEFAULT_FEEDER_CALIBRATION } from "@magic-vault/shared";
-import { apiGet, apiPut } from "@/lib/api/client";
 import { queryOptions } from "@tanstack/react-query";
 
 export const feederQueryOptions = queryOptions({
@@ -26,10 +26,16 @@ export interface FeederConfigAuditEntry {
   createdAt: string;
 }
 
-export async function getFeederHistory(): Promise<Result<FeederConfigAuditEntry[]>> {
+export async function getFeederHistory(): Promise<
+  Result<FeederConfigAuditEntry[]>
+> {
   return apiGet<Result<FeederConfigAuditEntry[]>>("/api/feeder/history");
 }
 
-export async function revertFeederConfig(guid: string): Promise<Result<FeederCalibration>> {
-  return apiPost<Result<FeederCalibration>>(`/api/feeder/history/${guid}/revert`);
+export async function revertFeederConfig(
+  guid: string,
+): Promise<Result<FeederCalibration>> {
+  return apiPost<Result<FeederCalibration>>(
+    `/api/feeder/history/${guid}/revert`,
+  );
 }

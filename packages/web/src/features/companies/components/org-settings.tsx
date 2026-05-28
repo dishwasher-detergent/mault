@@ -32,7 +32,7 @@ type RenameValues = z.infer<typeof renameSchema>;
 type InviteValues = z.infer<typeof inviteSchema>;
 
 export function OrgSettings() {
-  const { data: orgs, refetch: refetchOrgs } = neon.auth.useListOrganizations();
+  const { refetch: refetchOrgs } = neon.auth.useListOrganizations();
   const { data: activeOrg, refetch: refetchActive } =
     neon.auth.useActiveOrganization();
   const { data: activeMember } = neon.auth.useActiveMember();
