@@ -1,5 +1,5 @@
 import { sql } from "drizzle-orm";
-import { authenticatedRole, authUid, crudPolicy } from "drizzle-orm/neon/rls";
+import { authenticatedRole, crudPolicy } from "drizzle-orm/neon/rls";
 import {
   boolean,
   customType,
@@ -26,6 +26,13 @@ const vector = customType<{ data: number[]; driverData: string }>({
   },
 });
 
+// org_id is a text column referencing neon_auth.organization.id (managed by Neon Auth)
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const orgRls = (orgId: any) =>
+  sql`${orgId} IN (SELECT "organizationId" FROM neon_auth.member WHERE "userId" = auth.user_id())`;
+
+// ─── Global card vectors (no org scope) ──────────────────────────────────────
+
 export const cardImageVectors = pgTable(
   "cards",
   {
@@ -48,6 +55,8 @@ export const cardImageVectors = pgTable(
   ],
 ).enableRLS();
 
+// ─── Org-scoped data tables ───────────────────────────────────────────────────
+
 export const binSets = pgTable(
   "bin_sets",
   {
@@ -55,9 +64,7 @@ export const binSets = pgTable(
     guid: uuid("guid").defaultRandom(),
     name: text("name").notNull(),
     isActive: boolean("is_active").notNull().default(false),
-    userId: text("user_id")
-      .notNull()
-      .default(sql`auth.user_id()`),
+    orgId: text("org_id").notNull(),
     createdAt: timestamp("created_at").defaultNow().notNull(),
     updatedAt: timestamp("updated_at").defaultNow().notNull(),
   },
@@ -65,8 +72,8 @@ export const binSets = pgTable(
     unique("bin_sets_guid_idx").on(table.guid),
     crudPolicy({
       role: authenticatedRole,
-      read: authUid(table.userId),
-      modify: authUid(table.userId),
+      read: orgRls(table.orgId),
+      modify: orgRls(table.orgId),
     }),
   ],
 ).enableRLS();
@@ -82,9 +89,7 @@ export const bins = pgTable(
     binSet: integer("bin_set")
       .notNull()
       .references(() => binSets.id),
-    userId: text("user_id")
-      .notNull()
-      .default(sql`auth.user_id()`),
+    orgId: text("org_id").notNull(),
     createdAt: timestamp("created_at").defaultNow().notNull(),
     updatedAt: timestamp("updated_at").defaultNow().notNull(),
   },
@@ -92,8 +97,8 @@ export const bins = pgTable(
     unique("bins_guid_idx").on(table.guid),
     crudPolicy({
       role: authenticatedRole,
-      read: authUid(table.userId),
-      modify: authUid(table.userId),
+      read: orgRls(table.orgId),
+      modify: orgRls(table.orgId),
     }),
   ],
 ).enableRLS();
@@ -104,16 +109,11 @@ export const moduleConfigs = pgTable(
     id: serial().primaryKey(),
     guid: uuid("guid").defaultRandom(),
     moduleNumber: integer("module_number").notNull(),
-    userId: text("user_id")
-      .notNull()
-      .default(sql`auth.user_id()`),
-    // Bottom paddle
+    orgId: text("org_id").notNull(),
     bottomClosed: integer("bottom_closed").notNull().default(102),
     bottomOpen: integer("bottom_open").notNull().default(307),
-    // Paddle
     paddleClosed: integer("paddle_closed").notNull().default(150),
     paddleOpen: integer("paddle_open").notNull().default(307),
-    // Pusher
     pusherLeft: integer("pusher_left").notNull().default(150),
     pusherNeutral: integer("pusher_neutral").notNull().default(307),
     pusherRight: integer("pusher_right").notNull().default(460),
@@ -121,14 +121,11 @@ export const moduleConfigs = pgTable(
     updatedAt: timestamp("updated_at").defaultNow().notNull(),
   },
   (table) => [
-    unique("module_configs_user_module_idx").on(
-      table.userId,
-      table.moduleNumber,
-    ),
+    unique("module_configs_org_module_idx").on(table.orgId, table.moduleNumber),
     crudPolicy({
       role: authenticatedRole,
-      read: authUid(table.userId),
-      modify: authUid(table.userId),
+      read: orgRls(table.orgId),
+      modify: orgRls(table.orgId),
     }),
   ],
 ).enableRLS();
@@ -138,9 +135,7 @@ export const feederConfigs = pgTable(
   {
     id: serial().primaryKey(),
     guid: uuid("guid").defaultRandom(),
-    userId: text("user_id")
-      .notNull()
-      .default(sql`auth.user_id()`),
+    orgId: text("org_id").notNull(),
     speed: integer("speed").notNull().default(400),
     duration: integer("duration").notNull().default(3000),
     pulseDuration: integer("pulse_duration").notNull().default(80),
@@ -149,11 +144,11 @@ export const feederConfigs = pgTable(
     updatedAt: timestamp("updated_at").defaultNow().notNull(),
   },
   (table) => [
-    unique("feeder_configs_user_idx").on(table.userId),
+    unique("feeder_configs_org_idx").on(table.orgId),
     crudPolicy({
       role: authenticatedRole,
-      read: authUid(table.userId),
-      modify: authUid(table.userId),
+      read: orgRls(table.orgId),
+      modify: orgRls(table.orgId),
     }),
   ],
 ).enableRLS();
@@ -165,9 +160,7 @@ export const collections = pgTable(
     guid: uuid("guid").defaultRandom(),
     name: text("name").notNull(),
     isActive: boolean("is_active").notNull().default(false),
-    userId: text("user_id")
-      .notNull()
-      .default(sql`auth.user_id()`),
+    orgId: text("org_id").notNull(),
     createdAt: timestamp("created_at").defaultNow().notNull(),
     updatedAt: timestamp("updated_at").defaultNow().notNull(),
   },
@@ -175,8 +168,8 @@ export const collections = pgTable(
     unique("collections_guid_idx").on(table.guid),
     crudPolicy({
       role: authenticatedRole,
-      read: authUid(table.userId),
-      modify: authUid(table.userId),
+      read: orgRls(table.orgId),
+      modify: orgRls(table.orgId),
     }),
   ],
 ).enableRLS();
@@ -194,17 +187,15 @@ export const collectionCards = pgTable(
     scannedAt: timestamp("scanned_at").notNull(),
     binNumber: integer("bin_number"),
     capturedImageDataUrl: text("captured_image_data_url"),
-    userId: text("user_id")
-      .notNull()
-      .default(sql`auth.user_id()`),
+    orgId: text("org_id").notNull(),
     createdAt: timestamp("created_at").defaultNow().notNull(),
   },
   (table) => [
     unique("collection_cards_guid_idx").on(table.guid),
     crudPolicy({
       role: authenticatedRole,
-      read: authUid(table.userId),
-      modify: authUid(table.userId),
+      read: orgRls(table.orgId),
+      modify: orgRls(table.orgId),
     }),
   ],
 ).enableRLS();
@@ -214,22 +205,22 @@ export const notificationSettings = pgTable(
   {
     id: serial().primaryKey(),
     guid: uuid("guid").defaultRandom(),
-    userId: text("user_id")
-      .notNull()
-      .default(sql`auth.user_id()`),
+    orgId: text("org_id").notNull(),
     discordWebhookUrl: text("discord_webhook_url"),
     createdAt: timestamp("created_at").defaultNow().notNull(),
     updatedAt: timestamp("updated_at").defaultNow().notNull(),
   },
   (table) => [
-    unique("notification_settings_user_idx").on(table.userId),
+    unique("notification_settings_org_idx").on(table.orgId),
     crudPolicy({
       role: authenticatedRole,
-      read: authUid(table.userId),
-      modify: authUid(table.userId),
+      read: orgRls(table.orgId),
+      modify: orgRls(table.orgId),
     }),
   ],
 ).enableRLS();
+
+// ─── Audit tables (org-scoped, no FK — audit records are permanent) ───────────
 
 export const binSetAudit = pgTable(
   "bin_set_audit",
@@ -238,17 +229,15 @@ export const binSetAudit = pgTable(
     guid: uuid("guid").defaultRandom(),
     binSetGuid: text("bin_set_guid").notNull(),
     snapshot: jsonb("snapshot").notNull(),
-    userId: text("user_id")
-      .notNull()
-      .default(sql`auth.user_id()`),
+    orgId: text("org_id").notNull(),
     createdAt: timestamp("created_at").defaultNow().notNull(),
   },
   (table) => [
     unique("bin_set_audit_guid_idx").on(table.guid),
     crudPolicy({
       role: authenticatedRole,
-      read: authUid(table.userId),
-      modify: authUid(table.userId),
+      read: orgRls(table.orgId),
+      modify: orgRls(table.orgId),
     }),
   ],
 ).enableRLS();
@@ -259,9 +248,7 @@ export const moduleConfigAudit = pgTable(
     id: serial().primaryKey(),
     guid: uuid("guid").defaultRandom(),
     moduleNumber: integer("module_number").notNull(),
-    userId: text("user_id")
-      .notNull()
-      .default(sql`auth.user_id()`),
+    orgId: text("org_id").notNull(),
     bottomClosed: integer("bottom_closed").notNull(),
     bottomOpen: integer("bottom_open").notNull(),
     paddleClosed: integer("paddle_closed").notNull(),
@@ -275,8 +262,8 @@ export const moduleConfigAudit = pgTable(
     unique("module_config_audit_guid_idx").on(table.guid),
     crudPolicy({
       role: authenticatedRole,
-      read: authUid(table.userId),
-      modify: authUid(table.userId),
+      read: orgRls(table.orgId),
+      modify: orgRls(table.orgId),
     }),
   ],
 ).enableRLS();
@@ -286,9 +273,7 @@ export const feederConfigAudit = pgTable(
   {
     id: serial().primaryKey(),
     guid: uuid("guid").defaultRandom(),
-    userId: text("user_id")
-      .notNull()
-      .default(sql`auth.user_id()`),
+    orgId: text("org_id").notNull(),
     speed: integer("speed").notNull(),
     duration: integer("duration").notNull(),
     pulseDuration: integer("pulse_duration").notNull(),
@@ -299,11 +284,13 @@ export const feederConfigAudit = pgTable(
     unique("feeder_config_audit_guid_idx").on(table.guid),
     crudPolicy({
       role: authenticatedRole,
-      read: authUid(table.userId),
-      modify: authUid(table.userId),
+      read: orgRls(table.orgId),
+      modify: orgRls(table.orgId),
     }),
   ],
 ).enableRLS();
+
+// ─── Relations ────────────────────────────────────────────────────────────────
 
 export const binSetRelations = relations(binSets, ({ many }) => ({
   bins: many(bins),

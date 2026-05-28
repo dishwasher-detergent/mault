@@ -57,7 +57,7 @@ export function ScannerOverlay({
           <span className="text-xs text-red-400">{errorMessage}</span>
           <Button
             variant="outline"
-            size="icon-sm"
+            size="icon"
             onClick={onRetryError}
             className="text-white border-white/30"
           >

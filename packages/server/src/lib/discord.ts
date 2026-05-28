@@ -9,20 +9,20 @@ type DiscordEmbed = {
   timestamp: string;
 };
 
-async function getWebhookUrl(userId: string): Promise<string | null> {
+async function getWebhookUrl(orgId: string): Promise<string | null> {
   const rows = await db
     .select({ discordWebhookUrl: notificationSettings.discordWebhookUrl })
     .from(notificationSettings)
-    .where(eq(notificationSettings.userId, userId))
+    .where(eq(notificationSettings.orgId, orgId))
     .limit(1);
   return rows[0]?.discordWebhookUrl ?? null;
 }
 
 export async function sendDiscordNotification(
-  userId: string,
+  orgId: string,
   embed: DiscordEmbed,
 ): Promise<void> {
-  const webhookUrl = await getWebhookUrl(userId);
+  const webhookUrl = await getWebhookUrl(orgId);
   if (!webhookUrl) return;
 
   try {

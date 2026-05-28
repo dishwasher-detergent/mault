@@ -6,6 +6,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { OrgSwitcher } from "@/features/companies/components/org-switcher";
 import { useIsMobile } from "@/hooks/use-is-mobile";
 import { useRole } from "@/hooks/use-role";
 import { cn } from "@/lib/utils";
@@ -144,6 +145,7 @@ export function AppNav() {
       </nav>
       <Separator orientation="horizontal" />
       <div className="flex flex-col items-center gap-2">
+        <OrgSwitcher side="right" />
         <ThemeToggle />
         <UserButton size="icon" side="right" />
       </div>

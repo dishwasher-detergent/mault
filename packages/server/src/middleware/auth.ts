@@ -3,10 +3,14 @@ import { createMiddleware } from "hono/factory";
 import * as jose from "jose";
 import { db } from "../db";
 
+export type OrgRole = "owner" | "admin" | "member";
+
 export type AppVariables = {
   jwtClaims: string;
   userId: string;
   userRole: string;
+  orgId: string;
+  orgRole: OrgRole;
 };
 export type AppEnv = { Variables: AppVariables };
 
@@ -57,10 +61,41 @@ export const requireAuth = createMiddleware<AppEnv>(async (c, next) => {
   await next();
 });
 
+export const requireOrg = createMiddleware<AppEnv>(async (c, next) => {
+  const orgId = c.req.header("X-Org-Id");
+  if (!orgId) {
+    return c.json({ success: false, message: "Organization context required." }, 400);
+  }
+
+  const userId = c.get("userId");
+
+  const rows = await db.execute<{ role: string }>(
+    sql`SELECT role FROM neon_auth.member WHERE "organizationId" = ${orgId} AND "userId" = ${userId} LIMIT 1`,
+  );
+  const member = rows.rows[0];
+
+  if (!member) {
+    return c.json({ success: false, message: "Organization not found or access denied." }, 403);
+  }
+
+  c.set("orgId", orgId);
+  c.set("orgRole", member.role as OrgRole);
+  await next();
+});
+
 export function requireRole(...roles: string[]) {
   return createMiddleware<AppEnv>(async (c, next) => {
     if (!roles.includes(c.get("userRole"))) {
       return c.json({ success: false, message: "Forbidden" }, 403);
+    }
+    await next();
+  });
+}
+
+export function requireOrgRole(...roles: OrgRole[]) {
+  return createMiddleware<AppEnv>(async (c, next) => {
+    if (!roles.includes(c.get("orgRole"))) {
+      return c.json({ success: false, message: "Insufficient organization permissions." }, 403);
     }
     await next();
   });

@@ -1,16 +1,13 @@
 import { Hono } from "hono";
 import { authQuery } from "../db";
 import { feederConfigAudit, feederConfigs } from "../db/schema";
-import {
-  DEFAULT_FEEDER_CALIBRATION,
-  type FeederCalibration,
-} from "@magic-vault/shared";
-import { requireAuth, type AppEnv } from "../middleware/auth";
+import { DEFAULT_FEEDER_CALIBRATION, type FeederCalibration } from "@magic-vault/shared";
+import { requireAuth, requireOrg, type AppEnv } from "../middleware/auth";
 
 const router = new Hono<AppEnv>();
 
 // GET /feeder
-router.get("/", requireAuth, async (c) => {
+router.get("/", requireAuth, requireOrg, async (c) => {
   try {
     const result = await authQuery(c.get("jwtClaims"), async (tx) => {
       const row = await tx.query.feederConfigs.findFirst();
@@ -27,20 +24,20 @@ router.get("/", requireAuth, async (c) => {
 });
 
 // PUT /feeder
-router.put("/", requireAuth, async (c) => {
+router.put("/", requireAuth, requireOrg, async (c) => {
+  const orgId = c.get("orgId");
   const calibration = await c.req.json<FeederCalibration>();
-
   try {
     const result = await authQuery(c.get("jwtClaims"), async (tx) => {
       await tx
         .insert(feederConfigs)
-        .values(calibration)
+        .values({ ...calibration, orgId })
         .onConflictDoUpdate({
-          target: [feederConfigs.userId],
+          target: [feederConfigs.orgId],
           set: { ...calibration, updatedAt: new Date() },
         });
 
-      await tx.insert(feederConfigAudit).values(calibration);
+      await tx.insert(feederConfigAudit).values({ ...calibration, orgId });
 
       const row = await tx.query.feederConfigs.findFirst();
       const saved: FeederCalibration = row
@@ -56,7 +53,7 @@ router.put("/", requireAuth, async (c) => {
 });
 
 // GET /feeder/history
-router.get("/history", requireAuth, async (c) => {
+router.get("/history", requireAuth, requireOrg, async (c) => {
   try {
     const result = await authQuery(c.get("jwtClaims"), async (tx) => {
       const rows = await tx.query.feederConfigAudit.findMany({
@@ -68,12 +65,7 @@ router.get("/history", requireAuth, async (c) => {
         message: "Loaded history.",
         data: rows.map((r) => ({
           guid: r.guid!,
-          calibration: {
-            speed: r.speed,
-            duration: r.duration,
-            pulseDuration: r.pulseDuration,
-            pauseDuration: r.pauseDuration,
-          } satisfies FeederCalibration,
+          calibration: { speed: r.speed, duration: r.duration, pulseDuration: r.pulseDuration, pauseDuration: r.pauseDuration } satisfies FeederCalibration,
           createdAt: r.createdAt.toISOString(),
         })),
       };
@@ -86,7 +78,8 @@ router.get("/history", requireAuth, async (c) => {
 });
 
 // POST /feeder/history/:guid/revert
-router.post("/history/:guid/revert", requireAuth, async (c) => {
+router.post("/history/:guid/revert", requireAuth, requireOrg, async (c) => {
+  const orgId = c.get("orgId");
   const guid = c.req.param("guid");
   try {
     const result = await authQuery(c.get("jwtClaims"), async (tx) => {
@@ -95,23 +88,17 @@ router.post("/history/:guid/revert", requireAuth, async (c) => {
       });
       if (!entry) return { success: false, message: "Audit record not found." };
 
-      const calibration: FeederCalibration = {
-        speed: entry.speed,
-        duration: entry.duration,
-        pulseDuration: entry.pulseDuration,
-        pauseDuration: entry.pauseDuration,
-      };
+      const calibration: FeederCalibration = { speed: entry.speed, duration: entry.duration, pulseDuration: entry.pulseDuration, pauseDuration: entry.pauseDuration };
 
       await tx
         .insert(feederConfigs)
-        .values(calibration)
+        .values({ ...calibration, orgId })
         .onConflictDoUpdate({
-          target: [feederConfigs.userId],
+          target: [feederConfigs.orgId],
           set: { ...calibration, updatedAt: new Date() },
         });
 
-      await tx.insert(feederConfigAudit).values(calibration);
-
+      await tx.insert(feederConfigAudit).values({ ...calibration, orgId });
       return { success: true, message: "Reverted feeder config.", data: calibration };
     });
     return c.json(result);

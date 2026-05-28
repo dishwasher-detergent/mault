@@ -4,9 +4,13 @@ const API_BASE = import.meta.env.VITE_API_URL ?? "";
 
 async function getAuthHeaders(): Promise<HeadersInit> {
   const { data } = await neon.auth.getSession();
-  const token = (data as { session?: { token?: string } } | null)?.session
-    ?.token;
-  return token ? { Authorization: `Bearer ${token}` } : {};
+  const session = (data as { session?: { token?: string; activeOrganizationId?: string | null } } | null)?.session;
+  const token = session?.token;
+  const orgId = session?.activeOrganizationId ?? localStorage.getItem("activeOrgId");
+  return {
+    ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    ...(orgId ? { "X-Org-Id": orgId } : {}),
+  };
 }
 
 export async function apiGet<T>(path: string): Promise<T> {

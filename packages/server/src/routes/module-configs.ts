@@ -1,12 +1,8 @@
 import { Hono } from "hono";
 import { authQuery } from "../db";
 import { moduleConfigAudit, moduleConfigs } from "../db/schema";
-import {
-  DEFAULT_CALIBRATION,
-  type ModuleConfig,
-  type ServoCalibration,
-} from "@magic-vault/shared";
-import { requireAuth, type AppEnv } from "../middleware/auth";
+import { DEFAULT_CALIBRATION, type ModuleConfig, type ServoCalibration } from "@magic-vault/shared";
+import { requireAuth, requireOrg, type AppEnv } from "../middleware/auth";
 
 const router = new Hono<AppEnv>();
 
@@ -34,25 +30,20 @@ function toModuleConfig(row: {
   };
 }
 
-function buildConfigs(
-  rows: { moduleNumber: number; bottomClosed: number; bottomOpen: number; paddleClosed: number; paddleOpen: number; pusherLeft: number; pusherNeutral: number; pusherRight: number }[],
-): ModuleConfig[] {
+type CalibRow = { moduleNumber: number; bottomClosed: number; bottomOpen: number; paddleClosed: number; paddleOpen: number; pusherLeft: number; pusherNeutral: number; pusherRight: number };
+function buildConfigs(rows: CalibRow[]): ModuleConfig[] {
   return ([1, 2, 3] as const).map((n) => {
     const row = rows.find((r) => r.moduleNumber === n);
     return row ? toModuleConfig(row) : { moduleNumber: n, calibration: { ...DEFAULT_CALIBRATION } };
   });
 }
 
-// GET /api/modules
-router.get("/", requireAuth, async (c) => {
+// GET /modules
+router.get("/", requireAuth, requireOrg, async (c) => {
   try {
     const result = await authQuery(c.get("jwtClaims"), async (tx) => {
       const rows = await tx.query.moduleConfigs.findMany();
-      return {
-        success: true,
-        message: "Loaded module configs.",
-        data: buildConfigs(rows),
-      };
+      return { success: true, message: "Loaded module configs.", data: buildConfigs(rows) };
     });
     return c.json(result);
   } catch (err) {
@@ -61,29 +52,25 @@ router.get("/", requireAuth, async (c) => {
   }
 });
 
-// PUT /api/modules/:moduleNumber
-router.put("/:moduleNumber", requireAuth, async (c) => {
+// PUT /modules/:moduleNumber
+router.put("/:moduleNumber", requireAuth, requireOrg, async (c) => {
+  const orgId = c.get("orgId");
   const moduleNumber = parseInt(c.req.param("moduleNumber")) as 1 | 2 | 3;
   const calibration = await c.req.json<ServoCalibration>();
-
   try {
     const result = await authQuery(c.get("jwtClaims"), async (tx) => {
       await tx
         .insert(moduleConfigs)
-        .values({ moduleNumber, ...calibration })
+        .values({ moduleNumber, ...calibration, orgId })
         .onConflictDoUpdate({
-          target: [moduleConfigs.userId, moduleConfigs.moduleNumber],
+          target: [moduleConfigs.orgId, moduleConfigs.moduleNumber],
           set: { ...calibration, updatedAt: new Date() },
         });
 
-      await tx.insert(moduleConfigAudit).values({ moduleNumber, ...calibration });
+      await tx.insert(moduleConfigAudit).values({ moduleNumber, ...calibration, orgId });
 
       const rows = await tx.query.moduleConfigs.findMany();
-      return {
-        success: true,
-        message: "Saved module config.",
-        data: buildConfigs(rows),
-      };
+      return { success: true, message: "Saved module config.", data: buildConfigs(rows) };
     });
     return c.json(result);
   } catch (err) {
@@ -92,8 +79,8 @@ router.put("/:moduleNumber", requireAuth, async (c) => {
   }
 });
 
-// GET /api/modules/history
-router.get("/history", requireAuth, async (c) => {
+// GET /modules/history
+router.get("/history", requireAuth, requireOrg, async (c) => {
   try {
     const result = await authQuery(c.get("jwtClaims"), async (tx) => {
       const rows = await tx.query.moduleConfigAudit.findMany({
@@ -126,8 +113,9 @@ router.get("/history", requireAuth, async (c) => {
   }
 });
 
-// POST /api/modules/history/:guid/revert
-router.post("/history/:guid/revert", requireAuth, async (c) => {
+// POST /modules/history/:guid/revert
+router.post("/history/:guid/revert", requireAuth, requireOrg, async (c) => {
+  const orgId = c.get("orgId");
   const guid = c.req.param("guid");
   try {
     const result = await authQuery(c.get("jwtClaims"), async (tx) => {
@@ -148,20 +136,16 @@ router.post("/history/:guid/revert", requireAuth, async (c) => {
 
       await tx
         .insert(moduleConfigs)
-        .values({ moduleNumber: entry.moduleNumber, ...calibration })
+        .values({ moduleNumber: entry.moduleNumber, ...calibration, orgId })
         .onConflictDoUpdate({
-          target: [moduleConfigs.userId, moduleConfigs.moduleNumber],
+          target: [moduleConfigs.orgId, moduleConfigs.moduleNumber],
           set: { ...calibration, updatedAt: new Date() },
         });
 
-      await tx.insert(moduleConfigAudit).values({ moduleNumber: entry.moduleNumber, ...calibration });
+      await tx.insert(moduleConfigAudit).values({ moduleNumber: entry.moduleNumber, ...calibration, orgId });
 
       const rows = await tx.query.moduleConfigs.findMany();
-      return {
-        success: true,
-        message: "Reverted module config.",
-        data: buildConfigs(rows),
-      };
+      return { success: true, message: "Reverted module config.", data: buildConfigs(rows) };
     });
     return c.json(result);
   } catch (err) {

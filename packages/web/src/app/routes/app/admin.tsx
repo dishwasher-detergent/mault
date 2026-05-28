@@ -287,7 +287,7 @@ export default function AdminPage() {
                 {new Date(card.updatedAt).toLocaleDateString()}
               </p>
               <Button
-                size="icon-sm"
+                size="icon"
                 variant="ghost"
                 disabled={revectorizingIds.has(card.scryfallId)}
                 onClick={() => handleRevectorize(card.scryfallId, card.name)}
@@ -315,7 +315,7 @@ export default function AdminPage() {
             </p>
             <div className="flex gap-1">
               <Button
-                size="icon-sm"
+                size="icon"
                 variant="ghost"
                 disabled={cardPage <= 1}
                 onClick={() => setCardPage((p) => p - 1)}
@@ -323,7 +323,7 @@ export default function AdminPage() {
                 <IconChevronLeft />
               </Button>
               <Button
-                size="icon-sm"
+                size="icon"
                 variant="ghost"
                 disabled={cardPage >= totalPages}
                 onClick={() => setCardPage((p) => p + 1)}

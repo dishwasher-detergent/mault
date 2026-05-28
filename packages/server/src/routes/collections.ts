@@ -1,7 +1,7 @@
 import { Hono } from "hono";
 import { authQuery, type Transaction } from "../db";
 import { collections, collectionCards } from "../db/schema";
-import { requireAuth, type AppEnv } from "../middleware/auth";
+import { requireAuth, requireOrg, type AppEnv } from "../middleware/auth";
 import type { Collection, ScannedCard, ScryfallCardWithDistance } from "@magic-vault/shared";
 import { count, desc, eq } from "drizzle-orm";
 
@@ -69,7 +69,7 @@ async function _loadCollections(tx: Transaction): Promise<{ success: true; data:
 }
 
 // GET /collections
-router.get("/", requireAuth, async (c) => {
+router.get("/", requireAuth, requireOrg, async (c) => {
   try {
     const result = await authQuery(c.get("jwtClaims"), _loadCollections);
     return c.json(result);
@@ -80,7 +80,8 @@ router.get("/", requireAuth, async (c) => {
 });
 
 // POST /collections — create and activate
-router.post("/", requireAuth, async (c) => {
+router.post("/", requireAuth, requireOrg, async (c) => {
+  const orgId = c.get("orgId");
   const { name } = await c.req.json<{ name: string }>();
   try {
     const result = await authQuery(c.get("jwtClaims"), async (tx) => {
@@ -89,7 +90,7 @@ router.post("/", requireAuth, async (c) => {
         .set({ isActive: false })
         .where(eq(collections.isActive, true));
 
-      await tx.insert(collections).values({ name, isActive: true });
+      await tx.insert(collections).values({ name, isActive: true, orgId });
 
       return _loadCollections(tx);
     });
@@ -101,7 +102,7 @@ router.post("/", requireAuth, async (c) => {
 });
 
 // PUT /collections/:guid — rename
-router.put("/:guid", requireAuth, async (c) => {
+router.put("/:guid", requireAuth, requireOrg, async (c) => {
   const guid = c.req.param("guid");
   const { name } = await c.req.json<{ name: string }>();
   try {
@@ -125,7 +126,7 @@ router.put("/:guid", requireAuth, async (c) => {
 });
 
 // PUT /collections/:guid/active — activate
-router.put("/:guid/active", requireAuth, async (c) => {
+router.put("/:guid/active", requireAuth, requireOrg, async (c) => {
   const guid = c.req.param("guid");
   try {
     const result = await authQuery(c.get("jwtClaims"), async (tx) => {
@@ -154,7 +155,7 @@ router.put("/:guid/active", requireAuth, async (c) => {
 });
 
 // DELETE /collections/:guid
-router.delete("/:guid", requireAuth, async (c) => {
+router.delete("/:guid", requireAuth, requireOrg, async (c) => {
   const guid = c.req.param("guid");
   try {
     const result = await authQuery(c.get("jwtClaims"), async (tx) => {
@@ -191,7 +192,7 @@ router.delete("/:guid", requireAuth, async (c) => {
 });
 
 // GET /collections/:guid/cards
-router.get("/:guid/cards", requireAuth, async (c) => {
+router.get("/:guid/cards", requireAuth, requireOrg, async (c) => {
   const guid = c.req.param("guid");
   try {
     const result = await authQuery(c.get("jwtClaims"), async (tx) => {
@@ -223,8 +224,9 @@ router.get("/:guid/cards", requireAuth, async (c) => {
 });
 
 // POST /collections/:guid/cards — add card
-router.post("/:guid/cards", requireAuth, async (c) => {
+router.post("/:guid/cards", requireAuth, requireOrg, async (c) => {
   const guid = c.req.param("guid");
+  const orgId = c.get("orgId");
   const { scanId, card, scannedAt, binNumber, capturedImageUrl } = await c.req.json<ScannedCard>();
   try {
     const result = await authQuery(c.get("jwtClaims"), async (tx) => {
@@ -242,6 +244,7 @@ router.post("/:guid/cards", requireAuth, async (c) => {
         scannedAt: new Date(scannedAt),
         binNumber: binNumber ?? null,
         capturedImageDataUrl: capturedImageUrl ?? null,
+        orgId,
       }).onConflictDoNothing();
 
       // bump collection updatedAt
@@ -260,7 +263,7 @@ router.post("/:guid/cards", requireAuth, async (c) => {
 });
 
 // PUT /collections/:guid/cards/:scanId — update card (correction)
-router.put("/:guid/cards/:scanId", requireAuth, async (c) => {
+router.put("/:guid/cards/:scanId", requireAuth, requireOrg, async (c) => {
   const { guid, scanId } = c.req.param();
   const { card, binNumber } = await c.req.json<{ card: ScryfallCardWithDistance; binNumber?: number }>();
   try {
@@ -289,7 +292,7 @@ router.put("/:guid/cards/:scanId", requireAuth, async (c) => {
 });
 
 // DELETE /collections/:guid/cards — clear all cards in collection
-router.delete("/:guid/cards", requireAuth, async (c) => {
+router.delete("/:guid/cards", requireAuth, requireOrg, async (c) => {
   const guid = c.req.param("guid");
   try {
     const result = await authQuery(c.get("jwtClaims"), async (tx) => {
@@ -313,7 +316,7 @@ router.delete("/:guid/cards", requireAuth, async (c) => {
 });
 
 // POST /collections/:guid/cards/remove-bulk — remove multiple cards
-router.post("/:guid/cards/remove-bulk", requireAuth, async (c) => {
+router.post("/:guid/cards/remove-bulk", requireAuth, requireOrg, async (c) => {
   const { scanIds } = await c.req.json<{ scanIds: string[] }>();
   try {
     const result = await authQuery(c.get("jwtClaims"), async (tx) => {
@@ -332,7 +335,7 @@ router.post("/:guid/cards/remove-bulk", requireAuth, async (c) => {
 });
 
 // DELETE /collections/:guid/cards/:scanId — remove one card
-router.delete("/:guid/cards/:scanId", requireAuth, async (c) => {
+router.delete("/:guid/cards/:scanId", requireAuth, requireOrg, async (c) => {
   const scanId = c.req.param("scanId");
   try {
     const result = await authQuery(c.get("jwtClaims"), async (tx) => {

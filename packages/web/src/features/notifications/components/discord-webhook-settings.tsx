@@ -13,8 +13,15 @@ const TEST_TYPES: { type: NotificationTestType; label: string }[] = [
 ];
 
 export function DiscordWebhookSettings() {
-  const { settings, isLoading, save, isSaving, sendTest, isTesting, testingType } =
-    useNotificationSettings();
+  const {
+    settings,
+    isLoading,
+    save,
+    isSaving,
+    sendTest,
+    isTesting,
+    testingType,
+  } = useNotificationSettings();
   const [webhookUrl, setWebhookUrl] = useState("");
 
   useEffect(() => {
@@ -31,8 +38,8 @@ export function DiscordWebhookSettings() {
         <Label>Discord Webhook</Label>
       </div>
       <p className="text-sm text-muted-foreground">
-        Receive a notification when card sorting fails, a card search errors, or the sync job
-        crashes.
+        Receive a notification when card sorting fails, a card search errors, or
+        the sync job crashes.
       </p>
       <div className="flex gap-2">
         <Input
@@ -51,7 +58,9 @@ export function DiscordWebhookSettings() {
       </div>
       <div className="flex flex-col gap-1.5">
         <Label className="text-xs text-muted-foreground">
-          {isDirty ? "Save webhook URL to enable test notifications" : "Send a test notification"}
+          {isDirty
+            ? "Save webhook URL to enable test notifications"
+            : "Send a test notification"}
         </Label>
         <div className="flex flex-wrap gap-2">
           {TEST_TYPES.map(({ type, label }) => (

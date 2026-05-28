@@ -233,7 +233,7 @@ export default function CollectionsPage() {
               <div className="flex items-center gap-1 shrink-0">
                 <Button
                   variant="ghost"
-                  size="icon-sm"
+                  size="icon"
                   disabled={isMutating}
                   onClick={() => {
                     renameForm.reset({ name: collection.name });
@@ -247,7 +247,7 @@ export default function CollectionsPage() {
                 </Button>
                 <Button
                   variant="destructive"
-                  size="icon-sm"
+                  size="icon"
                   disabled={isMutating}
                   onClick={() =>
                     setDeleteTarget({
@@ -256,7 +256,7 @@ export default function CollectionsPage() {
                     })
                   }
                 >
-                  <IconTrash className="text-destructive" />
+                  <IconTrash />
                 </Button>
               </div>
             </div>

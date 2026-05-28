@@ -3,7 +3,7 @@ import { authQuery } from "../db";
 import { binSetAudit, bins, binSets } from "../db/schema";
 import { BIN_COUNT, type BinConfig, type BinRuleGroup, type BinSet } from "@magic-vault/shared";
 import { eq } from "drizzle-orm";
-import { requireAuth, type AppEnv } from "../middleware/auth";
+import { requireAuth, requireOrg, type AppEnv } from "../middleware/auth";
 import type { Transaction } from "../db";
 
 const router = new Hono<AppEnv>();
@@ -40,26 +40,19 @@ function toBinSet(row: {
 }
 
 const binSetQuery = {
-  columns: {
-    guid: true,
-    name: true,
-    isActive: true,
-    createdAt: true,
-    updatedAt: true,
-  },
-  with: {
-    bins: {
-      columns: {
-        guid: true,
-        binNumber: true,
-        rules: true,
-        isCatchAll: true,
-      },
-    },
-  },
+  columns: { guid: true, name: true, isActive: true, createdAt: true, updatedAt: true },
+  with: { bins: { columns: { guid: true, binNumber: true, rules: true, isCatchAll: true } } },
 } as const;
 
-async function _snapshotBinSet(tx: Transaction, binSetId: number, binSetGuid: string) {
+async function _loadSets(tx: Transaction) {
+  const rows = await tx.query.binSets.findMany({
+    ...binSetQuery,
+    orderBy: (binSets, { desc }) => [desc(binSets.updatedAt)],
+  });
+  return { message: "Loaded sets.", success: true, data: rows.map(toBinSet) };
+}
+
+async function _snapshotBinSet(tx: Transaction, binSetId: number, binSetGuid: string, orgId: number) {
   const rows = await tx.query.bins.findMany({
     where: (bins, { eq }) => eq(bins.binSet, binSetId),
     columns: { guid: true, binNumber: true, rules: true, isCatchAll: true },
@@ -70,23 +63,11 @@ async function _snapshotBinSet(tx: Transaction, binSetId: number, binSetGuid: st
     rules: r.rules as BinRuleGroup,
     isCatchAll: r.isCatchAll,
   }));
-  await tx.insert(binSetAudit).values({ binSetGuid, snapshot });
+  await tx.insert(binSetAudit).values({ binSetGuid, snapshot, orgId });
 }
 
-async function _loadSets(tx: Transaction) {
-  const rows = await tx.query.binSets.findMany({
-    ...binSetQuery,
-    orderBy: (binSets, { desc }) => [desc(binSets.updatedAt)],
-  });
-  return {
-    message: "Loaded sets.",
-    success: true,
-    data: rows.map(toBinSet),
-  };
-}
-
-// GET /api/sort-bins
-router.get("/", requireAuth, async (c) => {
+// GET /bins
+router.get("/", requireAuth, requireOrg, async (c) => {
   try {
     const result = await authQuery(c.get("jwtClaims"), _loadSets);
     return c.json(result);
@@ -96,8 +77,8 @@ router.get("/", requireAuth, async (c) => {
   }
 });
 
-// PUT /api/sort-bins/:guid/active
-router.put("/:guid/active", requireAuth, async (c) => {
+// PUT /bins/:guid/active
+router.put("/:guid/active", requireAuth, requireOrg, async (c) => {
   const guid = c.req.param("guid");
   try {
     const result = await authQuery(c.get("jwtClaims"), async (tx) => {
@@ -105,14 +86,9 @@ router.put("/:guid/active", requireAuth, async (c) => {
         where: (binSets, { eq }) => eq(binSets.guid, guid),
         columns: { id: true },
       });
-
-      if (!target) {
-        return { message: "Set not found.", success: false };
-      }
-
+      if (!target) return { message: "Set not found.", success: false };
       await tx.update(binSets).set({ isActive: false }).where(eq(binSets.isActive, true));
       await tx.update(binSets).set({ isActive: true }).where(eq(binSets.id, target.id));
-
       return _loadSets(tx);
     });
     return c.json(result);
@@ -122,27 +98,23 @@ router.put("/:guid/active", requireAuth, async (c) => {
   }
 });
 
-// POST /api/sort-bins
-router.post("/", requireAuth, async (c) => {
+// POST /bins
+router.post("/", requireAuth, requireOrg, async (c) => {
+  const orgId = c.get("orgId");
   const { name } = await c.req.json<{ name: string }>();
   try {
     const result = await authQuery(c.get("jwtClaims"), async (tx) => {
       await tx.update(binSets).set({ isActive: false }).where(eq(binSets.isActive, true));
-
-      const [newBinSet] = await tx
-        .insert(binSets)
-        .values({ name, isActive: true })
-        .returning({ id: binSets.id });
-
+      const [newBinSet] = await tx.insert(binSets).values({ name, isActive: true, orgId }).returning({ id: binSets.id });
       await tx.insert(bins).values(
         Array.from({ length: BIN_COUNT }, (_, i) => ({
           binNumber: i + 1,
           rules: emptyRules(),
           isCatchAll: false,
           binSet: newBinSet.id,
+          orgId,
         })),
       );
-
       return _loadSets(tx);
     });
     return c.json(result);
@@ -152,28 +124,19 @@ router.post("/", requireAuth, async (c) => {
   }
 });
 
-// POST /api/sort-bins/copies
-router.post("/copies", requireAuth, async (c) => {
+// POST /bins/copies
+router.post("/copies", requireAuth, requireOrg, async (c) => {
+  const orgId = c.get("orgId");
   const { name } = await c.req.json<{ name: string }>();
   try {
     const result = await authQuery(c.get("jwtClaims"), async (tx) => {
       const active = await tx.query.binSets.findFirst({
         where: (binSets, { eq }) => eq(binSets.isActive, true),
         columns: { id: true },
-        with: {
-          bins: {
-            columns: { binNumber: true, rules: true, isCatchAll: true },
-          },
-        },
+        with: { bins: { columns: { binNumber: true, rules: true, isCatchAll: true } } },
       });
-
       const activeBins = active?.bins ?? [];
-
-      const [newBinSet] = await tx
-        .insert(binSets)
-        .values({ name, isActive: false })
-        .returning({ id: binSets.id });
-
+      const [newBinSet] = await tx.insert(binSets).values({ name, isActive: false, orgId }).returning({ id: binSets.id });
       if (activeBins.length > 0) {
         await tx.insert(bins).values(
           activeBins.map((bin) => ({
@@ -181,10 +144,10 @@ router.post("/copies", requireAuth, async (c) => {
             rules: bin.rules,
             isCatchAll: bin.isCatchAll,
             binSet: newBinSet.id,
+            orgId,
           })),
         );
       }
-
       return _loadSets(tx);
     });
     return c.json(result);
@@ -194,29 +157,21 @@ router.post("/copies", requireAuth, async (c) => {
   }
 });
 
-// PUT /api/sort-bins/bins/:binNumber
-router.put("/bins/:binNumber", requireAuth, async (c) => {
+// PUT /bins/bins/:binNumber
+router.put("/bins/:binNumber", requireAuth, requireOrg, async (c) => {
+  const orgId = c.get("orgId");
   const binNumber = parseInt(c.req.param("binNumber"));
   const { rules, isCatchAll } = await c.req.json<{ rules: BinRuleGroup; isCatchAll?: boolean }>();
-
   try {
     const result = await authQuery(c.get("jwtClaims"), async (tx) => {
       const activeBinSet = await tx.query.binSets.findFirst({
         where: (binSets, { eq }) => eq(binSets.isActive, true),
         columns: { id: true, guid: true },
-        with: {
-          bins: {
-            columns: { id: true, binNumber: true },
-          },
-        },
+        with: { bins: { columns: { id: true, binNumber: true } } },
       });
-
-      if (!activeBinSet) {
-        return { message: "No active set found.", success: false };
-      }
+      if (!activeBinSet) return { message: "No active set found.", success: false };
 
       const existing = activeBinSet.bins.find((b) => b.binNumber === binNumber);
-
       let savedBin: BinConfig;
 
       if (existing) {
@@ -224,43 +179,18 @@ router.put("/bins/:binNumber", requireAuth, async (c) => {
           .update(bins)
           .set({ rules, isCatchAll: isCatchAll ?? false, updatedAt: new Date() })
           .where(eq(bins.id, existing.id))
-          .returning({
-            guid: bins.guid,
-            binNumber: bins.binNumber,
-            rules: bins.rules,
-            isCatchAll: bins.isCatchAll,
-          });
-        savedBin = {
-          guid: updated.guid!,
-          binNumber: updated.binNumber,
-          rules: updated.rules as BinRuleGroup,
-          isCatchAll: updated.isCatchAll,
-        };
+          .returning({ guid: bins.guid, binNumber: bins.binNumber, rules: bins.rules, isCatchAll: bins.isCatchAll });
+        savedBin = { guid: updated.guid!, binNumber: updated.binNumber, rules: updated.rules as BinRuleGroup, isCatchAll: updated.isCatchAll };
       } else {
         const [inserted] = await tx
           .insert(bins)
-          .values({ binNumber, rules, isCatchAll: isCatchAll ?? false, binSet: activeBinSet.id })
-          .returning({
-            guid: bins.guid,
-            binNumber: bins.binNumber,
-            rules: bins.rules,
-            isCatchAll: bins.isCatchAll,
-          });
-        savedBin = {
-          guid: inserted.guid!,
-          binNumber: inserted.binNumber,
-          rules: inserted.rules as BinRuleGroup,
-          isCatchAll: inserted.isCatchAll,
-        };
+          .values({ binNumber, rules, isCatchAll: isCatchAll ?? false, binSet: activeBinSet.id, orgId })
+          .returning({ guid: bins.guid, binNumber: bins.binNumber, rules: bins.rules, isCatchAll: bins.isCatchAll });
+        savedBin = { guid: inserted.guid!, binNumber: inserted.binNumber, rules: inserted.rules as BinRuleGroup, isCatchAll: inserted.isCatchAll };
       }
 
-      await _snapshotBinSet(tx, activeBinSet.id, activeBinSet.guid!);
-
-      return {
-        message: "Successfully saved bin config.",
-        success: true,
-        data: savedBin,
-      };
+      await _snapshotBinSet(tx, activeBinSet.id, activeBinSet.guid!, orgId);
+      return { message: "Successfully saved bin config.", success: true, data: savedBin };
     });
     return c.json(result);
   } catch (err) {
@@ -269,30 +199,19 @@ router.put("/bins/:binNumber", requireAuth, async (c) => {
   }
 });
 
-// DELETE /api/sort-bins/bins/:binNumber — must be before DELETE /:guid
-router.delete("/bins/:binNumber", requireAuth, async (c) => {
+// DELETE /bins/bins/:binNumber
+router.delete("/bins/:binNumber", requireAuth, requireOrg, async (c) => {
   const binNumber = parseInt(c.req.param("binNumber"));
   try {
     const result = await authQuery(c.get("jwtClaims"), async (tx) => {
       const activeBinSet = await tx.query.binSets.findFirst({
         where: (binSets, { eq }) => eq(binSets.isActive, true),
         columns: { id: true },
-        with: {
-          bins: {
-            columns: { id: true, binNumber: true },
-          },
-        },
+        with: { bins: { columns: { id: true, binNumber: true } } },
       });
-
-      if (!activeBinSet) {
-        return { message: "No active set found.", success: false };
-      }
-
+      if (!activeBinSet) return { message: "No active set found.", success: false };
       const existing = activeBinSet.bins.find((b) => b.binNumber === binNumber);
-      if (existing) {
-        await tx.delete(bins).where(eq(bins.id, existing.id));
-      }
-
+      if (existing) await tx.delete(bins).where(eq(bins.id, existing.id));
       return { message: "Successfully cleared bin config.", success: true, data: null };
     });
     return c.json(result);
@@ -302,8 +221,8 @@ router.delete("/bins/:binNumber", requireAuth, async (c) => {
   }
 });
 
-// PUT /api/sort-bins/:guid
-router.put("/:guid", requireAuth, async (c) => {
+// PUT /bins/:guid
+router.put("/:guid", requireAuth, requireOrg, async (c) => {
   const guid = c.req.param("guid");
   const { name } = await c.req.json<{ name: string }>();
   try {
@@ -323,8 +242,8 @@ router.put("/:guid", requireAuth, async (c) => {
   }
 });
 
-// DELETE /api/sort-bins/:guid
-router.delete("/:guid", requireAuth, async (c) => {
+// DELETE /bins/:guid
+router.delete("/:guid", requireAuth, requireOrg, async (c) => {
   const guid = c.req.param("guid");
   try {
     const result = await authQuery(c.get("jwtClaims"), async (tx) => {
@@ -332,14 +251,9 @@ router.delete("/:guid", requireAuth, async (c) => {
         where: (binSets, { eq }) => eq(binSets.guid, guid),
         columns: { id: true },
       });
-
-      if (!target) {
-        return { message: "Set not found.", success: false };
-      }
-
+      if (!target) return { message: "Set not found.", success: false };
       await tx.delete(bins).where(eq(bins.binSet, target.id));
       await tx.delete(binSets).where(eq(binSets.id, target.id));
-
       return _loadSets(tx);
     });
     return c.json(result);
@@ -349,8 +263,8 @@ router.delete("/:guid", requireAuth, async (c) => {
   }
 });
 
-// GET /api/bins/history?setGuid=<guid>
-router.get("/history", requireAuth, async (c) => {
+// GET /bins/history?setGuid=
+router.get("/history", requireAuth, requireOrg, async (c) => {
   const setGuid = c.req.query("setGuid");
   try {
     const result = await authQuery(c.get("jwtClaims"), async (tx) => {
@@ -378,8 +292,9 @@ router.get("/history", requireAuth, async (c) => {
   }
 });
 
-// POST /api/bins/history/:guid/revert
-router.post("/history/:guid/revert", requireAuth, async (c) => {
+// POST /bins/history/:guid/revert
+router.post("/history/:guid/revert", requireAuth, requireOrg, async (c) => {
+  const orgId = c.get("orgId");
   const guid = c.req.param("guid");
   try {
     const result = await authQuery(c.get("jwtClaims"), async (tx) => {
@@ -399,22 +314,13 @@ router.post("/history/:guid/revert", requireAuth, async (c) => {
       for (const config of snapshot) {
         const existing = binSet.bins.find((b) => b.binNumber === config.binNumber);
         if (existing) {
-          await tx
-            .update(bins)
-            .set({ rules: config.rules, isCatchAll: config.isCatchAll, updatedAt: new Date() })
-            .where(eq(bins.id, existing.id));
+          await tx.update(bins).set({ rules: config.rules, isCatchAll: config.isCatchAll, updatedAt: new Date() }).where(eq(bins.id, existing.id));
         } else {
-          await tx.insert(bins).values({
-            binNumber: config.binNumber,
-            rules: config.rules,
-            isCatchAll: config.isCatchAll,
-            binSet: binSet.id,
-          });
+          await tx.insert(bins).values({ binNumber: config.binNumber, rules: config.rules, isCatchAll: config.isCatchAll, binSet: binSet.id, orgId });
         }
       }
 
-      await tx.insert(binSetAudit).values({ binSetGuid: entry.binSetGuid, snapshot: entry.snapshot });
-
+      await tx.insert(binSetAudit).values({ binSetGuid: entry.binSetGuid, snapshot: entry.snapshot, orgId });
       return _loadSets(tx);
     });
     return c.json(result);
