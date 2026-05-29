@@ -61,7 +61,7 @@ export function OrgPickerModal() {
   }
 
   return (
-    <Dialog open={needsPick && !isPending} dismissible={false}>
+    <Dialog open={needsPick && !isPending}>
       <DialogContent showCloseButton={false}>
         <DialogHeader>
           <DialogTitle>Choose an organization</DialogTitle>

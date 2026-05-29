@@ -1,4 +1,8 @@
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 export function getInitials(name: string | undefined): string {
   if (!name) return "?";
@@ -14,7 +18,12 @@ interface InitialsAvatarProps {
   tooltip?: string;
 }
 
-export function InitialsAvatar({ name, variant = "watcher", size = "md", tooltip }: InitialsAvatarProps) {
+export function InitialsAvatar({
+  name,
+  variant = "watcher",
+  size = "md",
+  tooltip,
+}: InitialsAvatarProps) {
   const sizeClass = size === "sm" ? "size-5 text-[9px]" : "size-6 text-[10px]";
   const colorClass =
     variant === "scanner"
@@ -35,7 +44,7 @@ export function InitialsAvatar({ name, variant = "watcher", size = "md", tooltip
 
   return (
     <Tooltip>
-      <TooltipTrigger asChild>{avatar}</TooltipTrigger>
+      <TooltipTrigger render={avatar} />
       <TooltipContent>{tooltip}</TooltipContent>
     </Tooltip>
   );
