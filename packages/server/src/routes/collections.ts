@@ -1,9 +1,12 @@
 import { Hono } from "hono";
-import { authQuery, type Transaction } from "../db";
+import { streamSSE } from "hono/streaming";
+import { count, desc, eq, sql } from "drizzle-orm";
+import { authQuery, db, type Transaction } from "../db";
 import { collections, collectionCards } from "../db/schema";
-import { requireAuth, requireOrg, type AppEnv } from "../middleware/auth";
+import { getUserDisplayName, requireAuth, requireOrg, verifyToken, type AppEnv } from "../middleware/auth";
+import { emitToSession, getSessionViewers, sessionListenerCount, subscribeSession } from "../lib/session-stream";
+import { acquireLock, getLocksForGuids, releaseLock, subscribeOrgLocks } from "../lib/scan-lock";
 import type { Collection, ScannedCard, ScryfallCardWithDistance } from "@magic-vault/shared";
-import { count, desc, eq } from "drizzle-orm";
 
 const router = new Hono<AppEnv>();
 
@@ -77,6 +80,99 @@ router.get("/", requireAuth, requireOrg, async (c) => {
     console.error(err);
     return c.json({ success: false, message: "Database error." }, 500);
   }
+});
+
+// GET /collections/lock-events — SSE stream of lock_acquired / lock_released for all org collections
+router.get("/lock-events", async (c) => {
+  const token = c.req.query("token");
+  const orgId = c.req.query("orgId");
+
+  if (!token || !orgId) return c.json({ success: false, message: "Unauthorized" }, 401);
+
+  const payload = await verifyToken(token);
+  if (!payload?.sub) return c.json({ success: false, message: "Unauthorized" }, 401);
+
+  const rows = await db.execute<{ role: string }>(
+    sql`SELECT role FROM neon_auth.member WHERE "organizationId" = ${orgId} AND "userId" = ${payload.sub} LIMIT 1`,
+  );
+  if (!rows.rows[0]) return c.json({ success: false, message: "Forbidden" }, 403);
+
+  const jwtClaims = JSON.stringify({ sub: payload.sub, role: "authenticated" });
+
+  return streamSSE(c, async (stream) => {
+    // Send current lock state as initial event
+    try {
+      const guids = await authQuery(jwtClaims, async (tx) =>
+        tx.select({ guid: collections.guid }).from(collections),
+      );
+      const initial = getLocksForGuids(guids.map((r) => r.guid!).filter(Boolean));
+      await stream.writeSSE({ event: "init", data: JSON.stringify({ locks: initial }) });
+    } catch { /* non-fatal */ }
+
+    const unsubscribe = subscribeOrgLocks(orgId, (event, data) => {
+      stream.writeSSE({ event, data: JSON.stringify(data) }).catch(() => {});
+    });
+
+    await new Promise<void>((resolve) => { stream.onAbort(resolve); });
+    unsubscribe();
+  });
+});
+
+// GET /collections/locks — returns { [guid]: ScanLock } for collections currently locked by a scanner
+router.get("/locks", requireAuth, requireOrg, async (c) => {
+  try {
+    const guids = await authQuery(c.get("jwtClaims"), async (tx) =>
+      tx.select({ guid: collections.guid }).from(collections),
+    );
+    const data = getLocksForGuids(guids.map((r) => r.guid!).filter(Boolean));
+    return c.json({ success: true, data });
+  } catch (err) {
+    console.error(err);
+    return c.json({ success: false, message: "Database error." }, 500);
+  }
+});
+
+// GET /collections/live — returns { [guid]: monitorCount } for sessions with active monitors
+router.get("/live", requireAuth, requireOrg, async (c) => {
+  try {
+    const allCollections = await authQuery(c.get("jwtClaims"), async (tx) => {
+      return tx
+        .select({ guid: collections.guid })
+        .from(collections);
+    });
+
+    const live: Record<string, number> = {};
+    for (const { guid } of allCollections) {
+      if (!guid) continue;
+      const n = sessionListenerCount(guid);
+      if (n > 0) live[guid] = n;
+    }
+
+    return c.json({ success: true, data: live });
+  } catch (err) {
+    console.error(err);
+    return c.json({ success: false, message: "Database error." }, 500);
+  }
+});
+
+// GET /collections/viewers — viewers for all collections { [guid]: ViewerInfo[] }
+router.get("/viewers", requireAuth, requireOrg, async (c) => {
+  const allCollections = await authQuery(c.get("jwtClaims"), async (tx) =>
+    tx.select({ guid: collections.guid }).from(collections),
+  );
+  const result: Record<string, ReturnType<typeof getSessionViewers>> = {};
+  for (const { guid } of allCollections) {
+    if (!guid) continue;
+    const viewers = getSessionViewers(guid);
+    if (viewers.length > 0) result[guid] = viewers;
+  }
+  return c.json({ success: true, data: result });
+});
+
+// GET /collections/:guid/viewers — current session viewers for a collection
+router.get("/:guid/viewers", requireAuth, requireOrg, async (c) => {
+  const guid = c.req.param("guid");
+  return c.json({ success: true, data: getSessionViewers(guid) });
 });
 
 // POST /collections — create and activate
@@ -226,8 +322,15 @@ router.get("/:guid/cards", requireAuth, requireOrg, async (c) => {
 // POST /collections/:guid/cards — add card
 router.post("/:guid/cards", requireAuth, requireOrg, async (c) => {
   const guid = c.req.param("guid");
+  const userId = c.get("userId");
   const orgId = c.get("orgId");
   const { scanId, card, scannedAt, binNumber, capturedImageUrl } = await c.req.json<ScannedCard>();
+
+  const displayName = await getUserDisplayName(userId);
+  if (!acquireLock(guid, userId, orgId, displayName)) {
+    return c.json({ success: false, message: "Another org member is currently scanning into this collection." }, 423);
+  }
+
   try {
     const result = await authQuery(c.get("jwtClaims"), async (tx) => {
       const collection = await tx.query.collections.findFirst({
@@ -255,9 +358,11 @@ router.post("/:guid/cards", requireAuth, requireOrg, async (c) => {
 
       return { success: true, data: { scanId, card, scannedAt, binNumber, capturedImageUrl } as ScannedCard };
     });
+    if (result.success) emitToSession(guid, "card_added", result.data);
     return c.json(result);
   } catch (err) {
     console.error(err);
+    emitToSession(guid, "scan_error", { message: "Failed to save card to collection.", timestamp: Date.now() });
     return c.json({ success: false, message: "Database error." }, 500);
   }
 });
@@ -284,9 +389,11 @@ router.put("/:guid/cards/:scanId", requireAuth, requireOrg, async (c) => {
         data: toScannedCard({ guid: scanId, card, scannedAt: existing.scannedAt, binNumber: binNumber ?? null }),
       };
     });
+    if (result.success) emitToSession(guid, "card_updated", result.data);
     return c.json(result);
   } catch (err) {
     console.error(err);
+    emitToSession(guid, "scan_error", { message: "Failed to update card.", timestamp: Date.now() });
     return c.json({ success: false, message: "Database error." }, 500);
   }
 });
@@ -308,6 +415,7 @@ router.delete("/:guid/cards", requireAuth, requireOrg, async (c) => {
 
       return { success: true, data: null };
     });
+    if (result.success) emitToSession(guid, "cards_cleared", {});
     return c.json(result);
   } catch (err) {
     console.error(err);
@@ -317,6 +425,7 @@ router.delete("/:guid/cards", requireAuth, requireOrg, async (c) => {
 
 // POST /collections/:guid/cards/remove-bulk — remove multiple cards
 router.post("/:guid/cards/remove-bulk", requireAuth, requireOrg, async (c) => {
+  const guid = c.req.param("guid");
   const { scanIds } = await c.req.json<{ scanIds: string[] }>();
   try {
     const result = await authQuery(c.get("jwtClaims"), async (tx) => {
@@ -327,6 +436,7 @@ router.post("/:guid/cards/remove-bulk", requireAuth, requireOrg, async (c) => {
       }
       return { success: true, data: null };
     });
+    if (result.success) emitToSession(guid, "cards_removed", { scanIds });
     return c.json(result);
   } catch (err) {
     console.error(err);
@@ -336,17 +446,111 @@ router.post("/:guid/cards/remove-bulk", requireAuth, requireOrg, async (c) => {
 
 // DELETE /collections/:guid/cards/:scanId — remove one card
 router.delete("/:guid/cards/:scanId", requireAuth, requireOrg, async (c) => {
-  const scanId = c.req.param("scanId");
+  const { guid, scanId } = c.req.param();
   try {
     const result = await authQuery(c.get("jwtClaims"), async (tx) => {
       await tx.delete(collectionCards).where(eq(collectionCards.guid, scanId));
       return { success: true, data: null };
     });
+    if (result.success) emitToSession(guid, "card_removed", { scanId });
     return c.json(result);
   } catch (err) {
     console.error(err);
     return c.json({ success: false, message: "Database error." }, 500);
   }
+});
+
+// DELETE /collections/:guid/scan-lock — release scanner lock
+router.delete("/:guid/scan-lock", requireAuth, requireOrg, async (c) => {
+  const guid = c.req.param("guid");
+  const userId = c.get("userId");
+  releaseLock(guid, userId); // emits lock_released to org subscribers internally
+  return c.json({ success: true, data: null });
+});
+
+// POST /collections/:guid/debug/error — emit a test scan_error to session watchers (admin only)
+router.post("/:guid/debug/error", requireAuth, requireOrg, async (c) => {
+  const guid = c.req.param("guid");
+  emitToSession(guid, "scan_error", { message: "Debug: forced error triggered.", timestamp: Date.now() });
+  return c.json({ success: true, data: null });
+});
+
+// GET /collections/:guid/stream — SSE, auth via ?token= and ?orgId= query params
+router.get("/:guid/stream", async (c) => {
+  const guid = c.req.param("guid");
+  const token = c.req.query("token");
+  const orgId = c.req.query("orgId");
+
+  if (!token || !orgId) return c.json({ success: false, message: "Unauthorized" }, 401);
+
+  const payload = await verifyToken(token);
+  if (!payload?.sub) return c.json({ success: false, message: "Unauthorized" }, 401);
+
+  const rows = await db.execute<{ role: string }>(
+    sql`SELECT role FROM neon_auth.member WHERE "organizationId" = ${orgId} AND "userId" = ${payload.sub} LIMIT 1`,
+  );
+  if (!rows.rows[0]) return c.json({ success: false, message: "Forbidden" }, 403);
+
+  const jwtClaims = JSON.stringify({ sub: payload.sub, role: "authenticated" });
+
+  const viewerDisplayName = await getUserDisplayName(payload.sub);
+
+  return streamSSE(c, async (stream) => {
+    const writer = (event: string, data: unknown) => {
+      stream.writeSSE({ event, data: JSON.stringify(data) }).catch(() => {});
+    };
+
+    // Subscribe first so viewers_updated includes this viewer
+    const unsubscribe = subscribeSession(guid, payload.sub, viewerDisplayName, writer);
+
+    // Send initial state
+    try {
+      const initial = await authQuery(jwtClaims, async (tx) => {
+        const collection = await tx.query.collections.findFirst({
+          where: (t, { eq }) => eq(t.guid, guid),
+          columns: { id: true, guid: true, name: true, isActive: true, createdAt: true, updatedAt: true },
+        });
+        if (!collection) return null;
+
+        const cardRows = await tx
+          .select({
+            guid: collectionCards.guid,
+            card: collectionCards.card,
+            scannedAt: collectionCards.scannedAt,
+            binNumber: collectionCards.binNumber,
+            capturedImageDataUrl: collectionCards.capturedImageDataUrl,
+          })
+          .from(collectionCards)
+          .where(eq(collectionCards.collectionId, collection.id))
+          .orderBy(desc(collectionCards.scannedAt));
+
+        return {
+          collection: {
+            guid: collection.guid!,
+            name: collection.name,
+            isActive: collection.isActive,
+            cardCount: cardRows.length,
+            createdAt: collection.createdAt,
+            updatedAt: collection.updatedAt,
+          } satisfies Collection,
+          cards: cardRows.map(toScannedCard),
+          viewers: getSessionViewers(guid),
+        };
+      });
+
+      if (initial) {
+        await stream.writeSSE({ event: "session_init", data: JSON.stringify(initial) });
+      }
+    } catch {
+      // non-fatal — subscriber will still receive live events
+    }
+
+    await new Promise<void>((resolve) => {
+      stream.onAbort(resolve);
+    });
+
+    unsubscribe();
+  });
 });
 
 export { router as collectionsRouter };

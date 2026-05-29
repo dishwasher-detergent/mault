@@ -3,16 +3,17 @@ import { useScannedCards } from "@/features/scanner/api/use-scanned-cards";
 import { computeStats } from "@/features/scanner/lib/compute-stats";
 import { useMemo, useState } from "react";
 
-function formatUsd(value: number): string {
+export function formatUsd(value: number): string {
   return `$${value.toFixed(2)}`;
 }
 
-function formatElapsed(ms: number): string {
+export function formatElapsed(ms: number): string {
   const s = Math.floor(ms / 1000);
   const h = Math.floor(s / 3600);
   const m = Math.floor((s % 3600) / 60);
   const sec = s % 60;
-  if (h > 0) return `${h}:${String(m).padStart(2, "0")}:${String(sec).padStart(2, "0")}`;
+  if (h > 0)
+    return `${h}:${String(m).padStart(2, "0")}:${String(sec).padStart(2, "0")}`;
   return `${m}:${String(sec).padStart(2, "0")}`;
 }
 
@@ -65,7 +66,11 @@ export function ScanStats() {
             />
             <StatCard
               label="Cards / hr"
-              value={elapsedMs > 0 ? String(Math.round((cards.length / elapsedMs) * 3_600_000)) : "—"}
+              value={
+                elapsedMs > 0
+                  ? String(Math.round((cards.length / elapsedMs) * 3_600_000))
+                  : "—"
+              }
             />
           </div>
           {stats.mostValuable && (

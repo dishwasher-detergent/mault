@@ -303,8 +303,6 @@ export function CardDetailPanel({
                   <div className="border-t" />
                 </div>
               )}
-
-              {/* Card detail */}
               <div className="flex gap-6">
                 {!hasMultipleCandidates && (
                   <div className="shrink-0 flex flex-col gap-3 items-center">

@@ -6,6 +6,8 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { getLiveSessionCounts } from "@/features/collections/api/collections";
+import { useCollectionLocks } from "@/features/collections/api/use-collection-locks";
 import { OrgSwitcher } from "@/features/companies/components/org-switcher";
 import { useIsMobile } from "@/hooks/use-is-mobile";
 import { useRole } from "@/hooks/use-role";
@@ -18,7 +20,9 @@ import {
   IconFolders,
   IconLayoutGrid,
   IconSettings,
+  IconWifi,
 } from "@tabler/icons-react";
+import { useQuery } from "@tanstack/react-query";
 import { NavLink } from "react-router-dom";
 
 interface NavItemDef {
@@ -27,9 +31,10 @@ interface NavItemDef {
   label: string;
   mobileLabel?: string;
   end?: boolean;
+  badge?: boolean;
 }
 
-function SideNavItem({ to, icon, label, end }: NavItemDef) {
+function SideNavItem({ to, icon, label, end, badge }: NavItemDef) {
   return (
     <Tooltip>
       <TooltipTrigger
@@ -46,14 +51,19 @@ function SideNavItem({ to, icon, label, end }: NavItemDef) {
           />
         }
       >
-        {icon}
+        <span className="relative">
+          {icon}
+          {badge && (
+            <span className="absolute -top-0.5 -right-0.5 size-2 rounded-full bg-green-500 ring-1 ring-background" />
+          )}
+        </span>
       </TooltipTrigger>
       <TooltipContent side="right">{label}</TooltipContent>
     </Tooltip>
   );
 }
 
-function BottomNavItem({ to, icon, label, mobileLabel, end }: NavItemDef) {
+function BottomNavItem({ to, icon, label, mobileLabel, end, badge }: NavItemDef) {
   return (
     <NavLink
       to={to}
@@ -65,7 +75,12 @@ function BottomNavItem({ to, icon, label, mobileLabel, end }: NavItemDef) {
         )
       }
     >
-      {icon}
+      <span className="relative">
+        {icon}
+        {badge && (
+          <span className="absolute -top-0.5 -right-0.5 size-2 rounded-full bg-green-500 ring-1 ring-background" />
+        )}
+      </span>
       <span className="text-[10px] leading-none font-medium">
         {mobileLabel ?? label}
       </span>
@@ -76,6 +91,19 @@ function BottomNavItem({ to, icon, label, mobileLabel, end }: NavItemDef) {
 export function AppNav() {
   const { isAdmin } = useRole();
   const isMobile = useIsMobile();
+
+  const { locks, currentUserId } = useCollectionLocks();
+  const { data: liveCounts } = useQuery({
+    queryKey: ["live-sessions"],
+    queryFn: () => getLiveSessionCounts().then((r) => r.data ?? {}),
+    refetchInterval: 10000,
+  });
+  const hasLiveSessions = !!(
+    currentUserId &&
+    Object.entries(liveCounts ?? {}).some(
+      ([guid, count]) => locks[guid]?.userId === currentUserId && count > 0,
+    )
+  );
 
   const navItems: NavItemDef[] = [
     {
@@ -94,6 +122,12 @@ export function AppNav() {
       icon: <IconLayoutGrid size={20} />,
       label: "Sorting Logic",
       mobileLabel: "Bins",
+    },
+    {
+      to: "/app/monitor",
+      icon: <IconWifi size={20} />,
+      label: "Monitor",
+      badge: hasLiveSessions,
     },
     {
       to: "/app/calibrate",

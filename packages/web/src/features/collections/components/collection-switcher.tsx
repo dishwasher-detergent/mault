@@ -16,14 +16,16 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { collectionsQueryOptions } from "@/features/collections/api/collections";
+import { collectionsQueryOptions, releaseScanLock } from "@/features/collections/api/collections";
+import { useCollectionLocks } from "@/features/collections/api/use-collection-locks";
 import { useCollections } from "@/features/collections/api/use-collections";
+import { toast } from "sonner";
 import {
   createCollectionSchema,
   type CreateCollectionFormValues,
 } from "@/schemas/collections.schema";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { IconEdit, IconLoader2, IconPlus } from "@tabler/icons-react";
+import { IconEdit, IconLock, IconLockOpen, IconLoader2, IconPlus, IconShare } from "@tabler/icons-react";
 import { useQuery } from "@tanstack/react-query";
 import { useCallback, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
@@ -39,7 +41,28 @@ export function CollectionSwitcher() {
     activateCollection,
   } = useCollections();
   const { isLoading } = useQuery(collectionsQueryOptions);
+  const { locks, currentUserId, isLockedByOther } = useCollectionLocks();
   const [createOpen, setCreateOpen] = useState(false);
+  const [releasing, setReleasing] = useState(false);
+
+  const isLockedByMe = !!(
+    activeCollection &&
+    locks[activeCollection.guid] &&
+    locks[activeCollection.guid].userId === currentUserId
+  );
+
+  const handleReleaseLock = useCallback(async () => {
+    if (!activeCollection) return;
+    setReleasing(true);
+    try {
+      await releaseScanLock(activeCollection.guid);
+      toast.success("Session released");
+    } catch {
+      toast.error("Failed to release session");
+    } finally {
+      setReleasing(false);
+    }
+  }, [activeCollection]);
 
   const form = useForm<CreateCollectionFormValues>({
     resolver: zodResolver(createCollectionSchema),
@@ -74,6 +97,16 @@ export function CollectionSwitcher() {
     [form],
   );
 
+  const handleShare = useCallback(() => {
+    if (!activeCollection) return;
+    const url = `${window.location.origin}/app/monitor/${activeCollection.guid}`;
+    navigator.clipboard.writeText(url).then(() => {
+      toast.success("Monitor link copied", { description: "Share this link with org members to let them watch the session." });
+    }).catch(() => {
+      toast.error("Could not copy link", { description: url });
+    });
+  }, [activeCollection]);
+
   if (isLoading) {
     return (
       <ButtonGroup className="w-full">
@@ -99,6 +132,9 @@ export function CollectionSwitcher() {
                 {isActivating && (
                   <IconLoader2 className="size-3 animate-spin shrink-0 text-muted-foreground" />
                 )}
+                {activeCollection && isLockedByOther(activeCollection.guid) && (
+                  <IconLock size={11} className="shrink-0 text-amber-500" />
+                )}
                 <span className="truncate">
                   {activeCollection?.name ?? "No collection"}
                 </span>
@@ -106,14 +142,20 @@ export function CollectionSwitcher() {
             </SelectValue>
           </SelectTrigger>
           <SelectContent>
-            {collections.map((c) => (
-              <SelectItem key={c.guid} value={c.guid}>
-                <span className="truncate">{c.name}</span>
-                <span className="ml-2 text-xs text-muted-foreground tabular-nums">
-                  {c.cardCount}
-                </span>
-              </SelectItem>
-            ))}
+            {collections.map((c) => {
+              const lockedByOther = isLockedByOther(c.guid);
+              return (
+                <SelectItem key={c.guid} value={c.guid} disabled={lockedByOther}>
+                  <span className="truncate">{c.name}</span>
+                  {lockedByOther && (
+                    <IconLock size={11} className="ml-1 shrink-0 text-muted-foreground" />
+                  )}
+                  <span className="ml-auto pl-2 text-xs text-muted-foreground tabular-nums">
+                    {c.cardCount}
+                  </span>
+                </SelectItem>
+              );
+            })}
             {collections.length === 0 && (
               <div className="px-2 py-3 text-xs text-muted-foreground text-center">
                 No collections yet
@@ -134,6 +176,41 @@ export function CollectionSwitcher() {
           />
           <TooltipContent>Manage Collections</TooltipContent>
         </Tooltip>
+
+        <Tooltip>
+          <TooltipTrigger
+            render={
+              <Button
+                variant="outline"
+                size="icon"
+                disabled={!activeCollection}
+                onClick={handleShare}
+              >
+                <IconShare />
+              </Button>
+            }
+          />
+          <TooltipContent>Copy monitor link</TooltipContent>
+        </Tooltip>
+
+        {isLockedByMe && (
+          <Tooltip>
+            <TooltipTrigger
+              render={
+                <Button
+                  variant="outline"
+                  size="icon"
+                  disabled={releasing}
+                  onClick={handleReleaseLock}
+                  className="text-amber-500 border-amber-500/40 hover:bg-amber-500/10"
+                >
+                  {releasing ? <IconLoader2 className="animate-spin" /> : <IconLockOpen />}
+                </Button>
+              }
+            />
+            <TooltipContent>Give up session</TooltipContent>
+          </Tooltip>
+        )}
 
         <DynamicDialog
           open={createOpen}

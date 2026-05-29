@@ -1,4 +1,4 @@
-import { apiDelete, apiGet, apiPost, apiPut } from "@/lib/api/client";
+import { apiDelete, apiGet, apiPost, apiPut, getAuthHeaders } from "@/lib/api/client";
 import type { Collection, Result, ScannedCard } from "@magic-vault/shared";
 import { queryOptions } from "@tanstack/react-query";
 
@@ -32,11 +32,20 @@ export async function loadCollectionCards(guid: string): Promise<Result<ScannedC
   return apiGet<Result<ScannedCard[]>>(`/api/collections/${guid}/cards`);
 }
 
+const API_BASE = import.meta.env.VITE_API_URL ?? "";
+
 export async function addCollectionCard(
   guid: string,
   record: ScannedCard,
 ): Promise<Result<ScannedCard>> {
-  return apiPost<Result<ScannedCard>>(`/api/collections/${guid}/cards`, record);
+  const res = await fetch(`${API_BASE}/api/collections/${guid}/cards`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...(await getAuthHeaders()) },
+    body: JSON.stringify(record),
+  });
+  // Return body for both success and 423 (locked)
+  if (res.ok || res.status === 423) return res.json();
+  throw new Error(`API error: ${res.status}`);
 }
 
 export async function updateCollectionCard(
@@ -67,4 +76,27 @@ export async function removeCollectionCards(
 
 export async function clearCollectionCards(guid: string): Promise<Result<null>> {
   return apiDelete<Result<null>>(`/api/collections/${guid}/cards`);
+}
+
+export async function getLiveSessionCounts(): Promise<Result<Record<string, number>>> {
+  return apiGet<Result<Record<string, number>>>("/api/collections/live");
+}
+
+export async function releaseScanLock(guid: string): Promise<Result<null>> {
+  return apiDelete<Result<null>>(`/api/collections/${guid}/scan-lock`);
+}
+
+export interface SessionViewer {
+  userId: string;
+  displayName: string;
+}
+
+export async function getCollectionViewers(guid: string): Promise<SessionViewer[]> {
+  const result = await apiGet<Result<SessionViewer[]>>(`/api/collections/${guid}/viewers`);
+  return result.data ?? [];
+}
+
+export async function getAllSessionViewers(): Promise<Record<string, SessionViewer[]>> {
+  const result = await apiGet<Result<Record<string, SessionViewer[]>>>("/api/collections/viewers");
+  return result.data ?? {};
 }

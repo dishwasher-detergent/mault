@@ -30,14 +30,15 @@ export interface CardToolbarProps {
   onSearchChange: (query: string) => void;
   sortKey: string | null;
   onSortChange: (key: string | null) => void;
-  onExport: () => void;
+  onExport?: () => void;
   onExportAndDelete?: () => Promise<void>;
   collectionName?: string;
-  onClearAll: () => void;
+  onClearAll?: () => void;
   hasCards: boolean;
   activeFilters: CardFilters;
   onFiltersChange: (filters: CardFilters) => void;
   activeFilterCount: number;
+  watchers?: { userId: string; displayName: string }[];
 }
 
 export interface ScannedCardItemProps {

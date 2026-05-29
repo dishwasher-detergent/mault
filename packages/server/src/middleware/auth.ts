@@ -42,6 +42,22 @@ export async function getUserRole(userId: string): Promise<string> {
   }
 }
 
+export async function getUserDisplayName(userId: string): Promise<string> {
+  try {
+    const result = await db.execute<{
+      name: string | null;
+      email: string | null;
+    }>(
+      sql`SELECT name, email FROM neon_auth.user WHERE id = ${userId} LIMIT 1`,
+    );
+
+    const row = result.rows[0];
+    return row?.name ?? row?.email?.split("@")[0] ?? "Unknown";
+  } catch {
+    return "Unknown";
+  }
+}
+
 export const requireAuth = createMiddleware<AppEnv>(async (c, next) => {
   const authHeader = c.req.header("Authorization");
   if (!authHeader?.startsWith("Bearer ")) {
@@ -64,7 +80,10 @@ export const requireAuth = createMiddleware<AppEnv>(async (c, next) => {
 export const requireOrg = createMiddleware<AppEnv>(async (c, next) => {
   const orgId = c.req.header("X-Org-Id");
   if (!orgId) {
-    return c.json({ success: false, message: "Organization context required." }, 400);
+    return c.json(
+      { success: false, message: "Organization context required." },
+      400,
+    );
   }
 
   const userId = c.get("userId");
@@ -75,7 +94,10 @@ export const requireOrg = createMiddleware<AppEnv>(async (c, next) => {
   const member = rows.rows[0];
 
   if (!member) {
-    return c.json({ success: false, message: "Organization not found or access denied." }, 403);
+    return c.json(
+      { success: false, message: "Organization not found or access denied." },
+      403,
+    );
   }
 
   c.set("orgId", orgId);
@@ -95,7 +117,10 @@ export function requireRole(...roles: string[]) {
 export function requireOrgRole(...roles: OrgRole[]) {
   return createMiddleware<AppEnv>(async (c, next) => {
     if (!roles.includes(c.get("orgRole"))) {
-      return c.json({ success: false, message: "Insufficient organization permissions." }, 403);
+      return c.json(
+        { success: false, message: "Insufficient organization permissions." },
+        403,
+      );
     }
     await next();
   });

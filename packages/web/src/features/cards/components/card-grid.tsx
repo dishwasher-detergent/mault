@@ -13,11 +13,14 @@ import { CardDetailPanel } from "@/features/cards/components/card-detail-panel";
 import { CardToolbar } from "@/features/cards/components/card-toolbar";
 import { ScannedCardItem } from "@/features/cards/components/scanned-card-item";
 import { exportToManabox } from "@/features/cards/lib/export-manabox";
+import { getCollectionViewers } from "@/features/collections/api/collections";
+import { useCollectionLocks } from "@/features/collections/api/use-collection-locks";
 import { useCollections } from "@/features/collections/api/use-collections";
 import { useScannedCards } from "@/features/scanner/api/use-scanned-cards";
 
 import { IconFolders } from "@tabler/icons-react";
 import { AnimatePresence } from "framer-motion";
+import { useQuery } from "@tanstack/react-query";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 
@@ -29,6 +32,15 @@ export function CardGrid() {
   } = useCollections();
   const { cards, removeCard, removeCards, clearCards, isLoading } =
     useScannedCards();
+  const { locks, currentUserId } = useCollectionLocks();
+  const isScanningActive = !!(activeCollection && locks[activeCollection.guid]?.userId === currentUserId);
+  const { data: viewersRaw } = useQuery({
+    queryKey: ["collection-viewers", activeCollection?.guid],
+    queryFn: () => getCollectionViewers(activeCollection!.guid),
+    enabled: isScanningActive,
+    refetchInterval: 5000,
+  });
+  const viewers = viewersRaw?.filter((v) => v.userId !== currentUserId);
   const {
     filteredAndSorted,
     searchQuery,
@@ -178,6 +190,7 @@ export function CardGrid() {
           activeFilters={filters}
           onFiltersChange={setFilters}
           activeFilterCount={activeFilterCount}
+          watchers={viewers}
         />
       </div>
       {filteredAndSorted.length === 0 && (

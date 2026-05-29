@@ -9,6 +9,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { WatcherStack } from "@/components/ui/watcher-stack";
 import { CardFilterPopover } from "@/features/cards/components/card-filter-popover";
 import type { CardToolbarProps } from "@/features/cards/types";
 import { IconDownload, IconLoader2, IconTrash } from "@tabler/icons-react";
@@ -27,6 +28,7 @@ export function CardToolbar({
   activeFilters,
   onFiltersChange,
   activeFilterCount,
+  watchers,
 }: CardToolbarProps) {
   const [isClearing, setIsClearing] = useState(false);
   const [clearAllDialogOpen, setClearAllDialogOpen] = useState(false);
@@ -36,7 +38,7 @@ export function CardToolbar({
   const handleClear = async () => {
     setIsClearing(true);
     try {
-      await onClearAll();
+      await onClearAll?.();
     } catch (error) {
       console.error("Failed to clear cards:", error);
     } finally {
@@ -46,12 +48,12 @@ export function CardToolbar({
   };
 
   const handleExportOnly = () => {
-    onExport();
+    onExport?.();
     setExportDialogOpen(false);
   };
 
   const handleExportAndDelete = async () => {
-    onExport();
+    onExport?.();
     if (onExportAndDelete) {
       setIsDeleting(true);
       try {
@@ -67,16 +69,18 @@ export function CardToolbar({
     if (onExportAndDelete) {
       setExportDialogOpen(true);
     } else {
-      onExport();
+      onExport?.();
     }
   };
 
   return (
     <div className="flex flex-row gap-2 items-center w-full">
+      {watchers && watchers.length > 0 && <WatcherStack watchers={watchers} />}
       <Input
         placeholder="Search by name, set, type..."
         value={searchQuery}
         onChange={(e) => onSearchChange(e.target.value)}
+        className="flex-1"
       />
       <Select value={sortKey} onValueChange={onSortChange}>
         <SelectTrigger className="w-full sm:w-64">
@@ -103,7 +107,7 @@ export function CardToolbar({
         onFiltersChange={onFiltersChange}
         activeFilterCount={activeFilterCount}
       />
-      <ButtonGroup>
+      {(onExport || onClearAll) && <ButtonGroup>
         <DynamicDialog
           open={exportDialogOpen}
           onOpenChange={setExportDialogOpen}
@@ -174,7 +178,7 @@ export function CardToolbar({
           }
           footerClassName="flex-col-reverse md:flex-row"
         />
-      </ButtonGroup>
+      </ButtonGroup>}
     </div>
   );
 }

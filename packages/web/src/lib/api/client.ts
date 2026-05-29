@@ -2,7 +2,7 @@ import { neon } from "@/lib/auth/client";
 
 const API_BASE = import.meta.env.VITE_API_URL ?? "";
 
-async function getAuthHeaders(): Promise<HeadersInit> {
+export async function getAuthHeaders(): Promise<HeadersInit> {
   const { data } = await neon.auth.getSession();
   const session = (data as { session?: { token?: string; activeOrganizationId?: string | null } } | null)?.session;
   const token = session?.token;

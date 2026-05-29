@@ -1,8 +1,11 @@
 import { Button } from "@/components/ui/button";
+import { apiPost } from "@/lib/api/client";
+import { useCollections } from "@/features/collections/api/use-collections";
 import { useScannedCards } from "@/features/scanner/api/use-scanned-cards";
 import { useRole } from "@/hooks/use-role";
 import type { ScryfallCardWithDistance } from "@magic-vault/shared";
-import { IconBug, IconCards, IconStack2 } from "@tabler/icons-react";
+import { IconBug, IconCards, IconChevronDown, IconChevronRight, IconStack2, IconAlertTriangle } from "@tabler/icons-react";
+import { useState } from "react";
 
 // All three use real M11 image URLs so they actually render.
 // set/collector differ to simulate a realistic multi-printing scenario.
@@ -97,7 +100,6 @@ const LIGHTNING_BOLT_2X2: ScryfallCardWithDistance = {
 
 const MOCK_CARDS: ScryfallCardWithDistance[] = [LIGHTNING_BOLT_M11];
 
-// art_crop of the M11 bolt used as the fake "captured" image
 const FAKE_SCAN_URL =
   "https://cards.scryfall.io/art_crop/front/e/3/e3285e6b-3e79-4d7c-bf96-d920f973b122.jpg";
 
@@ -106,6 +108,8 @@ let mockCardIndex = 0;
 export function ScannerDebug() {
   const { isAdmin } = useRole();
   const { addCard } = useScannedCards();
+  const { activeCollection } = useCollections();
+  const [open, setOpen] = useState(false);
 
   if (!isAdmin) return null;
 
@@ -116,39 +120,58 @@ export function ScannerDebug() {
   };
 
   const handleSimulateMultiMatch = () => {
-    addCard(
-      LIGHTNING_BOLT_M11,
-      FAKE_SCAN_URL,
-      [LIGHTNING_BOLT_A25, LIGHTNING_BOLT_2X2],
-    );
+    addCard(LIGHTNING_BOLT_M11, FAKE_SCAN_URL, [LIGHTNING_BOLT_A25, LIGHTNING_BOLT_2X2]);
+  };
+
+  const handleForceError = () => {
+    if (!activeCollection) return;
+    apiPost(`/api/collections/${activeCollection.guid}/debug/error`, {}).catch(() => {});
   };
 
   return (
-    <div className="border border-dashed border-yellow-500/40 rounded-lg p-2 bg-yellow-500/5 flex flex-col gap-1.5">
-      <div className="flex items-center gap-1.5 text-yellow-500/70">
+    <div className="border border-dashed border-yellow-500/40 rounded-lg bg-yellow-500/5 overflow-hidden">
+      <button
+        type="button"
+        onClick={() => setOpen((v) => !v)}
+        className="flex items-center gap-1.5 text-yellow-500/70 w-full px-2 py-2 hover:bg-yellow-500/10 transition-colors"
+      >
+        {open ? <IconChevronDown className="size-3" /> : <IconChevronRight className="size-3" />}
         <IconBug className="size-3" />
-        <span className="text-xs font-mono font-semibold uppercase tracking-wide">
-          Debug
-        </span>
-      </div>
-      <Button
-        variant="outline"
-        size="sm"
-        className="w-full text-xs border-yellow-500/30 hover:bg-yellow-500/10"
-        onClick={handleSimulateScan}
-      >
-        <IconCards className="size-3.5" />
-        Simulate Scan
-      </Button>
-      <Button
-        variant="outline"
-        size="sm"
-        className="w-full text-xs border-yellow-500/30 hover:bg-yellow-500/10"
-        onClick={handleSimulateMultiMatch}
-      >
-        <IconStack2 className="size-3.5" />
-        Simulate Multi-Match
-      </Button>
+        <span className="text-xs font-mono font-semibold uppercase tracking-wide">Debug</span>
+      </button>
+
+      {open && (
+        <div className="flex flex-col gap-1.5 px-2 pb-2">
+          <Button
+            variant="outline"
+            size="sm"
+            className="w-full text-xs border-yellow-500/30 hover:bg-yellow-500/10"
+            onClick={handleSimulateScan}
+          >
+            <IconCards className="size-3.5" />
+            Simulate Scan
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            className="w-full text-xs border-yellow-500/30 hover:bg-yellow-500/10"
+            onClick={handleSimulateMultiMatch}
+          >
+            <IconStack2 className="size-3.5" />
+            Simulate Multi-Match
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            className="w-full text-xs border-red-500/30 text-red-500 hover:bg-red-500/10"
+            onClick={handleForceError}
+            disabled={!activeCollection}
+          >
+            <IconAlertTriangle className="size-3.5" />
+            Force Error
+          </Button>
+        </div>
+      )}
     </div>
   );
 }

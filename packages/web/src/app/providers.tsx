@@ -3,6 +3,7 @@ import { BinConfigsProvider } from "@/features/bins/api/use-bin-configs";
 import { OrgPickerModal } from "@/features/companies/components/org-picker-modal";
 import { FeederConfigProvider } from "@/features/calibration/api/use-feeder-config";
 import { ModuleConfigsProvider } from "@/features/calibration/api/use-module-configs";
+import { CollectionLocksProvider } from "@/features/collections/api/use-collection-locks";
 import { CollectionsProvider } from "@/features/collections/api/use-collections";
 import { CameraProvider } from "@/features/scanner/api/use-camera";
 import { ScannedCardsProvider } from "@/features/scanner/api/use-scanned-cards";
@@ -25,6 +26,7 @@ export function AppProviders({ children }: { children: React.ReactNode }) {
         <SerialProvider>
           <BinConfigsProvider>
             <CollectionsProvider>
+              <CollectionLocksProvider>
               <ModuleConfigsProvider>
                 <FeederConfigProvider>
                   <ScannedCardsProvider>
@@ -34,6 +36,7 @@ export function AppProviders({ children }: { children: React.ReactNode }) {
                   </ScannedCardsProvider>
                 </FeederConfigProvider>
               </ModuleConfigsProvider>
+              </CollectionLocksProvider>
             </CollectionsProvider>
           </BinConfigsProvider>
         </SerialProvider>

@@ -263,8 +263,6 @@ export default function CollectionsPage() {
           );
         })}
       </div>
-
-      {/* Rename dialog */}
       <DynamicDialog
         open={!!renameTarget}
         onOpenChange={(open) => {
@@ -312,8 +310,6 @@ export default function CollectionsPage() {
           />
         </form>
       </DynamicDialog>
-
-      {/* Delete dialog */}
       <DynamicDialog
         open={!!deleteTarget}
         onOpenChange={(open) => {

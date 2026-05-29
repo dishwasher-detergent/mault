@@ -11,10 +11,12 @@ import {
   addCollectionCard,
   clearCollectionCards,
   loadCollectionCards,
+  releaseScanLock,
   removeCollectionCard,
   removeCollectionCards,
   updateCollectionCard,
 } from "@/features/collections/api/collections";
+import { useCollectionLocks } from "@/features/collections/api/use-collection-locks";
 import { reportSortError } from "@/features/notifications/api/notification-settings";
 import { useCollections } from "@/features/collections/api/use-collections";
 import { useSerial } from "@/features/scanner/api/use-serial";
@@ -44,9 +46,17 @@ export function ScannedCardsProvider({
   const { sendBin, sendCommand, receiveResponse, isConnected, isReady } = useSerial();
   const { activeCollection } = useCollections();
 
+  const { locks, currentUserId } = useCollectionLocks();
+  const locksRef = useRef(locks);
+  const currentUserIdRef = useRef(currentUserId);
+
+  useEffect(() => { locksRef.current = locks; }, [locks]);
+  useEffect(() => { currentUserIdRef.current = currentUserId; }, [currentUserId]);
+
   const binConfigsRef = useRef(binConfigs);
   const serialRef = useRef({ sendBin, sendCommand, receiveResponse, isConnected, isReady });
   const activeCollectionRef = useRef(activeCollection);
+  const prevCollectionGuidRef = useRef<string | undefined>(undefined);
   const [autoFeed, setAutoFeedState] = useState(true);
   const autoFeedRef = useRef(true);
   const [timerTrigger, setTimerTrigger] = useState<number | undefined>(undefined);
@@ -100,8 +110,22 @@ export function ScannedCardsProvider({
   }, []);
 
   useEffect(() => {
+    const prev = prevCollectionGuidRef.current;
+    const next = activeCollection?.guid;
+    if (prev && prev !== next) {
+      releaseScanLock(prev).catch(() => {});
+    }
+    prevCollectionGuidRef.current = next;
     activeCollectionRef.current = activeCollection;
-  }, [activeCollection]);
+  }, [activeCollection]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Release lock on unmount
+  useEffect(() => {
+    return () => {
+      const guid = activeCollectionRef.current?.guid;
+      if (guid) releaseScanLock(guid).catch(() => {});
+    };
+  }, []);
 
   // Reload cards when active collection changes
   useEffect(() => {
@@ -140,6 +164,14 @@ export function ScannedCardsProvider({
       return;
     }
 
+    const lock = locksRef.current?.[collection.guid];
+    if (lock && lock.userId !== currentUserIdRef.current) {
+      toast.error("Collection locked", {
+        description: "Another org member is currently scanning into this collection.",
+      });
+      return;
+    }
+
     const matchedBin = evaluateCardBin(card, binConfigsRef.current);
     const record: ScannedCard = {
       scanId: generateScanId(),
@@ -154,10 +186,15 @@ export function ScannedCardsProvider({
     setCards((prev) => [record, ...prev]);
     setTimerTrigger(record.scannedAt);
 
-    // Persist to server (fire-and-forget)
-    addCollectionCard(collection.guid, record).catch((err) =>
-      console.error("Failed to persist card:", err),
-    );
+    // Persist to server — rollback if collection is locked by another user
+    addCollectionCard(collection.guid, record).then((result) => {
+      if (!result.success) {
+        setCards((prev) => prev.filter((c) => c.scanId !== record.scanId));
+        toast.error("Collection locked", {
+          description: "Another org member is currently scanning into this collection.",
+        });
+      }
+    }).catch((err) => console.error("Failed to persist card:", err));
 
     if (matchedBin && serialRef.current.isConnected && serialRef.current.isReady) {
       serialRef.current.sendBin(matchedBin.binNumber).then((response) => {

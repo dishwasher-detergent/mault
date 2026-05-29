@@ -5,6 +5,8 @@ import CalibratePage from "@/app/routes/app/calibrate";
 import CollectionsPage from "@/app/routes/app/collections";
 import ScannerPage from "@/app/routes/app/index";
 import AppLayout from "@/app/routes/app/layout";
+import MonitorPage from "@/app/routes/app/monitor";
+import MonitorSessionsPage from "@/app/routes/app/monitor-sessions";
 import SettingsPage from "@/app/routes/app/settings";
 import AuthPage from "@/app/routes/auth";
 import LandingPage from "@/app/routes/index";
@@ -73,6 +75,14 @@ export const router = createBrowserRouter([
                 element: <AdminPage />,
               },
             ],
+          },
+          {
+            path: "/app/monitor",
+            element: <MonitorSessionsPage />,
+          },
+          {
+            path: "/app/monitor/:collectionGuid",
+            element: <MonitorPage />,
           },
           {
             path: "/app/account/:path",
