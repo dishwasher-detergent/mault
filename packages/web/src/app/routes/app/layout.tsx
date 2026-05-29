@@ -1,11 +1,14 @@
 import { AppProviders } from "@/app/providers";
 import { AppNav } from "@/app/routes/app/nav";
 import { EnvBanner } from "@/components/env-banner";
+import { StatusFooter } from "@/components/status-footer";
+import { useOrg } from "@/features/companies/api/use-organization";
 import { useIsMobile } from "@/hooks/use-is-mobile";
 import { Outlet } from "react-router-dom";
 
 export default function AppLayout() {
   const isMobile = useIsMobile();
+  const { activeOrg } = useOrg();
 
   return (
     <AppProviders>
@@ -26,7 +29,11 @@ export default function AppLayout() {
           </div>
           <div className="absolute bottom-0 left-0 px-4 text-xs h-6 flex items-center justify-between w-full">
             <EnvBanner />
-            <p className="text-muted-foreground">v{__APP_VERSION__}</p>
+            <StatusFooter />
+            <p className="text-muted-foreground">
+              {activeOrg && <span>{activeOrg.name} · </span>}
+              v{__APP_VERSION__}
+            </p>
           </div>
         </div>
       )}

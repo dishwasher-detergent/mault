@@ -1,5 +1,6 @@
 import { SyncIndicator } from "@/components/sync-indicator";
 import { BinConfigsProvider } from "@/features/bins/api/use-bin-configs";
+import { OrgPickerModal } from "@/features/companies/components/org-picker-modal";
 import { FeederConfigProvider } from "@/features/calibration/api/use-feeder-config";
 import { ModuleConfigsProvider } from "@/features/calibration/api/use-module-configs";
 import { CollectionsProvider } from "@/features/collections/api/use-collections";
@@ -29,6 +30,7 @@ export function AppProviders({ children }: { children: React.ReactNode }) {
                   <ScannedCardsProvider>
                     {children}
                     <SyncIndicator />
+                    <OrgPickerModal />
                   </ScannedCardsProvider>
                 </FeederConfigProvider>
               </ModuleConfigsProvider>

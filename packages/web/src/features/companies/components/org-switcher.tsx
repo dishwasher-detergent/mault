@@ -64,13 +64,20 @@ export function OrgSwitcher({ side = "right" }: { side?: "right" | "top" }) {
   return (
     <>
       <DropdownMenu>
-        <DropdownMenuTrigger
-          render={
-            <Button size="icon" variant="outline">
-              <IconBuilding />
-            </Button>
-          }
-        ></DropdownMenuTrigger>
+        <div className="relative">
+          <DropdownMenuTrigger
+            render={
+              <Button size="icon" variant="outline">
+                <IconBuilding />
+              </Button>
+            }
+          />
+          {activeOrg && (
+            <span className="pointer-events-none absolute -right-1 -top-1 grid size-4 place-items-center rounded-full bg-primary text-[0.6rem] font-bold leading-none text-primary-foreground">
+              {activeOrg.name[0].toUpperCase()}
+            </span>
+          )}
+        </div>
         <DropdownMenuContent
           side={side}
           align="end"
