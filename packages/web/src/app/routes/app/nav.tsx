@@ -29,9 +29,9 @@ interface NavItemDef {
   to: string;
   icon: React.ReactNode;
   label: string;
-  mobileLabel?: string;
   end?: boolean;
   badge?: boolean;
+  desktopOnly?: boolean;
 }
 
 function SideNavItem({ to, icon, label, end, badge }: NavItemDef) {
@@ -63,7 +63,7 @@ function SideNavItem({ to, icon, label, end, badge }: NavItemDef) {
   );
 }
 
-function BottomNavItem({ to, icon, label, mobileLabel, end, badge }: NavItemDef) {
+function BottomNavItem({ to, icon, label, end, badge }: NavItemDef) {
   return (
     <NavLink
       to={to}
@@ -81,9 +81,7 @@ function BottomNavItem({ to, icon, label, mobileLabel, end, badge }: NavItemDef)
           <span className="absolute -top-0.5 -right-0.5 size-2 rounded-full bg-green-500 ring-1 ring-background" />
         )}
       </span>
-      <span className="text-[10px] leading-none font-medium">
-        {mobileLabel ?? label}
-      </span>
+      <span className="text-[10px] leading-none font-medium">{label}</span>
     </NavLink>
   );
 }
@@ -111,17 +109,19 @@ export function AppNav() {
       icon: <IconCamera size={20} />,
       label: "Scanner",
       end: true,
+      desktopOnly: true,
     },
     {
       to: "/app/collections",
       icon: <IconFolders size={20} />,
       label: "Collections",
+      desktopOnly: true,
     },
     {
       to: "/app/bins",
       icon: <IconLayoutGrid size={20} />,
       label: "Sorting Logic",
-      mobileLabel: "Bins",
+      desktopOnly: true,
     },
     {
       to: "/app/monitor",
@@ -133,11 +133,13 @@ export function AppNav() {
       to: "/app/calibrate",
       icon: <IconAdjustments size={20} />,
       label: "Calibrate",
+      desktopOnly: true,
     },
     {
       to: "/app/settings",
       icon: <IconSettings size={20} />,
       label: "Settings",
+      desktopOnly: true,
     },
     ...(isAdmin
       ? [
@@ -145,15 +147,17 @@ export function AppNav() {
             to: "/app/admin",
             icon: <IconDatabase size={20} />,
             label: "Admin",
+            desktopOnly: true,
           },
         ]
       : []),
   ];
 
   if (isMobile) {
+    const mobileItems = navItems.filter((item) => !item.desktopOnly);
     return (
       <nav className="flex-none flex flex-row items-center justify-around bg-sidebar border-t px-1 py-1">
-        {navItems.map((item) => (
+        {mobileItems.map((item) => (
           <BottomNavItem key={item.to} {...item} />
         ))}
         <div className="flex flex-col items-center gap-0.5 px-2 py-1">

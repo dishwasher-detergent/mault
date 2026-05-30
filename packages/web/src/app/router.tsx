@@ -10,7 +10,9 @@ import MonitorSessionsPage from "@/app/routes/app/monitor-sessions";
 import SettingsPage from "@/app/routes/app/settings";
 import AuthPage from "@/app/routes/auth";
 import LandingPage from "@/app/routes/index";
+import { useIsMobile } from "@/hooks/use-is-mobile";
 import { useRole } from "@/hooks/use-role";
+import { IconDeviceDesktop } from "@tabler/icons-react";
 import { RedirectToSignIn, SignedIn } from "@neondatabase/neon-js/auth/react";
 import { createBrowserRouter, Navigate, Outlet } from "react-router-dom";
 
@@ -32,6 +34,22 @@ function AdminGuard() {
   return <Outlet />;
 }
 
+function DesktopOnlyGuard() {
+  const isMobile = useIsMobile();
+  if (isMobile) {
+    return (
+      <div className="flex flex-col items-center justify-center flex-1 gap-3 p-8 text-center text-muted-foreground">
+        <IconDeviceDesktop className="size-10" />
+        <p className="text-sm font-semibold text-foreground">Desktop Only</p>
+        <p className="text-xs max-w-[200px]">
+          This feature requires a desktop browser. Use the Session Monitor to join a live scan.
+        </p>
+      </div>
+    );
+  }
+  return <Outlet />;
+}
+
 export const router = createBrowserRouter([
   {
     path: "/",
@@ -48,31 +66,40 @@ export const router = createBrowserRouter([
         element: <AppLayout />,
         children: [
           {
-            path: "/app",
-            element: <ScannerPage />,
-          },
-          {
-            path: "/app/collections",
-            element: <CollectionsPage />,
-          },
-          {
-            path: "/app/bins",
-            element: <BinsPage />,
-          },
-          {
-            path: "/app/calibrate",
-            element: <CalibratePage />,
-          },
-          {
-            path: "/app/settings",
-            element: <SettingsPage />,
-          },
-          {
-            element: <AdminGuard />,
+            element: <DesktopOnlyGuard />,
             children: [
               {
-                path: "/app/admin",
-                element: <AdminPage />,
+                path: "/app",
+                element: <ScannerPage />,
+              },
+              {
+                path: "/app/collections",
+                element: <CollectionsPage />,
+              },
+              {
+                path: "/app/bins",
+                element: <BinsPage />,
+              },
+              {
+                path: "/app/calibrate",
+                element: <CalibratePage />,
+              },
+              {
+                path: "/app/settings",
+                element: <SettingsPage />,
+              },
+              {
+                element: <AdminGuard />,
+                children: [
+                  {
+                    path: "/app/admin",
+                    element: <AdminPage />,
+                  },
+                ],
+              },
+              {
+                path: "/app/account/:path",
+                element: <AccountPage />,
               },
             ],
           },
@@ -83,10 +110,6 @@ export const router = createBrowserRouter([
           {
             path: "/app/monitor/:collectionGuid",
             element: <MonitorPage />,
-          },
-          {
-            path: "/app/account/:path",
-            element: <AccountPage />,
           },
         ],
       },
