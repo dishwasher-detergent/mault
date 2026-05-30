@@ -12,7 +12,6 @@ import AuthPage from "@/app/routes/auth";
 import LandingPage from "@/app/routes/index";
 import { useIsMobile } from "@/hooks/use-is-mobile";
 import { useRole } from "@/hooks/use-role";
-import { IconDeviceDesktop } from "@tabler/icons-react";
 import { RedirectToSignIn, SignedIn } from "@neondatabase/neon-js/auth/react";
 import { createBrowserRouter, Navigate, Outlet } from "react-router-dom";
 
@@ -36,17 +35,7 @@ function AdminGuard() {
 
 function DesktopOnlyGuard() {
   const isMobile = useIsMobile();
-  if (isMobile) {
-    return (
-      <div className="flex flex-col items-center justify-center flex-1 gap-3 p-8 text-center text-muted-foreground">
-        <IconDeviceDesktop className="size-10" />
-        <p className="text-sm font-semibold text-foreground">Desktop Only</p>
-        <p className="text-xs max-w-[200px]">
-          This feature requires a desktop browser. Use the Session Monitor to join a live scan.
-        </p>
-      </div>
-    );
-  }
+  if (isMobile) return <Navigate to="/app/monitor" replace />;
   return <Outlet />;
 }
 
