@@ -5,7 +5,8 @@ import {
   deleteCollection as deleteCollectionFn,
   renameCollection as renameCollectionFn,
 } from "@/features/collections/api/collections";
-import type { Collection } from "@magic-vault/shared";
+import { createSet as createSetFn } from "@/features/bins/api/sort-bins";
+import { createDefaultColorBins, type Collection } from "@magic-vault/shared";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   createContext,
@@ -69,12 +70,15 @@ export function CollectionsProvider({ children }: { children: React.ReactNode })
 
   const createMutation = useMutation({
     mutationFn: createCollectionFn,
-    onSuccess: (r) => {
+    onSuccess: async (r, name) => {
       if (r.success && r.data) {
         setCollections(r.data);
-        // Activate the newly created collection locally
         const created = r.data.find((c) => c.isActive);
         if (created) setActiveGuid(created.guid);
+        const binsResult = await createSetFn(name, createDefaultColorBins());
+        if (binsResult.success && binsResult.data) {
+          queryClient.setQueryData(["bins"], binsResult.data);
+        }
       }
     },
     onError: () => toast.error("Failed to create collection"),

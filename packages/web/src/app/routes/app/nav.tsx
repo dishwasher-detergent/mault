@@ -18,7 +18,6 @@ import {
   IconCamera,
   IconDatabase,
   IconFolders,
-  IconLayoutGrid,
   IconSettings,
   IconWifi,
 } from "@tabler/icons-react";
@@ -115,12 +114,6 @@ export function AppNav() {
       to: "/app/collections",
       icon: <IconFolders size={20} />,
       label: "Collections",
-      desktopOnly: true,
-    },
-    {
-      to: "/app/bins",
-      icon: <IconLayoutGrid size={20} />,
-      label: "Sorting Logic",
       desktopOnly: true,
     },
     {

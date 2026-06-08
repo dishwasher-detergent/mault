@@ -14,6 +14,7 @@ import {
   IconCheck,
   IconEdit,
   IconFolders,
+  IconLayoutGrid,
   IconLoader2,
   IconPlus,
   IconTrash,
@@ -21,6 +22,7 @@ import {
 import { useQuery } from "@tanstack/react-query";
 import { useCallback, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
+import { Link } from "react-router-dom";
 
 export default function CollectionsPage() {
   const {
@@ -231,6 +233,15 @@ export default function CollectionsPage() {
               </div>
 
               <div className="flex items-center gap-1 shrink-0">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  asChild
+                >
+                  <Link to={`/app/collections/${collection.guid}/bins`}>
+                    <IconLayoutGrid />
+                  </Link>
+                </Button>
                 <Button
                   variant="ghost"
                   size="icon"

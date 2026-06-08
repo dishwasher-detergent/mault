@@ -2,6 +2,7 @@ import type {
   BinConfig,
   BinRuleGroup,
   BinSet,
+  DefaultBinInit,
   Result,
 } from "@magic-vault/shared";
 import { apiDelete, apiGet, apiPost, apiPut } from "@/lib/api/client";
@@ -21,8 +22,8 @@ export async function activateSet(guid: string): Promise<Result<BinSet[]>> {
   return apiPut<Result<BinSet[]>>(`/api/bins/${guid}/active`);
 }
 
-export async function createSet(name: string): Promise<Result<BinSet[]>> {
-  return apiPost<Result<BinSet[]>>("/api/bins", { name });
+export async function createSet(name: string, initialBins?: DefaultBinInit[]): Promise<Result<BinSet[]>> {
+  return apiPost<Result<BinSet[]>>("/api/bins", { name, initialBins });
 }
 
 export async function saveSet(name: string): Promise<Result<BinSet[]>> {

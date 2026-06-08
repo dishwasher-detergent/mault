@@ -66,7 +66,7 @@ export const router = createBrowserRouter([
                 element: <CollectionsPage />,
               },
               {
-                path: "/app/bins",
+                path: "/app/collections/:collectionGuid/bins",
                 element: <BinsPage />,
               },
               {

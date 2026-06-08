@@ -24,6 +24,7 @@ import {
   type BinSetAuditEntry,
 } from "@/features/bins/api/sort-bins";
 import { useBinConfigs } from "@/features/bins/api/use-bin-configs";
+import { useCollections } from "@/features/collections/api/use-collections";
 import type { PresetSelectorProps } from "@/features/bins/types";
 import {
   createSetSchema,
@@ -86,6 +87,7 @@ export function PresetSelector({ readOnly }: PresetSelectorProps) {
     isActivating,
     isPresetMutating,
   } = useBinConfigs();
+  const { activeCollection } = useCollections();
   const queryClient = useQueryClient();
   const { isLoading } = useQuery(binsQueryOptions);
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
@@ -228,14 +230,21 @@ export function PresetSelector({ readOnly }: PresetSelectorProps) {
             <Tooltip>
               <TooltipTrigger
                 render={
-                  <Button nativeButton={false} variant="outline" size="icon">
-                    <Link to="bins">
+                  <Button
+                    nativeButton={false}
+                    variant="outline"
+                    size="icon"
+                    disabled={!activeCollection}
+                  >
+                    <Link
+                      to={`/app/collections/${activeCollection?.guid}/bins`}
+                    >
                       <IconEdit />
                     </Link>
                   </Button>
                 }
               ></TooltipTrigger>
-              <TooltipContent>Edit Preset</TooltipContent>
+              <TooltipContent>Edit Sorting Logic</TooltipContent>
             </Tooltip>
           </>
         ) : (
@@ -249,7 +258,7 @@ export function PresetSelector({ readOnly }: PresetSelectorProps) {
                 <Button
                   variant="outline"
                   size="icon"
-                  disabled={!selectedSet || isPresetMutating}
+                  disabled={!selectedSet || isPresetMutating || sets.length <= 1}
                 >
                   <IconTrash />
                 </Button>

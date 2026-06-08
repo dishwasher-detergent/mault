@@ -1,7 +1,7 @@
 import { Hono } from "hono";
 import { authQuery } from "../db";
 import { binSetAudit, bins, binSets } from "../db/schema";
-import { BIN_COUNT, type BinConfig, type BinRuleGroup, type BinSet } from "@magic-vault/shared";
+import { BIN_COUNT, type BinConfig, type BinRuleGroup, type BinSet, type DefaultBinInit } from "@magic-vault/shared";
 import { eq } from "drizzle-orm";
 import { requireAuth, requireOrg, type AppEnv } from "../middleware/auth";
 import type { Transaction } from "../db";
@@ -101,16 +101,21 @@ router.put("/:guid/active", requireAuth, requireOrg, async (c) => {
 // POST /bins
 router.post("/", requireAuth, requireOrg, async (c) => {
   const orgId = c.get("orgId");
-  const { name } = await c.req.json<{ name: string }>();
+  const { name, initialBins } = await c.req.json<{ name: string; initialBins?: DefaultBinInit[] }>();
   try {
     const result = await authQuery(c.get("jwtClaims"), async (tx) => {
       await tx.update(binSets).set({ isActive: false }).where(eq(binSets.isActive, true));
       const [newBinSet] = await tx.insert(binSets).values({ name, isActive: true, orgId }).returning({ id: binSets.id });
+      const binsToInsert = Array.isArray(initialBins) ? initialBins : Array.from({ length: BIN_COUNT }, (_, i) => ({
+        binNumber: i + 1,
+        rules: emptyRules(),
+        isCatchAll: false,
+      }));
       await tx.insert(bins).values(
-        Array.from({ length: BIN_COUNT }, (_, i) => ({
-          binNumber: i + 1,
-          rules: emptyRules(),
-          isCatchAll: false,
+        binsToInsert.map((b) => ({
+          binNumber: b.binNumber,
+          rules: b.rules,
+          isCatchAll: b.isCatchAll,
           binSet: newBinSet.id,
           orgId,
         })),
