@@ -28,4 +28,4 @@ export const RARITY_ORDER = [
 
 export const MTG_ASPECT_RATIO = 2.5 / 3.5;
 
-export const OPENCV_CDN_URL = "https://docs.opencv.org/4.10.0/opencv.js";
+export const OPENCV_CDN_URL = "/opencv.js";

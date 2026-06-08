@@ -37,6 +37,7 @@
   },
   "devDependencies": {
     "@tailwindcss/vite": "^4.2.1",
+    "@techstark/opencv-js": "^4.10.0-release.1",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
@@ -44,6 +45,7 @@
     "@vitejs/plugin-react": "^4.4.1",
     "tailwindcss": "^4.1.18",
     "typescript": "^5",
-    "vite": "^6.3.5"
+    "vite": "^6.3.5",
+    "vite-plugin-static-copy": "^2.3.0"
   }
 }
