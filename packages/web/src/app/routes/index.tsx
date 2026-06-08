@@ -8,7 +8,6 @@ import { LandingNav } from "./landing/nav";
 import { LandingPipeline } from "./landing/pipeline";
 import { LandingRarity } from "./landing/rarity";
 import { LandingStats } from "./landing/stats";
-import { responsiveStyles } from "./landing/styles";
 
 export default function LandingPage() {
   const { data, isPending } = neon.auth.useSession();
@@ -21,11 +20,7 @@ export default function LandingPage() {
   }
 
   return (
-    <div
-      className="min-h-screen"
-      style={{ background: "#0a0a0a", color: "#f5f5f5" }}
-    >
-      <style>{responsiveStyles}</style>
+    <div className="min-h-screen bg-neutral-950 text-neutral-100">
       <LandingNav isSignedIn={isSignedIn} onSignOut={handleSignOut} />
       <LandingHero isSignedIn={isSignedIn} onSignOut={handleSignOut} />
       <LandingStats />

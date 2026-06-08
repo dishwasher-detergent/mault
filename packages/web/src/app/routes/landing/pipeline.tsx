@@ -8,111 +8,39 @@ const steps = [
 
 export function LandingPipeline() {
   return (
-    <section
-      style={{
-        background: "#0f0f0f",
-        borderTop: "1px solid #1a1a1a",
-        borderBottom: "1px solid #1a1a1a",
-        padding: "6rem 2.5rem",
-      }}
-    >
-      <div
-        className="lp-section"
-        style={{ maxWidth: "1200px", margin: "0 auto" }}
-      >
-        <p
-          style={{
-            fontFamily: "var(--font-heading)",
-            fontSize: "0.7rem",
-            letterSpacing: "0.2em",
-            color: "#999",
-            marginBottom: "1rem",
-          }}
-        >
+    <section className="bg-neutral-950 border-y border-zinc-900 px-10 py-24 max-sm:px-5 max-sm:py-14">
+      <div className="max-w-[1200px] mx-auto">
+        <p className="font-heading text-[0.7rem] tracking-[0.2em] text-zinc-400 mb-4">
           THE PIPELINE
         </p>
-        <h2
-          style={{
-            fontFamily: "var(--font-heading)",
-            fontSize: "clamp(2rem, 5vw, 3.5rem)",
-            fontWeight: 800,
-            letterSpacing: "-0.02em",
-            color: "#f5f5f5",
-            marginBottom: "4rem",
-            lineHeight: 1.05,
-          }}
-        >
+        <h2 className="font-heading text-[clamp(2rem,5vw,3.5rem)] font-extrabold tracking-[-0.02em] text-neutral-100 mb-16 leading-[1.05]">
           FROM LENS
           <br />
           TO BIN.
         </h2>
 
-        <div
-          className="lp-pipeline-steps"
-          style={{ display: "flex", alignItems: "center", flexWrap: "wrap" }}
-        >
+        <div className="flex items-center flex-wrap max-sm:flex-col max-sm:items-stretch">
           {steps.map((step, i) => (
             <div
               key={i}
-              className="lp-pipeline-step"
-              style={{ display: "flex", alignItems: "center", flex: "1", minWidth: "140px" }}
+              className="flex items-center flex-1 min-w-[140px] max-sm:flex-none max-sm:w-full max-sm:flex-col"
             >
-              <div
-                className="lp-pipeline-step-inner"
-                style={{
-                  display: "flex",
-                  flexDirection: "column",
-                  alignItems: "center",
-                  gap: "0.75rem",
-                  flex: 1,
-                  padding: "1.5rem 0.5rem",
-                }}
-              >
+              <div className="flex flex-col items-center gap-3 flex-1 py-6 px-2 max-sm:flex-row max-sm:items-center max-sm:py-2 max-sm:px-0 max-sm:gap-4">
                 <div
-                  style={{
-                    width: "52px",
-                    height: "52px",
-                    flexShrink: 0,
-                    borderRadius: "50%",
-                    background: i === 0 ? "#7C3AED" : "#1a1a1a",
-                    border: `2px solid ${i === 0 ? "#7C3AED" : "#2a2a2a"}`,
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    fontFamily: "var(--font-heading)",
-                    fontSize: "1.1rem",
-                    color: i === 0 ? "#fff" : "#888",
-                    fontWeight: 700,
-                  }}
+                  className={`w-13 h-13 shrink-0 rounded-full flex items-center justify-center font-heading text-[1.1rem] font-bold border-2 ${
+                    i === 0
+                      ? "bg-primary border-primary text-primary-foreground"
+                      : "bg-zinc-900 border-zinc-800 text-neutral-500"
+                  }`}
                 >
                   {step.icon}
                 </div>
-                <span
-                  className="lp-step-label"
-                  style={{
-                    fontFamily: "var(--font-heading)",
-                    fontSize: "0.65rem",
-                    letterSpacing: "0.1em",
-                    color: "#999",
-                    textAlign: "center",
-                    lineHeight: 1.4,
-                  }}
-                >
+                <span className="font-heading text-[0.65rem] tracking-[0.1em] text-zinc-400 text-center leading-[1.4] max-sm:text-left">
                   {step.label.toUpperCase()}
                 </span>
               </div>
               {i < steps.length - 1 && (
-                <div
-                  className="lp-pipeline-connector"
-                  style={{
-                    flexShrink: 0,
-                    height: "1px",
-                    width: "2rem",
-                    background: "#2a2a2a",
-                    alignSelf: "center",
-                    marginTop: "-1.5rem",
-                  }}
-                />
+                <div className="shrink-0 h-px w-8 bg-zinc-800 self-center -mt-6 max-sm:w-px max-sm:h-6 max-sm:ml-[25px] max-sm:mt-0 max-sm:self-auto" />
               )}
             </div>
           ))}

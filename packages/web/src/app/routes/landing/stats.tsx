@@ -7,46 +7,16 @@ const stats = [
 
 export function LandingStats() {
   return (
-    <div
-      style={{
-        borderTop: "1px solid #1a1a1a",
-        borderBottom: "1px solid #1a1a1a",
-        background: "#0f0f0f",
-        display: "flex",
-        justifyContent: "center",
-        flexWrap: "wrap",
-      }}
-    >
+    <div className="border-y border-zinc-900 bg-zinc-900 grid grid-cols-4 max-sm:grid-cols-2 gap-px">
       {stats.map((stat, i) => (
         <div
           key={i}
-          className="lp-stats-item"
-          style={{
-            padding: "2.5rem 4rem",
-            textAlign: "center",
-            borderRight: i < stats.length - 1 ? "1px solid #1a1a1a" : "none",
-          }}
+          className="bg-neutral-950 px-16 py-10 text-center max-sm:px-4 max-sm:py-7"
         >
-          <div
-            style={{
-              fontFamily: "var(--font-heading)",
-              fontSize: "2.5rem",
-              fontWeight: 800,
-              color: "#7C3AED",
-              lineHeight: 1,
-            }}
-          >
+          <div className="font-heading text-[2.5rem] font-extrabold text-primary leading-none">
             {stat.value}
           </div>
-          <div
-            style={{
-              fontFamily: "var(--font-heading)",
-              fontSize: "0.65rem",
-              letterSpacing: "0.15em",
-              color: "#999",
-              marginTop: "0.4rem",
-            }}
-          >
+          <div className="font-heading text-[0.65rem] tracking-[0.15em] text-zinc-400 mt-[0.4rem]">
             {stat.label.toUpperCase()}
           </div>
         </div>

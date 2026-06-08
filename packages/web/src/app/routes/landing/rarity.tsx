@@ -2,119 +2,59 @@ const rarities = [
   {
     label: "MYTHIC",
     desc: "Route chase rares to a dedicated bin automatically.",
-    color: "oklch(73.235% 0.17251 55.531)",
-    bg: "#1a1008",
+    dotClass: "bg-mythic",
+    textClass: "text-mythic",
+    cardBg: "#1a1008",
   },
   {
     label: "RARE",
     desc: "Gold cards for your trade binder, sorted on the fly.",
-    color: "oklch(83.828% 0.16176 98.163)",
-    bg: "#18170a",
+    dotClass: "bg-rare",
+    textClass: "text-rare",
+    cardBg: "#18170a",
   },
   {
     label: "UNCOMMON",
     desc: "Silver cards neatly separated from the bulk.",
-    color: "oklch(78.194% 0.09549 244.199)",
-    bg: "#0a1018",
+    dotClass: "bg-uncommon",
+    textClass: "text-uncommon",
+    cardBg: "#0a1018",
   },
   {
     label: "COMMON",
     desc: "Bulk commons sorted by color, CMC, or set.",
-    color: "oklch(60% 0 0)",
-    bg: "#111",
+    dotClass: "bg-common",
+    textClass: "text-common",
+    cardBg: "#111",
   },
 ];
 
 export function LandingRarity() {
   return (
-    <section
-      className="lp-section"
-      style={{
-        padding: "6rem 2.5rem",
-        maxWidth: "1200px",
-        margin: "0 auto",
-      }}
-    >
-      <p
-        style={{
-          fontFamily: "var(--font-heading)",
-          fontSize: "0.7rem",
-          letterSpacing: "0.2em",
-          color: "#999",
-          marginBottom: "1rem",
-        }}
-      >
+    <section className="px-10 py-24 max-w-[1200px] mx-auto max-sm:px-5 max-sm:py-14">
+      <p className="font-heading text-[0.7rem] tracking-[0.2em] text-zinc-400 mb-4">
         RULE ENGINE
       </p>
-      <h2
-        style={{
-          fontFamily: "var(--font-heading)",
-          fontSize: "clamp(2rem, 5vw, 3.5rem)",
-          fontWeight: 800,
-          letterSpacing: "-0.02em",
-          color: "#f5f5f5",
-          marginBottom: "3rem",
-          lineHeight: 1.05,
-        }}
-      >
+      <h2 className="font-heading text-[clamp(2rem,5vw,3.5rem)] font-extrabold tracking-[-0.02em] text-neutral-100 mb-12 leading-[1.05]">
         BUILD RULES,
         <br />
         NOT SPREADSHEETS.
       </h2>
 
-      <div
-        className="lp-rarity-grid"
-        style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))",
-          gap: "1px",
-          background: "#1a1a1a",
-          borderRadius: "0.75rem",
-          overflow: "hidden",
-        }}
-      >
+      <div className="grid grid-cols-[repeat(auto-fit,minmax(240px,1fr))] gap-px bg-zinc-900 rounded-xl overflow-hidden">
         {rarities.map((rarity) => (
           <div
             key={rarity.label}
-            style={{
-              background: rarity.bg,
-              padding: "2rem 1.75rem",
-              display: "flex",
-              flexDirection: "column",
-              gap: "0.75rem",
-            }}
+            className="flex flex-col gap-3 p-8 px-7"
+            style={{ background: rarity.cardBg }}
           >
-            <div style={{ display: "flex", alignItems: "center", gap: "0.6rem" }}>
-              <div
-                style={{
-                  width: "8px",
-                  height: "8px",
-                  borderRadius: "50%",
-                  background: rarity.color,
-                  flexShrink: 0,
-                }}
-              />
-              <span
-                style={{
-                  fontFamily: "var(--font-heading)",
-                  fontSize: "0.75rem",
-                  letterSpacing: "0.15em",
-                  color: rarity.color,
-                  fontWeight: 700,
-                }}
-              >
+            <div className="flex items-center gap-[0.6rem]">
+              <div className={`w-2 h-2 rounded-full shrink-0 ${rarity.dotClass}`} />
+              <span className={`font-heading text-[0.75rem] tracking-[0.15em] font-bold ${rarity.textClass}`}>
                 {rarity.label}
               </span>
             </div>
-            <p
-              style={{
-                fontFamily: "var(--font-sans)",
-                fontSize: "0.85rem",
-                color: "#aaa",
-                lineHeight: 1.55,
-                margin: 0,
-              }}
-            >
+            <p className="font-sans text-[0.85rem] text-neutral-400 leading-[1.55] m-0">
               {rarity.desc}
             </p>
           </div>

@@ -7,44 +7,17 @@ interface LandingNavProps {
 
 export function LandingNav({ isSignedIn, onSignOut }: LandingNavProps) {
   return (
-    <nav
-      className="lp-nav"
-      style={{
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "space-between",
-        padding: "1.5rem 2.5rem",
-        borderBottom: "1px solid #222",
-      }}
-    >
-      <span
-        style={{
-          fontFamily: "var(--font-heading)",
-          fontWeight: 700,
-          fontSize: "1rem",
-          letterSpacing: "0.12em",
-          color: "#A78BFA",
-        }}
-      >
+    <nav className="flex items-center justify-between px-10 py-6 border-b border-neutral-800 max-sm:px-5 max-sm:py-4">
+      <span className="font-heading font-bold text-base tracking-[0.12em] text-primary">
         MAULT
       </span>
 
-      <div style={{ display: "flex", gap: "0.75rem", alignItems: "center" }}>
+      <div className="flex gap-3 items-center">
         <a
           href="https://github.com/dishwasher-detergent/mault"
           target="_blank"
           rel="noopener noreferrer"
-          className="lp-nav-external"
-          style={{
-            color: "#999",
-            textDecoration: "none",
-            fontSize: "0.8rem",
-            fontFamily: "var(--font-heading)",
-            letterSpacing: "0.08em",
-            transition: "color 0.15s",
-          }}
-          onMouseOver={(e) => (e.currentTarget.style.color = "#fff")}
-          onMouseOut={(e) => (e.currentTarget.style.color = "#999")}
+          className="max-sm:hidden text-zinc-400 no-underline text-[0.8rem] font-heading tracking-[0.08em] transition-colors duration-150 hover:text-white"
         >
           GITHUB
         </a>
@@ -52,62 +25,23 @@ export function LandingNav({ isSignedIn, onSignOut }: LandingNavProps) {
           href="https://makerworld.com/en/models/2484318-horizontal-card-divider-for-storage-box#profileId-2728971"
           target="_blank"
           rel="noopener noreferrer"
-          className="lp-nav-external"
-          style={{
-            color: "#999",
-            textDecoration: "none",
-            fontSize: "0.8rem",
-            fontFamily: "var(--font-heading)",
-            letterSpacing: "0.08em",
-            transition: "color 0.15s",
-          }}
-          onMouseOver={(e) => (e.currentTarget.style.color = "#fff")}
-          onMouseOut={(e) => (e.currentTarget.style.color = "#999")}
+          className="max-sm:hidden text-zinc-400 no-underline text-[0.8rem] font-heading tracking-[0.08em] transition-colors duration-150 hover:text-white"
         >
           3D MODEL
         </a>
-        <div
-          className="lp-nav-divider"
-          style={{ width: "1px", height: "1rem", background: "#2a2a2a" }}
-        />
+        <div className="max-sm:hidden w-px h-4 bg-zinc-800" />
 
         {isSignedIn ? (
           <>
             <button
               onClick={onSignOut}
-              style={{
-                background: "transparent",
-                border: "none",
-                cursor: "pointer",
-                color: "#aaa",
-                fontSize: "0.8rem",
-                fontFamily: "var(--font-heading)",
-                letterSpacing: "0.08em",
-                padding: 0,
-                transition: "color 0.15s",
-              }}
-              onMouseOver={(e) => (e.currentTarget.style.color = "#fff")}
-              onMouseOut={(e) => (e.currentTarget.style.color = "#aaa")}
+              className="bg-transparent border-none cursor-pointer text-neutral-400 text-[0.8rem] font-heading tracking-[0.08em] p-0 transition-colors duration-150 hover:text-white"
             >
               SIGN OUT
             </button>
             <Link
               to="/app"
-              style={{
-                background: "#7C3AED",
-                color: "#fff",
-                textDecoration: "none",
-                fontSize: "0.8rem",
-                fontFamily: "var(--font-heading)",
-                letterSpacing: "0.08em",
-                padding: "0.5rem 1.25rem",
-                borderRadius: "0.3rem",
-                transition: "background 0.15s",
-              }}
-              onMouseOver={(e) =>
-                (e.currentTarget.style.background = "#6D28D9")
-              }
-              onMouseOut={(e) => (e.currentTarget.style.background = "#7C3AED")}
+              className="bg-primary text-primary-foreground no-underline text-[0.8rem] font-heading tracking-[0.08em] px-5 py-2 rounded-[0.3rem] transition-colors duration-150 hover:bg-primary/80"
             >
               GO TO APP
             </Link>
@@ -116,36 +50,13 @@ export function LandingNav({ isSignedIn, onSignOut }: LandingNavProps) {
           <>
             <Link
               to="/auth/sign-in"
-              style={{
-                color: "#aaa",
-                textDecoration: "none",
-                fontSize: "0.8rem",
-                fontFamily: "var(--font-heading)",
-                letterSpacing: "0.08em",
-                transition: "color 0.15s",
-              }}
-              onMouseOver={(e) => (e.currentTarget.style.color = "#fff")}
-              onMouseOut={(e) => (e.currentTarget.style.color = "#aaa")}
+              className="text-neutral-400 no-underline text-[0.8rem] font-heading tracking-[0.08em] transition-colors duration-150 hover:text-white"
             >
               SIGN IN
             </Link>
             <Link
               to="/auth/sign-up"
-              style={{
-                background: "#7C3AED",
-                color: "#fff",
-                textDecoration: "none",
-                fontSize: "0.8rem",
-                fontFamily: "var(--font-heading)",
-                letterSpacing: "0.08em",
-                padding: "0.5rem 1.25rem",
-                borderRadius: "0.3rem",
-                transition: "background 0.15s",
-              }}
-              onMouseOver={(e) =>
-                (e.currentTarget.style.background = "#6D28D9")
-              }
-              onMouseOut={(e) => (e.currentTarget.style.background = "#7C3AED")}
+              className="bg-primary text-primary-foreground no-underline text-[0.8rem] font-heading tracking-[0.08em] px-5 py-2 rounded-[0.3rem] transition-colors duration-150 hover:bg-primary/80"
             >
               GET STARTED
             </Link>

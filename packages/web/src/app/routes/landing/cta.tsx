@@ -6,63 +6,18 @@ interface LandingCtaProps {
 
 export function LandingCta({ isSignedIn }: LandingCtaProps) {
   return (
-    <section
-      className="lp-cta"
-      style={{
-        background: "#7C3AED",
-        padding: "6rem 2.5rem",
-        textAlign: "center",
-      }}
-    >
-      <h2
-        style={{
-          fontFamily: "var(--font-heading)",
-          fontSize: "clamp(2.5rem, 8vw, 6rem)",
-          fontWeight: 800,
-          letterSpacing: "-0.03em",
-          color: "#fff",
-          lineHeight: 0.95,
-          marginBottom: "1.5rem",
-        }}
-      >
+    <section className="bg-primary px-10 py-24 text-center max-sm:px-5 max-sm:py-16">
+      <h2 className="font-heading text-[clamp(2.5rem,8vw,6rem)] font-extrabold tracking-[-0.03em] text-primary-foreground leading-[0.95] mb-6">
         READY TO
         <br />
         START SORTING?
       </h2>
-      <p
-        style={{
-          fontFamily: "var(--font-sans)",
-          fontSize: "1.05rem",
-          color: "#fff",
-          marginBottom: "2.5rem",
-          lineHeight: 1.6,
-        }}
-      >
+      <p className="font-sans text-[1.05rem] text-primary-foreground mb-10 leading-[1.6]">
         Create a free account and connect your hardware.
       </p>
       <Link
         to={isSignedIn ? "/app" : "/auth/sign-up"}
-        style={{
-          background: "#fff",
-          color: "#7C3AED",
-          textDecoration: "none",
-          fontFamily: "var(--font-heading)",
-          fontWeight: 800,
-          fontSize: "0.9rem",
-          letterSpacing: "0.12em",
-          padding: "1.1rem 3rem",
-          borderRadius: "0.4rem",
-          display: "inline-block",
-          transition: "background 0.15s, transform 0.1s",
-        }}
-        onMouseOver={(e) => {
-          e.currentTarget.style.background = "#EDE9FE";
-          e.currentTarget.style.transform = "translateY(-2px)";
-        }}
-        onMouseOut={(e) => {
-          e.currentTarget.style.background = "#fff";
-          e.currentTarget.style.transform = "translateY(0)";
-        }}
+        className="bg-white text-primary no-underline font-heading font-extrabold text-[0.9rem] tracking-[0.12em] px-12 py-[1.1rem] rounded-[0.4rem] inline-block transition-all duration-150 hover:bg-primary/10 hover:-translate-y-0.5"
       >
         {isSignedIn ? "GO TO APP" : "CREATE ACCOUNT"}
       </Link>

@@ -1,46 +1,16 @@
 export function LandingFooter() {
   return (
-    <footer
-      className="lp-footer"
-      style={{
-        borderTop: "1px solid #1a1a1a",
-        padding: "2rem 2.5rem",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "space-between",
-        flexWrap: "wrap",
-        gap: "1rem",
-      }}
-    >
-      <span
-        style={{
-          fontFamily: "var(--font-heading)",
-          fontSize: "0.75rem",
-          color: "#888",
-          letterSpacing: "0.1em",
-        }}
-      >
+    <footer className="border-t border-zinc-900 px-10 py-8 flex items-center justify-between flex-wrap gap-4 max-sm:px-5 max-sm:py-6 max-sm:flex-col max-sm:items-start">
+      <span className="font-heading text-[0.75rem] text-neutral-500 tracking-[0.1em]">
         MAULT
       </span>
 
-      <div
-        className="lp-footer-right"
-        style={{ display: "flex", gap: "1.5rem", alignItems: "center" }}
-      >
+      <div className="flex gap-6 items-center max-sm:flex-col max-sm:gap-[0.6rem]">
         <a
           href="https://github.com/dishwasher-detergent/mault"
           target="_blank"
           rel="noopener noreferrer"
-          style={{
-            fontFamily: "var(--font-heading)",
-            fontSize: "0.65rem",
-            color: "#999",
-            letterSpacing: "0.1em",
-            textDecoration: "none",
-            transition: "color 0.15s",
-          }}
-          onMouseOver={(e) => (e.currentTarget.style.color = "#fff")}
-          onMouseOut={(e) => (e.currentTarget.style.color = "#999")}
+          className="font-heading text-[0.65rem] text-zinc-400 tracking-[0.1em] no-underline transition-colors duration-150 hover:text-white"
         >
           GITHUB
         </a>
@@ -48,27 +18,11 @@ export function LandingFooter() {
           href="https://makerworld.com/en/models/2484318-horizontal-card-divider-for-storage-box#profileId-2728971"
           target="_blank"
           rel="noopener noreferrer"
-          style={{
-            fontFamily: "var(--font-heading)",
-            fontSize: "0.65rem",
-            color: "#999",
-            letterSpacing: "0.1em",
-            textDecoration: "none",
-            transition: "color 0.15s",
-          }}
-          onMouseOver={(e) => (e.currentTarget.style.color = "#fff")}
-          onMouseOut={(e) => (e.currentTarget.style.color = "#999")}
+          className="font-heading text-[0.65rem] text-zinc-400 tracking-[0.1em] no-underline transition-colors duration-150 hover:text-white"
         >
           3D MODEL
         </a>
-        <span
-          style={{
-            fontFamily: "var(--font-heading)",
-            fontSize: "0.65rem",
-            color: "#888",
-            letterSpacing: "0.08em",
-          }}
-        >
+        <span className="font-heading text-[0.65rem] text-neutral-500 tracking-[0.08em]">
           NOT AFFILIATED WITH WIZARDS OF THE COAST
         </span>
       </div>

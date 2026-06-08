@@ -8,7 +8,7 @@ import {
 } from "@/features/calibration/lib/calibration-utils";
 import type { ActivePositions, ServoConfig, SliderKey } from "@/features/calibration/types";
 import { useSerial } from "@/features/scanner/api/use-serial";
-import type { ServoCalibration } from "@magic-vault/shared";
+import { DEFAULT_CALIBRATION, type ServoCalibration } from "@magic-vault/shared";
 import { useQuery } from "@tanstack/react-query";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
@@ -26,6 +26,14 @@ export function useCalibrationPage() {
 
   const configsRef = useRef(configs);
   configsRef.current = configs;
+
+  const isUnconfigured =
+    configs.length > 0 &&
+    configs.every((c) =>
+      (Object.keys(DEFAULT_CALIBRATION) as (keyof ServoCalibration)[]).every(
+        (key) => c.calibration[key] === DEFAULT_CALIBRATION[key],
+      ),
+    );
 
   const [sliderValues, setSliderValues] =
     useState<Record<SliderKey, number>>(defaultSliderValues);
@@ -120,6 +128,12 @@ export function useCalibrationPage() {
   );
 
   const handleTest = useCallback(async () => {
+    if (isUnconfigured) {
+      toast.error("Modules not calibrated", {
+        description: "Configure all three modules before running the test sequence.",
+      });
+      return;
+    }
     setIsTesting(true);
     toast.info("Running test sequence…");
     const ok = await sendTest();
@@ -129,7 +143,7 @@ export function useCalibrationPage() {
     } else {
       toast.error("Test failed", { description: "No response from sorter." });
     }
-  }, [sendTest]);
+  }, [sendTest, isUnconfigured]);
 
   const handleTestBin = useCallback(
     async (bin: number) => {
@@ -296,6 +310,7 @@ export function useCalibrationPage() {
     ledStates,
     activeBin,
     isTesting,
+    isUnconfigured,
     handleControl,
     handleReset,
     handleSliderChange,

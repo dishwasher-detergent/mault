@@ -129,6 +129,7 @@ export default function CalibratePage() {
     ledStates,
     activeBin,
     isTesting,
+    isUnconfigured,
     handleControl,
     handleReset,
     handleSliderChange,
@@ -161,7 +162,7 @@ export default function CalibratePage() {
 
   return (
     <div className="flex flex-col gap-4 p-4 overflow-y-auto">
-      <div className="flex justify-start gap-2">
+      <div className="flex flex-wrap items-center gap-2">
         {isConnected ? (
           <Button variant="outline" onClick={disconnect}>
             <IconDeviceUsbFilled />
@@ -175,11 +176,16 @@ export default function CalibratePage() {
         )}
         <Button
           variant="outline"
-          disabled={!isConnected || isTesting}
+          disabled={!isConnected || isTesting || isUnconfigured}
           onClick={handleTest}
         >
           {isTesting ? "Testing…" : "Run Test"}
         </Button>
+        {isUnconfigured && (
+          <span className="text-xs text-muted-foreground">
+            Calibrate all modules before running the test
+          </span>
+        )}
       </div>
 
       <LedControls

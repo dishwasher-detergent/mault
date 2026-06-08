@@ -3,120 +3,47 @@ const features = [
     number: "01",
     title: "Vision-Powered Scanning",
     body: "Point your webcam at any card. OpenCV detects the border, our AI model identifies it in milliseconds using 768-dimensional image embeddings.",
-    bg: "#7C3AED",
-    fg: "#fff",
-    accent: "#fff",
+    cardClass: "bg-primary text-primary-foreground",
   },
   {
     number: "02",
     title: "Rule-Based Sorting",
     body: "Define up to 7 physical bins with nested AND/OR rule trees. Filter by color, rarity, CMC, type, set, value — anything on the card.",
-    bg: "#F59E0B",
-    fg: "#0a0a0a",
-    accent: "#0a0a0a",
+    cardClass: "bg-amber-500 text-neutral-950",
   },
   {
     number: "03",
     title: "Hardware Control",
     body: "Paired with an Arduino servo controller over Web Serial API. Sort decisions become physical motion — automatically routed to the right bin.",
-    bg: "#DC2626",
-    fg: "#fff",
-    accent: "#fff",
+    cardClass: "bg-red-600 text-white",
   },
 ];
 
 export function LandingFeatures() {
   return (
-    <section
-      className="lp-section"
-      style={{
-        padding: "6rem 2.5rem",
-        maxWidth: "1200px",
-        margin: "0 auto",
-      }}
-    >
-      <p
-        style={{
-          fontFamily: "var(--font-heading)",
-          fontSize: "0.7rem",
-          letterSpacing: "0.2em",
-          color: "#999",
-          marginBottom: "1rem",
-        }}
-      >
+    <section className="px-10 py-24 max-w-[1200px] mx-auto max-sm:px-5 max-sm:py-14">
+      <p className="font-heading text-[0.7rem] tracking-[0.2em] text-zinc-400 mb-4">
         FEATURES
       </p>
-      <h2
-        style={{
-          fontFamily: "var(--font-heading)",
-          fontSize: "clamp(2rem, 5vw, 3.5rem)",
-          fontWeight: 800,
-          letterSpacing: "-0.02em",
-          color: "#f5f5f5",
-          marginBottom: "3.5rem",
-          lineHeight: 1.05,
-        }}
-      >
+      <h2 className="font-heading text-[clamp(2rem,5vw,3.5rem)] font-extrabold tracking-[-0.02em] text-neutral-100 mb-14 leading-[1.05]">
         EVERYTHING YOU NEED
         <br />
         TO SORT SMARTER.
       </h2>
 
-      <div
-        className="lp-features-grid"
-        style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))",
-          gap: "1.25rem",
-        }}
-      >
+      <div className="grid grid-cols-[repeat(auto-fit,minmax(300px,1fr))] gap-5 max-sm:grid-cols-1">
         {features.map((f) => (
           <div
             key={f.number}
-            className="lp-feature-card"
-            style={{
-              background: f.bg,
-              color: f.fg,
-              borderRadius: "0.75rem",
-              padding: "2.5rem",
-              display: "flex",
-              flexDirection: "column",
-              gap: "1.25rem",
-            }}
+            className={`rounded-xl p-10 flex flex-col gap-5 max-sm:p-7 ${f.cardClass}`}
           >
-            <span
-              style={{
-                fontFamily: "var(--font-heading)",
-                fontSize: "0.7rem",
-                letterSpacing: "0.18em",
-                color: f.accent,
-                fontWeight: 600,
-              }}
-            >
+            <span className="font-heading text-[0.7rem] tracking-[0.18em] font-semibold">
               {f.number}
             </span>
-            <h3
-              style={{
-                fontFamily: "var(--font-heading)",
-                fontSize: "1.35rem",
-                fontWeight: 800,
-                letterSpacing: "-0.01em",
-                lineHeight: 1.15,
-                margin: 0,
-                color: f.fg,
-              }}
-            >
+            <h3 className="font-heading text-[1.35rem] font-extrabold tracking-[-0.01em] leading-[1.15] m-0">
               {f.title.toUpperCase()}
             </h3>
-            <p
-              style={{
-                fontFamily: "var(--font-sans)",
-                fontSize: "0.9rem",
-                lineHeight: 1.65,
-                color: f.fg,
-                margin: 0,
-              }}
-            >
+            <p className="font-sans text-[0.9rem] leading-[1.65] m-0">
               {f.body}
             </p>
           </div>
