@@ -19,10 +19,6 @@ export default defineConfig({
           src: "node_modules/@techstark/opencv-js/dist/opencv.js",
           dest: ".",
         },
-        {
-          src: "node_modules/@techstark/opencv-js/dist/opencv.wasm",
-          dest: ".",
-        },
       ],
     }),
   ],
