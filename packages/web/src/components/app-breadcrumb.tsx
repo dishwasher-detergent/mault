@@ -59,7 +59,9 @@ export function AppBreadcrumb() {
                 {crumb.label}
               </Link>
             ) : (
-              <span className={cn(isLast && "text-foreground")}>{crumb.label}</span>
+              <span className={cn(isLast && "text-muted-foreground")}>
+                {crumb.label}
+              </span>
             )}
           </span>
         );
