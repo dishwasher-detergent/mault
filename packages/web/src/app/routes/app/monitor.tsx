@@ -75,8 +75,7 @@ function CardGrid({
 
 export default function MonitorPage() {
   const { collectionGuid } = useParams<{ collectionGuid: string }>();
-  const { collection, cards, viewers, errors, status } =
-    useSessionMonitor(collectionGuid);
+  const { cards, viewers, errors, status } = useSessionMonitor(collectionGuid);
   const { locks, currentUserId } = useCollectionLocks();
   const isMobile = useIsMobile();
 
