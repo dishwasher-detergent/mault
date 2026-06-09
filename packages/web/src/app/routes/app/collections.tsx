@@ -236,12 +236,12 @@ export default function CollectionsPage() {
                 <Button
                   variant="ghost"
                   size="icon"
-                  asChild
-                >
-                  <Link to={`/app/collections/${collection.guid}/bins`}>
-                    <IconLayoutGrid />
-                  </Link>
-                </Button>
+                  render={
+                    <Link to={`/app/collections/${collection.guid}/bins`}>
+                      <IconLayoutGrid />
+                    </Link>
+                  }
+                ></Button>
                 <Button
                   variant="ghost"
                   size="icon"

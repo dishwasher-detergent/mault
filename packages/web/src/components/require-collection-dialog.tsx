@@ -1,6 +1,4 @@
 import { Button } from "@/components/ui/button";
-import { Field, FieldError, FieldLabel } from "@/components/ui/field";
-import { Input } from "@/components/ui/input";
 import {
   Dialog,
   DialogContent,
@@ -9,6 +7,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { Field, FieldError, FieldLabel } from "@/components/ui/field";
+import { Input } from "@/components/ui/input";
 import { useCollections } from "@/features/collections/api/use-collections";
 import {
   createCollectionSchema,
@@ -40,7 +40,7 @@ export function RequireCollectionDialog() {
   const open = !isLoading && collections.length === 0;
 
   return (
-    <Dialog open={open} dismissible={false}>
+    <Dialog open={open}>
       <DialogContent showCloseButton={false} className="sm:max-w-md">
         <DialogHeader>
           <div className="flex items-center gap-2 mb-1">

@@ -164,7 +164,7 @@ export function BinConfigsProvider({
   });
 
   const createSetMutation = useMutation({
-    mutationFn: createSetAction,
+    mutationFn: (name: string) => createSetAction(name),
     onSuccess: (result) => {
       if (result.success && result.data) {
         setSelectedBin(1);
