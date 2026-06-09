@@ -21,7 +21,7 @@ import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 
-export function CardScanner({ className }: CardScannerProps) {
+export function CardScanner({ className, compact }: CardScannerProps) {
   const navigate = useNavigate();
   const { isAdmin } = useRole();
   const isMobile = useIsMobile();
@@ -142,7 +142,7 @@ export function CardScanner({ className }: CardScannerProps) {
         className,
       )}
     >
-      <div className="relative overflow-hidden bg-background w-full h-full md:aspect-[2.5/3.5] max-w-full rounded-lg border">
+      <div className={cn("relative overflow-hidden bg-background w-full h-full max-w-full rounded-lg border", !compact && "md:aspect-[2.5/3.5]")}>
         <video ref={videoRef} className="hidden" playsInline muted />
         <canvas ref={processingCanvasRef} className="hidden" />
         <canvas ref={displayCanvasRef} className={cn("absolute", !isMobile && "rotate-90")} />

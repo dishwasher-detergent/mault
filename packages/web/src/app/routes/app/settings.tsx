@@ -1,4 +1,5 @@
 import { PrimaryColorPicker } from "@/components/primary-color-picker";
+import { ScannerLayoutToggle } from "@/components/scanner-layout-toggle";
 import { OrgSettings } from "@/features/companies/components/org-settings";
 import { DiscordWebhookSettings } from "@/features/notifications/components/discord-webhook-settings";
 
@@ -19,6 +20,10 @@ export default function SettingsPage() {
         <div className="flex flex-col gap-1.5">
           <p className="text-xs font-medium">Primary color</p>
           <PrimaryColorPicker />
+        </div>
+        <div className="flex flex-col gap-1.5">
+          <p className="text-xs font-medium">Scanner layout</p>
+          <ScannerLayoutToggle />
         </div>
       </div>
       <div className="rounded-lg border p-4 flex flex-col gap-4">

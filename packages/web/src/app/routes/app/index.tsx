@@ -2,12 +2,15 @@ import { Drawer, DrawerContent, DrawerTrigger } from "@/components/ui/drawer";
 import { PresetSelector } from "@/features/bins/components/preset-selector";
 import { CardGrid } from "@/features/cards/components/card-grid";
 import { CollectionSwitcher } from "@/features/collections/components/collection-switcher";
+import { orgSettingsQueryOptions } from "@/features/companies/api/org-settings";
+import { useOrg } from "@/features/companies/api/use-organization";
 import { useScannedCards } from "@/features/scanner/api/use-scanned-cards";
 import { CardScanner } from "@/features/scanner/components/card-scanner";
 import { ScanStats } from "@/features/scanner/components/scan-stats";
 import { ScannerDebug } from "@/features/scanner/components/scanner-debug";
 import { useIsMobile } from "@/hooks/use-is-mobile";
 import { IconCards } from "@tabler/icons-react";
+import { useQuery } from "@tanstack/react-query";
 
 function MobileScanner() {
   const { cards } = useScannedCards();
@@ -47,9 +50,33 @@ function MobileScanner() {
 
 export default function App() {
   const isMobile = useIsMobile();
+  const { activeOrg } = useOrg();
+  const { data: orgSettings } = useQuery(
+    orgSettingsQueryOptions(activeOrg?.id),
+  );
+  const isVertical = orgSettings?.scannerLayout === "vertical";
 
   if (isMobile) {
     return <MobileScanner />;
+  }
+
+  if (isVertical) {
+    return (
+      <div className="flex flex-col flex-1 min-h-0 overflow-hidden">
+        <section className="flex items-stretch gap-2 p-2 border-b bg-sidebar shrink-0 h-1/2">
+          <CardScanner className="flex-1 min-w-0" compact />
+          <div className="flex flex-col gap-2 w-52 shrink-0 overflow-y-auto">
+            <CollectionSwitcher />
+            <PresetSelector readOnly />
+            <ScannerDebug />
+            <ScanStats />
+          </div>
+        </section>
+        <section className="flex-1 min-h-0 overflow-y-auto @container">
+          <CardGrid />
+        </section>
+      </div>
+    );
   }
 
   return (

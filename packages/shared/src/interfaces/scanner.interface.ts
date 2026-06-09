@@ -35,6 +35,7 @@ export interface CardScannerProps {
   onManualAdd?: () => void;
   onError?: (error: string) => void;
   className?: string;
+  compact?: boolean;
 }
 
 export interface CardMatch {

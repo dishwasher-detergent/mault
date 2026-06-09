@@ -12,7 +12,10 @@ router.get("/", requireAuth, requireOrg, async (c) => {
       return {
         success: true,
         message: "Loaded.",
-        data: { primaryColor: row?.primaryColor ?? null },
+        data: {
+          primaryColor: row?.primaryColor ?? null,
+          scannerLayout: (row?.scannerLayout as "horizontal" | "vertical") ?? "horizontal",
+        },
       };
     });
     return c.json(result);
@@ -24,20 +27,28 @@ router.get("/", requireAuth, requireOrg, async (c) => {
 
 router.put("/", requireAuth, requireOrg, async (c) => {
   const orgId = c.get("orgId");
-  const { primaryColor } = await c.req.json<{ primaryColor: string | null }>();
+  const body = await c.req.json<{ primaryColor?: string | null; scannerLayout?: string | null }>();
   try {
     const result = await authQuery(c.get("jwtClaims"), async (tx) => {
+      const existing = await tx.query.orgSettings.findFirst();
+      const merged = {
+        primaryColor: "primaryColor" in body ? body.primaryColor ?? null : (existing?.primaryColor ?? null),
+        scannerLayout: "scannerLayout" in body ? body.scannerLayout ?? null : (existing?.scannerLayout ?? null),
+      };
       await tx
         .insert(orgSettings)
-        .values({ orgId, primaryColor })
+        .values({ orgId, ...merged })
         .onConflictDoUpdate({
           target: [orgSettings.orgId],
-          set: { primaryColor, updatedAt: new Date() },
+          set: { ...merged, updatedAt: new Date() },
         });
       return {
         success: true,
         message: "Saved.",
-        data: { primaryColor: primaryColor ?? null },
+        data: {
+          primaryColor: merged.primaryColor,
+          scannerLayout: (merged.scannerLayout as "horizontal" | "vertical") ?? "horizontal",
+        },
       };
     });
     return c.json(result);
