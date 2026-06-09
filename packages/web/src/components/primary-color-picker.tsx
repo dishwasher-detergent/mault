@@ -27,7 +27,11 @@ export function PrimaryColorPicker() {
     onMutate: async (primaryColor) => {
       await queryClient.cancelQueries({ queryKey: queryOpts.queryKey });
       const previous = queryClient.getQueryData(queryOpts.queryKey);
-      queryClient.setQueryData(queryOpts.queryKey, { primaryColor });
+      queryClient.setQueryData(queryOpts.queryKey, (old: typeof data) => ({
+        scannerLayout: old?.scannerLayout ?? "horizontal",
+        ...old,
+        primaryColor,
+      }));
       return { previous };
     },
     onError: (_err, _vars, ctx) => {
