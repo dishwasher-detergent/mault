@@ -1,6 +1,7 @@
 import { useCameraContext } from "@/features/scanner/api/use-camera";
 import { useScannedCards } from "@/features/scanner/api/use-scanned-cards";
 import { useSerial } from "@/features/scanner/api/use-serial";
+import { IconPointFilled } from "@tabler/icons-react";
 
 type BadgeVariant = "success" | "outline" | "destructive";
 
@@ -42,10 +43,13 @@ export function StatusFooter() {
         Device
       </p>
       {cards.length > 0 && (
-        <span className="text-xs">
-          {cards.length} card{cards.length !== 1 ? "s" : ""} · $
-          {totalValue.toFixed(2)}
-        </span>
+        <div className="text-xs flex flex-row items-center gap-2">
+          <p>
+            {cards.length} card{cards.length !== 1 ? "s" : ""}
+          </p>
+          <IconPointFilled className="size-2" />
+          <p>${totalValue.toFixed(2)}</p>
+        </div>
       )}
     </div>
   );
