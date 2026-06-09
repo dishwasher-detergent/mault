@@ -8,7 +8,11 @@ import { CollectionsProvider } from "@/features/collections/api/use-collections"
 import { CameraProvider } from "@/features/scanner/api/use-camera";
 import { ScannedCardsProvider } from "@/features/scanner/api/use-scanned-cards";
 import { SerialProvider } from "@/features/scanner/api/use-serial";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { orgSettingsQueryOptions } from "@/features/companies/api/org-settings";
+import { useOrg } from "@/features/companies/api/use-organization";
+import { applyPrimaryColor, resetPrimaryColor, THEME_COLORS } from "@/lib/primary-color";
+import { QueryClient, QueryClientProvider, useQuery } from "@tanstack/react-query";
+import { useEffect } from "react";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -19,9 +23,28 @@ const queryClient = new QueryClient({
   },
 });
 
+function OrgThemeApplier() {
+  const { activeOrg } = useOrg();
+  const { data } = useQuery(orgSettingsQueryOptions(activeOrg?.id));
+
+  useEffect(() => {
+    const color = data?.primaryColor
+      ? THEME_COLORS.find((c) => c.name === data.primaryColor)
+      : null;
+    if (color) {
+      applyPrimaryColor(color);
+    } else {
+      resetPrimaryColor();
+    }
+  }, [data?.primaryColor]);
+
+  return null;
+}
+
 export function AppProviders({ children }: { children: React.ReactNode }) {
   return (
     <QueryClientProvider client={queryClient}>
+      <OrgThemeApplier />
       <CameraProvider>
         <SerialProvider>
           <BinConfigsProvider>

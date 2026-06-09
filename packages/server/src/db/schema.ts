@@ -220,6 +220,26 @@ export const notificationSettings = pgTable(
   ],
 ).enableRLS();
 
+export const orgSettings = pgTable(
+  "org_settings",
+  {
+    id: serial().primaryKey(),
+    guid: uuid("guid").defaultRandom(),
+    orgId: text("org_id").notNull(),
+    primaryColor: text("primary_color"),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+    updatedAt: timestamp("updated_at").defaultNow().notNull(),
+  },
+  (table) => [
+    unique("org_settings_org_idx").on(table.orgId),
+    crudPolicy({
+      role: authenticatedRole,
+      read: orgRls(table.orgId),
+      modify: orgRls(table.orgId),
+    }),
+  ],
+).enableRLS();
+
 // ─── Audit tables (org-scoped, no FK — audit records are permanent) ───────────
 
 export const binSetAudit = pgTable(
