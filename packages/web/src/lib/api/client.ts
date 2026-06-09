@@ -1,12 +1,11 @@
-import { neon } from "@/lib/auth/client";
+import { getAuthSession, getOrgId } from "@/lib/auth/session";
 
-const API_BASE = import.meta.env.VITE_API_URL ?? "";
+export const API_BASE = import.meta.env.VITE_API_URL ?? "";
 
 export async function getAuthHeaders(): Promise<HeadersInit> {
-  const { data } = await neon.auth.getSession();
-  const session = (data as { session?: { token?: string; activeOrganizationId?: string | null } } | null)?.session;
+  const session = await getAuthSession();
   const token = session?.token;
-  const orgId = session?.activeOrganizationId ?? localStorage.getItem("activeOrgId");
+  const orgId = getOrgId(session);
   return {
     ...(token ? { Authorization: `Bearer ${token}` } : {}),
     ...(orgId ? { "X-Org-Id": orgId } : {}),

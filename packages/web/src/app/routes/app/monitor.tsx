@@ -110,7 +110,7 @@ export default function MonitorPage() {
     return () => {
       if (timerRef.current) clearTimeout(timerRef.current);
     };
-  }, [firstCardId]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [firstCardId]);
 
   const viewerAvatars = (
     <>

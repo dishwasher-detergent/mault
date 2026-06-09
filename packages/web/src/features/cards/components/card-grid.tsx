@@ -93,7 +93,7 @@ export function CardGrid() {
       cards,
       activeCollection?.name.replace(/\s+/g, "-").toLowerCase() ?? "collection",
     );
-  }, [cards]);
+  }, [cards, activeCollection?.name]);
 
   const handleExportAndDelete = useCallback(async () => {
     if (activeCollection) {

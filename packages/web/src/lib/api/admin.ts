@@ -1,5 +1,5 @@
-import { apiDelete, apiGet, apiPost } from "@/lib/api/client";
-import { neon } from "@/lib/auth/client";
+import { API_BASE, apiDelete, apiGet, apiPost } from "@/lib/api/client";
+import { getAuthSession } from "@/lib/auth/session";
 import type { SyncState } from "@magic-vault/shared";
 
 export interface AdminCard {
@@ -16,8 +16,6 @@ export interface AdminCardsPage {
   page: number;
   limit: number;
 }
-
-const API_BASE = import.meta.env.VITE_API_URL ?? "";
 
 export async function startSync(): Promise<{
   success: boolean;
@@ -62,9 +60,7 @@ export async function revectorizeCard(
 }
 
 export async function createSyncEventSource(): Promise<EventSource> {
-  const { data } = await neon.auth.getSession();
-  const token = (data as { session?: { token?: string } } | null)?.session
-    ?.token;
-  const url = `${API_BASE}/api/admin/sync/stream${token ? `?token=${encodeURIComponent(token)}` : ""}`;
+  const session = await getAuthSession();
+  const url = `${API_BASE}/api/admin/sync/stream${session?.token ? `?token=${encodeURIComponent(session.token)}` : ""}`;
   return new EventSource(url);
 }

@@ -82,6 +82,9 @@ function scoreContour(contour: CardContour, frameArea: number): number {
 // Points are scaled back up to original coordinates before returning.
 const PROC_WIDTH = 640;
 
+// Minimum composite score (aspect ratio + area + symmetry) to accept a contour as a card.
+const CONFIDENCE_THRESHOLD = 0.35;
+
 /**
  * Detect an MTG card in an ImageData frame using OpenCV.js contour detection.
  */
@@ -177,7 +180,7 @@ export function detectCard(imageData: ImageData): DetectionResult {
           imageData.width * imageData.height,
         );
 
-        if (confidence > bestResult.confidence && confidence > 0.35) {
+        if (confidence > bestResult.confidence && confidence > CONFIDENCE_THRESHOLD) {
           bestResult = { detected: true, contour: ordered, confidence };
         }
       } finally {

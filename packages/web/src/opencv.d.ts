@@ -2,7 +2,6 @@
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 declare const cv: any;
 // Namespace merge so `cv.Mat` etc. are valid as type annotations.
-// eslint-disable-next-line @typescript-eslint/no-namespace
 declare namespace cv {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   type Mat = any;

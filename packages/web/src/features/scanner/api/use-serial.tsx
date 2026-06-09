@@ -51,19 +51,17 @@ export function SerialProvider({ children }: { children: React.ReactNode }) {
             for (const line of lines) {
               const trimmed = line.trim();
               if (!trimmed) continue;
-              console.log("[Serial] ←", trimmed);
+              console.log("[Serial] ←", trimmed); // eslint-disable-line no-console -- hardware debug trace
 
-              // Notify all subscribers with parsed JSON
               try {
                 const parsed = JSON.parse(trimmed);
                 for (const listener of listenersRef.current) {
                   listener(parsed);
                 }
               } catch {
-                // Not JSON — skip listener notification
+                console.warn("[Serial] Non-JSON message:", trimmed);
               }
 
-              // Resolve pending request/response promise
               const pending = pendingRef.current.shift();
               if (pending) {
                 pending(trimmed);
@@ -182,56 +180,60 @@ export function SerialProvider({ children }: { children: React.ReactNode }) {
     return cleanup;
   }, []);
 
-  const openPort = useCallback(async (port: SerialPort): Promise<boolean> => {
-    if (!port.readable || !port.writable) {
-      try {
-        await port.open({ baudRate: 9600 });
-      } catch {
-        toast.error("Connection failed", {
-          description: "Failed to open port. Make sure no other application is using it.",
-        });
-        return false;
+  const openPort = useCallback(
+    async (port: SerialPort): Promise<boolean> => {
+      if (!port.readable || !port.writable) {
+        try {
+          await port.open({ baudRate: 9600 });
+        } catch {
+          toast.error("Connection failed", {
+            description:
+              "Failed to open port. Make sure no other application is using it.",
+          });
+          return false;
+        }
       }
-    }
 
-    portRef.current = port;
-    writableRef.current = port.writable;
+      portRef.current = port;
+      writableRef.current = port.writable;
 
-    const reader = port.readable!.getReader();
-    readerRef.current = reader;
-    decoderRef.current = new TextDecoder();
+      const reader = port.readable!.getReader();
+      readerRef.current = reader;
+      decoderRef.current = new TextDecoder();
 
-    setIsConnected(true);
+      setIsConnected(true);
 
-    startReading(reader, () => {
-      if (portRef.current === port) {
-        console.warn("[Serial] Stream ended unexpectedly, disconnecting");
-        disconnect();
-      }
-    });
+      startReading(reader, () => {
+        if (portRef.current === port) {
+          console.warn("[Serial] Stream ended unexpectedly, disconnecting");
+          disconnect();
+        }
+      });
 
-    (async () => {
-      // Consume the Arduino's boot message before sending the test
-      await waitForLine(5000);
-      if (!portRef.current) return;
-      if (preTestHookRef.current) {
-        await preTestHookRef.current();
-      }
-      if (!portRef.current) return;
-      toast.info("Testing device…");
-      const ok = await sendTest();
-      if (!portRef.current) return;
-      if (ok) {
-        toast.success("Device ready");
-      } else {
-        toast.error("Device test failed", {
-          description: "Connected but got no response. Try reconnecting.",
-        });
-      }
-    })();
+      (async () => {
+        // Consume the Arduino's boot message before sending the test
+        await waitForLine(5000);
+        if (!portRef.current) return;
+        if (preTestHookRef.current) {
+          await preTestHookRef.current();
+        }
+        if (!portRef.current) return;
+        toast.info("Testing device…");
+        const ok = await sendTest();
+        if (!portRef.current) return;
+        if (ok) {
+          toast.success("Device ready");
+        } else {
+          toast.error("Device test failed", {
+            description: "Connected but got no response. Try reconnecting.",
+          });
+        }
+      })();
 
-    return true;
-  }, [startReading, waitForLine, sendTest, disconnect]);
+      return true;
+    },
+    [startReading, waitForLine, sendTest, disconnect],
+  );
 
   const connect = useCallback(async () => {
     if (disconnectingRef.current) {
@@ -276,9 +278,10 @@ export function SerialProvider({ children }: { children: React.ReactNode }) {
         setIsReady(true);
       }
     };
-    listenersRef.current.add(listener);
+    const listeners = listenersRef.current;
+    listeners.add(listener);
     return () => {
-      listenersRef.current.delete(listener);
+      listeners.delete(listener);
     };
   }, []);
 
@@ -292,7 +295,10 @@ export function SerialProvider({ children }: { children: React.ReactNode }) {
   const registerPreTestHook = useCallback((fn: () => Promise<void>) => {
     const previous = preTestHookRef.current;
     preTestHookRef.current = previous
-      ? async () => { await previous(); await fn(); }
+      ? async () => {
+          await previous();
+          await fn();
+        }
       : fn;
   }, []);
 
@@ -310,7 +316,9 @@ export function SerialProvider({ children }: { children: React.ReactNode }) {
 
       binBusyRef.current = true;
       try {
-        const sent = await sendCommand(JSON.stringify({ bin: binNumber }) + "\n");
+        const sent = await sendCommand(
+          JSON.stringify({ bin: binNumber }) + "\n",
+        );
         if (!sent) return null;
 
         const response = await waitForLine(15000);

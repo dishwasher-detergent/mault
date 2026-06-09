@@ -1,13 +1,11 @@
-import { neon } from "@/lib/auth/client";
-
-const API_BASE = import.meta.env.VITE_API_URL ?? "";
+import { API_BASE } from "@/lib/api/client";
+import { getAuthSession, getOrgId } from "@/lib/auth/session";
 
 async function getSessionParams(): Promise<URLSearchParams> {
-  const { data } = await neon.auth.getSession();
-  const session = (data as { session?: { token?: string; activeOrganizationId?: string | null } } | null)?.session;
+  const session = await getAuthSession();
   const params = new URLSearchParams();
   if (session?.token) params.set("token", session.token);
-  const orgId = session?.activeOrganizationId ?? localStorage.getItem("activeOrgId");
+  const orgId = getOrgId(session);
   if (orgId) params.set("orgId", orgId);
   return params;
 }

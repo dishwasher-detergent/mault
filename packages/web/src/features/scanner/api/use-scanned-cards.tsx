@@ -117,7 +117,7 @@ export function ScannedCardsProvider({
     }
     prevCollectionGuidRef.current = next;
     activeCollectionRef.current = activeCollection;
-  }, [activeCollection]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [activeCollection]);
 
   // Release lock on unmount
   useEffect(() => {

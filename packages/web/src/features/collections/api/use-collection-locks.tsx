@@ -66,7 +66,7 @@ export function CollectionLocksProvider({ children }: { children: React.ReactNod
       esRef.current?.close();
       esRef.current = null;
     };
-  }, [orgId]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [orgId]);
 
   const isLockedByOther = (guid: string) => {
     const lock = locks[guid];

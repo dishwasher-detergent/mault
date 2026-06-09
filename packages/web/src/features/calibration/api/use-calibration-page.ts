@@ -165,7 +165,7 @@ export function useCalibrationPage() {
         setActiveBin(null);
       }
     },
-    [sendBin],
+    [sendBin, setActiveBin],
   );
 
   const handleSampleRun = useCallback(async () => {
@@ -195,7 +195,7 @@ export function useCalibrationPage() {
       setActiveBin(null);
       setIsSampleRunning(false);
     }
-  }, [sendBin]);
+  }, [sendBin, setActiveBin]);
 
   const handleCenterModule = useCallback(
     (module: 1 | 2 | 3) => {
