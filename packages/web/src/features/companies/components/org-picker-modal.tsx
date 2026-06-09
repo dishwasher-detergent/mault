@@ -16,18 +16,12 @@ import { toast } from "sonner";
 import { z } from "zod";
 import { useOrg } from "../api/use-organization";
 
-const ORG_KEY = "activeOrgId";
-
 const createSchema = z.object({ name: z.string().min(1) });
 type CreateValues = z.infer<typeof createSchema>;
 
 export function OrgPickerModal() {
-  const [needsPick, setNeedsPick] = useState(
-    () => !localStorage.getItem(ORG_KEY),
-  );
   const [showCreate, setShowCreate] = useState(false);
-  const { orgs, setActiveOrg } = useOrg();
-  const { isPending } = neon.auth.useListOrganizations();
+  const { orgs, activeOrg, isLoading, setActiveOrg } = useOrg();
 
   const form = useForm<CreateValues>({
     resolver: zodResolver(createSchema),
@@ -36,7 +30,6 @@ export function OrgPickerModal() {
 
   async function handlePick(id: string) {
     await setActiveOrg(id);
-    setNeedsPick(false);
   }
 
   async function handleCreate({ name }: CreateValues) {
@@ -53,6 +46,7 @@ export function OrgPickerModal() {
       if (error) throw new Error(error.message);
       if (data) await handlePick(data.id);
       form.reset();
+      setShowCreate(false);
     } catch (e: unknown) {
       toast.error(
         e instanceof Error ? e.message : "Failed to create organization.",
@@ -61,12 +55,14 @@ export function OrgPickerModal() {
   }
 
   return (
-    <Dialog open={needsPick && !isPending}>
+    <Dialog open={!isLoading && !activeOrg}>
       <DialogContent showCloseButton={false}>
         <DialogHeader>
           <DialogTitle>Choose an organization</DialogTitle>
           <DialogDescription>
-            Select or create an organization to continue.
+            {orgs.length === 0
+              ? "Create an organization to get started."
+              : "Select or create an organization to continue."}
           </DialogDescription>
         </DialogHeader>
 

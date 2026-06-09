@@ -6,6 +6,12 @@ import { DiscordWebhookSettings } from "@/features/notifications/components/disc
 export default function SettingsPage() {
   return (
     <div className="flex flex-col p-4 md:p-6 max-w-4xl mx-auto w-full h-full overflow-y-auto gap-4">
+      <div>
+        <h1 className="text-lg font-semibold font-heading">Settings</h1>
+        <p className="text-xs text-muted-foreground">
+          Manage your organization, appearance, and notifications
+        </p>
+      </div>
       <div className="rounded-lg border p-4 flex flex-col gap-4">
         <h2 className="text-base font-semibold">Organizations</h2>
         <OrgSettings />

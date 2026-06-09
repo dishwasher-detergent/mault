@@ -7,6 +7,24 @@ import {
   IconRefresh,
 } from "@tabler/icons-react";
 
+function StatusPill({
+  children,
+  variant = "default",
+}: {
+  children: React.ReactNode;
+  variant?: "default" | "warning" | "error" | "loading";
+}) {
+  const base =
+    "absolute bottom-1 left-1 right-1 rounded-lg backdrop-blur-3xl border text-xs px-2 py-1 flex flex-row gap-1.5 items-center";
+  const variants = {
+    default: "bg-background/50 border-border/60",
+    warning: "bg-amber-500/10 border-amber-500/30 text-amber-600 dark:text-amber-400",
+    error: "bg-red-500/10 border-red-500/30 text-red-600 dark:text-red-400",
+    loading: "bg-background/50 border-border/60",
+  };
+  return <div className={`${base} ${variants[variant]}`}>{children}</div>;
+}
+
 export function ScannerOverlay({
   status,
   errorMessage,
@@ -29,66 +47,68 @@ export function ScannerOverlay({
 
   if (isConnected && isReady && !hasCatchAll) {
     return (
-      <div className="absolute bottom-1 left-1 right-1 rounded-lg bg-background/50 backdrop-blur-3xl border text-xs px-2 py-1 flex flex-row gap-1 items-center">
-        <IconAlertTriangle className="size-4 shrink-0" />
-        <span>Configure a catch-all bin for sorting.</span>
-      </div>
+      <StatusPill variant="warning">
+        <IconAlertTriangle className="size-3.5 shrink-0" />
+        <span>No catch-all bin configured — unmatched cards won't be sorted.</span>
+      </StatusPill>
     );
   }
 
   switch (status) {
     case "initializing":
       return (
-        <div className="absolute bottom-1 left-1 right-1 rounded-lg bg-background/50 backdrop-blur-3xl border text-xs px-2 py-1 flex flex-row gap-1 items-center">
-          <IconLoader2 className="size-4 animate-spin" />
-          <span>Initializing Scanner...</span>
-        </div>
+        <StatusPill variant="loading">
+          <IconLoader2 className="size-3.5 animate-spin shrink-0" />
+          <span>Initializing scanner…</span>
+        </StatusPill>
       );
     case "requesting-camera":
       return (
-        <div className="absolute bottom-1 left-1 right-1 rounded-lg bg-background/50 backdrop-blur-3xl border text-xs px-2 py-1 flex flex-row gap-1 items-center">
-          <IconCamera className="size-4" />
-          <span>Requesting camera access...</span>
-        </div>
+        <StatusPill variant="loading">
+          <IconCamera className="size-3.5 shrink-0" />
+          <span>Requesting camera access…</span>
+        </StatusPill>
       );
     case "error":
       return (
-        <div className="absolute bottom-1 left-1 right-1 rounded-lg bg-background/50 backdrop-blur-3xl border text-xs px-2 py-1 flex flex-row gap-1 items-start justify-between">
-          <span className="text-xs text-red-400">{errorMessage}</span>
+        <StatusPill variant="error">
+          <span className="flex-1">{errorMessage}</span>
           <Button
             variant="outline"
             size="icon"
             onClick={onRetryError}
-            className="text-white border-white/30"
+            className="size-6 shrink-0"
           >
-            <IconRefresh />
+            <IconRefresh className="size-3" />
           </Button>
-        </div>
+        </StatusPill>
       );
     case "searching":
       return (
-        <div className="absolute bottom-1 left-1 right-1 rounded-lg bg-background/50 backdrop-blur-3xl border text-xs px-2 py-1 flex flex-row gap-1 items-center justify-between">
-          <span>Identifying card...</span>
-          <IconLoader2 className="size-4 animate-spin" />
-        </div>
+        <StatusPill variant="loading">
+          <IconLoader2 className="size-3.5 animate-spin shrink-0" />
+          <span>Identifying card…</span>
+        </StatusPill>
       );
     case "paused":
       return (
-        <div className="absolute bottom-1 left-1 right-1 rounded-lg bg-background/50 backdrop-blur-3xl border text-xs px-2 py-1 flex flex-row gap-1 items-center">
-          <span>Scanner Paused</span>
-        </div>
+        <StatusPill>
+          <span className="text-muted-foreground">Scanner paused — press Resume to continue.</span>
+        </StatusPill>
       );
     case "duplicate":
       return (
-        <div className="absolute bottom-1 left-1 right-1 rounded-lg bg-background/50 backdrop-blur-3xl border text-xs px-2 py-1 flex flex-row gap-1 items-center">
-          <span>Duplicate card detected</span>
-        </div>
+        <StatusPill variant="warning">
+          <IconAlertTriangle className="size-3.5 shrink-0" />
+          <span>Same card scanned — use Add Again to add it anyway.</span>
+        </StatusPill>
       );
     case "no-match":
       return (
-        <div className="absolute bottom-1 left-1 right-1 rounded-lg bg-background/50 backdrop-blur-3xl border text-xs px-2 py-1 flex flex-row gap-1 items-center">
-          <span>Card not found</span>
-        </div>
+        <StatusPill variant="warning">
+          <IconAlertTriangle className="size-3.5 shrink-0" />
+          <span>Card not recognized — try Scan Again or adjust lighting.</span>
+        </StatusPill>
       );
     default:
       return null;

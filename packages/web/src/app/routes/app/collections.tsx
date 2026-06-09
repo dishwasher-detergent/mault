@@ -3,6 +3,11 @@ import { Field, FieldError, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { DynamicDialog } from "@/components/ui/responsive-dialog";
 import { Skeleton } from "@/components/ui/skeleton";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { collectionsQueryOptions } from "@/features/collections/api/collections";
 import { useCollections } from "@/features/collections/api/use-collections";
 import { useOrg } from "@/features/companies/api/use-organization";
@@ -37,7 +42,10 @@ export default function CollectionsPage() {
     deleteCollection,
   } = useCollections();
   const { activeOrg } = useOrg();
-  const { isLoading } = useQuery({ ...collectionsQueryOptions, enabled: !!activeOrg });
+  const { isLoading } = useQuery({
+    ...collectionsQueryOptions,
+    enabled: !!activeOrg,
+  });
 
   const [createOpen, setCreateOpen] = useState(false);
   const [renameTarget, setRenameTarget] = useState<{
@@ -201,32 +209,17 @@ export default function CollectionsPage() {
               key={collection.guid}
               className="flex items-center gap-3 px-4 py-3"
             >
-              <button
-                type="button"
-                onClick={() => !isActive && activateCollection(collection.guid)}
-                disabled={isActivating || isActive}
-                className="size-8 rounded-md border flex items-center justify-center shrink-0 transition-colors disabled:cursor-default"
-                style={
-                  isActive
-                    ? {
-                        background: "var(--primary)",
-                        borderColor: "var(--primary)",
-                      }
-                    : {}
-                }
-                title={isActive ? "Active collection" : "Set as active"}
-              >
-                {isActive ? (
-                  <IconCheck className="size-4 text-primary-foreground" />
-                ) : (
-                  <span className="size-2 rounded-full bg-muted-foreground/30" />
-                )}
-              </button>
-
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium truncate">
-                  {collection.name}
-                </p>
+                <div className="flex items-center gap-2">
+                  <p className="text-sm font-medium truncate">
+                    {collection.name}
+                  </p>
+                  {isActive && (
+                    <span className="shrink-0 text-[10px] font-medium px-1.5 py-0.5 rounded-full bg-primary/10 text-primary border border-primary/20">
+                      Active
+                    </span>
+                  )}
+                </div>
                 <p className="text-xs text-muted-foreground">
                   {collection.cardCount}{" "}
                   {collection.cardCount === 1 ? "card" : "cards"} ·{" "}
@@ -235,42 +228,80 @@ export default function CollectionsPage() {
               </div>
 
               <div className="flex items-center gap-1 shrink-0">
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  render={
-                    <Link to={`/app/collections/${collection.guid}/bins`}>
-                      <IconLayoutGrid />
-                    </Link>
-                  }
-                ></Button>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  disabled={isMutating}
-                  onClick={() => {
-                    renameForm.reset({ name: collection.name });
-                    setRenameTarget({
-                      guid: collection.guid,
-                      name: collection.name,
-                    });
-                  }}
-                >
-                  <IconEdit />
-                </Button>
-                <Button
-                  variant="destructive"
-                  size="icon"
-                  disabled={isMutating}
-                  onClick={() =>
-                    setDeleteTarget({
-                      guid: collection.guid,
-                      name: collection.name,
-                    })
-                  }
-                >
-                  <IconTrash />
-                </Button>
+                {!isActive && (
+                  <Tooltip>
+                    <TooltipTrigger
+                      render={
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          disabled={isActivating}
+                          onClick={() => activateCollection(collection.guid)}
+                        >
+                          <IconCheck className="size-4 text-muted-foreground" />
+                        </Button>
+                      }
+                    ></TooltipTrigger>
+                    <TooltipContent>Set as active collection</TooltipContent>
+                  </Tooltip>
+                )}
+                <Tooltip>
+                  <TooltipTrigger
+                    render={
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        render={
+                          <Link to={`/app/collections/${collection.guid}/bins`}>
+                            <IconLayoutGrid />
+                          </Link>
+                        }
+                      />
+                    }
+                  ></TooltipTrigger>
+                  <TooltipContent>Edit sorting rules</TooltipContent>
+                </Tooltip>
+                <Tooltip>
+                  <TooltipTrigger
+                    render={
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        disabled={isMutating}
+                        onClick={() => {
+                          renameForm.reset({ name: collection.name });
+                          setRenameTarget({
+                            guid: collection.guid,
+                            name: collection.name,
+                          });
+                        }}
+                      >
+                        <IconEdit />
+                      </Button>
+                    }
+                  ></TooltipTrigger>
+                  <TooltipContent>Rename</TooltipContent>
+                </Tooltip>
+                <Tooltip>
+                  <TooltipTrigger
+                    render={
+                      <Button
+                        variant="destructive"
+                        size="icon"
+                        disabled={isMutating}
+                        onClick={() =>
+                          setDeleteTarget({
+                            guid: collection.guid,
+                            name: collection.name,
+                          })
+                        }
+                      >
+                        <IconTrash />
+                      </Button>
+                    }
+                  ></TooltipTrigger>
+                  <TooltipContent>Delete collection</TooltipContent>
+                </Tooltip>
               </div>
             </div>
           );
