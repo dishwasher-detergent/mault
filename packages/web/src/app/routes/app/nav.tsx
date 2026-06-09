@@ -8,6 +8,7 @@ import {
 } from "@/components/ui/tooltip";
 import { getLiveSessionCounts } from "@/features/collections/api/collections";
 import { useCollectionLocks } from "@/features/collections/api/use-collection-locks";
+import { useOrg } from "@/features/companies/api/use-organization";
 import { OrgSwitcher } from "@/features/companies/components/org-switcher";
 import { useIsMobile } from "@/hooks/use-is-mobile";
 import { useRole } from "@/hooks/use-role";
@@ -88,12 +89,14 @@ function BottomNavItem({ to, icon, label, end, badge }: NavItemDef) {
 export function AppNav() {
   const { isAdmin } = useRole();
   const isMobile = useIsMobile();
+  const { activeOrg } = useOrg();
 
   const { locks, currentUserId } = useCollectionLocks();
   const { data: liveCounts } = useQuery({
     queryKey: ["live-sessions"],
     queryFn: () => getLiveSessionCounts().then((r) => r.data ?? {}),
     refetchInterval: 10000,
+    enabled: !!activeOrg,
   });
   const hasLiveSessions = !!(
     currentUserId &&

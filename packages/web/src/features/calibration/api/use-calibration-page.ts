@@ -1,4 +1,5 @@
 import { modulesQueryOptions } from "@/features/calibration/api/module-configs";
+import { useOrg } from "@/features/companies/api/use-organization";
 import { useFeederConfig } from "@/features/calibration/api/use-feeder-config";
 import { useModuleConfigs } from "@/features/calibration/api/use-module-configs";
 import { SERVOS } from "@/features/calibration/constants";
@@ -18,7 +19,8 @@ export function useCalibrationPage() {
     useSerial();
   const { configs, saveConfig, moveServo } = useModuleConfigs();
   const { feederConfig, saveConfig: saveFeeder, previewSpeed } = useFeederConfig();
-  const { isLoading } = useQuery(modulesQueryOptions);
+  const { activeOrg } = useOrg();
+  const { isLoading } = useQuery({ ...modulesQueryOptions, enabled: !!activeOrg });
 
   const [active, setActive] = useState<ActivePositions>({});
   const activeRef = useRef(active);

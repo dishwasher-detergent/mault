@@ -6,6 +6,7 @@ import {
   renameCollection as renameCollectionFn,
 } from "@/features/collections/api/collections";
 import { createSet as createSetFn } from "@/features/bins/api/sort-bins";
+import { useOrg } from "@/features/companies/api/use-organization";
 import { createDefaultColorBins, type Collection } from "@magic-vault/shared";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
@@ -36,7 +37,8 @@ const CollectionsContext = createContext<CollectionsContextValue | null>(null);
 
 export function CollectionsProvider({ children }: { children: React.ReactNode }) {
   const queryClient = useQueryClient();
-  const { data: collections = [], isLoading } = useQuery(collectionsQueryOptions);
+  const { activeOrg } = useOrg();
+  const { data: collections = [], isLoading } = useQuery({ ...collectionsQueryOptions, enabled: !!activeOrg });
 
   const [activeGuid, setActiveGuidState] = useState<string | null>(
     () => localStorage.getItem(ACTIVE_KEY),

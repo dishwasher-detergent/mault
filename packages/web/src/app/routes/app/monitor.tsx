@@ -14,15 +14,10 @@ import { SessionErrorsPanel } from "@/features/scanner/components/session-errors
 import { SessionStatsPanel } from "@/features/scanner/components/session-stats-panel";
 import { computeStats } from "@/features/scanner/lib/compute-stats";
 import { useIsMobile } from "@/hooks/use-is-mobile";
-import {
-  IconArrowLeft,
-  IconCards,
-  IconLoader2,
-  IconWifiOff,
-} from "@tabler/icons-react";
+import { IconCards, IconLoader2, IconWifiOff } from "@tabler/icons-react";
 import { AnimatePresence } from "framer-motion";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Link, useParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 
 function CardGrid({
   filteredAndSorted,
@@ -141,20 +136,9 @@ export default function MonitorPage() {
   if (isMobile) {
     return (
       <div className="flex flex-col flex-1 min-h-0 overflow-hidden">
-        <div className="flex items-center gap-2 px-3 py-3 border-b bg-sidebar">
-          <Link
-            to="/app/monitor"
-            className="text-muted-foreground hover:text-foreground transition-colors shrink-0"
-          >
-            <IconArrowLeft size={16} />
-          </Link>
-          <h1 className="text-sm font-semibold truncate flex-1">
-            {collection?.name ?? "Session Monitor"}
-          </h1>
-          {(isScanning || otherViewers.length > 0) && (
-            <div className="flex items-center gap-1">{viewerAvatars}</div>
-          )}
-        </div>
+        {(isScanning || otherViewers.length > 0) && (
+          <div className="flex items-center gap-1">{viewerAvatars}</div>
+        )}
 
         <div className="flex-1 overflow-y-auto p-3 flex flex-col gap-3">
           <SessionStatsPanel stats={stats} totalCards={cards.length} />
@@ -201,17 +185,6 @@ export default function MonitorPage() {
   return (
     <div className="grid grid-cols-12 flex-1 min-h-0 overflow-hidden">
       <aside className="col-span-5 md:col-span-5 lg:col-span-4 xl:col-span-3 2xl:col-span-2 overflow-hidden flex flex-col h-full p-2 border-r gap-2 bg-sidebar">
-        <div className="flex items-center gap-2 px-1 pt-1 min-w-0">
-          <Link
-            to="/app/monitor"
-            className="text-muted-foreground hover:text-foreground transition-colors shrink-0"
-          >
-            <IconArrowLeft size={16} />
-          </Link>
-          <h1 className="text-sm font-semibold truncate">
-            {collection?.name ?? "Session Monitor"}
-          </h1>
-        </div>
         {(isScanning || otherViewers.length > 0) && (
           <div className="flex items-center gap-1 px-1 flex-wrap">
             {viewerAvatars}

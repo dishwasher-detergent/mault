@@ -16,6 +16,7 @@ import {
   saveBinConfig as saveBinConfigAction,
   saveSet as saveSetAction,
 } from "@/features/bins/api/sort-bins";
+import { useOrg } from "@/features/companies/api/use-organization";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   createContext,
@@ -51,9 +52,10 @@ export function BinConfigsProvider({
   children: React.ReactNode;
 }) {
   const queryClient = useQueryClient();
+  const { activeOrg } = useOrg();
   const [selectedBin, setSelectedBin] = useState(1);
 
-  const { data: sets = [] } = useQuery(binsQueryOptions);
+  const { data: sets = [] } = useQuery({ ...binsQueryOptions, enabled: !!activeOrg });
 
   const selectedSet = useMemo(
     () => sets.find((s) => s.isActive) ?? sets[0],

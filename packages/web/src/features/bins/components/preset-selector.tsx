@@ -25,6 +25,7 @@ import {
 } from "@/features/bins/api/sort-bins";
 import { useBinConfigs } from "@/features/bins/api/use-bin-configs";
 import { useCollections } from "@/features/collections/api/use-collections";
+import { useOrg } from "@/features/companies/api/use-organization";
 import type { PresetSelectorProps } from "@/features/bins/types";
 import {
   createSetSchema,
@@ -88,8 +89,9 @@ export function PresetSelector({ readOnly }: PresetSelectorProps) {
     isPresetMutating,
   } = useBinConfigs();
   const { activeCollection } = useCollections();
+  const { activeOrg } = useOrg();
   const queryClient = useQueryClient();
-  const { isLoading } = useQuery(binsQueryOptions);
+  const { isLoading } = useQuery({ ...binsQueryOptions, enabled: !!activeOrg });
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
   const [renameDialogOpen, setRenameDialogOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);

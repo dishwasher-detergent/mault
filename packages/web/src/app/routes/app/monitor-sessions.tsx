@@ -8,6 +8,7 @@ import {
 } from "@/features/collections/api/collections";
 import type { ScanLockInfo } from "@/features/collections/api/use-collection-locks";
 import { useCollectionLocks } from "@/features/collections/api/use-collection-locks";
+import { useOrg } from "@/features/companies/api/use-organization";
 import { IconLoader2, IconLockOpen, IconWifi } from "@tabler/icons-react";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
@@ -91,14 +92,17 @@ function ReleaseButton({ guid }: { guid: string }) {
 }
 
 export default function MonitorSessionsPage() {
+  const { activeOrg } = useOrg();
   const { data: collections, isLoading } = useQuery({
     ...collectionsQueryOptions,
     refetchInterval: 8000,
+    enabled: !!activeOrg,
   });
   const { data: allViewers } = useQuery({
     queryKey: ["session-viewers-all"],
     queryFn: getAllSessionViewers,
     refetchInterval: 5000,
+    enabled: !!activeOrg,
   });
   const { locks, currentUserId } = useCollectionLocks();
   const navigate = useNavigate();

@@ -2,6 +2,7 @@ import {
   feederQueryOptions,
   saveFeederConfig,
 } from "@/features/calibration/api/feeder-config";
+import { useOrg } from "@/features/companies/api/use-organization";
 import { useSerial } from "@/features/scanner/api/use-serial";
 import {
   DEFAULT_FEEDER_CALIBRATION,
@@ -30,10 +31,11 @@ export function FeederConfigProvider({
   children: React.ReactNode;
 }) {
   const queryClient = useQueryClient();
+  const { activeOrg } = useOrg();
   const { sendCommand, receiveResponse, registerPreTestHook } = useSerial();
 
   const { data: feederConfig = { ...DEFAULT_FEEDER_CALIBRATION } } =
-    useQuery(feederQueryOptions);
+    useQuery({ ...feederQueryOptions, enabled: !!activeOrg });
 
   useEffect(() => {
     registerPreTestHook(async () => {

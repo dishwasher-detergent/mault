@@ -17,6 +17,7 @@ import {
   revectorizeCard,
   startSync,
 } from "@/lib/api/admin";
+import { useOrg } from "@/features/companies/api/use-organization";
 import type { SyncState } from "@magic-vault/shared";
 import {
   IconChevronLeft,
@@ -29,6 +30,7 @@ import { toast } from "sonner";
 import { DEFAULT_SYNC_STATE, STATUS_COLORS } from "./admin.constants";
 
 export default function AdminPage() {
+  const { activeOrg } = useOrg();
   const [syncState, setSyncState] = useState<SyncState>(DEFAULT_SYNC_STATE);
   const [dumpOpen, setDumpOpen] = useState(false);
   const logRef = useRef<HTMLDivElement>(null);
@@ -107,6 +109,7 @@ export default function AdminPage() {
     queryKey: ["admin", "cards", cardPage, cardSearch],
     queryFn: () => listCards(cardPage, cardSearch).then((r) => r.data),
     staleTime: 30_000,
+    enabled: !!activeOrg,
   });
 
   const totalPages = cardsQuery.data

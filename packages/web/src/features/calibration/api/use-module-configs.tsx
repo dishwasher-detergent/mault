@@ -3,6 +3,7 @@ import {
   saveModuleConfig,
 } from "@/features/calibration/api/module-configs";
 import type { ModuleConfigsContextValue } from "@/features/calibration/types";
+import { useOrg } from "@/features/companies/api/use-organization";
 import { useSerial } from "@/features/scanner/api/use-serial";
 import {
   DEFAULT_CALIBRATION,
@@ -30,9 +31,10 @@ export function ModuleConfigsProvider({
   children: React.ReactNode;
 }) {
   const queryClient = useQueryClient();
+  const { activeOrg } = useOrg();
   const { sendCommand, receiveResponse, registerPreTestHook } = useSerial();
 
-  const { data: configs = defaultConfigs() } = useQuery(modulesQueryOptions);
+  const { data: configs = defaultConfigs() } = useQuery({ ...modulesQueryOptions, enabled: !!activeOrg });
 
   useEffect(() => {
     registerPreTestHook(async () => {

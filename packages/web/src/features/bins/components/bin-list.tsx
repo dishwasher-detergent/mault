@@ -2,12 +2,14 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Skeleton } from "@/components/ui/skeleton";
 import { binsQueryOptions } from "@/features/bins/api/sort-bins";
 import { useBinConfigs } from "@/features/bins/api/use-bin-configs";
+import { useOrg } from "@/features/companies/api/use-organization";
 import { BinCard } from "@/features/bins/components/bin-card";
 import { useQuery } from "@tanstack/react-query";
 
 export function BinList() {
   const { configs, selectedBin, setSelectedBin, hasCatchAll } = useBinConfigs();
-  const { isLoading } = useQuery(binsQueryOptions);
+  const { activeOrg } = useOrg();
+  const { isLoading } = useQuery({ ...binsQueryOptions, enabled: !!activeOrg });
 
   if (isLoading) {
     return (

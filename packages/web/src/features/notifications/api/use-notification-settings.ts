@@ -1,3 +1,4 @@
+import { useOrg } from "@/features/companies/api/use-organization";
 import type { NotificationSettings } from "@magic-vault/shared";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
@@ -10,8 +11,9 @@ import {
 
 export function useNotificationSettings() {
   const queryClient = useQueryClient();
+  const { activeOrg } = useOrg();
 
-  const { data, isLoading } = useQuery(notificationSettingsQueryOptions);
+  const { data, isLoading } = useQuery({ ...notificationSettingsQueryOptions, enabled: !!activeOrg });
   const settings = data?.data ?? { discordWebhookUrl: null };
 
   const saveMutation = useMutation({

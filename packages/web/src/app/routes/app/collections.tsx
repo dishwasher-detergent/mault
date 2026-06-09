@@ -5,6 +5,7 @@ import { DynamicDialog } from "@/components/ui/responsive-dialog";
 import { Skeleton } from "@/components/ui/skeleton";
 import { collectionsQueryOptions } from "@/features/collections/api/collections";
 import { useCollections } from "@/features/collections/api/use-collections";
+import { useOrg } from "@/features/companies/api/use-organization";
 import {
   createCollectionSchema,
   type CreateCollectionFormValues,
@@ -35,7 +36,8 @@ export default function CollectionsPage() {
     activateCollection,
     deleteCollection,
   } = useCollections();
-  const { isLoading } = useQuery(collectionsQueryOptions);
+  const { activeOrg } = useOrg();
+  const { isLoading } = useQuery({ ...collectionsQueryOptions, enabled: !!activeOrg });
 
   const [createOpen, setCreateOpen] = useState(false);
   const [renameTarget, setRenameTarget] = useState<{

@@ -10,6 +10,7 @@ import {
 import { Field, FieldError, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { useCollections } from "@/features/collections/api/use-collections";
+import { useOrg } from "@/features/companies/api/use-organization";
 import {
   createCollectionSchema,
   type CreateCollectionFormValues,
@@ -22,6 +23,7 @@ import { Controller, useForm } from "react-hook-form";
 export function RequireCollectionDialog() {
   const { collections, isLoading, isMutating, createCollection } =
     useCollections();
+  const { activeOrg } = useOrg();
 
   const form = useForm<CreateCollectionFormValues>({
     resolver: zodResolver(createCollectionSchema),
@@ -37,7 +39,7 @@ export function RequireCollectionDialog() {
     [createCollection, form],
   );
 
-  const open = !isLoading && collections.length === 0;
+  const open = !!activeOrg && !isLoading && collections.length === 0;
 
   return (
     <Dialog open={open}>

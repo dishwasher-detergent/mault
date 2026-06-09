@@ -19,6 +19,7 @@ import {
 import { collectionsQueryOptions, releaseScanLock } from "@/features/collections/api/collections";
 import { useCollectionLocks } from "@/features/collections/api/use-collection-locks";
 import { useCollections } from "@/features/collections/api/use-collections";
+import { useOrg } from "@/features/companies/api/use-organization";
 import { toast } from "sonner";
 import {
   createCollectionSchema,
@@ -40,7 +41,8 @@ export function CollectionSwitcher() {
     createCollection,
     activateCollection,
   } = useCollections();
-  const { isLoading } = useQuery(collectionsQueryOptions);
+  const { activeOrg } = useOrg();
+  const { isLoading } = useQuery({ ...collectionsQueryOptions, enabled: !!activeOrg });
   const { locks, currentUserId, isLockedByOther } = useCollectionLocks();
   const [createOpen, setCreateOpen] = useState(false);
   const [releasing, setReleasing] = useState(false);
