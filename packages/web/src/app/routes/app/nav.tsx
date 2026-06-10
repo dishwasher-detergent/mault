@@ -26,7 +26,7 @@ import {
   IconWifi,
 } from "@tabler/icons-react";
 import { useQuery } from "@tanstack/react-query";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { NavLink } from "react-router-dom";
 
 const EXPANDED_KEY = "sidebarExpanded";
@@ -163,6 +163,22 @@ export function AppNav() {
     });
   }, []);
 
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key !== "[" || e.metaKey || e.ctrlKey || e.altKey) return;
+      const target = e.target as HTMLElement;
+      if (
+        target.tagName === "INPUT" ||
+        target.tagName === "TEXTAREA" ||
+        target.isContentEditable
+      )
+        return;
+      toggle();
+    };
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, [toggle]);
+
   const { data: liveCounts } = useQuery({
     queryKey: ["live-sessions"],
     queryFn: () => getLiveSessionCounts().then((r) => r.data ?? {}),
@@ -261,7 +277,7 @@ export function AppNav() {
             expanded ? "w-full h-8" : "w-full aspect-square",
           )}
         >
-          {expanded ? "MAULT" : "M"}
+          {expanded ? "Magic Vault" : "MV"}
         </TooltipTrigger>
         <TooltipContent side="right">v{__APP_VERSION__}</TooltipContent>
       </Tooltip>
@@ -321,7 +337,7 @@ export function AppNav() {
           buttonVariants({ variant: "ghost", size: "icon" }),
           expanded ? "self-end" : "",
         )}
-        title={expanded ? "Collapse sidebar" : "Expand sidebar"}
+        title={expanded ? "Collapse sidebar ([)" : "Expand sidebar ([)"}
       >
         {expanded ? (
           <IconLayoutSidebarLeftCollapse size={16} />

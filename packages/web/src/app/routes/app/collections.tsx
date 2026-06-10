@@ -17,8 +17,8 @@ import {
 } from "@/schemas/collections.schema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
-  IconCheck,
   IconEdit,
+  IconPlayerPlay,
   IconFolders,
   IconLayoutGrid,
   IconLoader2,
@@ -207,7 +207,7 @@ export default function CollectionsPage() {
           return (
             <div
               key={collection.guid}
-              className="flex items-center gap-3 px-4 py-3"
+              className="group flex items-center gap-3 px-4 py-3"
             >
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2">
@@ -227,7 +227,7 @@ export default function CollectionsPage() {
                 </p>
               </div>
 
-              <div className="flex items-center gap-1 shrink-0">
+              <div className="flex items-center gap-1 shrink-0 opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition-opacity">
                 {!isActive && (
                   <Tooltip>
                     <TooltipTrigger
@@ -238,7 +238,7 @@ export default function CollectionsPage() {
                           disabled={isActivating}
                           onClick={() => activateCollection(collection.guid)}
                         >
-                          <IconCheck className="size-4 text-muted-foreground" />
+                          <IconPlayerPlay className="size-4 text-muted-foreground" />
                         </Button>
                       }
                     ></TooltipTrigger>
