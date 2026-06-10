@@ -22,10 +22,9 @@ export function useNotificationSettings() {
     onMutate: async (discordWebhookUrl) => {
       await queryClient.cancelQueries({ queryKey: queryOpts.queryKey });
       const previous = queryClient.getQueryData(queryOpts.queryKey);
-      queryClient.setQueryData(queryOpts.queryKey, (old: typeof data) => ({
+      queryClient.setQueryData(queryOpts.queryKey, (old: typeof data): typeof data => ({
         primaryColor: old?.primaryColor ?? null,
         scannerLayout: old?.scannerLayout ?? "horizontal",
-        ...old,
         discordWebhookUrl,
       }));
       return { previous };
