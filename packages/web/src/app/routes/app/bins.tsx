@@ -48,7 +48,7 @@ export default function BinsPage() {
 
   return (
     <div className="grid grid-cols-12 flex-1 min-h-0 overflow-hidden">
-      <section className="col-span-4 lg:col-span-3 overflow-hidden flex flex-col h-full border-r p-2 gap-2 bg-sidebar">
+      <section className="col-span-4 lg:col-span-3 overflow-hidden flex flex-col h-full border-r p-2 gap-2 bg-sidebar/70">
         <PresetSelector />
         <BinList />
       </section>

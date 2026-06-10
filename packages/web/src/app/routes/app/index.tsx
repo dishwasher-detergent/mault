@@ -63,7 +63,7 @@ export default function App() {
   if (isVertical) {
     return (
       <div className="flex flex-col flex-1 min-h-0 overflow-hidden">
-        <section className="flex items-stretch gap-2 p-2 border-b bg-sidebar shrink-0 h-1/2">
+        <section className="flex items-stretch gap-2 p-2 border-b bg-sidebar/70 shrink-0 h-1/2">
           <CardScanner className="flex-1 min-w-0" compact />
           <div className="flex flex-col gap-2 w-52 shrink-0 overflow-y-auto">
             <CollectionSwitcher />
@@ -81,7 +81,7 @@ export default function App() {
 
   return (
     <div className="grid grid-cols-12 flex-1 min-h-0 overflow-hidden">
-      <section className="col-span-4 lg:col-span-4 xl:col-span-3 2xl:col-span-2 overflow-hidden flex flex-col h-full p-2 border-r gap-2 bg-sidebar">
+      <section className="col-span-4 lg:col-span-4 xl:col-span-3 2xl:col-span-2 overflow-hidden flex flex-col h-full p-2 border-r gap-2 bg-sidebar/70">
         <CollectionSwitcher />
         <PresetSelector readOnly />
         <CardScanner className="flex-none" />

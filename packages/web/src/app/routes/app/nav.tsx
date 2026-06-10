@@ -265,7 +265,7 @@ export function AppNav() {
   return (
     <aside
       className={cn(
-        "py-2 flex-none flex flex-col bg-secondary h-full border-r gap-2 overflow-hidden transition-[width] duration-200",
+        "py-2 flex-none flex flex-col bg-secondary/70 dark:bg-secondary/50 h-full border-r gap-2 overflow-hidden transition-[width] duration-200",
         expanded ? "w-55 items-stretch" : "w-12 items-center",
       )}
     >

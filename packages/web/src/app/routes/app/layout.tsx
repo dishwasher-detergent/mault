@@ -22,9 +22,13 @@ export default function AppLayout() {
         </div>
       ) : (
         <div className="h-dvh w-dvw overflow-hidden p-2 pb-6 bg-muted dark:bg-black relative text-muted-foreground">
-          <div className="flex flex-row bg-background border rounded-lg size-full overflow-hidden">
+          <div
+            aria-hidden
+            className="pointer-events-none absolute top-8 left-8 -translate-x-1/2 -translate-y-1/2 size-60 rounded-full bg-primary/50 blur-[60px]"
+          />
+          <div className="flex flex-row border rounded-lg size-full overflow-hidden relative">
             <AppNav />
-            <main className="flex-1 min-w-0 overflow-hidden flex flex-col">
+            <main className="flex-1 min-w-0 overflow-hidden flex flex-col bg-background/70 dark:bg-background/60">
               <Outlet />
             </main>
           </div>
