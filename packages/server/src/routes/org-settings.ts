@@ -1,3 +1,4 @@
+import { eq } from "drizzle-orm";
 import { Hono } from "hono";
 import { authQuery } from "../db";
 import { orgSettings } from "../db/schema";
@@ -6,15 +7,19 @@ import { requireAuth, requireOrg, type AppEnv } from "../middleware/auth";
 const router = new Hono<AppEnv>();
 
 router.get("/", requireAuth, requireOrg, async (c) => {
+  const orgId = c.get("orgId");
   try {
     const result = await authQuery(c.get("jwtClaims"), async (tx) => {
-      const row = await tx.query.orgSettings.findFirst();
+      const row = await tx.query.orgSettings.findFirst({
+        where: eq(orgSettings.orgId, orgId),
+      });
       return {
         success: true,
         message: "Loaded.",
         data: {
           primaryColor: row?.primaryColor ?? null,
           scannerLayout: (row?.scannerLayout as "horizontal" | "vertical") ?? "horizontal",
+          discordWebhookUrl: row?.discordWebhookUrl ?? null,
         },
       };
     });
@@ -27,13 +32,16 @@ router.get("/", requireAuth, requireOrg, async (c) => {
 
 router.put("/", requireAuth, requireOrg, async (c) => {
   const orgId = c.get("orgId");
-  const body = await c.req.json<{ primaryColor?: string | null; scannerLayout?: string | null }>();
+  const body = await c.req.json<{ primaryColor?: string | null; scannerLayout?: string | null; discordWebhookUrl?: string | null }>();
   try {
     const result = await authQuery(c.get("jwtClaims"), async (tx) => {
-      const existing = await tx.query.orgSettings.findFirst();
+      const existing = await tx.query.orgSettings.findFirst({
+        where: eq(orgSettings.orgId, orgId),
+      });
       const merged = {
         primaryColor: "primaryColor" in body ? body.primaryColor ?? null : (existing?.primaryColor ?? null),
         scannerLayout: "scannerLayout" in body ? body.scannerLayout ?? null : (existing?.scannerLayout ?? null),
+        discordWebhookUrl: "discordWebhookUrl" in body ? body.discordWebhookUrl ?? null : (existing?.discordWebhookUrl ?? null),
       };
       await tx
         .insert(orgSettings)
@@ -48,6 +56,7 @@ router.put("/", requireAuth, requireOrg, async (c) => {
         data: {
           primaryColor: merged.primaryColor,
           scannerLayout: (merged.scannerLayout as "horizontal" | "vertical") ?? "horizontal",
+          discordWebhookUrl: merged.discordWebhookUrl,
         },
       };
     });

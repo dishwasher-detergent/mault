@@ -11,5 +11,5 @@ export async function getAuthSession(): Promise<AuthSession | null> {
 }
 
 export function getOrgId(session: AuthSession | null): string | null {
-  return session?.activeOrganizationId ?? localStorage.getItem("activeOrgId");
+  return localStorage.getItem("activeOrgId") ?? session?.activeOrganizationId ?? null;
 }

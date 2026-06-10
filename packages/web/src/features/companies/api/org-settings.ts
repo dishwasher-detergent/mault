@@ -4,6 +4,7 @@ import { queryOptions } from "@tanstack/react-query";
 export interface OrgSettings {
   primaryColor: string | null;
   scannerLayout: "horizontal" | "vertical";
+  discordWebhookUrl: string | null;
 }
 
 export async function getOrgSettings(): Promise<{ success: boolean; data?: OrgSettings }> {
@@ -21,7 +22,7 @@ export const orgSettingsQueryOptions = (orgId: string | undefined) =>
     queryKey: ["org-settings", orgId],
     queryFn: () =>
       getOrgSettings().then(
-        (r) => r.data ?? { primaryColor: null, scannerLayout: "horizontal" as const },
+        (r) => r.data ?? { primaryColor: null, scannerLayout: "horizontal" as const, discordWebhookUrl: null },
       ),
     staleTime: Infinity,
     enabled: !!orgId,

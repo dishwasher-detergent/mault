@@ -228,6 +228,7 @@ export const orgSettings = pgTable(
     orgId: text("org_id").notNull(),
     primaryColor: text("primary_color"),
     scannerLayout: text("scanner_layout"),
+    discordWebhookUrl: text("discord_webhook_url"),
     createdAt: timestamp("created_at").defaultNow().notNull(),
     updatedAt: timestamp("updated_at").defaultNow().notNull(),
   },

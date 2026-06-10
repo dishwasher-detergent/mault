@@ -97,19 +97,6 @@ export function PrimaryColorPicker() {
           </button>
         )}
       </div>
-
-      {selectedName && (
-        <p className="text-xs text-muted-foreground">
-          {selectedName} —{" "}
-          <button
-            type="button"
-            onClick={handleReset}
-            className="underline underline-offset-2 hover:text-foreground transition-colors"
-          >
-            reset to default
-          </button>
-        </p>
-      )}
     </div>
   );
 }

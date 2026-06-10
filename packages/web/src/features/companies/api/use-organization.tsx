@@ -1,9 +1,11 @@
 import { neon } from "@/lib/auth/client";
+import { useQueryClient } from "@tanstack/react-query";
 import { useCallback, useEffect, useState } from "react";
 
 const ORG_KEY = "activeOrgId";
 
 export function useOrg() {
+  const queryClient = useQueryClient();
   const { data: orgs, isPending: orgsLoading } =
     neon.auth.useListOrganizations();
   const { data: activeOrg, isPending: orgLoading } =
@@ -12,10 +14,14 @@ export function useOrg() {
     () => !!localStorage.getItem(ORG_KEY),
   );
 
-  const setActiveOrg = useCallback(async (orgId: string) => {
-    await neon.auth.organization.setActive({ organizationId: orgId });
-    localStorage.setItem(ORG_KEY, orgId);
-  }, []);
+  const setActiveOrg = useCallback(
+    async (orgId: string) => {
+      localStorage.setItem(ORG_KEY, orgId);
+      await neon.auth.organization.setActive({ organizationId: orgId });
+      queryClient.invalidateQueries({ queryKey: ["org-settings"] });
+    },
+    [queryClient],
+  );
 
   if (activeOrg?.id) {
     localStorage.setItem(ORG_KEY, activeOrg.id);

@@ -1,6 +1,6 @@
 import { eq } from "drizzle-orm";
 import { db } from "../db";
-import { notificationSettings } from "../db/schema";
+import { orgSettings } from "../db/schema";
 
 type DiscordEmbed = {
   title: string;
@@ -11,9 +11,9 @@ type DiscordEmbed = {
 
 async function getWebhookUrl(orgId: string): Promise<string | null> {
   const rows = await db
-    .select({ discordWebhookUrl: notificationSettings.discordWebhookUrl })
-    .from(notificationSettings)
-    .where(eq(notificationSettings.orgId, orgId))
+    .select({ discordWebhookUrl: orgSettings.discordWebhookUrl })
+    .from(orgSettings)
+    .where(eq(orgSettings.orgId, orgId))
     .limit(1);
   return rows[0]?.discordWebhookUrl ?? null;
 }
