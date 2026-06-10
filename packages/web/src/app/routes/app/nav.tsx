@@ -1,5 +1,5 @@
 import { ThemeToggle } from "@/components/theme-toggle";
-import { buttonVariants } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import {
   Tooltip,
@@ -265,26 +265,22 @@ export function AppNav() {
   return (
     <aside
       className={cn(
-        "flex-none flex flex-col bg-secondary h-full border-r p-2 gap-2 overflow-hidden transition-[width] duration-200",
-        expanded ? "w-55 items-stretch" : "w-14 items-center",
+        "py-2 flex-none flex flex-col bg-secondary h-full border-r gap-2 overflow-hidden transition-[width] duration-200",
+        expanded ? "w-55 items-stretch" : "w-12 items-center",
       )}
     >
-      {/* Logo */}
       <Tooltip>
         <TooltipTrigger
           className={cn(
             "bg-primary grid place-items-center rounded-lg text-primary-foreground font-bold font-heading cursor-default text-sm shrink-0",
-            expanded ? "w-full h-8" : "w-full aspect-square",
+            expanded ? "h-8 mx-2" : "size-8",
           )}
         >
           {expanded ? "Magic Vault" : "MV"}
         </TooltipTrigger>
         <TooltipContent side="right">v{__APP_VERSION__}</TooltipContent>
       </Tooltip>
-
       <Separator />
-
-      {/* Nav items */}
       <nav
         className={cn(
           "flex flex-col flex-1 gap-1 min-h-0 overflow-y-auto",
@@ -329,30 +325,26 @@ export function AppNav() {
           );
         })}
       </nav>
-
-      <button
-        type="button"
+      <Button
         onClick={toggle}
-        className={cn(
-          buttonVariants({ variant: "ghost", size: "icon" }),
-          expanded ? "self-end" : "",
-        )}
+        className={cn(expanded ? "h-8 mx-2" : "size-8")}
+        variant="ghost"
         title={expanded ? "Collapse sidebar ([)" : "Expand sidebar ([)"}
       >
         {expanded ? (
-          <IconLayoutSidebarLeftCollapse size={16} />
+          <>
+            Collapse
+            <IconLayoutSidebarLeftCollapse size={16} />
+          </>
         ) : (
           <IconLayoutSidebarLeftExpand size={16} />
         )}
-      </button>
-
+      </Button>
       <Separator />
-
-      {/* Bottom controls */}
       <div
         className={cn(
           "flex gap-2",
-          expanded ? "flex-row items-center" : "flex-col items-center",
+          expanded ? "flex-row items-center px-2" : "flex-col items-center",
         )}
       >
         <OrgSwitcher side="right" />

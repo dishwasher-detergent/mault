@@ -67,7 +67,7 @@ export function OrgSwitcher({ side = "right" }: { side?: "right" | "top" }) {
         <div className="relative">
           <DropdownMenuTrigger
             render={
-              <Button size="icon" variant="outline">
+              <Button size="icon-lg" variant="outline">
                 <IconBuilding />
               </Button>
             }

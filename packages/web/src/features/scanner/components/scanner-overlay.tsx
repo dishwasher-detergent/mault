@@ -1,28 +1,40 @@
 import { Button } from "@/components/ui/button";
 import type { ScannerOverlayProps } from "@/features/scanner/types";
+import { cn } from "@/lib/utils";
 import {
   IconAlertTriangle,
   IconCamera,
   IconLoader2,
   IconRefresh,
 } from "@tabler/icons-react";
+import { cva, type VariantProps } from "class-variance-authority";
+
+const statusPill = cva(
+  "absolute bottom-1 left-1 right-1 rounded-lg backdrop-blur-3xl border text-xs px-2 py-1 flex flex-row gap-1.5 items-center text-foreground",
+  {
+    variants: {
+      variant: {
+        default: "bg-background/50 border-border/60",
+        loading: "bg-background/50 border-border/60",
+        warning:
+          "bg-amber-500/10 border-amber-500/30 text-amber-600 dark:text-amber-400",
+        error: "bg-red-500/10 border-red-500/30 text-red-600 dark:text-red-400",
+      },
+    },
+    defaultVariants: { variant: "default" },
+  },
+);
 
 function StatusPill({
   children,
-  variant = "default",
-}: {
-  children: React.ReactNode;
-  variant?: "default" | "warning" | "error" | "loading";
-}) {
-  const base =
-    "absolute bottom-1 left-1 right-1 rounded-lg backdrop-blur-3xl border text-xs px-2 py-1 flex flex-row gap-1.5 items-center";
-  const variants = {
-    default: "bg-background/50 border-border/60",
-    warning: "bg-amber-500/10 border-amber-500/30 text-amber-600 dark:text-amber-400",
-    error: "bg-red-500/10 border-red-500/30 text-red-600 dark:text-red-400",
-    loading: "bg-background/50 border-border/60",
-  };
-  return <div className={`${base} ${variants[variant]}`}>{children}</div>;
+  variant,
+  className,
+}: { children: React.ReactNode; className?: string } & VariantProps<
+  typeof statusPill
+>) {
+  return (
+    <div className={cn(statusPill({ variant }), className)}>{children}</div>
+  );
 }
 
 export function ScannerOverlay({
@@ -49,7 +61,9 @@ export function ScannerOverlay({
     return (
       <StatusPill variant="warning">
         <IconAlertTriangle className="size-3.5 shrink-0" />
-        <span>No catch-all bin configured — unmatched cards won't be sorted.</span>
+        <span>
+          No catch-all bin configured — unmatched cards won't be sorted.
+        </span>
       </StatusPill>
     );
   }
@@ -92,9 +106,7 @@ export function ScannerOverlay({
       );
     case "paused":
       return (
-        <StatusPill>
-          <span className="text-muted-foreground">Scanner paused — press Resume to continue.</span>
-        </StatusPill>
+        <StatusPill>Scanner paused — press Resume to continue.</StatusPill>
       );
     case "duplicate":
       return (
