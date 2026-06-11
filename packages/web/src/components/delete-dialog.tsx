@@ -28,25 +28,6 @@ interface DeleteDialogProps {
   onConfirm: () => void;
 }
 
-function buildSchema(confirm: ConfirmMode) {
-  if (confirm.type === "simple") {
-    return z.object({});
-  }
-  if (confirm.type === "keyword") {
-    return z.object({
-      input: z.literal("delete", {
-        errorMap: () => ({ message: 'Type "delete" to confirm' }),
-      }),
-    });
-  }
-  const name = confirm.name;
-  return z.object({
-    input: z.literal(name, {
-      errorMap: () => ({ message: `Type "${name}" to confirm` }),
-    }),
-  });
-}
-
 export function DeleteDialog({
   open,
   onOpenChange,
@@ -55,7 +36,13 @@ export function DeleteDialog({
   confirm = { type: "simple" },
   onConfirm,
 }: DeleteDialogProps) {
-  const schema = buildSchema(confirm);
+  const schema = z.object({ input: z.string() }).superRefine((data, ctx) => {
+    if (confirm.type === "keyword" && data.input !== "delete") {
+      ctx.addIssue({ code: "custom", message: 'Type "delete" to confirm', path: ["input"] });
+    } else if (confirm.type === "name" && data.input !== confirm.name) {
+      ctx.addIssue({ code: "custom", message: `Type "${confirm.name}" to confirm`, path: ["input"] });
+    }
+  });
   type FormValues = z.infer<typeof schema>;
 
   const {
@@ -66,7 +53,7 @@ export function DeleteDialog({
   } = useForm<FormValues>({
     resolver: zodResolver(schema),
     mode: "onChange",
-    defaultValues: confirm.type === "simple" ? {} : { input: "" },
+    defaultValues: { input: "" },
   });
 
   useEffect(() => {
