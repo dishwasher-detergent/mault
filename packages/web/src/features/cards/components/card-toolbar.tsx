@@ -21,7 +21,6 @@ export function CardToolbar({
   sortKey,
   onSortChange,
   onExport,
-  collectionName,
   onClearAll,
   hasCards,
   activeFilters,
@@ -78,47 +77,49 @@ export function CardToolbar({
         onFiltersChange={onFiltersChange}
         activeFilterCount={activeFilterCount}
       />
-      {(onExport || onClearAll) && <ButtonGroup>
-        <Button
-          variant="outline"
-          size="icon"
-          onClick={onExport}
-          disabled={!hasCards}
-          className="shrink-0"
-          title="Session summary & export"
-        >
-          <IconDownload className="size-4" />
-        </Button>
-        <DynamicDialog
-          open={clearAllDialogOpen}
-          onOpenChange={setClearAllDialogOpen}
-          title="Delete Scanned Cards"
-          description={`This will permanently delete all cards from your collection. This action cannot be undone.`}
-          trigger={
-            <Button variant="outline" size="icon" title="Clear all cards">
-              <IconTrash className="size-4" />
-            </Button>
-          }
-          footer={
-            <>
-              <Button
-                variant="outline"
-                onClick={() => setClearAllDialogOpen(false)}
-              >
-                Cancel
+      {(onExport || onClearAll) && (
+        <ButtonGroup>
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={onExport}
+            disabled={!hasCards}
+            className="shrink-0"
+            title="Session summary & export"
+          >
+            <IconDownload className="size-4" />
+          </Button>
+          <DynamicDialog
+            open={clearAllDialogOpen}
+            onOpenChange={setClearAllDialogOpen}
+            title="Delete Scanned Cards"
+            description={`This will permanently delete all cards from your collection. This action cannot be undone.`}
+            trigger={
+              <Button variant="outline" size="icon" title="Clear all cards">
+                <IconTrash className="size-4" />
               </Button>
-              <Button
-                variant="destructive"
-                onClick={handleClear}
-                disabled={isClearing}
-              >
-                {isClearing ? "Clearing..." : "Clear All"}
-              </Button>
-            </>
-          }
-          footerClassName="flex-col-reverse md:flex-row"
-        />
-      </ButtonGroup>}
+            }
+            footer={
+              <>
+                <Button
+                  variant="outline"
+                  onClick={() => setClearAllDialogOpen(false)}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  variant="destructive"
+                  onClick={handleClear}
+                  disabled={isClearing}
+                >
+                  {isClearing ? "Clearing..." : "Clear All"}
+                </Button>
+              </>
+            }
+            footerClassName="flex-col-reverse md:flex-row"
+          />
+        </ButtonGroup>
+      )}
     </div>
   );
 }
