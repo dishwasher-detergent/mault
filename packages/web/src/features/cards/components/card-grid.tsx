@@ -1,13 +1,6 @@
 import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
 import { Skeleton } from "@/components/ui/skeleton";
+import { DeleteDialog } from "@/components/delete-dialog";
 import { useCardFilterSort } from "@/features/cards/api/use-card-filter-sort";
 import { CardDetailPanel } from "@/features/cards/components/card-detail-panel";
 import { CardToolbar } from "@/features/cards/components/card-toolbar";
@@ -92,7 +85,6 @@ export function CardGrid() {
   const handleBulkDelete = useCallback(() => {
     removeCards(Array.from(selectedIds));
     setSelectedIds(new Set());
-    setConfirmOpen(false);
   }, [removeCards, selectedIds]);
 
   const handleClearSession = useCallback(async () => {
@@ -271,29 +263,14 @@ export function CardGrid() {
         onClear={handleClearSession}
       />
 
-      <Dialog open={confirmOpen} onOpenChange={setConfirmOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>
-              Delete {selectedIds.size}{" "}
-              {selectedIds.size === 1 ? "card" : "cards"}?
-            </DialogTitle>
-            <DialogDescription>
-              This will permanently remove the selected{" "}
-              {selectedIds.size === 1 ? "card" : "cards"} from your collection.
-              This action cannot be undone.
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setConfirmOpen(false)}>
-              Cancel
-            </Button>
-            <Button variant="destructive" onClick={handleBulkDelete}>
-              Delete
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      <DeleteDialog
+        open={confirmOpen}
+        onOpenChange={setConfirmOpen}
+        title={`Delete ${selectedIds.size} ${selectedIds.size === 1 ? "card" : "cards"}?`}
+        description={`This will permanently remove the selected ${selectedIds.size === 1 ? "card" : "cards"} from your collection. This action cannot be undone.`}
+        confirm={{ type: "keyword" }}
+        onConfirm={handleBulkDelete}
+      />
     </>
   );
 }

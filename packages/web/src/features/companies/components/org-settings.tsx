@@ -1,4 +1,5 @@
 import { Button } from "@/components/ui/button";
+import { DeleteDialog } from "@/components/delete-dialog";
 import { Input } from "@/components/ui/input";
 import {
   Select,
@@ -11,6 +12,7 @@ import { neon } from "@/lib/auth/client";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { IconTrash } from "@tabler/icons-react";
 import { Controller, useForm } from "react-hook-form";
+import { useState } from "react";
 import { toast } from "sonner";
 import { z } from "zod";
 
@@ -40,6 +42,9 @@ export function OrgSettings() {
   const myRole = activeMember?.role as OrgRole | undefined;
   const canManage = myRole === "owner" || myRole === "admin";
   const isOwner = myRole === "owner";
+
+  const [deleteOrgOpen, setDeleteOrgOpen] = useState(false);
+  const [removeMemberTarget, setRemoveMemberTarget] = useState<{ id: string; name: string } | null>(null);
 
   const renameForm = useForm<RenameValues>({
     resolver: zodResolver(renameSchema),
@@ -111,13 +116,15 @@ export function OrgSettings() {
     }
   }
 
-  async function handleRemoveMember(memberId: string) {
+  async function handleRemoveMember() {
+    if (!removeMemberTarget) return;
     try {
       const { error } = await neon.auth.organization.removeMember({
-        memberIdOrEmail: memberId,
+        memberIdOrEmail: removeMemberTarget.id,
         organizationId: activeOrg!.id,
       });
       if (error) throw new Error(error.message);
+      setRemoveMemberTarget(null);
       await refetchActive();
       toast.success("Member removed.");
     } catch (e: unknown) {
@@ -127,7 +134,6 @@ export function OrgSettings() {
 
   async function handleDelete() {
     if (!activeOrg) return;
-    if (!confirm(`Delete "${activeOrg.name}"? This cannot be undone.`)) return;
     try {
       const { error } = await neon.auth.organization.delete({
         organizationId: activeOrg.id,
@@ -144,6 +150,7 @@ export function OrgSettings() {
     activeOrg?.invitations?.filter((i) => i.status === "pending") ?? [];
 
   return (
+    <>
     <div className="flex flex-col gap-6">
       {!activeOrg && (
         <p className="text-sm text-muted-foreground">
@@ -218,7 +225,12 @@ export function OrgSettings() {
                     <Button
                       variant="ghost"
                       size="icon"
-                      onClick={() => handleRemoveMember(m.id)}
+                      onClick={() =>
+                        setRemoveMemberTarget({
+                          id: m.id,
+                          name: m.user.name || m.user.email,
+                        })
+                      }
                     >
                       <IconTrash />
                     </Button>
@@ -302,7 +314,7 @@ export function OrgSettings() {
               <p className="text-xs">
                 Permanently deletes "{activeOrg.name}" and all its data.
               </p>
-              <Button variant="secondary" size="sm" onClick={handleDelete}>
+              <Button variant="secondary" size="sm" onClick={() => setDeleteOrgOpen(true)}>
                 Delete organization
               </Button>
             </div>
@@ -310,5 +322,24 @@ export function OrgSettings() {
         </>
       )}
     </div>
+
+    <DeleteDialog
+      open={!!removeMemberTarget}
+      onOpenChange={(open) => { if (!open) setRemoveMemberTarget(null); }}
+      title="Remove member"
+      description={`Remove "${removeMemberTarget?.name}" from this organization? They will lose access immediately.`}
+      confirm={{ type: "simple" }}
+      onConfirm={handleRemoveMember}
+    />
+
+    <DeleteDialog
+      open={deleteOrgOpen}
+      onOpenChange={setDeleteOrgOpen}
+      title="Delete organization"
+      description={`Permanently deletes "${activeOrg?.name}" and all its data. This cannot be undone.`}
+      confirm={{ type: "name", name: activeOrg?.name ?? "" }}
+      onConfirm={handleDelete}
+    />
+    </>
   );
 }

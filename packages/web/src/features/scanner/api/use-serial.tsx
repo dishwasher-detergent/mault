@@ -307,6 +307,11 @@ export function SerialProvider({ children }: { children: React.ReactNode }) {
     [sendCommand],
   );
 
+  const receiveResponse = useCallback(
+    (timeoutMs = 5000) => waitForLine(timeoutMs),
+    [waitForLine],
+  );
+
   const binBusyRef = useRef(false);
 
   const sendBin = useCallback(
@@ -347,7 +352,7 @@ export function SerialProvider({ children }: { children: React.ReactNode }) {
         sendBin,
         sendTest,
         sendCommand: sendCommandWithNewline,
-        receiveResponse: (timeoutMs = 5000) => waitForLine(timeoutMs),
+        receiveResponse,
         subscribe,
         registerPreTestHook,
       }}

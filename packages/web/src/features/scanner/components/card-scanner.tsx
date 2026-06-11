@@ -15,7 +15,7 @@ import { useRole } from "@/hooks/use-role";
 import { cn } from "@/lib/utils";
 import type { CardScannerProps } from "@magic-vault/shared";
 import { IconEye } from "@tabler/icons-react";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 
@@ -86,7 +86,7 @@ export function CardScanner({ className, compact }: CardScannerProps) {
     }
   });
 
-  const handleFeed = async () => {
+  const handleFeed = useCallback(async () => {
     setIsFeeding(true);
     try {
       const sent = await sendCommand(JSON.stringify({ feeder: true }));
@@ -120,7 +120,7 @@ export function CardScanner({ className, compact }: CardScannerProps) {
     } finally {
       setIsFeeding(false);
     }
-  };
+  }, [sendCommand, receiveResponse]);
 
   useEffect(() => {
     registerIsland({

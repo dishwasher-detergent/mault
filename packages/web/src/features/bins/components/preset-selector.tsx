@@ -1,5 +1,6 @@
 import { AuditDrawer, type AuditEntry } from "@/components/audit-drawer";
 import { Button } from "@/components/ui/button";
+import { DeleteDialog } from "@/components/delete-dialog";
 import { ButtonGroup } from "@/components/ui/button-group";
 import { Field, FieldError, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
@@ -176,7 +177,6 @@ export function PresetSelector({ readOnly }: PresetSelectorProps) {
   const handleDelete = useCallback(async () => {
     if (!selectedSet) return;
     await deleteSet(selectedSet.guid);
-    setDeleteDialogOpen(false);
   }, [selectedSet, deleteSet]);
 
   if (isLoading) {
@@ -251,41 +251,21 @@ export function PresetSelector({ readOnly }: PresetSelectorProps) {
           </>
         ) : (
           <>
-            <DynamicDialog
+            <Button
+              variant="outline"
+              size="icon"
+              disabled={!selectedSet || isPresetMutating || sets.length <= 1}
+              onClick={() => setDeleteDialogOpen(true)}
+            >
+              <IconTrash />
+            </Button>
+            <DeleteDialog
               open={deleteDialogOpen}
               onOpenChange={setDeleteDialogOpen}
               title="Delete Set"
-              description={`Are you sure you want to delete "${selectedSet?.name}"? This cannot be undone.`}
-              trigger={
-                <Button
-                  variant="outline"
-                  size="icon"
-                  disabled={!selectedSet || isPresetMutating || sets.length <= 1}
-                >
-                  <IconTrash />
-                </Button>
-              }
-              footer={
-                <>
-                  <Button
-                    variant="outline"
-                    onClick={() => setDeleteDialogOpen(false)}
-                  >
-                    Cancel
-                  </Button>
-                  <Button
-                    variant="destructive"
-                    onClick={handleDelete}
-                    disabled={isPresetMutating}
-                  >
-                    {isPresetMutating && (
-                      <IconLoader2 className="size-4 animate-spin" />
-                    )}
-                    Delete
-                  </Button>
-                </>
-              }
-              footerClassName="flex-col-reverse md:flex-row"
+              description={`Permanently deletes "${selectedSet?.name}". This cannot be undone.`}
+              confirm={{ type: "name", name: selectedSet?.name ?? "" }}
+              onConfirm={handleDelete}
             />
             <DynamicDialog
               open={renameDialogOpen}

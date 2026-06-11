@@ -1,4 +1,5 @@
 import { Button } from "@/components/ui/button";
+import { DeleteDialog } from "@/components/delete-dialog";
 import { Field, FieldError, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { DynamicDialog } from "@/components/ui/responsive-dialog";
@@ -114,6 +115,10 @@ export default function CollectionsPage() {
     await deleteCollection(deleteTarget.guid);
     setDeleteTarget(null);
   }, [deleteTarget, deleteCollection]);
+
+  const handleDeleteOpenChange = useCallback((open: boolean) => {
+    if (!open) setDeleteTarget(null);
+  }, []);
 
   return (
     <div className="flex flex-col p-4 md:p-6 max-w-4xl mx-auto w-full gap-4">
@@ -354,30 +359,13 @@ export default function CollectionsPage() {
           />
         </form>
       </DynamicDialog>
-      <DynamicDialog
+      <DeleteDialog
         open={!!deleteTarget}
-        onOpenChange={(open) => {
-          if (!open) setDeleteTarget(null);
-        }}
+        onOpenChange={handleDeleteOpenChange}
         title="Delete Collection"
-        description={`Are you sure you want to delete "${deleteTarget?.name}"? All ${deleteTarget?.name ? "cards in this collection" : "cards"} will also be deleted. This cannot be undone.`}
-        trigger={<span />}
-        footer={
-          <>
-            <Button variant="outline" onClick={() => setDeleteTarget(null)}>
-              Cancel
-            </Button>
-            <Button
-              variant="destructive"
-              onClick={handleDelete}
-              disabled={isMutating}
-            >
-              {isMutating && <IconLoader2 className="size-4 animate-spin" />}
-              Delete
-            </Button>
-          </>
-        }
-        footerClassName="flex-col-reverse md:flex-row"
+        description={`Permanently deletes "${deleteTarget?.name}" and all its cards. This cannot be undone.`}
+        confirm={{ type: "name", name: deleteTarget?.name ?? "" }}
+        onConfirm={handleDelete}
       />
     </div>
   );
