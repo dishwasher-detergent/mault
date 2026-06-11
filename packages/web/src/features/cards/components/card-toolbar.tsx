@@ -12,7 +12,7 @@ import {
 import { WatcherStack } from "@/components/ui/watcher-stack";
 import { CardFilterPopover } from "@/features/cards/components/card-filter-popover";
 import type { CardToolbarProps } from "@/features/cards/types";
-import { IconDownload, IconLoader2, IconTrash } from "@tabler/icons-react";
+import { IconDownload, IconTrash } from "@tabler/icons-react";
 import { useState } from "react";
 
 export function CardToolbar({
@@ -21,7 +21,6 @@ export function CardToolbar({
   sortKey,
   onSortChange,
   onExport,
-  onExportAndDelete,
   collectionName,
   onClearAll,
   hasCards,
@@ -32,8 +31,6 @@ export function CardToolbar({
 }: CardToolbarProps) {
   const [isClearing, setIsClearing] = useState(false);
   const [clearAllDialogOpen, setClearAllDialogOpen] = useState(false);
-  const [exportDialogOpen, setExportDialogOpen] = useState(false);
-  const [isDeleting, setIsDeleting] = useState(false);
 
   const handleClear = async () => {
     setIsClearing(true);
@@ -44,32 +41,6 @@ export function CardToolbar({
     } finally {
       setIsClearing(false);
       setClearAllDialogOpen(false);
-    }
-  };
-
-  const handleExportOnly = () => {
-    onExport?.();
-    setExportDialogOpen(false);
-  };
-
-  const handleExportAndDelete = async () => {
-    onExport?.();
-    if (onExportAndDelete) {
-      setIsDeleting(true);
-      try {
-        await onExportAndDelete();
-      } finally {
-        setIsDeleting(false);
-        setExportDialogOpen(false);
-      }
-    }
-  };
-
-  const handleExportClick = () => {
-    if (onExportAndDelete) {
-      setExportDialogOpen(true);
-    } else {
-      onExport?.();
     }
   };
 
@@ -108,47 +79,16 @@ export function CardToolbar({
         activeFilterCount={activeFilterCount}
       />
       {(onExport || onClearAll) && <ButtonGroup>
-        <DynamicDialog
-          open={exportDialogOpen}
-          onOpenChange={setExportDialogOpen}
-          title="Export Collection"
-          description={
-            collectionName
-              ? `Export "${collectionName}" to Manabox CSV. Would you also like to delete the collection afterwards?`
-              : "Export cards to Manabox CSV. Would you also like to delete the collection afterwards?"
-          }
-          trigger={
-            <Button
-              variant="outline"
-              size="icon"
-              onClick={handleExportClick}
-              disabled={!hasCards}
-              className="shrink-0"
-            >
-              <IconDownload className="size-4" />
-            </Button>
-          }
-          footer={
-            <>
-              <Button
-                variant="outline"
-                onClick={handleExportOnly}
-                disabled={isDeleting}
-              >
-                Export Only
-              </Button>
-              <Button
-                variant="destructive"
-                onClick={handleExportAndDelete}
-                disabled={isDeleting}
-              >
-                {isDeleting && <IconLoader2 className="size-4 animate-spin" />}
-                Export & Delete
-              </Button>
-            </>
-          }
-          footerClassName="flex-col-reverse md:flex-row"
-        />
+        <Button
+          variant="outline"
+          size="icon"
+          onClick={onExport}
+          disabled={!hasCards}
+          className="shrink-0"
+          title="Session summary & export"
+        >
+          <IconDownload className="size-4" />
+        </Button>
         <DynamicDialog
           open={clearAllDialogOpen}
           onOpenChange={setClearAllDialogOpen}

@@ -12,7 +12,7 @@ import { useCardFilterSort } from "@/features/cards/api/use-card-filter-sort";
 import { CardDetailPanel } from "@/features/cards/components/card-detail-panel";
 import { CardToolbar } from "@/features/cards/components/card-toolbar";
 import { ScannedCardItem } from "@/features/cards/components/scanned-card-item";
-import { exportToManabox } from "@/features/cards/lib/export-manabox";
+import { SessionSummaryDialog } from "@/features/cards/components/session-summary-dialog";
 import { getCollectionViewers } from "@/features/collections/api/collections";
 import { useCollectionLocks } from "@/features/collections/api/use-collection-locks";
 import { useCollections } from "@/features/collections/api/use-collections";
@@ -30,8 +30,9 @@ export function CardGrid() {
     deleteCollection,
     isLoading: collectionsLoading,
   } = useCollections();
-  const { cards, removeCard, removeCards, clearCards, isLoading } =
+  const { cards, removeCard, removeCards, clearCards, isLoading, elapsedMs } =
     useScannedCards();
+  const [summaryOpen, setSummaryOpen] = useState(false);
   const { locks, currentUserId } = useCollectionLocks();
   const isScanningActive = !!(activeCollection && locks[activeCollection.guid]?.userId === currentUserId);
   const { data: viewersRaw } = useQuery({
@@ -88,18 +89,13 @@ export function CardGrid() {
     setConfirmOpen(false);
   }, [removeCards, selectedIds]);
 
-  const handleExport = useCallback(() => {
-    exportToManabox(
-      cards,
-      activeCollection?.name.replace(/\s+/g, "-").toLowerCase() ?? "collection",
-    );
-  }, [cards, activeCollection?.name]);
-
-  const handleExportAndDelete = useCallback(async () => {
+  const handleClearSession = useCallback(async () => {
     if (activeCollection) {
       await deleteCollection(activeCollection.guid);
+    } else {
+      clearCards();
     }
-  }, [activeCollection, deleteCollection]);
+  }, [activeCollection, deleteCollection, clearCards]);
 
   if (isLoading) {
     return (
@@ -180,12 +176,9 @@ export function CardGrid() {
           onSearchChange={setSearchQuery}
           sortKey={sortKey}
           onSortChange={setSortKey}
-          onExport={handleExport}
-          onExportAndDelete={
-            activeCollection ? handleExportAndDelete : undefined
-          }
+          onExport={() => setSummaryOpen(true)}
           collectionName={activeCollection?.name}
-          onClearAll={clearCards}
+          onClearAll={() => setSummaryOpen(true)}
           hasCards={filteredAndSorted.length > 0}
           activeFilters={filters}
           onFiltersChange={setFilters}
@@ -238,6 +231,15 @@ export function CardGrid() {
           </Button>
         </div>
       )}
+
+      <SessionSummaryDialog
+        open={summaryOpen}
+        onOpenChange={setSummaryOpen}
+        cards={cards}
+        elapsedMs={elapsedMs}
+        collectionName={activeCollection?.name ?? "collection"}
+        onClear={handleClearSession}
+      />
 
       <Dialog open={confirmOpen} onOpenChange={setConfirmOpen}>
         <DialogContent>
