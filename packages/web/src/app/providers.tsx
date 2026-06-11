@@ -7,6 +7,7 @@ import { CollectionLocksProvider } from "@/features/collections/api/use-collecti
 import { CollectionsProvider } from "@/features/collections/api/use-collections";
 import { CameraProvider } from "@/features/scanner/api/use-camera";
 import { ScannedCardsProvider } from "@/features/scanner/api/use-scanned-cards";
+import { ScannerIslandProvider } from "@/features/scanner/api/use-scanner-island";
 import { SerialProvider } from "@/features/scanner/api/use-serial";
 import { orgSettingsQueryOptions } from "@/features/companies/api/org-settings";
 import { useOrg } from "@/features/companies/api/use-organization";
@@ -45,6 +46,7 @@ export function AppProviders({ children }: { children: React.ReactNode }) {
   return (
     <QueryClientProvider client={queryClient}>
       <OrgThemeApplier />
+      <ScannerIslandProvider>
       <CameraProvider>
         <SerialProvider>
           <BinConfigsProvider>
@@ -64,6 +66,7 @@ export function AppProviders({ children }: { children: React.ReactNode }) {
           </BinConfigsProvider>
         </SerialProvider>
       </CameraProvider>
+      </ScannerIslandProvider>
     </QueryClientProvider>
   );
 }

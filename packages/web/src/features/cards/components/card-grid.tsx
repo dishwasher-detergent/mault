@@ -17,10 +17,13 @@ import { getCollectionViewers } from "@/features/collections/api/collections";
 import { useCollectionLocks } from "@/features/collections/api/use-collection-locks";
 import { useCollections } from "@/features/collections/api/use-collections";
 import { useScannedCards } from "@/features/scanner/api/use-scanned-cards";
+import { useScannerIsland } from "@/features/scanner/api/use-scanner-island";
+import { ScannerControls } from "@/features/scanner/components/scanner-controls";
+import { ScannerDebug } from "@/features/scanner/components/scanner-debug";
 
 import { IconFolders } from "@tabler/icons-react";
-import { AnimatePresence } from "framer-motion";
 import { useQuery } from "@tanstack/react-query";
+import { AnimatePresence } from "framer-motion";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 
@@ -33,8 +36,11 @@ export function CardGrid() {
   const { cards, removeCard, removeCards, clearCards, isLoading, elapsedMs } =
     useScannedCards();
   const [summaryOpen, setSummaryOpen] = useState(false);
+  const scanner = useScannerIsland();
   const { locks, currentUserId } = useCollectionLocks();
-  const isScanningActive = !!(activeCollection && locks[activeCollection.guid]?.userId === currentUserId);
+  const isScanningActive = !!(
+    activeCollection && locks[activeCollection.guid]?.userId === currentUserId
+  );
   const { data: viewersRaw } = useQuery({
     queryKey: ["collection-viewers", activeCollection?.guid],
     queryFn: () => getCollectionViewers(activeCollection!.guid),
@@ -209,26 +215,50 @@ export function CardGrid() {
         </AnimatePresence>
       </div>
 
-      {selectedIds.size > 0 && (
-        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 flex items-center gap-3 rounded-lg border backdrop-blur-sm shadow-lg p-2 bg-sidebar">
-          <span className="text-sm">
-            {selectedIds.size} {selectedIds.size === 1 ? "card" : "cards"}{" "}
-            selected
-          </span>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => setSelectedIds(new Set())}
-          >
-            Clear
-          </Button>
-          <Button
-            variant="destructive"
-            size="sm"
-            onClick={() => setConfirmOpen(true)}
-          >
-            Delete
-          </Button>
+      {(scanner?.isCameraActive || selectedIds.size > 0) && (
+        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 flex items-center gap-2 rounded-xl border backdrop-blur-xl shadow-xl px-3 py-2 bg-sidebar/80">
+          {scanner?.isCameraActive && (
+            <>
+              <ScannerControls
+                status={scanner.status}
+                onForceAddDuplicate={scanner.handleForceAddDuplicate}
+                onForceScan={scanner.handleForceScan}
+                onPause={scanner.handlePause}
+                onResume={scanner.handleResume}
+              />
+              {scanner.isConnected && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={scanner.handleFeed}
+                  disabled={!scanner.isReady || scanner.isFeeding}
+                >
+                  {scanner.isFeeding ? "Feeding…" : "Feed"}
+                </Button>
+              )}
+              <ScannerDebug />
+            </>
+          )}
+          {selectedIds.size > 0 && (
+            <>
+              {scanner?.isCameraActive && (
+                <div className="w-px h-5 bg-border mx-1 shrink-0" />
+              )}
+              <span className="text-sm text-muted-foreground">
+                {selectedIds.size} {selectedIds.size === 1 ? "card" : "cards"}{" "}
+                selected
+              </span>
+              <Button variant="ghost" onClick={() => setSelectedIds(new Set())}>
+                Clear
+              </Button>
+              <Button
+                variant="destructive"
+                onClick={() => setConfirmOpen(true)}
+              >
+                Delete
+              </Button>
+            </>
+          )}
         </div>
       )}
 

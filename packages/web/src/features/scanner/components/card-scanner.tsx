@@ -1,5 +1,3 @@
-import { Button } from "@/components/ui/button";
-import { ButtonGroup } from "@/components/ui/button-group";
 import {
   Tooltip,
   TooltipContent,
@@ -8,15 +6,15 @@ import {
 import { useBinConfigs } from "@/features/bins/api/use-bin-configs";
 import { useCardScanner } from "@/features/scanner/api/use-card-scanner";
 import { useScannedCards } from "@/features/scanner/api/use-scanned-cards";
+import { useRegisterScannerIsland } from "@/features/scanner/api/use-scanner-island";
 import { useSerial, useSerialMessage } from "@/features/scanner/api/use-serial";
-import { ScannerControls } from "@/features/scanner/components/scanner-controls";
 import { ScannerMenu } from "@/features/scanner/components/scanner-menu";
 import { ScannerOverlay } from "@/features/scanner/components/scanner-overlay";
 import { useIsMobile } from "@/hooks/use-is-mobile";
 import { useRole } from "@/hooks/use-role";
 import { cn } from "@/lib/utils";
 import type { CardScannerProps } from "@magic-vault/shared";
-import { IconArrowBarToDown, IconEye } from "@tabler/icons-react";
+import { IconEye } from "@tabler/icons-react";
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
@@ -26,6 +24,7 @@ export function CardScanner({ className, compact }: CardScannerProps) {
   const { isAdmin } = useRole();
   const isMobile = useIsMobile();
   const { addCard, sendCatchAllBin, autoFeed, setAutoFeed } = useScannedCards();
+  const registerIsland = useRegisterScannerIsland();
   const {
     isConnected,
     isReady,
@@ -123,6 +122,25 @@ export function CardScanner({ className, compact }: CardScannerProps) {
     }
   };
 
+  useEffect(() => {
+    registerIsland({
+      status,
+      isCameraActive,
+      isConnected,
+      isReady,
+      isFeeding,
+      handleForceAddDuplicate,
+      handleForceScan,
+      handlePause: () => { setAutoFeed(false); handlePause(); },
+      handleResume,
+      handleFeed,
+    });
+  }, [status, isCameraActive, isConnected, isReady, isFeeding,
+      handleForceAddDuplicate, handleForceScan, handlePause, handleResume,
+      handleFeed, setAutoFeed, registerIsland]);
+
+  useEffect(() => () => registerIsland(null), [registerIsland]);
+
   const canScan = isCameraActive;
   const wasReadyRef = useRef(canScan);
   useEffect(() => {
@@ -197,30 +215,6 @@ export function CardScanner({ className, compact }: CardScannerProps) {
           onAllowDuplicatesChange={setAllowDuplicates}
         />
       </div>
-      {isCameraActive && (
-        <ButtonGroup className="w-full *:flex-1">
-          <ScannerControls
-            status={status}
-            onForceAddDuplicate={handleForceAddDuplicate}
-            onForceScan={handleForceScan}
-            onPause={() => {
-              setAutoFeed(false);
-              handlePause();
-            }}
-            onResume={handleResume}
-          />
-          {isConnected && (
-            <Button
-              onClick={handleFeed}
-              variant="outline"
-              disabled={!isReady || isFeeding}
-            >
-              <IconArrowBarToDown />
-              {isFeeding ? "Feeding…" : "Feed"}
-            </Button>
-          )}
-        </ButtonGroup>
-      )}
     </div>
   );
 }

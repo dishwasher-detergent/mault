@@ -1,11 +1,24 @@
 import { Button } from "@/components/ui/button";
-import { apiPost } from "@/lib/api/client";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { useCollections } from "@/features/collections/api/use-collections";
 import { useScannedCards } from "@/features/scanner/api/use-scanned-cards";
 import { useRole } from "@/hooks/use-role";
+import { apiPost } from "@/lib/api/client";
 import type { ScryfallCardWithDistance } from "@magic-vault/shared";
-import { IconBug, IconCards, IconChevronDown, IconChevronRight, IconStack2, IconAlertTriangle } from "@tabler/icons-react";
-import { useState } from "react";
+import {
+  IconAlertTriangle,
+  IconBug,
+  IconCards,
+  IconStack2,
+} from "@tabler/icons-react";
 
 // All three use real M11 image URLs so they actually render.
 // set/collector differ to simulate a realistic multi-printing scenario.
@@ -22,12 +35,17 @@ const LIGHTNING_BOLT_M11: ScryfallCardWithDistance = {
   highres_image: true,
   image_status: "highres_scan",
   image_uris: {
-    small: "https://cards.scryfall.io/small/front/e/3/e3285e6b-3e79-4d7c-bf96-d920f973b122.jpg",
-    normal: "https://cards.scryfall.io/normal/front/e/3/e3285e6b-3e79-4d7c-bf96-d920f973b122.jpg",
-    large: "https://cards.scryfall.io/large/front/e/3/e3285e6b-3e79-4d7c-bf96-d920f973b122.jpg",
+    small:
+      "https://cards.scryfall.io/small/front/e/3/e3285e6b-3e79-4d7c-bf96-d920f973b122.jpg",
+    normal:
+      "https://cards.scryfall.io/normal/front/e/3/e3285e6b-3e79-4d7c-bf96-d920f973b122.jpg",
+    large:
+      "https://cards.scryfall.io/large/front/e/3/e3285e6b-3e79-4d7c-bf96-d920f973b122.jpg",
     png: "https://cards.scryfall.io/png/front/e/3/e3285e6b-3e79-4d7c-bf96-d920f973b122.png",
-    art_crop: "https://cards.scryfall.io/art_crop/front/e/3/e3285e6b-3e79-4d7c-bf96-d920f973b122.jpg",
-    border_crop: "https://cards.scryfall.io/border_crop/front/e/3/e3285e6b-3e79-4d7c-bf96-d920f973b122.jpg",
+    art_crop:
+      "https://cards.scryfall.io/art_crop/front/e/3/e3285e6b-3e79-4d7c-bf96-d920f973b122.jpg",
+    border_crop:
+      "https://cards.scryfall.io/border_crop/front/e/3/e3285e6b-3e79-4d7c-bf96-d920f973b122.jpg",
   },
   mana_cost: "{R}",
   cmc: 1,
@@ -46,7 +64,14 @@ const LIGHTNING_BOLT_M11: ScryfallCardWithDistance = {
   foil: true,
   nonfoil: true,
   legalities: {} as never,
-  prices: { usd: "1.20", usd_foil: null, usd_etched: null, eur: null, eur_foil: null, tix: null },
+  prices: {
+    usd: "1.20",
+    usd_foil: null,
+    usd_etched: null,
+    eur: null,
+    eur_foil: null,
+    tix: null,
+  },
   distance: 0.03,
   games: [],
   game_changer: false,
@@ -81,7 +106,14 @@ const LIGHTNING_BOLT_A25: ScryfallCardWithDistance = {
   set_name: "Masters 25",
   collector_number: "140",
   artist: "Christopher Moeller",
-  prices: { usd: "0.75", usd_foil: "3.50", usd_etched: null, eur: "0.60", eur_foil: null, tix: null },
+  prices: {
+    usd: "0.75",
+    usd_foil: "3.50",
+    usd_etched: null,
+    eur: "0.60",
+    eur_foil: null,
+    tix: null,
+  },
   distance: 0.05,
 };
 
@@ -94,7 +126,14 @@ const LIGHTNING_BOLT_2X2: ScryfallCardWithDistance = {
   set_name: "Double Masters 2022",
   collector_number: "117",
   artist: "Christopher Moeller",
-  prices: { usd: "0.90", usd_foil: "5.00", usd_etched: null, eur: "0.80", eur_foil: null, tix: null },
+  prices: {
+    usd: "0.90",
+    usd_foil: "5.00",
+    usd_etched: null,
+    eur: "0.80",
+    eur_foil: null,
+    tix: null,
+  },
   distance: 0.06,
 };
 
@@ -109,7 +148,6 @@ export function ScannerDebug() {
   const { isAdmin } = useRole();
   const { addCard } = useScannedCards();
   const { activeCollection } = useCollections();
-  const [open, setOpen] = useState(false);
 
   if (!isAdmin) return null;
 
@@ -120,58 +158,54 @@ export function ScannerDebug() {
   };
 
   const handleSimulateMultiMatch = () => {
-    addCard(LIGHTNING_BOLT_M11, FAKE_SCAN_URL, [LIGHTNING_BOLT_A25, LIGHTNING_BOLT_2X2]);
+    addCard(LIGHTNING_BOLT_M11, FAKE_SCAN_URL, [
+      LIGHTNING_BOLT_A25,
+      LIGHTNING_BOLT_2X2,
+    ]);
   };
 
   const handleForceError = () => {
     if (!activeCollection) return;
-    apiPost(`/api/collections/${activeCollection.guid}/debug/error`, {}).catch(() => {});
+    apiPost(`/api/collections/${activeCollection.guid}/debug/error`, {}).catch(
+      () => {},
+    );
   };
 
   return (
-    <div className="border border-dashed border-yellow-500/40 rounded-lg bg-yellow-500/5 overflow-hidden">
-      <button
-        type="button"
-        onClick={() => setOpen((v) => !v)}
-        className="flex items-center gap-1.5 text-yellow-500/70 w-full px-2 py-2 hover:bg-yellow-500/10 transition-colors"
-      >
-        {open ? <IconChevronDown className="size-3" /> : <IconChevronRight className="size-3" />}
-        <IconBug className="size-3" />
-        <span className="text-xs font-mono font-semibold uppercase tracking-wide">Debug</span>
-      </button>
-
-      {open && (
-        <div className="flex flex-col gap-1.5 px-2 pb-2">
-          <Button
-            variant="outline"
-            size="sm"
-            className="w-full text-xs border-yellow-500/30 hover:bg-yellow-500/10"
-            onClick={handleSimulateScan}
-          >
+    <DropdownMenu>
+      <DropdownMenuTrigger
+        render={
+          <Button size="icon" variant="outline">
+            <IconBug className="size-3.5" />
+          </Button>
+        }
+      ></DropdownMenuTrigger>
+      <DropdownMenuContent side="right" align="end">
+        <DropdownMenuGroup>
+          <DropdownMenuLabel className="text-xs font-mono">
+            Debug
+          </DropdownMenuLabel>
+          <DropdownMenuItem onClick={handleSimulateScan}>
             <IconCards className="size-3.5" />
             Simulate Scan
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            className="w-full text-xs border-yellow-500/30 hover:bg-yellow-500/10"
-            onClick={handleSimulateMultiMatch}
-          >
+          </DropdownMenuItem>
+          <DropdownMenuItem onClick={handleSimulateMultiMatch}>
             <IconStack2 className="size-3.5" />
             Simulate Multi-Match
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            className="w-full text-xs border-red-500/30 text-red-500 hover:bg-red-500/10"
+          </DropdownMenuItem>
+        </DropdownMenuGroup>
+        <DropdownMenuSeparator />
+        <DropdownMenuGroup>
+          <DropdownMenuItem
             onClick={handleForceError}
             disabled={!activeCollection}
+            variant="destructive"
           >
             <IconAlertTriangle className="size-3.5" />
             Force Error
-          </Button>
-        </div>
-      )}
-    </div>
+          </DropdownMenuItem>
+        </DropdownMenuGroup>
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 }

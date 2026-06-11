@@ -36,7 +36,6 @@ function MobileScanner() {
               <CollectionSwitcher />
               <PresetSelector readOnly />
             </div>
-            <ScannerDebug />
             <ScanStats />
             <div className="@container">
               <CardGrid />
@@ -68,7 +67,6 @@ export default function App() {
           <div className="flex flex-col gap-2 w-52 shrink-0 overflow-y-auto">
             <CollectionSwitcher />
             <PresetSelector readOnly />
-            <ScannerDebug />
             <ScanStats />
           </div>
         </section>
