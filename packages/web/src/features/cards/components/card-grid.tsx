@@ -139,7 +139,7 @@ export function CardGrid() {
           <p className="text-xs">Scan a card to get started</p>
         </div>
         {scanner?.isCameraActive && (
-          <div className="fixed bottom-8 left-1/2 -translate-x-1/2 z-50 flex items-center gap-2 rounded-xl border backdrop-blur-xl shadow-xl px-3 py-2 bg-sidebar/80">
+          <div className="fixed bottom-8 left-1/2 -translate-x-1/2 z-50 flex items-center gap-2 rounded-xl border ring-2 ring-sidebar/70 dark:ring-border/50 backdrop-blur-xl shadow-xl p-2 bg-sidebar/50">
             {scanner?.isCameraActive && (
               <>
                 <ScannerControls
@@ -151,7 +151,6 @@ export function CardGrid() {
                 />
                 {scanner.isConnected && (
                   <Button
-                    variant="outline"
                     onClick={scanner.handleFeed}
                     disabled={!scanner.isReady || scanner.isFeeding}
                   >
@@ -235,7 +234,7 @@ export function CardGrid() {
       </div>
 
       {(scanner?.isCameraActive || selectedIds.size > 0) && (
-        <div className="fixed bottom-8 left-1/2 -translate-x-1/2 z-50 flex items-center gap-2 rounded-xl border backdrop-blur-xl shadow-xl px-3 py-2 bg-sidebar/80">
+        <div className="fixed bottom-8 left-1/2 -translate-x-1/2 z-50 flex items-center gap-2 rounded-xl border ring-2 ring-foreground/20 backdrop-blur-xl shadow-xl p-2 bg-sidebar/70">
           {scanner?.isCameraActive && (
             <>
               <ScannerControls
@@ -247,7 +246,6 @@ export function CardGrid() {
               />
               {scanner.isConnected && (
                 <Button
-                  variant="outline"
                   onClick={scanner.handleFeed}
                   disabled={!scanner.isReady || scanner.isFeeding}
                 >
