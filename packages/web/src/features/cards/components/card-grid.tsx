@@ -1,6 +1,6 @@
+import { DeleteDialog } from "@/components/delete-dialog";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { DeleteDialog } from "@/components/delete-dialog";
 import { useCardFilterSort } from "@/features/cards/api/use-card-filter-sort";
 import { CardDetailPanel } from "@/features/cards/components/card-detail-panel";
 import { CardToolbar } from "@/features/cards/components/card-toolbar";
@@ -133,10 +133,37 @@ export function CardGrid() {
 
   if (cards.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center py-16 text-muted-foreground">
-        <p className="text-sm font-medium">No cards scanned yet</p>
-        <p className="text-xs">Scan a card to get started</p>
-      </div>
+      <>
+        <div className="flex flex-col items-center justify-center py-16 text-muted-foreground">
+          <p className="text-sm font-medium">No cards scanned yet</p>
+          <p className="text-xs">Scan a card to get started</p>
+        </div>
+        {scanner?.isCameraActive && (
+          <div className="fixed bottom-8 left-1/2 -translate-x-1/2 z-50 flex items-center gap-2 rounded-xl border backdrop-blur-xl shadow-xl px-3 py-2 bg-sidebar/80">
+            {scanner?.isCameraActive && (
+              <>
+                <ScannerControls
+                  status={scanner.status}
+                  onForceAddDuplicate={scanner.handleForceAddDuplicate}
+                  onForceScan={scanner.handleForceScan}
+                  onPause={scanner.handlePause}
+                  onResume={scanner.handleResume}
+                />
+                {scanner.isConnected && (
+                  <Button
+                    variant="outline"
+                    onClick={scanner.handleFeed}
+                    disabled={!scanner.isReady || scanner.isFeeding}
+                  >
+                    {scanner.isFeeding ? "Feeding…" : "Feed"}
+                  </Button>
+                )}
+                <ScannerDebug />
+              </>
+            )}
+          </div>
+        )}
+      </>
     );
   }
 
@@ -208,7 +235,7 @@ export function CardGrid() {
       </div>
 
       {(scanner?.isCameraActive || selectedIds.size > 0) && (
-        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 flex items-center gap-2 rounded-xl border backdrop-blur-xl shadow-xl px-3 py-2 bg-sidebar/80">
+        <div className="fixed bottom-8 left-1/2 -translate-x-1/2 z-50 flex items-center gap-2 rounded-xl border backdrop-blur-xl shadow-xl px-3 py-2 bg-sidebar/80">
           {scanner?.isCameraActive && (
             <>
               <ScannerControls
@@ -221,7 +248,6 @@ export function CardGrid() {
               {scanner.isConnected && (
                 <Button
                   variant="outline"
-                  size="sm"
                   onClick={scanner.handleFeed}
                   disabled={!scanner.isReady || scanner.isFeeding}
                 >
