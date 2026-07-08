@@ -92,10 +92,17 @@ type ScryfallBulkCard = {
   image_uris?: { png?: string; large?: string };
 };
 
+const SCRYFALL_HEADERS = {
+  "User-Agent": "MagicVault/1.0",
+  Accept: "application/json",
+};
+
 async function runSync(): Promise<void> {
   addLog("Fetching Scryfall bulk data catalog...");
 
-  const catalogRes = await fetch("https://api.scryfall.com/bulk-data");
+  const catalogRes = await fetch("https://api.scryfall.com/bulk-data", {
+    headers: SCRYFALL_HEADERS,
+  });
   if (!catalogRes.ok) {
     throw new Error(`Scryfall catalog fetch failed: ${catalogRes.status}`);
   }
@@ -104,12 +111,16 @@ async function runSync(): Promise<void> {
   };
 
   const artEntry = catalog.data.find((e) => e.type === "unique_artwork");
-  if (!artEntry) throw new Error("Could not find unique_artwork bulk data entry");
+  if (!artEntry)
+    throw new Error("Could not find unique_artwork bulk data entry");
 
   addLog(`Downloading bulk artwork data...`);
 
-  const bulkRes = await fetch(artEntry.download_uri);
-  if (!bulkRes.ok) throw new Error(`Bulk data download failed: ${bulkRes.status}`);
+  const bulkRes = await fetch(artEntry.download_uri, {
+    headers: SCRYFALL_HEADERS,
+  });
+  if (!bulkRes.ok)
+    throw new Error(`Bulk data download failed: ${bulkRes.status}`);
 
   const cards = (await bulkRes.json()) as ScryfallBulkCard[];
   state = { ...state, total: cards.length };
@@ -152,14 +163,20 @@ async function runSync(): Promise<void> {
     }
 
     try {
-      const imageRes = await fetch(imageUrl);
-      if (!imageRes.ok) throw new Error(`Image fetch failed: ${imageRes.status}`);
+      const imageRes = await fetch(imageUrl, { headers: SCRYFALL_HEADERS });
+      if (!imageRes.ok)
+        throw new Error(`Image fetch failed: ${imageRes.status}`);
       const buffer = Buffer.from(await imageRes.arrayBuffer());
       const embedding = await vectorizeImageFromBuffer(buffer);
 
       await db
         .insert(cardImageVectors)
-        .values({ scryfallId: card.id, name: card.name, setCode: card.set, embedding })
+        .values({
+          scryfallId: card.id,
+          name: card.name,
+          setCode: card.set,
+          embedding,
+        })
         .onConflictDoNothing();
 
       existingSet.add(card.id);
