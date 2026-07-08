@@ -12,7 +12,7 @@ import {
 import { WatcherStack } from "@/components/ui/watcher-stack";
 import { CardFilterPopover } from "@/features/cards/components/card-filter-popover";
 import type { CardToolbarProps } from "@/features/cards/types";
-import { IconDownload, IconTrash } from "@tabler/icons-react";
+import { IconCheckbox, IconDownload, IconTrash } from "@tabler/icons-react";
 import { useState } from "react";
 
 export function CardToolbar({
@@ -27,6 +27,8 @@ export function CardToolbar({
   onFiltersChange,
   activeFilterCount,
   watchers,
+  allSelected,
+  onToggleSelectAll,
 }: CardToolbarProps) {
   const [isClearing, setIsClearing] = useState(false);
   const [clearAllDialogOpen, setClearAllDialogOpen] = useState(false);
@@ -77,6 +79,18 @@ export function CardToolbar({
         onFiltersChange={onFiltersChange}
         activeFilterCount={activeFilterCount}
       />
+      {onToggleSelectAll && (
+        <Button
+          variant="outline"
+          size="icon"
+          onClick={onToggleSelectAll}
+          disabled={!hasCards}
+          className="shrink-0"
+          title={allSelected ? "Deselect all" : "Select all"}
+        >
+          <IconCheckbox className="size-4" />
+        </Button>
+      )}
       {(onExport || onClearAll) && (
         <ButtonGroup>
           <Button

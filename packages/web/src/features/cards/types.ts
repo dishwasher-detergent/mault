@@ -38,6 +38,8 @@ export interface CardToolbarProps {
   onFiltersChange: (filters: CardFilters) => void;
   activeFilterCount: number;
   watchers?: { userId: string; displayName: string }[];
+  allSelected?: boolean;
+  onToggleSelectAll?: () => void;
 }
 
 export interface ScannedCardItemProps {

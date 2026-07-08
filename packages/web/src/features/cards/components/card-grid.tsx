@@ -82,6 +82,21 @@ export function CardGrid() {
     });
   }, []);
 
+  const allSelected =
+    filteredAndSorted.length > 0 &&
+    filteredAndSorted.every((card) => selectedIds.has(card.scanId));
+
+  const toggleSelectAll = useCallback(() => {
+    setSelectedIds((prev) => {
+      const allCurrentlySelected =
+        filteredAndSorted.length > 0 &&
+        filteredAndSorted.every((card) => prev.has(card.scanId));
+      return allCurrentlySelected
+        ? new Set()
+        : new Set(filteredAndSorted.map((card) => card.scanId));
+    });
+  }, [filteredAndSorted]);
+
   const handleBulkDelete = useCallback(() => {
     removeCards(Array.from(selectedIds));
     setSelectedIds(new Set());
@@ -209,6 +224,8 @@ export function CardGrid() {
           onFiltersChange={setFilters}
           activeFilterCount={activeFilterCount}
           watchers={viewers}
+          allSelected={allSelected}
+          onToggleSelectAll={toggleSelectAll}
         />
       </div>
       {filteredAndSorted.length === 0 && (
