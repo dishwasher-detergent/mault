@@ -53,7 +53,7 @@ router.get("/sync", requireAuth, requireRole("admin"), (c) => {
 
 // POST /admin/sync
 router.post("/sync", requireAuth, requireRole("admin"), (c) => {
-  startSync(c.get("userId"));
+  startSync(c.req.header("X-Org-Id"));
   return c.json({ success: true, data: getStatus() });
 });
 

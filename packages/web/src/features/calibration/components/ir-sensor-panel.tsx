@@ -4,6 +4,7 @@ import { Label } from "@/components/ui/label";
 
 interface IrSensorPanelProps {
   irStates: boolean[] | null;
+  hopperHasCards: boolean | null;
   isConnected: boolean;
   isMonitoring: boolean;
   onRead: () => void;
@@ -12,6 +13,7 @@ interface IrSensorPanelProps {
 
 export function IrSensorPanel({
   irStates,
+  hopperHasCards,
   isConnected,
   isMonitoring,
   onRead,
@@ -41,6 +43,11 @@ export function IrSensorPanel({
             </div>
           );
         })}
+        <div className="flex items-center gap-1.5">
+          <Badge variant={hopperHasCards ? "success" : "ghost"}>
+            {hopperHasCards === false ? "Hopper empty" : "Hopper"}
+          </Badge>
+        </div>
       </div>
     </div>
   );

@@ -20,10 +20,17 @@ Adafruit_PWMServoDriver pwm = Adafruit_PWMServoDriver();
 #define IR_PIN_MODULE3 4
 #define IR_TIMEOUT_MS  3000  // max ms to wait for a card before aborting
 
+// Hopper IR sensor — active LOW: pin reads LOW while cards remain in the feeder stack
+#define IR_PIN_HOPPER 5
+
 int irPin(int module) {
   if (module == 1) return IR_PIN_MODULE1;
   if (module == 2) return IR_PIN_MODULE2;
   return IR_PIN_MODULE3;
+}
+
+bool hopperHasCards() {
+  return digitalRead(IR_PIN_HOPPER) == LOW;
 }
 
 // Returns true when the IR sensor at 'module' detects a card within timeoutMs.
@@ -83,30 +90,41 @@ void stopFeeder() {
   pwm.setPin(FEEDER_CHANNEL, 0);  // cut PWM signal entirely to stop 360° servo
 }
 
+enum FeedResult { FEED_DETECTED, FEED_TIMEOUT, FEED_EMPTY };
+
 // Runs the feeder in short pulses, checking module 1 IR between each stop.
-// Stops as soon as a card is detected. Returns false if feederConfig.duration
-// elapses with no card detected. If pulseDuration is 0, the motor runs
-// continuously (no pulse/pause cycling) while IR is polled throughout.
-bool runFeeder() {
+// Stops as soon as a card is detected. Returns FEED_TIMEOUT if feederConfig.duration
+// elapses with no card detected, or FEED_EMPTY if the hopper sensor reports no
+// cards remain in the stack (checked before starting and throughout the feed).
+// If pulseDuration is 0, the motor runs continuously (no pulse/pause cycling)
+// while IR is polled throughout.
+FeedResult runFeeder() {
   unsigned long start = millis();
 
+  if (!hopperHasCards()) return FEED_EMPTY;
+
   if (feederConfig.pulseDuration <= 0) {
-    if (digitalRead(irPin(1)) == LOW) return true;
+    if (digitalRead(irPin(1)) == LOW) return FEED_DETECTED;
     setServoPosition(FEEDER_CHANNEL, feederConfig.speed);
     while (millis() - start < (unsigned long)feederConfig.duration) {
       if (digitalRead(irPin(1)) == LOW) {
         stopFeeder();
-        return true;
+        return FEED_DETECTED;
+      }
+      if (!hopperHasCards()) {
+        stopFeeder();
+        return FEED_EMPTY;
       }
       delay(2);
     }
     stopFeeder();
-    return false;
+    return FEED_TIMEOUT;
   }
 
   while (millis() - start < (unsigned long)feederConfig.duration) {
     // Check before starting the motor — catches cards that arrived during the pause
-    if (digitalRead(irPin(1)) == LOW) return true;
+    if (digitalRead(irPin(1)) == LOW) return FEED_DETECTED;
+    if (!hopperHasCards()) return FEED_EMPTY;
 
     setServoPosition(FEEDER_CHANNEL, feederConfig.speed);
 
@@ -115,16 +133,17 @@ bool runFeeder() {
     while (millis() - pulseStart < (unsigned long)feederConfig.pulseDuration) {
       if (digitalRead(irPin(1)) == LOW) {
         stopFeeder();
-        return true;
+        return FEED_DETECTED;
       }
       delay(2);
     }
 
     stopFeeder();
-    if (digitalRead(irPin(1)) == LOW) return true;
+    if (digitalRead(irPin(1)) == LOW) return FEED_DETECTED;
+    if (!hopperHasCards()) return FEED_EMPTY;
     delay(feederConfig.pauseDuration);
   }
-  return false;
+  return FEED_TIMEOUT;
 }
 
 void setAllNeutral() {
@@ -172,9 +191,16 @@ void routeCard(int bin) {
     return;
   }
 
-  // Run feeder until module 1 IR detects the card (or timeout)
-  if (!runFeeder()) {
-    Serial.println("{\"error\":\"timeout: feeder did not deliver card to module 1\"}");
+  // Run feeder until module 1 IR detects the card (or timeout/empty hopper)
+  FeedResult feedResult = runFeeder();
+  if (feedResult != FEED_DETECTED) {
+    JsonDocument res;
+    res["error"] = feedResult == FEED_EMPTY
+      ? "empty: feeder hopper is out of cards"
+      : "timeout: feeder did not deliver card to module 1";
+    res["empty"] = feedResult == FEED_EMPTY;
+    serializeJson(res, Serial);
+    Serial.println();
     setAllNeutral();
     return;
   }
@@ -394,12 +420,13 @@ void handleCommand(const String& json) {
     return;
   }
 
-  // {"feeder": true} — run feeder until module 1 IR detects a card (or timeout)
+  // {"feeder": true} — run feeder until module 1 IR detects a card (or timeout/empty hopper)
   if (doc["feeder"].is<bool>() && doc["feeder"].as<bool>()) {
-    bool detected = runFeeder();
+    FeedResult result = runFeeder();
     JsonDocument res;
     res["status"] = "ok";
-    res["detected"] = detected;
+    res["detected"] = result == FEED_DETECTED;
+    res["empty"] = result == FEED_EMPTY;
     serializeJson(res, Serial);
     Serial.println();
     return;
@@ -440,7 +467,7 @@ void handleCommand(const String& json) {
     return;
   }
 
-  // {"readIR": true} — read current IR sensor state for all modules
+  // {"readIR": true} — read current IR sensor state for all modules + hopper
   if (doc["readIR"].is<bool>() && doc["readIR"].as<bool>()) {
     JsonDocument res;
     res["status"] = "ok";
@@ -448,6 +475,7 @@ void handleCommand(const String& json) {
     for (int m = 1; m <= NUM_MODULES; m++) {
       ir.add(digitalRead(irPin(m)) == LOW);  // true = card present
     }
+    res["hopper"] = hopperHasCards();  // true = cards remain in feeder stack
     serializeJson(res, Serial);
     Serial.println();
     return;
@@ -470,6 +498,7 @@ void setup() {
   pinMode(IR_PIN_MODULE1, INPUT_PULLUP);
   pinMode(IR_PIN_MODULE2, INPUT_PULLUP);
   pinMode(IR_PIN_MODULE3, INPUT_PULLUP);
+  pinMode(IR_PIN_HOPPER, INPUT_PULLUP);
 
   pwm.begin();
   pwm.setPWMFreq(50);

@@ -1,3 +1,4 @@
+import { reportSerialEvent } from "@/features/notifications/api/notification-settings";
 import type {
   SerialContextValue,
   SerialMessageListener,
@@ -190,6 +191,7 @@ export function SerialProvider({ children }: { children: React.ReactNode }) {
             description:
               "Failed to open port. Make sure no other application is using it.",
           });
+          void reportSerialEvent({ command: "connect", sent: false, response: null });
           return false;
         }
       }
@@ -227,6 +229,7 @@ export function SerialProvider({ children }: { children: React.ReactNode }) {
           toast.error("Device test failed", {
             description: "Connected but got no response. Try reconnecting.",
           });
+          void reportSerialEvent({ command: "test", sent: true, response: null });
         }
       })();
 

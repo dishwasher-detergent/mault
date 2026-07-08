@@ -4,6 +4,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { useBinConfigs } from "@/features/bins/api/use-bin-configs";
+import { reportSerialEvent } from "@/features/notifications/api/notification-settings";
 import { useCardScanner } from "@/features/scanner/api/use-card-scanner";
 import { useScannedCards } from "@/features/scanner/api/use-scanned-cards";
 import { useRegisterScannerIsland } from "@/features/scanner/api/use-scanner-island";
@@ -76,13 +77,14 @@ export function CardScanner({ className, compact }: CardScannerProps) {
       "error" in msg &&
       (msg as Record<string, unknown>).error === "jam"
     ) {
-      const { module, bin } = msg as Record<string, unknown>;
+      const raw = msg as Record<string, unknown>;
       handlePause();
       toast.error("Card jam detected", {
-        description: `Card stuck at module ${module} (heading to bin ${bin}). Check the sorter and resume.`,
+        description: `Card stuck at module ${raw.module} (heading to bin ${raw.bin}). Check the sorter and resume.`,
         duration: Infinity,
         dismissible: true,
       });
+      void reportSerialEvent({ command: "jam", sent: true, response: raw });
     }
   });
 
@@ -94,6 +96,7 @@ export function CardScanner({ className, compact }: CardScannerProps) {
         toast.error("Feed failed", {
           description: "Could not send feeder command.",
         });
+        void reportSerialEvent({ command: "feeder", sent: false, response: null });
         return;
       }
       const response = await receiveResponse(10000);
@@ -101,21 +104,31 @@ export function CardScanner({ className, compact }: CardScannerProps) {
         toast.error("Feed timeout", {
           description: "Feeder did not respond in time.",
         });
+        void reportSerialEvent({ command: "feeder", sent: true, response: null });
         return;
       }
       try {
         const parsed = JSON.parse(response) as Record<string, unknown>;
-        if (parsed.error) {
+        if (parsed.empty) {
+          toast.error("Feeder empty", {
+            description: "No cards remaining in the hopper. Add more cards to continue.",
+            duration: Infinity,
+            dismissible: true,
+          });
+          void reportSerialEvent({ command: "feeder", sent: true, response: parsed });
+        } else if (parsed.error) {
           toast.error("Feeder error", {
             description: String(parsed.error),
             duration: Infinity,
             dismissible: true,
           });
+          void reportSerialEvent({ command: "feeder", sent: true, response: parsed });
         }
       } catch {
         toast.error("Feed error", {
           description: "Unexpected response from feeder.",
         });
+        void reportSerialEvent({ command: "feeder", sent: true, response });
       }
     } finally {
       setIsFeeding(false);

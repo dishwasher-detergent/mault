@@ -18,7 +18,7 @@ import {
   updateCollectionCard,
 } from "@/features/collections/api/collections";
 import { useCollectionLocks } from "@/features/collections/api/use-collection-locks";
-import { reportSortError } from "@/features/notifications/api/notification-settings";
+import { reportSerialEvent } from "@/features/notifications/api/notification-settings";
 import { useCollections } from "@/features/collections/api/use-collections";
 import { useSerial } from "@/features/scanner/api/use-serial";
 import { useScanTimer } from "@/features/scanner/api/use-scan-timer";
@@ -83,6 +83,7 @@ export function ScannedCardsProvider({
       autoFeedRef.current = false;
       setAutoFeedState(false);
       toast.error("Auto-feed failed", { description: "Could not send feeder command." });
+      void reportSerialEvent({ command: "auto-feed", sent: false, response: null });
       return;
     }
     const response = await serialRef.current.receiveResponse(10000);
@@ -90,11 +91,21 @@ export function ScannedCardsProvider({
       autoFeedRef.current = false;
       setAutoFeedState(false);
       toast.error("Auto-feed timeout", { description: "Feeder did not respond in time." });
+      void reportSerialEvent({ command: "auto-feed", sent: true, response: null });
       return;
     }
     try {
       const parsed = JSON.parse(response) as Record<string, unknown>;
-      if (parsed.error) {
+      if (parsed.empty) {
+        autoFeedRef.current = false;
+        setAutoFeedState(false);
+        toast.error("Feeder empty", {
+          description: "No cards remaining in the hopper. Add more cards to continue.",
+          duration: Infinity,
+          dismissible: true,
+        });
+        void reportSerialEvent({ command: "auto-feed", sent: true, response: parsed });
+      } else if (parsed.error) {
         autoFeedRef.current = false;
         setAutoFeedState(false);
         toast.error("Feeder error", {
@@ -102,11 +113,13 @@ export function ScannedCardsProvider({
           duration: Infinity,
           dismissible: true,
         });
+        void reportSerialEvent({ command: "auto-feed", sent: true, response: parsed });
       }
     } catch {
       autoFeedRef.current = false;
       setAutoFeedState(false);
       toast.error("Auto-feed error", { description: "Unexpected response from feeder." });
+      void reportSerialEvent({ command: "auto-feed", sent: true, response });
     }
   }, []);
 
@@ -200,22 +213,51 @@ export function ScannedCardsProvider({
     if (matchedBin && serialRef.current.isConnected && serialRef.current.isReady) {
       serialRef.current.sendBin(matchedBin.binNumber).then((response) => {
         if (!response) {
-          const errMsg = `No response from sorter for bin ${matchedBin.binNumber}.`;
-          toast.error("Routing failed", { description: errMsg });
-          void reportSortError(card.name, matchedBin.binNumber, errMsg);
+          toast.error("Routing failed", {
+            description: `No response from sorter for bin ${matchedBin.binNumber}.`,
+          });
+          void reportSerialEvent({
+            command: "bin",
+            sent: true,
+            response: null,
+            cardName: card.name,
+            binNumber: matchedBin.binNumber,
+          });
           autoFeedRef.current = false;
           setAutoFeedState(false);
           return;
         }
         const res = response as Record<string, unknown>;
-        if (res.error) {
-          const errMsg = String(res.error);
-          toast.error("Sorter error", {
-            description: errMsg,
+        if (res.empty) {
+          toast.error("Feeder empty", {
+            description: "No cards remaining in the hopper. Add more cards to continue.",
             duration: Infinity,
             dismissible: true,
           });
-          void reportSortError(card.name, matchedBin.binNumber, errMsg);
+          void reportSerialEvent({
+            command: "bin",
+            sent: true,
+            response: res,
+            cardName: card.name,
+            binNumber: matchedBin.binNumber,
+          });
+          autoFeedRef.current = false;
+          setAutoFeedState(false);
+          return;
+        }
+        if (res.error) {
+          toast.error("Sorter error", {
+            description: String(res.error),
+            duration: Infinity,
+            dismissible: true,
+          });
+          void reportSerialEvent({
+            command: "bin",
+            sent: true,
+            response: res,
+            cardName: card.name,
+            binNumber: matchedBin.binNumber,
+          });
           autoFeedRef.current = false;
           setAutoFeedState(false);
           return;
@@ -235,16 +277,44 @@ export function ScannedCardsProvider({
           toast.error("Routing failed", {
             description: `No response from sorter for catch-all bin ${catchAll.binNumber}.`,
           });
+          void reportSerialEvent({
+            command: "bin",
+            sent: true,
+            response: null,
+            binNumber: catchAll.binNumber,
+          });
           autoFeedRef.current = false;
           setAutoFeedState(false);
           return;
         }
         const res = response as Record<string, unknown>;
+        if (res.empty) {
+          toast.error("Feeder empty", {
+            description: "No cards remaining in the hopper. Add more cards to continue.",
+            duration: Infinity,
+            dismissible: true,
+          });
+          void reportSerialEvent({
+            command: "bin",
+            sent: true,
+            response: res,
+            binNumber: catchAll.binNumber,
+          });
+          autoFeedRef.current = false;
+          setAutoFeedState(false);
+          return;
+        }
         if (res.error) {
           toast.error("Sorter error", {
             description: String(res.error),
             duration: Infinity,
             dismissible: true,
+          });
+          void reportSerialEvent({
+            command: "bin",
+            sent: true,
+            response: res,
+            binNumber: catchAll.binNumber,
           });
           autoFeedRef.current = false;
           setAutoFeedState(false);

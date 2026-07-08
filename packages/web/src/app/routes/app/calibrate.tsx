@@ -155,6 +155,7 @@ export default function CalibratePage() {
     isSampleRunning,
     handleSampleRun,
     irStates,
+    hopperHasCards,
     irMonitoring,
     handleReadIR,
     handleToggleIrMonitor,
@@ -196,6 +197,7 @@ export default function CalibratePage() {
 
       <IrSensorPanel
         irStates={irStates}
+        hopperHasCards={hopperHasCards}
         isConnected={isConnected}
         isMonitoring={irMonitoring}
         onRead={handleReadIR}

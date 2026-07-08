@@ -60,6 +60,7 @@ export function useCalibrationPage() {
   const [isSampleRunning, setIsSampleRunning] = useState(false);
 
   const [irStates, setIrStates] = useState<boolean[] | null>(null);
+  const [hopperHasCards, setHopperHasCards] = useState<boolean | null>(null);
   const [irMonitoring, setIrMonitoring] = useState(false);
   const irBusyRef = useRef(false);
 
@@ -273,6 +274,7 @@ export function useCalibrationPage() {
       if (!response) return;
       const parsed = JSON.parse(response);
       if (Array.isArray(parsed.ir)) setIrStates(parsed.ir as boolean[]);
+      if (typeof parsed.hopper === "boolean") setHopperHasCards(parsed.hopper);
     } catch {
       // ignore parse errors
     } finally {
@@ -298,6 +300,7 @@ export function useCalibrationPage() {
     if (!isConnected) {
       setIrMonitoring(false);
       setIrStates(null);
+      setHopperHasCards(null);
     }
   }, [isConnected]);
 
@@ -338,6 +341,7 @@ export function useCalibrationPage() {
     isSampleRunning,
     handleSampleRun,
     irStates,
+    hopperHasCards,
     irMonitoring,
     handleReadIR: readIR,
     handleToggleIrMonitor,

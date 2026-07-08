@@ -50,7 +50,7 @@ export function cancelSync(): void {
   }
 }
 
-export function startSync(userId?: string): void {
+export function startSync(orgId?: string): void {
   if (state.status === "running") return;
 
   cancelFlag = false;
@@ -70,8 +70,8 @@ export function startSync(userId?: string): void {
     const msg = err instanceof Error ? err.message : String(err);
     addLog(`Fatal error: ${msg}`);
     emit("error", { message: msg });
-    if (userId) {
-      void sendDiscordNotification(userId, {
+    if (orgId) {
+      void sendDiscordNotification(orgId, {
         title: "Magic Vault — Sync Failed",
         description: `The card database sync job encountered a fatal error.\n\n**Error:** ${msg}`,
         color: 0xed4245,

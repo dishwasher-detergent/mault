@@ -7,7 +7,9 @@ import type { NotificationTestType } from "../api/notification-settings";
 import { useNotificationSettings } from "../api/use-notification-settings";
 
 const TEST_TYPES: { type: NotificationTestType; label: string }[] = [
-  { type: "sort-error", label: "Sort Error" },
+  { type: "sorter-error", label: "Sorter Error" },
+  { type: "feeder-empty", label: "Feeder Empty" },
+  { type: "card-jam", label: "Card Jam" },
   { type: "card-search-error", label: "Card Search Error" },
   { type: "sync-failure", label: "Sync Failure" },
 ];
@@ -38,8 +40,9 @@ export function DiscordWebhookSettings() {
         <Label>Discord Webhook</Label>
       </div>
       <p className="text-sm text-muted-foreground">
-        Receive a notification when card sorting fails, a card search errors, or
-        the sync job crashes.
+        Receive a notification when card sorting fails, the device reports an
+        error (jams, empty feeder, connection issues), a card search errors,
+        or the sync job crashes.
       </p>
       <div className="flex gap-2">
         <Input

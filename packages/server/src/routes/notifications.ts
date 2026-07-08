@@ -1,8 +1,12 @@
-import type { NotificationSettings } from "@magic-vault/shared";
+import type {
+  NotificationSettings,
+  SerialEventReport,
+} from "@magic-vault/shared";
 import { Hono } from "hono";
 import { authQuery } from "../db";
 import { notificationSettings } from "../db/schema";
 import { sendDiscordNotification } from "../lib/discord";
+import { classifySerialEvent } from "../lib/serial-events";
 import { requireAuth, requireOrg, type AppEnv } from "../middleware/auth";
 
 const router = new Hono<AppEnv>();
@@ -15,7 +19,11 @@ router.get("/", requireAuth, requireOrg, async (c) => {
       const settings: NotificationSettings = {
         discordWebhookUrl: row?.discordWebhookUrl ?? null,
       };
-      return { success: true, message: "Loaded notification settings.", data: settings };
+      return {
+        success: true,
+        message: "Loaded notification settings.",
+        data: settings,
+      };
     });
     return c.json(result);
   } catch (err) {
@@ -35,13 +43,20 @@ router.put("/", requireAuth, requireOrg, async (c) => {
         .values({ discordWebhookUrl: body.discordWebhookUrl, orgId })
         .onConflictDoUpdate({
           target: [notificationSettings.orgId],
-          set: { discordWebhookUrl: body.discordWebhookUrl, updatedAt: new Date() },
+          set: {
+            discordWebhookUrl: body.discordWebhookUrl,
+            updatedAt: new Date(),
+          },
         });
       const row = await tx.query.notificationSettings.findFirst();
       const saved: NotificationSettings = {
         discordWebhookUrl: row?.discordWebhookUrl ?? null,
       };
-      return { success: true, message: "Saved notification settings.", data: saved };
+      return {
+        success: true,
+        message: "Saved notification settings.",
+        data: saved,
+      };
     });
     return c.json(result);
   } catch (err) {
@@ -51,10 +66,20 @@ router.put("/", requireAuth, requireOrg, async (c) => {
 });
 
 const TEST_EMBEDS: Record<string, { title: string; description: string }> = {
-  "sort-error": {
-    title: "Magic Vault — Sort Error [TEST]",
+  "sorter-error": {
+    title: "Magic Vault — Sorter Error [TEST]",
     description:
-      "**Card:** Lightning Bolt\n**Bin:** 3\n**Error:** No response from sorter for bin 3.",
+      "**Card:** Lightning Bolt\n**Bin:** 3\n**Error:** No response from the device in time.",
+  },
+  "feeder-empty": {
+    title: "Magic Vault — Feeder Empty [TEST]",
+    description:
+      "No cards remaining in the hopper. Add more cards to continue.",
+  },
+  "card-jam": {
+    title: "Magic Vault — Card Jam Detected [TEST]",
+    description:
+      "Card stuck at module 2 (heading to bin 5). Check the sorter and resume.",
   },
   "card-search-error": {
     title: "Magic Vault — Card Search Error [TEST]",
@@ -72,7 +97,10 @@ router.post("/test", requireAuth, requireOrg, async (c) => {
   const { type } = await c.req.json<{ type: string }>();
   const embed = TEST_EMBEDS[type];
   if (!embed) {
-    return c.json({ success: false, message: "Unknown notification type." }, 400);
+    return c.json(
+      { success: false, message: "Unknown notification type." },
+      400,
+    );
   }
   const orgId = c.get("orgId");
   await sendDiscordNotification(orgId, {
@@ -83,21 +111,20 @@ router.post("/test", requireAuth, requireOrg, async (c) => {
   return c.json({ success: true, message: "Test notification sent." });
 });
 
-// POST /notifications/sort-error
-router.post("/sort-error", requireAuth, requireOrg, async (c) => {
-  const { cardName, binNumber, error } = await c.req.json<{
-    cardName: string;
-    binNumber: number;
-    error: string;
-  }>();
-  const orgId = c.get("orgId");
-  void sendDiscordNotification(orgId, {
-    title: "Magic Vault — Sort Error",
-    description: `**Card:** ${cardName}\n**Bin:** ${binNumber}\n**Error:** ${error}`,
-    color: 0xed4245,
-    timestamp: new Date().toISOString(),
-  });
-  return c.json({ success: true, message: "Sort error reported." });
+// POST /notifications/serial-event — raw serial command/response pair reported
+router.post("/serial-event", requireAuth, requireOrg, async (c) => {
+  const event = await c.req.json<SerialEventReport>();
+  const classified = classifySerialEvent(event);
+  if (classified) {
+    const orgId = c.get("orgId");
+    void sendDiscordNotification(orgId, {
+      title: `Magic Vault — ${classified.title}`,
+      description: classified.description,
+      color: 0xed4245,
+      timestamp: new Date().toISOString(),
+    });
+  }
+  return c.json({ success: true, message: "Serial event reported." });
 });
 
 export { router as notificationsRouter };
