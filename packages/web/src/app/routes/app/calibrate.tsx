@@ -50,7 +50,7 @@ function FeederHistoryBody({ entry }: { entry: FeederConfigAuditEntry }) {
     <div className="grid grid-cols-2 gap-x-4 gap-y-0.5">
       <span className="text-muted-foreground">Speed</span><span>{c.speed}</span>
       <span className="text-muted-foreground">Duration</span><span>{c.duration}ms</span>
-      <span className="text-muted-foreground">Pulse</span><span>{c.pulseDuration}ms</span>
+      <span className="text-muted-foreground">Pulse</span><span>{c.pulseDuration <= 0 ? "Continuous" : `${c.pulseDuration}ms`}</span>
       <span className="text-muted-foreground">Pause</span><span>{c.pauseDuration}ms</span>
     </div>
   );

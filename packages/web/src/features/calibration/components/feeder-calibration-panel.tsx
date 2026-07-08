@@ -161,26 +161,33 @@ export function FeederCalibrationPanel({
           ) : null}
         </div>
         <div className="flex flex-col gap-2">
-          <p className="text-xs text-muted-foreground">Pulse Duration (ms)</p>
+          <div className="flex items-center justify-between">
+            <p className="text-xs text-muted-foreground">Pulse Duration (ms)</p>
+            {pulseDurationValue <= 0 && (
+              <p className="text-xs text-muted-foreground italic">Continuous</p>
+            )}
+          </div>
           <ButtonGroup className="w-full">
             <Button
               variant="secondary"
-              disabled={!isConnected || pulseDurationValue <= 10}
-              onClick={() => onPulseDurationChange(Math.max(10, pulseDurationValue - 10))}
+              disabled={!isConnected || pulseDurationValue <= 0}
+              onClick={() => onPulseDurationChange(Math.max(0, pulseDurationValue - 10))}
               className="px-2 text-xs"
             >
               -10
             </Button>
             <Button
               variant="secondary"
-              disabled={!isConnected || pulseDurationValue <= 10}
-              onClick={() => onPulseDurationChange(Math.max(10, pulseDurationValue - 1))}
+              disabled={!isConnected || pulseDurationValue <= 0}
+              onClick={() => onPulseDurationChange(Math.max(0, pulseDurationValue - 1))}
               className="px-2"
             >
               -
             </Button>
             <div className="flex flex-row flex-1 bg-background border-y justify-center px-2 items-center">
-              <p className="font-bold text-sm">{pulseDurationValue} ms</p>
+              <p className="font-bold text-sm">
+                {pulseDurationValue <= 0 ? "Continuous" : `${pulseDurationValue} ms`}
+              </p>
             </div>
             <Button
               variant="secondary"
@@ -202,6 +209,14 @@ export function FeederCalibrationPanel({
           <ButtonGroup className="w-full">
             <Button
               variant="secondary"
+              disabled={!isConnected || pulseDurationValue > 0}
+              onClick={() => onPulseDurationChange(0)}
+              className="flex-1"
+            >
+              Continuous Feed
+            </Button>
+            <Button
+              variant="secondary"
               disabled={!isConnected}
               onClick={onSetPulseDuration}
               className="flex-1"
@@ -213,7 +228,9 @@ export function FeederCalibrationPanel({
             <Skeleton className="h-3 w-16 rounded" />
           ) : calibration ? (
             <p className="text-xs text-muted-foreground text-center">
-              {calibration.pulseDuration} ms
+              {calibration.pulseDuration <= 0
+                ? "Continuous"
+                : `${calibration.pulseDuration} ms`}
             </p>
           ) : null}
         </div>
@@ -222,16 +239,16 @@ export function FeederCalibrationPanel({
           <ButtonGroup className="w-full">
             <Button
               variant="secondary"
-              disabled={!isConnected || pauseDurationValue <= 10}
-              onClick={() => onPauseDurationChange(Math.max(10, pauseDurationValue - 10))}
+              disabled={!isConnected || pauseDurationValue <= 0}
+              onClick={() => onPauseDurationChange(Math.max(0, pauseDurationValue - 10))}
               className="px-2 text-xs"
             >
               -10
             </Button>
             <Button
               variant="secondary"
-              disabled={!isConnected || pauseDurationValue <= 10}
-              onClick={() => onPauseDurationChange(Math.max(10, pauseDurationValue - 1))}
+              disabled={!isConnected || pauseDurationValue <= 0}
+              onClick={() => onPauseDurationChange(Math.max(0, pauseDurationValue - 1))}
               className="px-2"
             >
               -

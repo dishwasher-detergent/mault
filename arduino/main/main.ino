@@ -51,7 +51,7 @@ ModuleConfig moduleConfig[NUM_MODULES] = {
 struct FeederConfig {
   int speed;         // PWM pulse for forward motion
   int duration;      // overall timeout (ms) — max total time before giving up
-  int pulseDuration; // ms to run the motor per pulse
+  int pulseDuration; // ms to run the motor per pulse (0 = continuous feed, no pulsing)
   int pauseDuration; // ms to pause between pulses (IR checked after each stop)
 };
 
@@ -85,9 +85,25 @@ void stopFeeder() {
 
 // Runs the feeder in short pulses, checking module 1 IR between each stop.
 // Stops as soon as a card is detected. Returns false if feederConfig.duration
-// elapses with no card detected.
+// elapses with no card detected. If pulseDuration is 0, the motor runs
+// continuously (no pulse/pause cycling) while IR is polled throughout.
 bool runFeeder() {
   unsigned long start = millis();
+
+  if (feederConfig.pulseDuration <= 0) {
+    if (digitalRead(irPin(1)) == LOW) return true;
+    setServoPosition(FEEDER_CHANNEL, feederConfig.speed);
+    while (millis() - start < (unsigned long)feederConfig.duration) {
+      if (digitalRead(irPin(1)) == LOW) {
+        stopFeeder();
+        return true;
+      }
+      delay(2);
+    }
+    stopFeeder();
+    return false;
+  }
+
   while (millis() - start < (unsigned long)feederConfig.duration) {
     // Check before starting the motor — catches cards that arrived during the pause
     if (digitalRead(irPin(1)) == LOW) return true;
