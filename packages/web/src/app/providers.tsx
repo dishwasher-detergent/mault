@@ -9,6 +9,7 @@ import { CameraProvider } from "@/features/scanner/api/use-camera";
 import { ScannedCardsProvider } from "@/features/scanner/api/use-scanned-cards";
 import { ScannerIslandProvider } from "@/features/scanner/api/use-scanner-island";
 import { SerialProvider } from "@/features/scanner/api/use-serial";
+import { DocumentTitleUpdater } from "@/features/scanner/components/document-title-updater";
 import { orgSettingsQueryOptions } from "@/features/companies/api/org-settings";
 import { useOrg } from "@/features/companies/api/use-organization";
 import { applyPrimaryColor, resetPrimaryColor, THEME_COLORS } from "@/lib/primary-color";
@@ -58,6 +59,7 @@ export function AppProviders({ children }: { children: React.ReactNode }) {
                     {children}
                     <SyncIndicator />
                     <OrgPickerModal />
+                    <DocumentTitleUpdater />
                   </ScannedCardsProvider>
                 </FeederConfigProvider>
               </ModuleConfigsProvider>
