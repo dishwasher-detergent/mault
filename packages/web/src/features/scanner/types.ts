@@ -39,6 +39,7 @@ export interface ScannedCardsContextValue {
   removeCard: (scanId: string) => void;
   removeCards: (scanIds: string[]) => void;
   correctCard: (scanId: string, card: ScryfallCard) => void;
+  toggleFoil: (scanId: string, isFoil: boolean) => void;
   clearCards: () => void;
 }
 

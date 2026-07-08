@@ -14,6 +14,7 @@ import {
   releaseScanLock,
   removeCollectionCard,
   removeCollectionCards,
+  setCollectionCardFoil,
   updateCollectionCard,
 } from "@/features/collections/api/collections";
 import { useCollectionLocks } from "@/features/collections/api/use-collection-locks";
@@ -295,6 +296,18 @@ export function ScannedCardsProvider({
     }
   }, []);
 
+  const toggleFoil = useCallback((scanId: string, isFoil: boolean) => {
+    const collection = activeCollectionRef.current;
+    setCards((prev) =>
+      prev.map((entry) => (entry.scanId === scanId ? { ...entry, isFoil } : entry)),
+    );
+    if (collection) {
+      setCollectionCardFoil(collection.guid, scanId, isFoil).catch((err) =>
+        console.error("Failed to update foil status:", err),
+      );
+    }
+  }, []);
+
   const clearCards = useCallback(() => {
     const collection = activeCollectionRef.current;
     setCards([]);
@@ -321,6 +334,7 @@ export function ScannedCardsProvider({
         removeCard,
         removeCards,
         correctCard,
+        toggleFoil,
         clearCards,
       }}
     >

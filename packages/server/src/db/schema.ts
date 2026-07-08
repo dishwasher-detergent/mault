@@ -187,6 +187,7 @@ export const collectionCards = pgTable(
     scannedAt: timestamp("scanned_at").notNull(),
     binNumber: integer("bin_number"),
     capturedImageDataUrl: text("captured_image_data_url"),
+    isFoil: boolean("is_foil").notNull().default(false),
     orgId: text("org_id").notNull(),
     createdAt: timestamp("created_at").defaultNow().notNull(),
   },

@@ -1,7 +1,9 @@
 import { Button } from "@/components/ui/button";
 import { ButtonGroup } from "@/components/ui/button-group";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Switch } from "@/components/ui/switch";
 import {
   Select,
   SelectContent,
@@ -48,6 +50,7 @@ interface CardDetailPanelProps {
   currentCard?: ScryfallCardWithDistance;
   alternativeMatches?: ScryfallCardWithDistance[];
   capturedImageUrl?: string;
+  isFoil?: boolean;
   onPrev?: () => void;
   onNext?: () => void;
   hasPrev?: boolean;
@@ -63,6 +66,7 @@ export function CardDetailPanel({
   currentCard,
   alternativeMatches,
   capturedImageUrl,
+  isFoil = false,
   onPrev,
   onNext,
   hasPrev,
@@ -80,7 +84,7 @@ export function CardDetailPanel({
   const [selectedId, setSelectedId] = useState<string | undefined>(undefined);
   const prevScanIdRef = useRef<string | undefined>(undefined);
 
-  const { addCard, correctCard } = useScannedCards();
+  const { addCard, correctCard, toggleFoil } = useScannedCards();
 
   useEffect(() => {
     if (!currentCard) return;
@@ -400,6 +404,16 @@ export function CardDetailPanel({
                     );
                   })()}
               </div>
+              <Label className="flex items-center gap-2 w-fit">
+                <Switch
+                  checked={isFoil}
+                  onCheckedChange={(checked) => {
+                    if (scanId) toggleFoil(scanId, checked);
+                  }}
+                  disabled={!scanId}
+                />
+                Foil
+              </Label>
               <div className="flex gap-3 pt-1">
                 <Button
                   variant="outline"

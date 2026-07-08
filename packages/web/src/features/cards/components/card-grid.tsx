@@ -173,6 +173,7 @@ export function CardGrid() {
         currentCard={openEntry.card}
         alternativeMatches={openEntry.alternativeMatches}
         capturedImageUrl={openEntry.capturedImageUrl}
+        isFoil={openEntry.isFoil}
         onClose={() => setOpenScanId(null)}
         onRemove={() => {
           removeCard(openEntry.scanId);
@@ -228,6 +229,7 @@ export function CardGrid() {
               onToggleSelect={() => toggleSelect(card.scanId)}
               isNew={card.scanId === newestScanId}
               hasAlternatives={!!card.alternativeMatches?.length}
+              isFoil={card.isFoil}
             />
           ))}
         </AnimatePresence>

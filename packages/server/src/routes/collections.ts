@@ -35,6 +35,7 @@ function toScannedCard(row: {
   scannedAt: Date;
   binNumber: number | null;
   capturedImageDataUrl?: string | null;
+  isFoil?: boolean | null;
 }): ScannedCard {
   return {
     scanId: row.guid!,
@@ -42,6 +43,7 @@ function toScannedCard(row: {
     scannedAt: row.scannedAt.getTime(),
     binNumber: row.binNumber ?? undefined,
     capturedImageUrl: row.capturedImageDataUrl ?? undefined,
+    isFoil: row.isFoil ?? undefined,
   };
 }
 
@@ -305,6 +307,7 @@ router.get("/:guid/cards", requireAuth, requireOrg, async (c) => {
           scannedAt: collectionCards.scannedAt,
           binNumber: collectionCards.binNumber,
           capturedImageDataUrl: collectionCards.capturedImageDataUrl,
+          isFoil: collectionCards.isFoil,
         })
         .from(collectionCards)
         .where(eq(collectionCards.collectionId, collection.id))
@@ -324,7 +327,7 @@ router.post("/:guid/cards", requireAuth, requireOrg, async (c) => {
   const guid = c.req.param("guid");
   const userId = c.get("userId");
   const orgId = c.get("orgId");
-  const { scanId, card, scannedAt, binNumber, capturedImageUrl } = await c.req.json<ScannedCard>();
+  const { scanId, card, scannedAt, binNumber, capturedImageUrl, isFoil } = await c.req.json<ScannedCard>();
 
   const displayName = await getUserDisplayName(userId);
   if (!acquireLock(guid, userId, orgId, displayName)) {
@@ -347,6 +350,7 @@ router.post("/:guid/cards", requireAuth, requireOrg, async (c) => {
         scannedAt: new Date(scannedAt),
         binNumber: binNumber ?? null,
         capturedImageDataUrl: capturedImageUrl ?? null,
+        isFoil: isFoil ?? false,
         orgId,
       }).onConflictDoNothing();
 
@@ -356,7 +360,7 @@ router.post("/:guid/cards", requireAuth, requireOrg, async (c) => {
         .set({ updatedAt: new Date() })
         .where(eq(collections.id, collection.id));
 
-      return { success: true, data: { scanId, card, scannedAt, binNumber, capturedImageUrl } as ScannedCard };
+      return { success: true, data: { scanId, card, scannedAt, binNumber, capturedImageUrl, isFoil } as ScannedCard };
     });
     if (result.success) emitToSession(guid, "card_added", result.data);
     return c.json(result);
@@ -367,26 +371,44 @@ router.post("/:guid/cards", requireAuth, requireOrg, async (c) => {
   }
 });
 
-// PUT /collections/:guid/cards/:scanId — update card (correction)
+// PUT /collections/:guid/cards/:scanId — update card (correction and/or foil status)
 router.put("/:guid/cards/:scanId", requireAuth, requireOrg, async (c) => {
   const { guid, scanId } = c.req.param();
-  const { card, binNumber } = await c.req.json<{ card: ScryfallCardWithDistance; binNumber?: number }>();
+  const { card, binNumber, isFoil } = await c.req.json<{
+    card?: ScryfallCardWithDistance;
+    binNumber?: number;
+    isFoil?: boolean;
+  }>();
   try {
     const result = await authQuery(c.get("jwtClaims"), async (tx) => {
       const existing = await tx.query.collectionCards.findFirst({
         where: (t, { eq }) => eq(t.guid, scanId),
-        columns: { id: true, scannedAt: true },
+        columns: { id: true, scannedAt: true, card: true, binNumber: true, isFoil: true },
       });
       if (!existing) return { success: false, message: "Card not found." };
 
+      const updates: Partial<typeof collectionCards.$inferInsert> = {};
+      if (card !== undefined) {
+        updates.card = card;
+        updates.scryfallId = card.id;
+        updates.binNumber = binNumber ?? null;
+      }
+      if (isFoil !== undefined) updates.isFoil = isFoil;
+
       await tx
         .update(collectionCards)
-        .set({ card, binNumber: binNumber ?? null, scryfallId: card.id })
+        .set(updates)
         .where(eq(collectionCards.id, existing.id));
 
       return {
         success: true,
-        data: toScannedCard({ guid: scanId, card, scannedAt: existing.scannedAt, binNumber: binNumber ?? null }),
+        data: toScannedCard({
+          guid: scanId,
+          card: (card ?? existing.card) as ScryfallCardWithDistance,
+          scannedAt: existing.scannedAt,
+          binNumber: card !== undefined ? (binNumber ?? null) : existing.binNumber,
+          isFoil: isFoil !== undefined ? isFoil : existing.isFoil,
+        }),
       };
     });
     if (result.success) emitToSession(guid, "card_updated", result.data);
@@ -519,6 +541,7 @@ router.get("/:guid/stream", async (c) => {
             scannedAt: collectionCards.scannedAt,
             binNumber: collectionCards.binNumber,
             capturedImageDataUrl: collectionCards.capturedImageDataUrl,
+            isFoil: collectionCards.isFoil,
           })
           .from(collectionCards)
           .where(eq(collectionCards.collectionId, collection.id))

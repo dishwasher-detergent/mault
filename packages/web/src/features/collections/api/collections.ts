@@ -60,6 +60,16 @@ export async function updateCollectionCard(
   });
 }
 
+export async function setCollectionCardFoil(
+  guid: string,
+  scanId: string,
+  isFoil: boolean,
+): Promise<Result<ScannedCard>> {
+  return apiPut<Result<ScannedCard>>(`/api/collections/${guid}/cards/${scanId}`, {
+    isFoil,
+  });
+}
+
 export async function removeCollectionCard(
   guid: string,
   scanId: string,

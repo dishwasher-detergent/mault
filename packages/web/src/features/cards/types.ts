@@ -48,4 +48,5 @@ export interface ScannedCardItemProps {
   onToggleSelect?: () => void;
   isNew?: boolean;
   hasAlternatives?: boolean;
+  isFoil?: boolean;
 }

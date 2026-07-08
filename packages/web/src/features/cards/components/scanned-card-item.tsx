@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import type { ScannedCardItemProps } from "@/features/cards/types";
 import { cn } from "@/lib/utils";
 import { getCardImageUris } from "@magic-vault/shared";
-import { IconCheck, IconHelpCircle } from "@tabler/icons-react";
+import { IconCheck, IconHelpCircle, IconSparkles } from "@tabler/icons-react";
 import { motion } from "framer-motion";
 import { memo } from "react";
 
@@ -15,6 +15,7 @@ export const ScannedCardItem = memo(function ScannedCardItem({
   onToggleSelect,
   isNew = false,
   hasAlternatives = false,
+  isFoil = false,
 }: ScannedCardItemProps) {
   return (
     <motion.div
@@ -58,6 +59,17 @@ export const ScannedCardItem = memo(function ScannedCardItem({
               title="Multiple close matches — tap to review"
             >
               <IconHelpCircle className="size-3 text-white" />
+            </div>
+          )}
+          {isFoil && (
+            <div
+              className={cn(
+                "absolute top-1 z-20 rounded-full p-0.5 shadow-md bg-gradient-to-br from-fuchsia-400 via-cyan-400 to-amber-300",
+                hasAlternatives ? "left-6" : "left-1",
+              )}
+              title="Foil"
+            >
+              <IconSparkles className="size-3 text-white" />
             </div>
           )}
           <div className="absolute bottom-1 left-1 right-1 flex gap-1 items-center justify-between z-20">

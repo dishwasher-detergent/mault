@@ -51,4 +51,5 @@ export interface ScannedCard {
   binNumber?: number;
   capturedImageUrl?: string;
   alternativeMatches?: ScryfallCardWithDistance[];
+  isFoil?: boolean;
 }
