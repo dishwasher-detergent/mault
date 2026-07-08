@@ -92,7 +92,7 @@ type ScryfallBulkCard = {
   image_uris?: { png?: string; large?: string };
 };
 
-const SCRYFALL_HEADERS = {
+export const SCRYFALL_HEADERS = {
   "User-Agent": "MagicVault/1.0",
   Accept: "application/json",
 };

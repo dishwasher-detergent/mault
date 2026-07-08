@@ -1,11 +1,23 @@
+import { count, ilike } from "drizzle-orm";
 import { Hono } from "hono";
 import { streamSSE } from "hono/streaming";
-import { requireAuth, requireRole, verifyToken, getUserRole, type AppEnv } from "../middleware/auth";
-import { cancelSync, getStatus, startSync, subscribeSSE } from "../lib/sync-job";
 import { db } from "../db";
 import { cardImageVectors } from "../db/schema";
-import { count, ilike } from "drizzle-orm";
+import {
+  cancelSync,
+  getStatus,
+  SCRYFALL_HEADERS,
+  startSync,
+  subscribeSSE,
+} from "../lib/sync-job";
 import { vectorizeImageFromBuffer } from "../lib/vectorize";
+import {
+  getUserRole,
+  requireAuth,
+  requireRole,
+  verifyToken,
+  type AppEnv,
+} from "../middleware/auth";
 
 const router = new Hono<AppEnv>();
 
@@ -15,9 +27,11 @@ router.get("/sync/stream", async (c) => {
   if (!token) return c.json({ success: false, message: "Unauthorized" }, 401);
 
   const payload = await verifyToken(token);
-  if (!payload?.sub) return c.json({ success: false, message: "Unauthorized" }, 401);
+  if (!payload?.sub)
+    return c.json({ success: false, message: "Unauthorized" }, 401);
   const role = await getUserRole(payload.sub);
-  if (role !== "admin") return c.json({ success: false, message: "Forbidden" }, 403);
+  if (role !== "admin")
+    return c.json({ success: false, message: "Forbidden" }, 403);
 
   return streamSSE(c, async (stream) => {
     const unsubscribe = subscribeSSE((event, data) => {
@@ -55,7 +69,9 @@ router.get("/cards", requireAuth, requireRole("admin"), async (c) => {
   const limit = Math.min(100, Math.max(1, Number(c.req.query("limit") ?? 50)));
   const search = (c.req.query("search") ?? "").trim();
   const offset = (page - 1) * limit;
-  const where = search ? ilike(cardImageVectors.name, `%${search}%`) : undefined;
+  const where = search
+    ? ilike(cardImageVectors.name, `%${search}%`)
+    : undefined;
 
   const [rows, [{ total }]] = await Promise.all([
     db
@@ -78,46 +94,69 @@ router.get("/cards", requireAuth, requireRole("admin"), async (c) => {
 });
 
 // POST /admin/cards/:scryfallId/revectorize — re-fetch image and regenerate embedding
-router.post("/cards/:scryfallId/revectorize", requireAuth, requireRole("admin"), async (c) => {
-  const scryfallId = c.req.param("scryfallId");
+router.post(
+  "/cards/:scryfallId/revectorize",
+  requireAuth,
+  requireRole("admin"),
+  async (c) => {
+    const scryfallId = c.req.param("scryfallId");
 
-  const scryfallRes = await fetch(`https://api.scryfall.com/cards/${scryfallId}`);
-  if (!scryfallRes.ok) {
-    return c.json({ success: false, message: "Card not found on Scryfall" }, 404);
-  }
-  const card = (await scryfallRes.json()) as {
-    name: string;
-    set: string;
-    image_uris?: { png?: string; large?: string };
-  };
+    const scryfallRes = await fetch(
+      `https://api.scryfall.com/cards/${scryfallId}`,
+      {
+        headers: SCRYFALL_HEADERS,
+      },
+    );
 
-  const imageUrl = card.image_uris?.png ?? card.image_uris?.large;
-  if (!imageUrl) {
-    return c.json({ success: false, message: "No image available for this card" }, 400);
-  }
+    if (!scryfallRes.ok) {
+      return c.json(
+        { success: false, message: "Card not found on Scryfall" },
+        404,
+      );
+    }
+    const card = (await scryfallRes.json()) as {
+      name: string;
+      set: string;
+      image_uris?: { png?: string; large?: string };
+    };
 
-  const imageRes = await fetch(imageUrl);
-  if (!imageRes.ok) {
-    return c.json({ success: false, message: "Failed to download card image" }, 502);
-  }
-  const buffer = Buffer.from(await imageRes.arrayBuffer());
-  const embedding = await vectorizeImageFromBuffer(buffer);
+    const imageUrl = card.image_uris?.png ?? card.image_uris?.large;
+    if (!imageUrl) {
+      return c.json(
+        { success: false, message: "No image available for this card" },
+        400,
+      );
+    }
 
-  await db
-    .insert(cardImageVectors)
-    .values({ scryfallId, name: card.name, setCode: card.set, embedding })
-    .onConflictDoUpdate({
-      target: cardImageVectors.scryfallId,
-      set: { embedding, updatedAt: new Date() },
-    });
+    const imageRes = await fetch(imageUrl);
+    if (!imageRes.ok) {
+      return c.json(
+        { success: false, message: "Failed to download card image" },
+        502,
+      );
+    }
+    const buffer = Buffer.from(await imageRes.arrayBuffer());
+    const embedding = await vectorizeImageFromBuffer(buffer);
 
-  return c.json({ success: true, message: `Re-vectorized: ${card.name}` });
-});
+    await db
+      .insert(cardImageVectors)
+      .values({ scryfallId, name: card.name, setCode: card.set, embedding })
+      .onConflictDoUpdate({
+        target: cardImageVectors.scryfallId,
+        set: { embedding, updatedAt: new Date() },
+      });
+
+    return c.json({ success: true, message: `Re-vectorized: ${card.name}` });
+  },
+);
 
 // POST /admin/cards/dump — delete all card vectors
 router.post("/cards/dump", requireAuth, requireRole("admin"), async (c) => {
   if (getStatus().status === "running") {
-    return c.json({ success: false, message: "Cannot dump while sync is running" }, 409);
+    return c.json(
+      { success: false, message: "Cannot dump while sync is running" },
+      409,
+    );
   }
 
   await db.delete(cardImageVectors);

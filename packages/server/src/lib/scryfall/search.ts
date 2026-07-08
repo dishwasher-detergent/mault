@@ -1,6 +1,6 @@
+import type { Result, ScryfallCard } from "@magic-vault/shared";
 import { QUERY_MIN_LENGTH } from "@magic-vault/shared";
-import type { Result } from "@magic-vault/shared";
-import type { ScryfallCard } from "@magic-vault/shared";
+import { SCRYFALL_HEADERS } from "../sync-job";
 
 export async function Search(query: string): Promise<Result<ScryfallCard[]>> {
   if (!query || query.trim().length < QUERY_MIN_LENGTH) {
@@ -12,7 +12,9 @@ export async function Search(query: string): Promise<Result<ScryfallCard[]>> {
 
   const scryfallUrl = `https://api.scryfall.com/cards/search?q=${encodeURIComponent(query)}&unique=prints&order=released&dir=desc`;
 
-  const response = await fetch(scryfallUrl);
+  const response = await fetch(scryfallUrl, {
+    headers: SCRYFALL_HEADERS,
+  });
 
   if (response.status === 404) {
     return {
@@ -38,7 +40,9 @@ export async function Search(query: string): Promise<Result<ScryfallCard[]>> {
 }
 
 export async function SearchById(id: string): Promise<Result<ScryfallCard>> {
-  const response = await fetch(`https://api.scryfall.com/cards/${id}`);
+  const response = await fetch(`https://api.scryfall.com/cards/${id}`, {
+    headers: SCRYFALL_HEADERS,
+  });
 
   if (!response.ok) {
     return {
