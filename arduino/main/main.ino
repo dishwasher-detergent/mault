@@ -100,12 +100,16 @@ void stopFeeder() {
   pwm.setPin(FEEDER_CHANNEL, 0);  // cut PWM signal entirely to stop 360° servo
 }
 
-// Keeps the feeder running for feederConfig.settleDuration more ms once the IR
-// first sees the card, then stops it. Without this, the motor cuts out the instant
-// the beam is broken — before the card has actually traveled into module 1's
-// mechanism — leaving it stopped part-way down the chute.
+// Stops the feeder once the IR sees the card. Cards still behind it in the
+// hopper push the current one the rest of the way into module 1, so no extra
+// run time is needed. But the last card has nothing behind it to push it in —
+// so if the hopper is now empty, keep the motor running for
+// feederConfig.settleDuration more ms before stopping, to carry it the rest
+// of the way into the mechanism.
 void settleAndStopFeeder() {
-  delay(feederConfig.settleDuration);
+  if (!hopperHasCards()) {
+    delay(feederConfig.settleDuration);
+  }
   stopFeeder();
 }
 
@@ -157,10 +161,13 @@ FeedResult runFeeder() {
 
     stopFeeder();
     if (digitalRead(irPin(1)) == LOW) {
-      // Card arrived during the pause window — motor's already off, so give it
-      // one more push for the settle duration before stopping again.
-      setServoPosition(FEEDER_CHANNEL, feederConfig.speed);
-      settleAndStopFeeder();
+      // Card arrived during the pause window — motor's already off. Only the
+      // last card (hopper now empty) needs an extra push to fully seat it.
+      if (!hopperHasCards()) {
+        setServoPosition(FEEDER_CHANNEL, feederConfig.speed);
+        delay(feederConfig.settleDuration);
+        stopFeeder();
+      }
       return FEED_DETECTED;
     }
     if (!hopperHasCards()) return FEED_EMPTY;
