@@ -12,7 +12,13 @@ router.get("/", requireAuth, requireOrg, async (c) => {
     const result = await authQuery(c.get("jwtClaims"), async (tx) => {
       const row = await tx.query.feederConfigs.findFirst();
       const calibration: FeederCalibration = row
-        ? { speed: row.speed, duration: row.duration, pulseDuration: row.pulseDuration, pauseDuration: row.pauseDuration }
+        ? {
+            speed: row.speed,
+            duration: row.duration,
+            pulseDuration: row.pulseDuration,
+            pauseDuration: row.pauseDuration,
+            settleDuration: row.settleDuration,
+          }
         : { ...DEFAULT_FEEDER_CALIBRATION };
       return { success: true, message: "Loaded feeder config.", data: calibration };
     });
@@ -41,7 +47,13 @@ router.put("/", requireAuth, requireOrg, async (c) => {
 
       const row = await tx.query.feederConfigs.findFirst();
       const saved: FeederCalibration = row
-        ? { speed: row.speed, duration: row.duration, pulseDuration: row.pulseDuration, pauseDuration: row.pauseDuration }
+        ? {
+            speed: row.speed,
+            duration: row.duration,
+            pulseDuration: row.pulseDuration,
+            pauseDuration: row.pauseDuration,
+            settleDuration: row.settleDuration,
+          }
         : calibration;
       return { success: true, message: "Saved feeder config.", data: saved };
     });
@@ -65,7 +77,13 @@ router.get("/history", requireAuth, requireOrg, async (c) => {
         message: "Loaded history.",
         data: rows.map((r) => ({
           guid: r.guid!,
-          calibration: { speed: r.speed, duration: r.duration, pulseDuration: r.pulseDuration, pauseDuration: r.pauseDuration } satisfies FeederCalibration,
+          calibration: {
+            speed: r.speed,
+            duration: r.duration,
+            pulseDuration: r.pulseDuration,
+            pauseDuration: r.pauseDuration,
+            settleDuration: r.settleDuration,
+          } satisfies FeederCalibration,
           createdAt: r.createdAt.toISOString(),
         })),
       };
@@ -88,7 +106,13 @@ router.post("/history/:guid/revert", requireAuth, requireOrg, async (c) => {
       });
       if (!entry) return { success: false, message: "Audit record not found." };
 
-      const calibration: FeederCalibration = { speed: entry.speed, duration: entry.duration, pulseDuration: entry.pulseDuration, pauseDuration: entry.pauseDuration };
+      const calibration: FeederCalibration = {
+        speed: entry.speed,
+        duration: entry.duration,
+        pulseDuration: entry.pulseDuration,
+        pauseDuration: entry.pauseDuration,
+        settleDuration: entry.settleDuration,
+      };
 
       await tx
         .insert(feederConfigs)

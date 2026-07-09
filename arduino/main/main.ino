@@ -23,6 +23,13 @@ Adafruit_PWMServoDriver pwm = Adafruit_PWMServoDriver();
 // Hopper IR sensor — active LOW: pin reads LOW while cards remain in the feeder stack
 #define IR_PIN_HOPPER 5
 
+// Declared here (before any function) because the Arduino builder hoists
+// auto-generated function prototypes to the top of the file, above any type
+// defined later — if FeedResult were declared next to runFeeder() instead,
+// the hoisted `FeedResult runFeeder();` prototype would precede it and fail
+// to compile ("FeedResult does not name a type").
+enum FeedResult { FEED_DETECTED, FEED_TIMEOUT, FEED_EMPTY };
+
 int irPin(int module) {
   if (module == 1) return IR_PIN_MODULE1;
   if (module == 2) return IR_PIN_MODULE2;
@@ -56,13 +63,16 @@ ModuleConfig moduleConfig[NUM_MODULES] = {
 };
 
 struct FeederConfig {
-  int speed;         // PWM pulse for forward motion
-  int duration;      // overall timeout (ms) — max total time before giving up
-  int pulseDuration; // ms to run the motor per pulse (0 = continuous feed, no pulsing)
-  int pauseDuration; // ms to pause between pulses (IR checked after each stop)
+  int speed;          // PWM pulse for forward motion
+  int duration;       // overall timeout (ms) — max total time before giving up
+  int pulseDuration;  // ms to run the motor per pulse (0 = continuous feed, no pulsing)
+  int pauseDuration;  // ms to pause between pulses (IR checked after each stop)
+  int settleDuration; // ms to keep feeding after the IR first sees the card, so it
+                       // travels all the way into the module 1 mechanism instead of
+                       // stopping right at the sensor's beam
 };
 
-FeederConfig feederConfig = {400, 3000, 80, 50};
+FeederConfig feederConfig = {400, 3000, 80, 50, 150};
 
 // Routing delays (ms) — tune to match your hardware timing
 #define DELAY_CARD_ENTER   300  // time for card to settle after target bottom opens
@@ -90,14 +100,21 @@ void stopFeeder() {
   pwm.setPin(FEEDER_CHANNEL, 0);  // cut PWM signal entirely to stop 360° servo
 }
 
-enum FeedResult { FEED_DETECTED, FEED_TIMEOUT, FEED_EMPTY };
+// Keeps the feeder running for feederConfig.settleDuration more ms once the IR
+// first sees the card, then stops it. Without this, the motor cuts out the instant
+// the beam is broken — before the card has actually traveled into module 1's
+// mechanism — leaving it stopped part-way down the chute.
+void settleAndStopFeeder() {
+  delay(feederConfig.settleDuration);
+  stopFeeder();
+}
 
 // Runs the feeder in short pulses, checking module 1 IR between each stop.
-// Stops as soon as a card is detected. Returns FEED_TIMEOUT if feederConfig.duration
-// elapses with no card detected, or FEED_EMPTY if the hopper sensor reports no
-// cards remain in the stack (checked before starting and throughout the feed).
-// If pulseDuration is 0, the motor runs continuously (no pulse/pause cycling)
-// while IR is polled throughout.
+// Keeps feeding (see settleAndStopFeeder) once a card is detected. Returns
+// FEED_TIMEOUT if feederConfig.duration elapses with no card detected, or
+// FEED_EMPTY if the hopper sensor reports no cards remain in the stack (checked
+// before starting and throughout the feed). If pulseDuration is 0, the motor runs
+// continuously (no pulse/pause cycling) while IR is polled throughout.
 FeedResult runFeeder() {
   unsigned long start = millis();
 
@@ -108,7 +125,7 @@ FeedResult runFeeder() {
     setServoPosition(FEEDER_CHANNEL, feederConfig.speed);
     while (millis() - start < (unsigned long)feederConfig.duration) {
       if (digitalRead(irPin(1)) == LOW) {
-        stopFeeder();
+        settleAndStopFeeder();
         return FEED_DETECTED;
       }
       if (!hopperHasCards()) {
@@ -128,18 +145,24 @@ FeedResult runFeeder() {
 
     setServoPosition(FEEDER_CHANNEL, feederConfig.speed);
 
-    // Poll IR mid-pulse so we stop the moment the card trips the sensor
+    // Poll IR mid-pulse so we catch the moment the card trips the sensor
     unsigned long pulseStart = millis();
     while (millis() - pulseStart < (unsigned long)feederConfig.pulseDuration) {
       if (digitalRead(irPin(1)) == LOW) {
-        stopFeeder();
+        settleAndStopFeeder();
         return FEED_DETECTED;
       }
       delay(2);
     }
 
     stopFeeder();
-    if (digitalRead(irPin(1)) == LOW) return FEED_DETECTED;
+    if (digitalRead(irPin(1)) == LOW) {
+      // Card arrived during the pause window — motor's already off, so give it
+      // one more push for the settle duration before stopping again.
+      setServoPosition(FEEDER_CHANNEL, feederConfig.speed);
+      settleAndStopFeeder();
+      return FEED_DETECTED;
+    }
     if (!hopperHasCards()) return FEED_EMPTY;
     delay(feederConfig.pauseDuration);
   }
@@ -452,13 +475,14 @@ void handleCommand(const String& json) {
     return;
   }
 
-  // {"setFeederConfig": {"speed": N, "duration": N, "pulseDuration": N, "pauseDuration": N}}
+  // {"setFeederConfig": {"speed": N, "duration": N, "pulseDuration": N, "pauseDuration": N, "settleDuration": N}}
   if (!doc["setFeederConfig"].isNull()) {
     JsonObject cfg = doc["setFeederConfig"];
-    feederConfig.speed         = cfg["speed"]         | feederConfig.speed;
-    feederConfig.duration      = cfg["duration"]      | feederConfig.duration;
-    feederConfig.pulseDuration = cfg["pulseDuration"] | feederConfig.pulseDuration;
-    feederConfig.pauseDuration = cfg["pauseDuration"] | feederConfig.pauseDuration;
+    feederConfig.speed          = cfg["speed"]          | feederConfig.speed;
+    feederConfig.duration       = cfg["duration"]       | feederConfig.duration;
+    feederConfig.pulseDuration  = cfg["pulseDuration"]  | feederConfig.pulseDuration;
+    feederConfig.pauseDuration  = cfg["pauseDuration"]  | feederConfig.pauseDuration;
+    feederConfig.settleDuration = cfg["settleDuration"] | feederConfig.settleDuration;
     stopFeeder();
     JsonDocument res;
     res["status"] = "ok";

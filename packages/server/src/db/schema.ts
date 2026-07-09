@@ -140,6 +140,7 @@ export const feederConfigs = pgTable(
     duration: integer("duration").notNull().default(3000),
     pulseDuration: integer("pulse_duration").notNull().default(80),
     pauseDuration: integer("pause_duration").notNull().default(50),
+    settleDuration: integer("settle_duration").notNull().default(150),
     createdAt: timestamp("created_at").defaultNow().notNull(),
     updatedAt: timestamp("updated_at").defaultNow().notNull(),
   },
@@ -301,6 +302,7 @@ export const feederConfigAudit = pgTable(
     duration: integer("duration").notNull(),
     pulseDuration: integer("pulse_duration").notNull(),
     pauseDuration: integer("pause_duration").notNull(),
+    settleDuration: integer("settle_duration").notNull(),
     createdAt: timestamp("created_at").defaultNow().notNull(),
   },
   (table) => [
@@ -312,8 +314,6 @@ export const feederConfigAudit = pgTable(
     }),
   ],
 ).enableRLS();
-
-// ─── Relations ────────────────────────────────────────────────────────────────
 
 export const binSetRelations = relations(binSets, ({ many }) => ({
   bins: many(bins),
@@ -330,9 +330,12 @@ export const collectionRelations = relations(collections, ({ many }) => ({
   cards: many(collectionCards),
 }));
 
-export const collectionCardsRelations = relations(collectionCards, ({ one }) => ({
-  collection: one(collections, {
-    fields: [collectionCards.collectionId],
-    references: [collections.id],
+export const collectionCardsRelations = relations(
+  collectionCards,
+  ({ one }) => ({
+    collection: one(collections, {
+      fields: [collectionCards.collectionId],
+      references: [collections.id],
+    }),
   }),
-}));
+);

@@ -28,6 +28,7 @@ export interface FeederCalibration {
   duration: number;
   pulseDuration: number;
   pauseDuration: number;
+  settleDuration: number;
 }
 
 export const DEFAULT_FEEDER_CALIBRATION: FeederCalibration = {
@@ -35,4 +36,5 @@ export const DEFAULT_FEEDER_CALIBRATION: FeederCalibration = {
   duration: 3000,
   pulseDuration: 80,
   pauseDuration: 50,
+  settleDuration: 150,
 };

@@ -68,6 +68,7 @@ export function useCalibrationPage() {
   const [feederDurationValue, setFeederDurationValue] = useState(feederConfig.duration);
   const [feederPulseDurationValue, setFeederPulseDurationValue] = useState(feederConfig.pulseDuration);
   const [feederPauseDurationValue, setFeederPauseDurationValue] = useState(feederConfig.pauseDuration);
+  const [feederSettleDurationValue, setFeederSettleDurationValue] = useState(feederConfig.settleDuration);
   const feederDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const handleControl = useCallback(
@@ -244,6 +245,10 @@ export function useCalibrationPage() {
     setFeederPauseDurationValue(value);
   }, []);
 
+  const handleFeederSettleDurationChange = useCallback((value: number) => {
+    setFeederSettleDurationValue(value);
+  }, []);
+
   const handleFeederSetSpeed = useCallback(() => {
     saveFeeder({ ...feederConfig, speed: feederSpeedValue });
   }, [feederConfig, feederSpeedValue, saveFeeder]);
@@ -259,6 +264,10 @@ export function useCalibrationPage() {
   const handleFeederSetPauseDuration = useCallback(() => {
     saveFeeder({ ...feederConfig, pauseDuration: feederPauseDurationValue });
   }, [feederConfig, feederPauseDurationValue, saveFeeder]);
+
+  const handleFeederSetSettleDuration = useCallback(() => {
+    saveFeeder({ ...feederConfig, settleDuration: feederSettleDurationValue });
+  }, [feederConfig, feederSettleDurationValue, saveFeeder]);
 
   const handleFeed = useCallback(() => {
     sendCommand(JSON.stringify({ feeder: true }));
@@ -329,14 +338,17 @@ export function useCalibrationPage() {
     feederDurationValue,
     feederPulseDurationValue,
     feederPauseDurationValue,
+    feederSettleDurationValue,
     handleFeederSpeedChange,
     handleFeederDurationChange,
     handleFeederPulseDurationChange,
     handleFeederPauseDurationChange,
+    handleFeederSettleDurationChange,
     handleFeederSetSpeed,
     handleFeederSetDuration,
     handleFeederSetPulseDuration,
     handleFeederSetPauseDuration,
+    handleFeederSetSettleDuration,
     handleFeed,
     isSampleRunning,
     handleSampleRun,

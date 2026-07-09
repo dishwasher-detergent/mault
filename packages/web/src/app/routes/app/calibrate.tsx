@@ -52,6 +52,7 @@ function FeederHistoryBody({ entry }: { entry: FeederConfigAuditEntry }) {
       <span className="text-muted-foreground">Duration</span><span>{c.duration}ms</span>
       <span className="text-muted-foreground">Pulse</span><span>{c.pulseDuration <= 0 ? "Continuous" : `${c.pulseDuration}ms`}</span>
       <span className="text-muted-foreground">Pause</span><span>{c.pauseDuration}ms</span>
+      <span className="text-muted-foreground">Settle</span><span>{c.settleDuration}ms</span>
     </div>
   );
 }
@@ -143,14 +144,17 @@ export default function CalibratePage() {
     feederDurationValue,
     feederPulseDurationValue,
     feederPauseDurationValue,
+    feederSettleDurationValue,
     handleFeederSpeedChange,
     handleFeederDurationChange,
     handleFeederPulseDurationChange,
     handleFeederPauseDurationChange,
+    handleFeederSettleDurationChange,
     handleFeederSetSpeed,
     handleFeederSetDuration,
     handleFeederSetPulseDuration,
     handleFeederSetPauseDuration,
+    handleFeederSetSettleDuration,
     handleFeed,
     isSampleRunning,
     handleSampleRun,
@@ -230,6 +234,7 @@ export default function CalibratePage() {
           durationValue={feederDurationValue}
           pulseDurationValue={feederPulseDurationValue}
           pauseDurationValue={feederPauseDurationValue}
+          settleDurationValue={feederSettleDurationValue}
           calibration={feederConfig}
           isLoading={isLoading}
           isConnected={isConnected}
@@ -237,10 +242,12 @@ export default function CalibratePage() {
           onDurationChange={handleFeederDurationChange}
           onPulseDurationChange={handleFeederPulseDurationChange}
           onPauseDurationChange={handleFeederPauseDurationChange}
+          onSettleDurationChange={handleFeederSettleDurationChange}
           onSetSpeed={handleFeederSetSpeed}
           onSetDuration={handleFeederSetDuration}
           onSetPulseDuration={handleFeederSetPulseDuration}
           onSetPauseDuration={handleFeederSetPauseDuration}
+          onSetSettleDuration={handleFeederSetSettleDuration}
         />
       </div>
 

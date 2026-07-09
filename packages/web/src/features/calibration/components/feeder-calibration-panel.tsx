@@ -8,6 +8,7 @@ interface FeederCalibrationPanelProps {
   durationValue: number;
   pulseDurationValue: number;
   pauseDurationValue: number;
+  settleDurationValue: number;
   calibration: FeederCalibration | undefined;
   isLoading: boolean;
   isConnected: boolean;
@@ -15,10 +16,12 @@ interface FeederCalibrationPanelProps {
   onDurationChange: (value: number) => void;
   onPulseDurationChange: (value: number) => void;
   onPauseDurationChange: (value: number) => void;
+  onSettleDurationChange: (value: number) => void;
   onSetSpeed: () => void;
   onSetDuration: () => void;
   onSetPulseDuration: () => void;
   onSetPauseDuration: () => void;
+  onSetSettleDuration: () => void;
 }
 
 export function FeederCalibrationPanel({
@@ -26,6 +29,7 @@ export function FeederCalibrationPanel({
   durationValue,
   pulseDurationValue,
   pauseDurationValue,
+  settleDurationValue,
   calibration,
   isLoading,
   isConnected,
@@ -33,10 +37,12 @@ export function FeederCalibrationPanel({
   onDurationChange,
   onPulseDurationChange,
   onPauseDurationChange,
+  onSettleDurationChange,
   onSetSpeed,
   onSetDuration,
   onSetPulseDuration,
   onSetPauseDuration,
+  onSetSettleDuration,
 }: FeederCalibrationPanelProps) {
   return (
     <div className="grid grid-cols-1 md:grid-cols-3">
@@ -288,6 +294,67 @@ export function FeederCalibrationPanel({
           ) : calibration ? (
             <p className="text-xs text-muted-foreground text-center">
               {calibration.pauseDuration} ms
+            </p>
+          ) : null}
+        </div>
+        <div className="flex flex-col gap-2">
+          <p className="text-xs text-muted-foreground">Settle Duration (ms)</p>
+          <p className="text-[10px] text-muted-foreground/70">
+            Extra time to keep feeding once the module 1 sensor sees the card, so it
+            travels all the way into the mechanism before the motor stops.
+          </p>
+          <ButtonGroup className="w-full">
+            <Button
+              variant="secondary"
+              disabled={!isConnected || settleDurationValue <= 0}
+              onClick={() => onSettleDurationChange(Math.max(0, settleDurationValue - 10))}
+              className="px-2 text-xs"
+            >
+              -10
+            </Button>
+            <Button
+              variant="secondary"
+              disabled={!isConnected || settleDurationValue <= 0}
+              onClick={() => onSettleDurationChange(Math.max(0, settleDurationValue - 1))}
+              className="px-2"
+            >
+              -
+            </Button>
+            <div className="flex flex-row flex-1 bg-background border-y justify-center px-2 items-center">
+              <p className="font-bold text-sm">{settleDurationValue} ms</p>
+            </div>
+            <Button
+              variant="secondary"
+              disabled={!isConnected}
+              onClick={() => onSettleDurationChange(settleDurationValue + 1)}
+              className="px-2"
+            >
+              +
+            </Button>
+            <Button
+              variant="secondary"
+              disabled={!isConnected}
+              onClick={() => onSettleDurationChange(settleDurationValue + 10)}
+              className="px-2 text-xs"
+            >
+              +10
+            </Button>
+          </ButtonGroup>
+          <ButtonGroup className="w-full">
+            <Button
+              variant="secondary"
+              disabled={!isConnected}
+              onClick={onSetSettleDuration}
+              className="flex-1"
+            >
+              Set Settle Duration
+            </Button>
+          </ButtonGroup>
+          {isLoading ? (
+            <Skeleton className="h-3 w-16 rounded" />
+          ) : calibration ? (
+            <p className="text-xs text-muted-foreground text-center">
+              {calibration.settleDuration} ms
             </p>
           ) : null}
         </div>
