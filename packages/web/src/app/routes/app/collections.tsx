@@ -1,5 +1,5 @@
-import { Button } from "@/components/ui/button";
 import { DeleteDialog } from "@/components/delete-dialog";
+import { Button } from "@/components/ui/button";
 import { Field, FieldError, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { DynamicDialog } from "@/components/ui/responsive-dialog";
@@ -18,11 +18,12 @@ import {
 } from "@/schemas/collections.schema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
+  IconCheck,
   IconEdit,
-  IconPlayerPlay,
   IconFolders,
   IconLayoutGrid,
   IconLoader2,
+  IconPlayerPlay,
   IconPlus,
   IconTrash,
 } from "@tabler/icons-react";
@@ -212,19 +213,13 @@ export default function CollectionsPage() {
           return (
             <div
               key={collection.guid}
-              className="group flex items-center gap-3 px-4 py-3"
+              className="flex items-center gap-3 px-4 py-3"
             >
+              <IconCheck className="size-4 text-primary" />
               <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2">
-                  <p className="text-sm font-medium truncate">
-                    {collection.name}
-                  </p>
-                  {isActive && (
-                    <span className="shrink-0 text-[10px] font-medium px-1.5 py-0.5 rounded-full bg-primary/10 text-primary border border-primary/20">
-                      Active
-                    </span>
-                  )}
-                </div>
+                <p className="text-sm font-medium truncate">
+                  {collection.name}
+                </p>
                 <p className="text-xs text-muted-foreground">
                   {collection.cardCount}{" "}
                   {collection.cardCount === 1 ? "card" : "cards"} ·{" "}
@@ -232,7 +227,7 @@ export default function CollectionsPage() {
                 </p>
               </div>
 
-              <div className="flex items-center gap-1 shrink-0 opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition-opacity">
+              <div className="flex items-center gap-1 shrink-0">
                 {!isActive && (
                   <Tooltip>
                     <TooltipTrigger

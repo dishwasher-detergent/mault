@@ -16,21 +16,31 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { collectionsQueryOptions, releaseScanLock } from "@/features/collections/api/collections";
+import {
+  collectionsQueryOptions,
+  releaseScanLock,
+} from "@/features/collections/api/collections";
 import { useCollectionLocks } from "@/features/collections/api/use-collection-locks";
 import { useCollections } from "@/features/collections/api/use-collections";
 import { useOrg } from "@/features/companies/api/use-organization";
-import { toast } from "sonner";
 import {
   createCollectionSchema,
   type CreateCollectionFormValues,
 } from "@/schemas/collections.schema";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { IconEdit, IconLock, IconLockOpen, IconLoader2, IconPlus, IconShare } from "@tabler/icons-react";
+import {
+  IconEdit,
+  IconLoader2,
+  IconLock,
+  IconLockOpen,
+  IconPlus,
+  IconShare,
+} from "@tabler/icons-react";
 import { useQuery } from "@tanstack/react-query";
 import { useCallback, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { Link } from "react-router-dom";
+import { toast } from "sonner";
 
 export function CollectionSwitcher() {
   const {
@@ -42,7 +52,10 @@ export function CollectionSwitcher() {
     activateCollection,
   } = useCollections();
   const { activeOrg } = useOrg();
-  const { isLoading } = useQuery({ ...collectionsQueryOptions, enabled: !!activeOrg });
+  const { isLoading } = useQuery({
+    ...collectionsQueryOptions,
+    enabled: !!activeOrg,
+  });
   const { locks, currentUserId, isLockedByOther } = useCollectionLocks();
   const [createOpen, setCreateOpen] = useState(false);
   const [releasing, setReleasing] = useState(false);
@@ -102,11 +115,17 @@ export function CollectionSwitcher() {
   const handleShare = useCallback(() => {
     if (!activeCollection) return;
     const url = `${window.location.origin}/app/monitor/${activeCollection.guid}`;
-    navigator.clipboard.writeText(url).then(() => {
-      toast.success("Monitor link copied", { description: "Share this link with org members to let them watch the session." });
-    }).catch(() => {
-      toast.error("Could not copy link", { description: url });
-    });
+    navigator.clipboard
+      .writeText(url)
+      .then(() => {
+        toast.success("Monitor link copied", {
+          description:
+            "Share this link with org members to let them watch the session.",
+        });
+      })
+      .catch(() => {
+        toast.error("Could not copy link", { description: url });
+      });
   }, [activeCollection]);
 
   if (isLoading) {
@@ -128,7 +147,10 @@ export function CollectionSwitcher() {
           value={activeCollection?.guid ?? ""}
           onValueChange={(guid) => activateCollection(guid!)}
         >
-          <SelectTrigger className="flex-1 overflow-hidden" disabled={isActivating}>
+          <SelectTrigger
+            className="flex-1 overflow-hidden"
+            disabled={isActivating}
+          >
             <SelectValue placeholder="No collection selected">
               <span className="flex items-center gap-1.5 min-w-0">
                 {isActivating && (
@@ -147,12 +169,19 @@ export function CollectionSwitcher() {
             {collections.map((c) => {
               const lockedByOther = isLockedByOther(c.guid);
               return (
-                <SelectItem key={c.guid} value={c.guid} disabled={lockedByOther}>
+                <SelectItem
+                  key={c.guid}
+                  value={c.guid}
+                  disabled={lockedByOther}
+                >
                   <span className="truncate">{c.name}</span>
                   {lockedByOther && (
-                    <IconLock size={11} className="ml-1 shrink-0 text-muted-foreground" />
+                    <IconLock
+                      size={11}
+                      className="ml-1 shrink-0 text-muted-foreground"
+                    />
                   )}
-                  <span className="ml-auto pl-2 text-xs text-muted-foreground tabular-nums">
+                  <span className="ml-auto pl-2 pr-6 pt-0.5 text-xs text-muted-foreground tabular-nums">
                     {c.cardCount}
                   </span>
                 </SelectItem>
@@ -206,7 +235,11 @@ export function CollectionSwitcher() {
                   onClick={handleReleaseLock}
                   className="text-amber-500 border-amber-500/40 hover:bg-amber-500/10"
                 >
-                  {releasing ? <IconLoader2 className="animate-spin" /> : <IconLockOpen />}
+                  {releasing ? (
+                    <IconLoader2 className="animate-spin" />
+                  ) : (
+                    <IconLockOpen />
+                  )}
                 </Button>
               }
             />
@@ -226,7 +259,10 @@ export function CollectionSwitcher() {
           }
           footer={
             <>
-              <Button variant="outline" onClick={() => handleCreateDialogChange(false)}>
+              <Button
+                variant="outline"
+                onClick={() => handleCreateDialogChange(false)}
+              >
                 Cancel
               </Button>
               <Button
@@ -246,7 +282,9 @@ export function CollectionSwitcher() {
               control={form.control}
               render={({ field, fieldState }) => (
                 <Field data-invalid={fieldState.invalid || undefined}>
-                  <FieldLabel htmlFor="collection-name">Collection name</FieldLabel>
+                  <FieldLabel htmlFor="collection-name">
+                    Collection name
+                  </FieldLabel>
                   <Input
                     {...field}
                     id="collection-name"
