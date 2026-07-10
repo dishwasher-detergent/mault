@@ -1,13 +1,5 @@
 import { neon } from "@/lib/auth/client";
 import { useNavigate } from "react-router-dom";
-import { LandingCta } from "./landing/cta";
-import { LandingFeatures } from "./landing/features";
-import { LandingFooter } from "./landing/footer";
-import { LandingHero } from "./landing/hero";
-import { LandingNav } from "./landing/nav";
-import { LandingPipeline } from "./landing/pipeline";
-import { LandingRarity } from "./landing/rarity";
-import { LandingStats } from "./landing/stats";
 
 export default function LandingPage() {
   const { data, isPending } = neon.auth.useSession();
@@ -20,15 +12,6 @@ export default function LandingPage() {
   }
 
   return (
-    <div className="min-h-screen bg-neutral-950 text-neutral-100">
-      <LandingNav isSignedIn={isSignedIn} onSignOut={handleSignOut} />
-      <LandingHero isSignedIn={isSignedIn} onSignOut={handleSignOut} />
-      <LandingStats />
-      <LandingFeatures />
-      <LandingPipeline />
-      <LandingRarity />
-      <LandingCta isSignedIn={isSignedIn} />
-      <LandingFooter />
-    </div>
+    <div className="min-h-screen bg-neutral-950 text-neutral-100">Landing</div>
   );
 }
