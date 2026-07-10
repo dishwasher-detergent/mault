@@ -54,8 +54,8 @@ export function LandingFeatures() {
           Everything you need to get organized
         </h2>
         <p className="mt-3 text-sm/relaxed text-muted-foreground md:text-base/relaxed">
-          Magic Vault handles the sorting so you can spend more time playing
-          and less time digging through boxes.
+          Magic Vault handles the sorting so you can spend more time playing and
+          less time digging through boxes.
         </p>
       </div>
 
@@ -63,7 +63,7 @@ export function LandingFeatures() {
         {FEATURES.map((feature) => (
           <div
             key={feature.title}
-            className="flex flex-col gap-3 rounded-lg border bg-card p-5 ring-1 ring-foreground/10"
+            className="flex flex-col gap-3 rounded-lg border bg-card p-5"
           >
             <span className="grid size-9 shrink-0 place-items-center rounded-lg bg-primary/10 text-primary">
               <feature.icon size={18} />

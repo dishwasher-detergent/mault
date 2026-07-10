@@ -1,10 +1,6 @@
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import {
-  IconBrandGithub,
-  IconCube,
-  IconDownload,
-} from "@tabler/icons-react";
+import { IconBrandGithub, IconCube, IconDownload } from "@tabler/icons-react";
 
 const REPO_URL = "https://github.com/dishwasher-detergent/mault";
 const MODEL_URL = `${REPO_URL}/tree/master/3d%20model`;
@@ -17,13 +13,13 @@ export function LandingOpenSource() {
           Fully open source
         </h2>
         <p className="mt-3 text-sm/relaxed text-muted-foreground md:text-base/relaxed">
-          The software and the physical sorter are both free to build,
-          inspect, and modify. Grab the code and print your own.
+          The software and the physical sorter are both free to build, inspect,
+          and modify. Grab the code and print your own.
         </p>
       </div>
 
       <div className="mt-12 grid gap-4 sm:grid-cols-2">
-        <div className="flex flex-col gap-3 rounded-lg border bg-card p-6 ring-1 ring-foreground/10">
+        <div className="flex flex-col gap-3 rounded-lg border bg-card p-6">
           <span className="grid size-9 shrink-0 place-items-center rounded-lg bg-primary/10 text-primary">
             <IconBrandGithub size={18} />
           </span>
@@ -48,7 +44,7 @@ export function LandingOpenSource() {
           </a>
         </div>
 
-        <div className="flex flex-col gap-3 rounded-lg border bg-card p-6 ring-1 ring-foreground/10">
+        <div className="flex flex-col gap-3 rounded-lg border bg-card p-6">
           <span className="grid size-9 shrink-0 place-items-center rounded-lg bg-primary/10 text-primary">
             <IconCube size={18} />
           </span>

@@ -39,7 +39,7 @@ export function LandingRarity() {
         {RARITIES.map((rarity) => (
           <div
             key={rarity.key}
-            className="flex flex-col gap-3 rounded-lg border bg-card p-5 ring-1 ring-foreground/10"
+            className="flex flex-col gap-3 rounded-lg border bg-card p-5"
           >
             <span
               className="size-6 rounded-full"

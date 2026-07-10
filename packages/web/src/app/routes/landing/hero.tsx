@@ -75,7 +75,7 @@ export function LandingHero() {
 
       <div className="relative">
         <div className="absolute inset-0 -z-10 rounded-3xl bg-primary/10 blur-2xl" />
-        <div className="rounded-xl border bg-card p-3 shadow-sm ring-1 ring-foreground/10">
+        <div className="rounded-xl border bg-card p-3 shadow-sm">
           <div className="flex items-center justify-between px-1 pb-2">
             <span className="text-xs font-medium text-muted-foreground">
               Current session
