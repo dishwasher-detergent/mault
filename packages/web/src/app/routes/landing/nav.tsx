@@ -33,6 +33,12 @@ export function LandingNav() {
           >
             How it works
           </a>
+          <a
+            href="#open-source"
+            className="transition-colors hover:text-foreground"
+          >
+            Open source
+          </a>
         </nav>
 
         <div className="flex items-center gap-2">

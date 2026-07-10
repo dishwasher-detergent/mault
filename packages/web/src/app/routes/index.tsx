@@ -3,6 +3,7 @@ import { LandingFeatures } from "@/app/routes/landing/features";
 import { LandingFooter } from "@/app/routes/landing/footer";
 import { LandingHero } from "@/app/routes/landing/hero";
 import { LandingNav } from "@/app/routes/landing/nav";
+import { LandingOpenSource } from "@/app/routes/landing/open-source";
 import { LandingPipeline } from "@/app/routes/landing/pipeline";
 import { LandingRarity } from "@/app/routes/landing/rarity";
 import { LandingStats } from "@/app/routes/landing/stats";
@@ -17,6 +18,7 @@ export default function LandingPage() {
         <LandingRarity />
         <LandingPipeline />
         <LandingFeatures />
+        <LandingOpenSource />
         <LandingCta />
       </main>
       <LandingFooter />

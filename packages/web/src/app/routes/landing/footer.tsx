@@ -23,6 +23,12 @@ export function LandingFooter() {
           >
             How it works
           </a>
+          <a
+            href="#open-source"
+            className="transition-colors hover:text-foreground"
+          >
+            Open source
+          </a>
           <Link to="/auth/sign-in" className="transition-colors hover:text-foreground">
             Sign in
           </Link>
