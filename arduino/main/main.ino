@@ -115,10 +115,13 @@ void settleAndStopFeeder() {
 
 // Runs the feeder in short pulses, checking module 1 IR between each stop.
 // Keeps feeding (see settleAndStopFeeder) once a card is detected. Returns
-// FEED_TIMEOUT if feederConfig.duration elapses with no card detected, or
-// FEED_EMPTY if the hopper sensor reports no cards remain in the stack (checked
-// before starting and throughout the feed). If pulseDuration is 0, the motor runs
-// continuously (no pulse/pause cycling) while IR is polled throughout.
+// FEED_EMPTY only if there was nothing to feed in the first place (hopper
+// already empty before the motor started) — once feeding is underway, the
+// hopper going empty is normal (it just means this is the last card) and
+// must NOT abort the feed; only the module 1 sensor or the overall
+// feederConfig.duration timeout should stop it. If pulseDuration is 0, the
+// motor runs continuously (no pulse/pause cycling) while IR is polled
+// throughout.
 FeedResult runFeeder() {
   unsigned long start = millis();
 
@@ -132,10 +135,6 @@ FeedResult runFeeder() {
         settleAndStopFeeder();
         return FEED_DETECTED;
       }
-      if (!hopperHasCards()) {
-        stopFeeder();
-        return FEED_EMPTY;
-      }
       delay(2);
     }
     stopFeeder();
@@ -145,7 +144,6 @@ FeedResult runFeeder() {
   while (millis() - start < (unsigned long)feederConfig.duration) {
     // Check before starting the motor — catches cards that arrived during the pause
     if (digitalRead(irPin(1)) == LOW) return FEED_DETECTED;
-    if (!hopperHasCards()) return FEED_EMPTY;
 
     setServoPosition(FEEDER_CHANNEL, feederConfig.speed);
 
@@ -170,7 +168,6 @@ FeedResult runFeeder() {
       }
       return FEED_DETECTED;
     }
-    if (!hopperHasCards()) return FEED_EMPTY;
     delay(feederConfig.pauseDuration);
   }
   return FEED_TIMEOUT;
