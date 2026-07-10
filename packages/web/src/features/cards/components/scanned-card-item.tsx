@@ -1,5 +1,10 @@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import type { ScannedCardItemProps } from "@/features/cards/types";
 import { cn } from "@/lib/utils";
 import { getCardImageUris } from "@magic-vault/shared";
@@ -73,12 +78,24 @@ export const ScannedCardItem = memo(function ScannedCardItem({
             </div>
           )}
           <div className="absolute bottom-1 left-1 right-1 flex gap-1 items-center justify-between z-20">
-            <Badge variant={card.distance < 0.15 ? "default" : "destructive"}>
-              {card.distance != null
-                ? (100 - card.distance * 100).toFixed(2)
-                : "0.00"}
-              %
-            </Badge>
+            <Tooltip>
+              <TooltipTrigger
+                render={
+                  <Badge
+                    variant={card.distance < 0.15 ? "default" : "destructive"}
+                  >
+                    {card.distance != null
+                      ? (100 - card.distance * 100).toFixed(2)
+                      : "0.00"}
+                    %
+                  </Badge>
+                }
+              />
+              <TooltipContent>
+                How closely the scanned image matches this card, based on
+                visual similarity search
+              </TooltipContent>
+            </Tooltip>
             <Badge variant="secondary" className="shadow-md">
               Bin {binNumber}
             </Badge>
