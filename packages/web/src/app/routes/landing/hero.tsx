@@ -44,7 +44,7 @@ export function LandingHero() {
       <div className="flex flex-col items-start gap-5">
         <span className="inline-flex items-center gap-1.5 rounded-full border bg-secondary/60 px-3 py-1 text-[0.625rem] font-medium text-muted-foreground">
           <IconCamera size={13} />
-          Built for collectors who sort by hand no more
+          Know exactly what's in your collection
         </span>
         <h1 className="text-4xl font-heading font-semibold leading-tight tracking-tight md:text-5xl">
           Every card,
