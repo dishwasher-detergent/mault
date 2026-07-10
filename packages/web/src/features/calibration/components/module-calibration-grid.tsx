@@ -1,6 +1,11 @@
 import { Button } from "@/components/ui/button";
 import { ButtonGroup } from "@/components/ui/button-group";
 import { Skeleton } from "@/components/ui/skeleton";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { MODULES, SERVOS } from "@/features/calibration/constants";
 import type {
   ActivePositions,
@@ -96,11 +101,21 @@ function ServoControl({
         >
           -
         </Button>
-        <div className="flex flex-row flex-1 bg-background border-y justify-between px-2 items-center">
-          <p className="text-xs text-muted-foreground">120</p>
-          <p className="font-bold text-sm">{sliderValue}</p>
-          <p className="text-xs text-muted-foreground">490</p>
-        </div>
+        <Tooltip>
+          <TooltipTrigger
+            render={
+              <div className="flex flex-row flex-1 bg-background border-y justify-between px-2 items-center">
+                <p className="text-xs text-muted-foreground">120</p>
+                <p className="font-bold text-sm">{sliderValue}</p>
+                <p className="text-xs text-muted-foreground">490</p>
+              </div>
+            }
+          />
+          <TooltipContent>
+            Raw servo pulse position (120-490). Use the position buttons
+            above, then a "Set" button to save this as a calibration point.
+          </TooltipContent>
+        </Tooltip>
         <Button
           variant="secondary"
           disabled={!isConnected || sliderValue >= 490}

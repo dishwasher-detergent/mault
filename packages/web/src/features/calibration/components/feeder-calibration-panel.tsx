@@ -1,6 +1,11 @@
 import { Button } from "@/components/ui/button";
 import { ButtonGroup } from "@/components/ui/button-group";
 import { Skeleton } from "@/components/ui/skeleton";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import type { FeederCalibration } from "@magic-vault/shared";
 
 interface FeederCalibrationPanelProps {
@@ -49,7 +54,19 @@ export function FeederCalibrationPanel({
       <div className="rounded-lg border bg-sidebar p-2 flex flex-col gap-5">
         <h2 className="text-sm font-bold font-heading">Feeder</h2>
         <div className="flex flex-col gap-2">
-          <p className="text-xs text-muted-foreground">Speed (PWM)</p>
+          <Tooltip>
+            <TooltipTrigger
+              render={
+                <p className="text-xs text-muted-foreground w-fit">
+                  Speed (PWM)
+                </p>
+              }
+            />
+            <TooltipContent>
+              Feeder motor speed as a raw PWM signal value (120 = slowest, 490
+              = fastest the motor controller accepts)
+            </TooltipContent>
+          </Tooltip>
           <ButtonGroup className="w-full">
             <Button
               variant="secondary"
