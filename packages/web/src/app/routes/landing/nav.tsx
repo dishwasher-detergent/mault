@@ -21,7 +21,10 @@ export function LandingNav() {
         </Link>
 
         <nav className="hidden items-center gap-6 text-xs/relaxed font-medium text-muted-foreground md:flex">
-          <a href="#features" className="transition-colors hover:text-foreground">
+          <a
+            href="#features"
+            className="transition-colors hover:text-foreground"
+          >
             Features
           </a>
           <a
@@ -37,7 +40,7 @@ export function LandingNav() {
           {isSignedIn ? (
             <Link
               to="/app"
-              className={cn(buttonVariants({ variant: "default", size: "sm" }))}
+              className={cn(buttonVariants({ variant: "default", size: "lg" }))}
             >
               Open app
             </Link>
@@ -46,7 +49,7 @@ export function LandingNav() {
               <Link
                 to="/auth/sign-in"
                 className={cn(
-                  buttonVariants({ variant: "ghost", size: "sm" }),
+                  buttonVariants({ variant: "ghost", size: "lg" }),
                   "hidden sm:inline-flex",
                 )}
               >
@@ -54,7 +57,9 @@ export function LandingNav() {
               </Link>
               <Link
                 to="/auth/sign-up"
-                className={cn(buttonVariants({ variant: "default", size: "sm" }))}
+                className={cn(
+                  buttonVariants({ variant: "default", size: "lg" }),
+                )}
               >
                 Get started
               </Link>
