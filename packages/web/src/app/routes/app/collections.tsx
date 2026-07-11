@@ -1,5 +1,6 @@
 import { DeleteDialog } from "@/components/delete-dialog";
 import { Button } from "@/components/ui/button";
+import { ButtonGroup } from "@/components/ui/button-group";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -237,7 +238,7 @@ export default function CollectionsPage() {
               key={collection.guid}
               className="flex items-center gap-3 px-4 py-3"
             >
-              <IconCheck className="size-4 text-primary" />
+              {isActive && <IconCheck className="size-4 text-primary" />}
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-medium truncate">
                   {collection.name}
@@ -249,7 +250,7 @@ export default function CollectionsPage() {
                 </p>
               </div>
 
-              <div className="flex items-center gap-1 shrink-0">
+              <ButtonGroup className="shrink-0">
                 {!isActive && (
                   <Tooltip>
                     <TooltipTrigger
@@ -342,7 +343,7 @@ export default function CollectionsPage() {
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
-              </div>
+              </ButtonGroup>
             </div>
           );
         })}
