@@ -86,7 +86,7 @@ export default function App() {
         <ScannerDebug />
         <ScanStats />
       </section>
-      <section className="col-span-8 lg:col-span-8 xl:col-span-9 2xl:col-span-10 overflow-y-auto h-full @container">
+      <section className="col-span-8 lg:col-span-8 xl:col-span-9 2xl:col-span-10 overflow-y-auto h-full @container flex flex-col">
         <CardGrid />
       </section>
     </div>

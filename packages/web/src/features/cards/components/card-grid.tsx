@@ -119,18 +119,32 @@ export function CardGrid() {
 
   if (isLoading) {
     return (
-      <div className="grid grid-cols-2 @sm:grid-cols-3 @md:grid-cols-2 @lg:grid-cols-3 @xl:grid-cols-4 @2xl:grid-cols-6 gap-2 p-2">
-        {Array.from({ length: 6 }).map((_, i) => (
-          <div key={i} className="rounded-lg p-1 bg-muted border border-border">
-            <Skeleton className="aspect-[2.5/3.5] rounded-lg" />
-            <div className="flex items-center gap-2 px-1 py-1">
-              <Skeleton className="size-3 rounded-full shrink-0" />
-              <Skeleton className="h-3 w-8 rounded" />
-              <Skeleton className="h-3 w-6 rounded" />
-            </div>
+      <>
+        <div className="sticky top-0 z-10 bg-background/80 backdrop-blur-2xl p-2 border-b">
+          <div className="flex flex-row gap-2 items-center w-full">
+            <Skeleton className="h-9 flex-1 rounded-md" />
+            <Skeleton className="h-9 w-full sm:w-64 rounded-md shrink-0" />
+            <Skeleton className="size-9 rounded-md shrink-0" />
+            <Skeleton className="size-9 rounded-md shrink-0" />
+            <Skeleton className="size-9 rounded-md shrink-0" />
           </div>
-        ))}
-      </div>
+        </div>
+        <div className="grid grid-cols-3 @md:grid-cols-4 @4xl:grid-cols-6 @5xl:grid-cols-8 gap-2 p-4 flex-1">
+          {Array.from({ length: 12 }).map((_, i) => (
+            <div
+              key={i}
+              className="rounded-lg p-1 bg-muted border border-border"
+            >
+              <Skeleton className="aspect-[2.5/3.5] rounded-lg" />
+              <div className="flex items-center gap-2 px-1 py-1">
+                <Skeleton className="size-3 rounded-full shrink-0" />
+                <Skeleton className="h-3 w-8 rounded" />
+                <Skeleton className="h-3 w-6 rounded" />
+              </div>
+            </div>
+          ))}
+        </div>
+      </>
     );
   }
 
@@ -156,32 +170,30 @@ export function CardGrid() {
   if (cards.length === 0) {
     return (
       <>
-        <div className="flex flex-col items-center justify-center py-16 text-muted-foreground">
+        <div className="flex flex-col items-center justify-center py-16 text-muted-foreground flex-1">
           <p className="text-sm font-medium">No cards scanned yet</p>
           <p className="text-xs">Scan a card to get started</p>
         </div>
         {scanner?.isCameraActive && (
-          <div className="fixed bottom-8 left-1/2 -translate-x-1/2 z-50 flex items-center gap-2 rounded-xl border backdrop-blur-xl shadow p-2 bg-sidebar/70">
-            {scanner?.isCameraActive && (
-              <>
-                <ScannerControls
-                  status={scanner.status}
-                  onForceAddDuplicate={scanner.handleForceAddDuplicate}
-                  onForceScan={scanner.handleForceScan}
-                  onPause={scanner.handlePause}
-                  onResume={scanner.handleResume}
-                />
-                {scanner.isConnected && (
-                  <Button
-                    onClick={scanner.handleFeed}
-                    disabled={!scanner.isReady || scanner.isFeeding}
-                  >
-                    {scanner.isFeeding ? "Feeding…" : "Feed"}
-                  </Button>
-                )}
-                <ScannerDebug />
-              </>
-            )}
+          <div className="sticky bottom-0 z-10 bg-background/80 backdrop-blur-2xl p-2 border-t">
+            <div className="flex flex-row gap-2 items-center w-full">
+              <ScannerControls
+                status={scanner.status}
+                onForceAddDuplicate={scanner.handleForceAddDuplicate}
+                onForceScan={scanner.handleForceScan}
+                onPause={scanner.handlePause}
+                onResume={scanner.handleResume}
+              />
+              {scanner.isConnected && (
+                <Button
+                  onClick={scanner.handleFeed}
+                  disabled={!scanner.isReady || scanner.isFeeding}
+                >
+                  {scanner.isFeeding ? "Feeding…" : "Feed"}
+                </Button>
+              )}
+              <ScannerDebug />
+            </div>
           </div>
         )}
       </>
@@ -236,7 +248,7 @@ export function CardGrid() {
         />
       </div>
       {filteredAndSorted.length === 0 && (
-        <div className="flex flex-col items-center justify-center py-16 text-muted-foreground">
+        <div className="flex flex-col items-center justify-center py-16 text-muted-foreground flex-1">
           <p className="text-sm font-medium">
             No cards match the current filters
           </p>
@@ -245,67 +257,74 @@ export function CardGrid() {
           </p>
         </div>
       )}
-      <div className="grid grid-cols-3 @md:grid-cols-4 @4xl:grid-cols-6 @5xl:grid-cols-8 gap-2 p-4">
-        <AnimatePresence initial={false}>
-          {filteredAndSorted.map((card) => (
-            <ScannedCardItem
-              key={card.scanId}
-              card={card.card}
-              onOpen={() => setOpenScanId(card.scanId)}
-              binNumber={card.binNumber}
-              isSelected={selectedIds.has(card.scanId)}
-              onToggleSelect={() => toggleSelect(card.scanId)}
-              isNew={card.scanId === newestScanId}
-              hasAlternatives={!!card.alternativeMatches?.length}
-              isFoil={card.isFoil}
-              isDownloaded={card.isDownloaded}
-            />
-          ))}
-        </AnimatePresence>
+      <div className="p-2 flex-1">
+        <div className="grid grid-cols-3 @md:grid-cols-4 @4xl:grid-cols-6 @5xl:grid-cols-8 gap-2">
+          <AnimatePresence initial={false}>
+            {filteredAndSorted.map((card) => (
+              <ScannedCardItem
+                key={card.scanId}
+                card={card.card}
+                onOpen={() => setOpenScanId(card.scanId)}
+                binNumber={card.binNumber}
+                isSelected={selectedIds.has(card.scanId)}
+                onToggleSelect={() => toggleSelect(card.scanId)}
+                isNew={card.scanId === newestScanId}
+                hasAlternatives={!!card.alternativeMatches?.length}
+                isFoil={card.isFoil}
+                isDownloaded={card.isDownloaded}
+              />
+            ))}
+          </AnimatePresence>
+        </div>
       </div>
 
       {(scanner?.isCameraActive || selectedIds.size > 0) && (
-        <div className="fixed bottom-8 left-1/2 -translate-x-1/2 z-50 flex items-center gap-2 rounded-xl border backdrop-blur-xl shadow p-2 bg-sidebar/70">
-          {scanner?.isCameraActive && (
-            <>
-              <ScannerControls
-                status={scanner.status}
-                onForceAddDuplicate={scanner.handleForceAddDuplicate}
-                onForceScan={scanner.handleForceScan}
-                onPause={scanner.handlePause}
-                onResume={scanner.handleResume}
-              />
-              {scanner.isConnected && (
+        <div className="sticky bottom-0 z-10 bg-background/80 backdrop-blur-2xl p-2 border-t">
+          <div className="flex flex-row gap-2 items-center w-full">
+            {scanner?.isCameraActive && (
+              <>
+                <ScannerControls
+                  status={scanner.status}
+                  onForceAddDuplicate={scanner.handleForceAddDuplicate}
+                  onForceScan={scanner.handleForceScan}
+                  onPause={scanner.handlePause}
+                  onResume={scanner.handleResume}
+                />
+                {scanner.isConnected && (
+                  <Button
+                    onClick={scanner.handleFeed}
+                    disabled={!scanner.isReady || scanner.isFeeding}
+                  >
+                    {scanner.isFeeding ? "Feeding…" : "Feed"}
+                  </Button>
+                )}
+                <ScannerDebug />
+              </>
+            )}
+            {selectedIds.size > 0 && (
+              <>
+                {scanner?.isCameraActive && (
+                  <div className="w-px h-5 bg-border mx-1 shrink-0" />
+                )}
+                <span className="text-sm text-muted-foreground">
+                  {selectedIds.size} {selectedIds.size === 1 ? "card" : "cards"}{" "}
+                  selected
+                </span>
                 <Button
-                  onClick={scanner.handleFeed}
-                  disabled={!scanner.isReady || scanner.isFeeding}
+                  variant="ghost"
+                  onClick={() => setSelectedIds(new Set())}
                 >
-                  {scanner.isFeeding ? "Feeding…" : "Feed"}
+                  Clear
                 </Button>
-              )}
-              <ScannerDebug />
-            </>
-          )}
-          {selectedIds.size > 0 && (
-            <>
-              {scanner?.isCameraActive && (
-                <div className="w-px h-5 bg-border mx-1 shrink-0" />
-              )}
-              <span className="text-sm text-muted-foreground">
-                {selectedIds.size} {selectedIds.size === 1 ? "card" : "cards"}{" "}
-                selected
-              </span>
-              <Button variant="ghost" onClick={() => setSelectedIds(new Set())}>
-                Clear
-              </Button>
-              <Button
-                variant="destructive"
-                onClick={() => setConfirmOpen(true)}
-              >
-                Delete
-              </Button>
-            </>
-          )}
+                <Button
+                  variant="destructive"
+                  onClick={() => setConfirmOpen(true)}
+                >
+                  Delete
+                </Button>
+              </>
+            )}
+          </div>
         </div>
       )}
 

@@ -21,6 +21,23 @@ function groupByCardId(
   return grouped;
 }
 
+function groupByCardIdAndFoil(
+  cards: ScannedCard[],
+): Map<string, { card: ScryfallCardWithDistance; quantity: number; isFoil: boolean }> {
+  const grouped = new Map<
+    string,
+    { card: ScryfallCardWithDistance; quantity: number; isFoil: boolean }
+  >();
+  for (const entry of cards) {
+    const isFoil = !!entry.isFoil;
+    const key = `${entry.card.id}:${isFoil}`;
+    const existing = grouped.get(key);
+    if (existing) existing.quantity++;
+    else grouped.set(key, { card: entry.card, quantity: 1, isFoil });
+  }
+  return grouped;
+}
+
 function downloadCsv(csv: string, filename: string) {
   const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
   const url = URL.createObjectURL(blob);
@@ -96,4 +113,18 @@ export function exportToTcgplayer(cards: ScannedCard[], collection: string) {
   ]);
   const csv = [headers.join(","), ...rows.map((r) => r.join(","))].join("\n");
   downloadCsv(csv, `magic-vault-tcgplayer-${dateSuffix()}-${collection}.csv`);
+}
+
+export function exportToCardKingdom(cards: ScannedCard[], collection: string) {
+  if (cards.length === 0) return;
+  const grouped = groupByCardIdAndFoil(cards);
+  const headers = ["Title", "Edition", "Foil", "Quantity"];
+  const rows = Array.from(grouped.values()).map(({ card, quantity, isFoil }) => [
+    csvEscape(card.name),
+    csvEscape(card.set_name),
+    isFoil ? "True" : "False",
+    String(quantity),
+  ]);
+  const csv = [headers.join(","), ...rows.map((r) => r.join(","))].join("\n");
+  downloadCsv(csv, `magic-vault-cardkingdom-${dateSuffix()}-${collection}.csv`);
 }

@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Switch } from "@/components/ui/switch";
 import {
+  exportToCardKingdom,
   exportToManabox,
   exportToMoxfield,
   exportToTcgplayer,
@@ -30,6 +31,7 @@ const EXPORT_FORMATS = {
   manabox: { label: "Manabox", fn: exportToManabox },
   moxfield: { label: "Moxfield", fn: exportToMoxfield },
   tcgplayer: { label: "TCGPlayer", fn: exportToTcgplayer },
+  cardkingdom: { label: "Card Kingdom Buylist", fn: exportToCardKingdom },
 } as const;
 
 type ExportFormat = keyof typeof EXPORT_FORMATS;
