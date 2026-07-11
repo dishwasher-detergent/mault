@@ -161,7 +161,7 @@ export function CardGrid() {
           <p className="text-xs">Scan a card to get started</p>
         </div>
         {scanner?.isCameraActive && (
-          <div className="fixed bottom-8 left-1/2 -translate-x-1/2 z-50 flex items-center gap-2 rounded-xl border ring-2 ring-sidebar/70 dark:ring-border/50 backdrop-blur-xl shadow-xl p-2 bg-sidebar/50">
+          <div className="fixed bottom-8 left-1/2 -translate-x-1/2 z-50 flex items-center gap-2 rounded-xl border backdrop-blur-xl shadow p-2 bg-sidebar/70">
             {scanner?.isCameraActive && (
               <>
                 <ScannerControls
@@ -237,8 +237,12 @@ export function CardGrid() {
       </div>
       {filteredAndSorted.length === 0 && (
         <div className="flex flex-col items-center justify-center py-16 text-muted-foreground">
-          <p className="text-sm font-medium">No cards match the current filters</p>
-          <p className="text-xs">Try adjusting your search, sort, or filter options</p>
+          <p className="text-sm font-medium">
+            No cards match the current filters
+          </p>
+          <p className="text-xs">
+            Try adjusting your search, sort, or filter options
+          </p>
         </div>
       )}
       <div className="grid grid-cols-3 @md:grid-cols-4 @4xl:grid-cols-6 @5xl:grid-cols-8 gap-2 p-4">
@@ -261,7 +265,7 @@ export function CardGrid() {
       </div>
 
       {(scanner?.isCameraActive || selectedIds.size > 0) && (
-        <div className="fixed bottom-8 left-1/2 -translate-x-1/2 z-50 flex items-center gap-2 rounded-xl border ring-2 ring-foreground/20 backdrop-blur-xl shadow-xl p-2 bg-sidebar/70">
+        <div className="fixed bottom-8 left-1/2 -translate-x-1/2 z-50 flex items-center gap-2 rounded-xl border backdrop-blur-xl shadow p-2 bg-sidebar/70">
           {scanner?.isCameraActive && (
             <>
               <ScannerControls
