@@ -3,9 +3,15 @@ import { DynamicPopover } from "@/components/ui/responsive-popover";
 import type { CardFilters } from "@/features/cards/types";
 import { cn } from "@/lib/utils";
 import { BIN_COUNT } from "@magic-vault/shared";
-import { IconFilter, IconHelpCircle } from "@tabler/icons-react";
+import { IconDownload, IconFilter, IconHelpCircle } from "@tabler/icons-react";
 
-const EMPTY_FILTERS: CardFilters = { colors: [], rarities: [], bins: [], needsAttention: false };
+const EMPTY_FILTERS: CardFilters = {
+  colors: [],
+  rarities: [],
+  bins: [],
+  needsAttention: false,
+  showDownloaded: false,
+};
 
 const COLORS = ["W", "U", "B", "R", "G", "C"] as const;
 const RARITIES = ["common", "uncommon", "rare", "mythic"] as const;
@@ -198,6 +204,31 @@ export function CardFilterPopover({
           >
             <IconHelpCircle className="size-3.5" />
             Needs attention
+          </button>
+        </div>
+
+        <div>
+          <p className="text-[11px] font-medium text-muted-foreground uppercase tracking-wide mb-1.5 font-heading">
+            Downloaded
+          </p>
+          <button
+            type="button"
+            onClick={() =>
+              onFiltersChange({
+                ...activeFilters,
+                showDownloaded: !activeFilters.showDownloaded,
+              })
+            }
+            className={cn(
+              chipBase,
+              "flex items-center gap-1.5 px-2 h-7",
+              activeFilters.showDownloaded
+                ? "bg-primary text-primary-foreground border-primary"
+                : chipInactive,
+            )}
+          >
+            <IconDownload className="size-3.5" />
+            Show downloaded cards
           </button>
         </div>
 

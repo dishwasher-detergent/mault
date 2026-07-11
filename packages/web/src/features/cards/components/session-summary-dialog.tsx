@@ -1,11 +1,17 @@
 import { Button } from "@/components/ui/button";
-import { ButtonGroup } from "@/components/ui/button-group";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Switch } from "@/components/ui/switch";
 import {
   exportToManabox,
   exportToMoxfield,
@@ -17,8 +23,16 @@ import {
 } from "@/features/scanner/components/scan-stats";
 import { computeStats } from "@/features/scanner/lib/compute-stats";
 import type { ScannedCard } from "@magic-vault/shared";
-import { IconLoader2 } from "@tabler/icons-react";
+import { IconChevronDown, IconDownload } from "@tabler/icons-react";
 import { useMemo, useState } from "react";
+
+const EXPORT_FORMATS = {
+  manabox: { label: "Manabox", fn: exportToManabox },
+  moxfield: { label: "Moxfield", fn: exportToMoxfield },
+  tcgplayer: { label: "TCGPlayer", fn: exportToTcgplayer },
+} as const;
+
+type ExportFormat = keyof typeof EXPORT_FORMATS;
 
 interface SessionSummaryDialogProps {
   open: boolean;
@@ -26,7 +40,7 @@ interface SessionSummaryDialogProps {
   cards: ScannedCard[];
   elapsedMs: number;
   collectionName: string;
-  onClear: () => Promise<void>;
+  onMarkDownloaded: (scanIds: string[]) => void;
 }
 
 function StatCell({ label, value }: { label: string; value: string }) {
@@ -46,23 +60,27 @@ export function SessionSummaryDialog({
   cards,
   elapsedMs,
   collectionName,
-  onClear,
+  onMarkDownloaded,
 }: SessionSummaryDialogProps) {
-  const [isClearing, setIsClearing] = useState(false);
+  const [includeDownloaded, setIncludeDownloaded] = useState(false);
+  const previouslyDownloadedCount = useMemo(
+    () => cards.filter((c) => c.isDownloaded).length,
+    [cards],
+  );
+  const exportCards = useMemo(
+    () => (includeDownloaded ? cards : cards.filter((c) => !c.isDownloaded)),
+    [cards, includeDownloaded],
+  );
   const stats = useMemo(() => computeStats(cards), [cards]);
   const slug = collectionName.replace(/\s+/g, "-").toLowerCase();
 
   const cardsPerHour =
     elapsedMs > 0 ? Math.round((cards.length / elapsedMs) * 3_600_000) : null;
 
-  async function handleClear() {
-    setIsClearing(true);
-    try {
-      await onClear();
-      onOpenChange(false);
-    } finally {
-      setIsClearing(false);
-    }
+  function handleDownload(format: ExportFormat) {
+    EXPORT_FORMATS[format].fn(exportCards, slug);
+    onMarkDownloaded(exportCards.map((c) => c.scanId));
+    onOpenChange(false);
   }
 
   return (
@@ -158,48 +176,41 @@ export function SessionSummaryDialog({
               </div>
             </div>
           )}
-          <div className="flex flex-col gap-1.5">
-            <p className="text-xs font-medium text-muted-foreground">
-              Export as
-            </p>
-            <ButtonGroup>
-              <Button
-                variant="outline"
-                onClick={() => exportToMoxfield(cards, slug)}
-                disabled={cards.length === 0}
-              >
-                Moxfield
-              </Button>
-              <Button
-                variant="outline"
-                onClick={() => exportToTcgplayer(cards, slug)}
-                disabled={cards.length === 0}
-              >
-                TCGPlayer
-              </Button>
-              <Button
-                variant="outline"
-                onClick={() => exportToManabox(cards, slug)}
-                disabled={cards.length === 0}
-              >
-                Manabox
-              </Button>
-            </ButtonGroup>
-          </div>
+          {previouslyDownloadedCount > 0 && (
+            <label className="flex items-center justify-between gap-1.5 text-xs text-muted-foreground">
+              Include previously downloaded
+              <Switch
+                size="sm"
+                checked={includeDownloaded}
+                onCheckedChange={setIncludeDownloaded}
+              />
+            </label>
+          )}
 
           {/* Actions */}
           <div className="flex gap-2 justify-end pt-1">
             <Button variant="outline" onClick={() => onOpenChange(false)}>
               Close
             </Button>
-            <Button
-              variant="destructive"
-              onClick={handleClear}
-              disabled={isClearing}
-            >
-              {isClearing && <IconLoader2 className="size-4 animate-spin" />}
-              Clear Collection
-            </Button>
+            <DropdownMenu>
+              <DropdownMenuTrigger
+                render={<Button disabled={exportCards.length === 0} />}
+              >
+                <IconDownload className="size-4" />
+                Download ({exportCards.length})
+                <IconChevronDown className="size-4" />
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                {Object.entries(EXPORT_FORMATS).map(([key, { label }]) => (
+                  <DropdownMenuItem
+                    key={key}
+                    onClick={() => handleDownload(key as ExportFormat)}
+                  >
+                    {label}
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </div>
       </DialogContent>

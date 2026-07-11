@@ -84,6 +84,13 @@ export async function removeCollectionCards(
   return apiPost<Result<null>>(`/api/collections/${guid}/cards/remove-bulk`, { scanIds });
 }
 
+export async function markCollectionCardsDownloaded(
+  guid: string,
+  scanIds: string[],
+): Promise<Result<null>> {
+  return apiPost<Result<null>>(`/api/collections/${guid}/cards/mark-downloaded`, { scanIds });
+}
+
 export async function clearCollectionCards(guid: string): Promise<Result<null>> {
   return apiDelete<Result<null>>(`/api/collections/${guid}/cards`);
 }

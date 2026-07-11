@@ -11,6 +11,7 @@ import {
   addCollectionCard,
   clearCollectionCards,
   loadCollectionCards,
+  markCollectionCardsDownloaded,
   releaseScanLock,
   removeCollectionCard,
   removeCollectionCards,
@@ -378,6 +379,22 @@ export function ScannedCardsProvider({
     }
   }, []);
 
+  const markDownloaded = useCallback((scanIds: string[]) => {
+    const collection = activeCollectionRef.current;
+    if (scanIds.length === 0) return;
+    const idSet = new Set(scanIds);
+    setCards((prev) =>
+      prev.map((entry) =>
+        idSet.has(entry.scanId) ? { ...entry, isDownloaded: true } : entry,
+      ),
+    );
+    if (collection) {
+      markCollectionCardsDownloaded(collection.guid, scanIds).catch((err) =>
+        console.error("Failed to mark cards downloaded:", err),
+      );
+    }
+  }, []);
+
   const clearCards = useCallback(() => {
     const collection = activeCollectionRef.current;
     setCards([]);
@@ -405,6 +422,7 @@ export function ScannedCardsProvider({
         removeCards,
         correctCard,
         toggleFoil,
+        markDownloaded,
         clearCards,
       }}
     >

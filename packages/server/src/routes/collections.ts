@@ -36,6 +36,7 @@ function toScannedCard(row: {
   binNumber: number | null;
   capturedImageDataUrl?: string | null;
   isFoil?: boolean | null;
+  isDownloaded?: boolean | null;
 }): ScannedCard {
   return {
     scanId: row.guid!,
@@ -44,6 +45,7 @@ function toScannedCard(row: {
     binNumber: row.binNumber ?? undefined,
     capturedImageUrl: row.capturedImageDataUrl ?? undefined,
     isFoil: row.isFoil ?? undefined,
+    isDownloaded: row.isDownloaded ?? undefined,
   };
 }
 
@@ -308,6 +310,7 @@ router.get("/:guid/cards", requireAuth, requireOrg, async (c) => {
           binNumber: collectionCards.binNumber,
           capturedImageDataUrl: collectionCards.capturedImageDataUrl,
           isFoil: collectionCards.isFoil,
+          isDownloaded: collectionCards.isDownloaded,
         })
         .from(collectionCards)
         .where(eq(collectionCards.collectionId, collection.id))
@@ -466,6 +469,28 @@ router.post("/:guid/cards/remove-bulk", requireAuth, requireOrg, async (c) => {
   }
 });
 
+// POST /collections/:guid/cards/mark-downloaded — mark multiple cards as downloaded
+router.post("/:guid/cards/mark-downloaded", requireAuth, requireOrg, async (c) => {
+  const guid = c.req.param("guid");
+  const { scanIds } = await c.req.json<{ scanIds: string[] }>();
+  try {
+    const result = await authQuery(c.get("jwtClaims"), async (tx) => {
+      for (const scanId of scanIds) {
+        await tx
+          .update(collectionCards)
+          .set({ isDownloaded: true })
+          .where(eq(collectionCards.guid, scanId));
+      }
+      return { success: true, data: null };
+    });
+    if (result.success) emitToSession(guid, "cards_downloaded", { scanIds });
+    return c.json(result);
+  } catch (err) {
+    console.error(err);
+    return c.json({ success: false, message: "Database error." }, 500);
+  }
+});
+
 // DELETE /collections/:guid/cards/:scanId — remove one card
 router.delete("/:guid/cards/:scanId", requireAuth, requireOrg, async (c) => {
   const { guid, scanId } = c.req.param();
@@ -542,6 +567,7 @@ router.get("/:guid/stream", async (c) => {
             binNumber: collectionCards.binNumber,
             capturedImageDataUrl: collectionCards.capturedImageDataUrl,
             isFoil: collectionCards.isFoil,
+            isDownloaded: collectionCards.isDownloaded,
           })
           .from(collectionCards)
           .where(eq(collectionCards.collectionId, collection.id))

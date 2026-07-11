@@ -25,6 +25,7 @@ interface DeleteDialogProps {
   title: string;
   description: string;
   confirm?: ConfirmMode;
+  confirmLabel?: string;
   onConfirm: () => void;
 }
 
@@ -34,6 +35,7 @@ export function DeleteDialog({
   title,
   description,
   confirm = { type: "simple" },
+  confirmLabel = "Delete",
   onConfirm,
 }: DeleteDialogProps) {
   const schema = z.object({ input: z.string() }).superRefine((data, ctx) => {
@@ -124,7 +126,7 @@ export function DeleteDialog({
               variant="destructive"
               disabled={confirm.type !== "simple" && !isValid}
             >
-              Delete
+              {confirmLabel}
             </Button>
           </DialogFooter>
         </form>

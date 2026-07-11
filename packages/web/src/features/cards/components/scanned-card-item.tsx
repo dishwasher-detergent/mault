@@ -8,7 +8,12 @@ import {
 import type { ScannedCardItemProps } from "@/features/cards/types";
 import { cn } from "@/lib/utils";
 import { getCardImageUris } from "@magic-vault/shared";
-import { IconCheck, IconHelpCircle, IconSparkles } from "@tabler/icons-react";
+import {
+  IconCheck,
+  IconDownload,
+  IconHelpCircle,
+  IconSparkles,
+} from "@tabler/icons-react";
 import { motion } from "framer-motion";
 import { memo } from "react";
 
@@ -21,6 +26,7 @@ export const ScannedCardItem = memo(function ScannedCardItem({
   isNew = false,
   hasAlternatives = false,
   isFoil = false,
+  isDownloaded = false,
 }: ScannedCardItemProps) {
   return (
     <motion.div
@@ -132,6 +138,11 @@ export const ScannedCardItem = memo(function ScannedCardItem({
           <p className="text-xs text-muted-foreground">
             #{card.collector_number}
           </p>
+          {isDownloaded && (
+            <span title="Downloaded">
+              <IconDownload className="size-3 text-muted-foreground shrink-0" />
+            </span>
+          )}
         </div>
         {card.prices?.usd && (
           <p className="text-xs font-medium text-muted-foreground">

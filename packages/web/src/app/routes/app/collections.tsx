@@ -1,5 +1,11 @@
 import { DeleteDialog } from "@/components/delete-dialog";
 import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Field, FieldError, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { DynamicDialog } from "@/components/ui/responsive-dialog";
@@ -20,6 +26,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import {
   IconCheck,
   IconEdit,
+  IconEraser,
   IconFolders,
   IconLayoutGrid,
   IconLoader2,
@@ -42,6 +49,7 @@ export default function CollectionsPage() {
     renameCollection,
     activateCollection,
     deleteCollection,
+    emptyCollection,
   } = useCollections();
   const { activeOrg } = useOrg();
   const { isLoading } = useQuery({
@@ -55,6 +63,10 @@ export default function CollectionsPage() {
     name: string;
   } | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<{
+    guid: string;
+    name: string;
+  } | null>(null);
+  const [emptyTarget, setEmptyTarget] = useState<{
     guid: string;
     name: string;
   } | null>(null);
@@ -119,6 +131,16 @@ export default function CollectionsPage() {
 
   const handleDeleteOpenChange = useCallback((open: boolean) => {
     if (!open) setDeleteTarget(null);
+  }, []);
+
+  const handleEmpty = useCallback(async () => {
+    if (!emptyTarget) return;
+    await emptyCollection(emptyTarget.guid);
+    setEmptyTarget(null);
+  }, [emptyTarget, emptyCollection]);
+
+  const handleEmptyOpenChange = useCallback((open: boolean) => {
+    if (!open) setEmptyTarget(null);
   }, []);
 
   return (
@@ -282,26 +304,44 @@ export default function CollectionsPage() {
                   ></TooltipTrigger>
                   <TooltipContent>Rename</TooltipContent>
                 </Tooltip>
-                <Tooltip>
-                  <TooltipTrigger
+                <DropdownMenu>
+                  <DropdownMenuTrigger
                     render={
                       <Button
                         variant="destructive"
                         size="icon"
                         disabled={isMutating}
-                        onClick={() =>
-                          setDeleteTarget({
-                            guid: collection.guid,
-                            name: collection.name,
-                          })
-                        }
                       >
                         <IconTrash />
                       </Button>
                     }
-                  ></TooltipTrigger>
-                  <TooltipContent>Delete collection</TooltipContent>
-                </Tooltip>
+                  />
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuItem
+                      onClick={() =>
+                        setEmptyTarget({
+                          guid: collection.guid,
+                          name: collection.name,
+                        })
+                      }
+                    >
+                      <IconEraser />
+                      Empty Collection
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                      variant="destructive"
+                      onClick={() =>
+                        setDeleteTarget({
+                          guid: collection.guid,
+                          name: collection.name,
+                        })
+                      }
+                    >
+                      <IconTrash />
+                      Delete Collection
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
               </div>
             </div>
           );
@@ -361,6 +401,15 @@ export default function CollectionsPage() {
         description={`Permanently deletes "${deleteTarget?.name}" and all its cards. This cannot be undone.`}
         confirm={{ type: "name", name: deleteTarget?.name ?? "" }}
         onConfirm={handleDelete}
+      />
+      <DeleteDialog
+        open={!!emptyTarget}
+        onOpenChange={handleEmptyOpenChange}
+        title="Empty Collection"
+        description={`Permanently removes all cards from "${emptyTarget?.name}", but keeps the collection itself. This cannot be undone.`}
+        confirm={{ type: "name", name: emptyTarget?.name ?? "" }}
+        confirmLabel="Empty"
+        onConfirm={handleEmpty}
       />
     </div>
   );

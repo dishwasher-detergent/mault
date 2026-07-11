@@ -91,6 +91,14 @@ export function useSessionMonitor(collectionGuid: string | undefined): SessionMo
         setCards((prev) => prev.filter((c) => !ids.has(c.scanId)));
       });
 
+      es.addEventListener("cards_downloaded", (e) => {
+        const { scanIds } = JSON.parse((e as MessageEvent).data) as { scanIds: string[] };
+        const ids = new Set(scanIds);
+        setCards((prev) =>
+          prev.map((c) => (ids.has(c.scanId) ? { ...c, isDownloaded: true } : c)),
+        );
+      });
+
       es.addEventListener("cards_cleared", () => {
         setCards([]);
       });

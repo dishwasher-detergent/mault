@@ -23,6 +23,7 @@ export interface CardFilters {
   rarities: string[];
   bins: Array<number | null>;
   needsAttention: boolean;
+  showDownloaded: boolean;
 }
 
 export interface CardToolbarProps {
@@ -51,4 +52,5 @@ export interface ScannedCardItemProps {
   isNew?: boolean;
   hasAlternatives?: boolean;
   isFoil?: boolean;
+  isDownloaded?: boolean;
 }

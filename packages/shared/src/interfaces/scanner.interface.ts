@@ -52,4 +52,5 @@ export interface ScannedCard {
   capturedImageUrl?: string;
   alternativeMatches?: ScryfallCardWithDistance[];
   isFoil?: boolean;
+  isDownloaded?: boolean;
 }

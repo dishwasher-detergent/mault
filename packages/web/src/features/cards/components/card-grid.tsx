@@ -26,8 +26,15 @@ export function CardGrid() {
     deleteCollection,
     isLoading: collectionsLoading,
   } = useCollections();
-  const { cards, removeCard, removeCards, clearCards, isLoading, elapsedMs } =
-    useScannedCards();
+  const {
+    cards,
+    removeCard,
+    removeCards,
+    clearCards,
+    markDownloaded,
+    isLoading,
+    elapsedMs,
+  } = useScannedCards();
   const [summaryOpen, setSummaryOpen] = useState(false);
   const scanner = useScannerIsland();
   const { locks, currentUserId } = useCollectionLocks();
@@ -218,7 +225,7 @@ export function CardGrid() {
           onSortChange={setSortKey}
           onExport={() => setSummaryOpen(true)}
           collectionName={activeCollection?.name}
-          onClearAll={() => setSummaryOpen(true)}
+          onClearAll={handleClearSession}
           hasCards={filteredAndSorted.length > 0}
           activeFilters={filters}
           onFiltersChange={setFilters}
@@ -230,8 +237,8 @@ export function CardGrid() {
       </div>
       {filteredAndSorted.length === 0 && (
         <div className="flex flex-col items-center justify-center py-16 text-muted-foreground">
-          <p className="text-sm font-medium">No cards match the search query</p>
-          <p className="text-xs">Try adjusting your search or sort options</p>
+          <p className="text-sm font-medium">No cards match the current filters</p>
+          <p className="text-xs">Try adjusting your search, sort, or filter options</p>
         </div>
       )}
       <div className="grid grid-cols-3 @md:grid-cols-4 @4xl:grid-cols-6 @5xl:grid-cols-8 gap-2 p-4">
@@ -247,6 +254,7 @@ export function CardGrid() {
               isNew={card.scanId === newestScanId}
               hasAlternatives={!!card.alternativeMatches?.length}
               isFoil={card.isFoil}
+              isDownloaded={card.isDownloaded}
             />
           ))}
         </AnimatePresence>
@@ -303,7 +311,7 @@ export function CardGrid() {
         cards={cards}
         elapsedMs={elapsedMs}
         collectionName={activeCollection?.name ?? "collection"}
-        onClear={handleClearSession}
+        onMarkDownloaded={markDownloaded}
       />
 
       <DeleteDialog

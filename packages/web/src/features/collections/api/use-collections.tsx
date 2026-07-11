@@ -1,5 +1,6 @@
 import {
   activateCollection as activateCollectionFn,
+  clearCollectionCards,
   collectionsQueryOptions,
   createCollection as createCollectionFn,
   deleteCollection as deleteCollectionFn,
@@ -31,6 +32,7 @@ interface CollectionsContextValue {
   renameCollection: (guid: string, name: string) => Promise<void>;
   activateCollection: (guid: string) => Promise<void>;
   deleteCollection: (guid: string) => Promise<void>;
+  emptyCollection: (guid: string) => Promise<void>;
 }
 
 const CollectionsContext = createContext<CollectionsContextValue | null>(null);
@@ -99,10 +101,25 @@ export function CollectionsProvider({ children }: { children: React.ReactNode })
     onError: () => toast.error("Failed to delete collection"),
   });
 
+  const emptyMutation = useMutation({
+    mutationFn: clearCollectionCards,
+    onSuccess: (r, guid) => {
+      if (r.success) {
+        setCollections(
+          collections.map((c) =>
+            c.guid === guid ? { ...c, cardCount: 0, updatedAt: new Date() } : c,
+          ),
+        );
+      }
+    },
+    onError: () => toast.error("Failed to empty collection"),
+  });
+
   const isMutating =
     createMutation.isPending ||
     renameMutation.isPending ||
-    deleteMutation.isPending;
+    deleteMutation.isPending ||
+    emptyMutation.isPending;
 
   const create = useCallback(
     async (name: string) => { await createMutation.mutateAsync(name); },
@@ -131,6 +148,11 @@ export function CollectionsProvider({ children }: { children: React.ReactNode })
     [deleteMutation],
   );
 
+  const empty = useCallback(
+    async (guid: string) => { await emptyMutation.mutateAsync(guid); },
+    [emptyMutation],
+  );
+
   return (
     <CollectionsContext
       value={{
@@ -143,6 +165,7 @@ export function CollectionsProvider({ children }: { children: React.ReactNode })
         renameCollection: rename,
         activateCollection: activate,
         deleteCollection: remove,
+        emptyCollection: empty,
       }}
     >
       {children}

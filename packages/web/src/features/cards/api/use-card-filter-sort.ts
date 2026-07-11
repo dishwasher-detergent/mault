@@ -2,7 +2,13 @@ import { RARITY_ORDER, type ScannedCard } from "@magic-vault/shared";
 import { useMemo, useState } from "react";
 import type { CardFilters } from "@/features/cards/types";
 
-const EMPTY_FILTERS: CardFilters = { colors: [], rarities: [], bins: [], needsAttention: false };
+const EMPTY_FILTERS: CardFilters = {
+  colors: [],
+  rarities: [],
+  bins: [],
+  needsAttention: false,
+  showDownloaded: false,
+};
 
 export function useCardFilterSort(cards: ScannedCard[]) {
   const [searchQuery, setSearchQuery] = useState("");
@@ -36,6 +42,10 @@ export function useCardFilterSort(cards: ScannedCard[]) {
       result = result.filter(
         (entry) => (entry.alternativeMatches?.length ?? 0) > 0,
       );
+    }
+
+    if (!filters.showDownloaded) {
+      result = result.filter((entry) => !entry.isDownloaded);
     }
 
     const query = searchQuery.toLowerCase().trim();
@@ -97,7 +107,8 @@ export function useCardFilterSort(cards: ScannedCard[]) {
     filters.colors.length +
     filters.rarities.length +
     filters.bins.length +
-    (filters.needsAttention ? 1 : 0);
+    (filters.needsAttention ? 1 : 0) +
+    (filters.showDownloaded ? 1 : 0);
 
   return {
     filteredAndSorted,
