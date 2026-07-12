@@ -63,7 +63,7 @@ export function CardFilterPopover({
     >
       <div className="flex flex-col gap-3">
         <div>
-          <p className="text-[11px] font-medium text-muted-foreground uppercase tracking-wide mb-1.5 font-heading">
+          <p className="text-[11px] font-medium text-muted-foreground tracking-wide mb-1.5 font-heading">
             Color
           </p>
           <div className="flex gap-1">
@@ -93,7 +93,7 @@ export function CardFilterPopover({
         </div>
 
         <div>
-          <p className="text-[11px] font-medium text-muted-foreground uppercase tracking-wide mb-1.5 font-heading">
+          <p className="text-[11px] font-medium text-muted-foreground tracking-wide mb-1.5 font-heading">
             Rarity
           </p>
           <div className="flex flex-col gap-1">
@@ -132,7 +132,7 @@ export function CardFilterPopover({
         </div>
 
         <div>
-          <p className="text-[11px] font-medium text-muted-foreground uppercase tracking-wide mb-1.5 font-heading">
+          <p className="text-[11px] font-medium text-muted-foreground tracking-wide mb-1.5 font-heading">
             Bin
           </p>
           <div className="flex gap-1 flex-wrap">
@@ -183,7 +183,7 @@ export function CardFilterPopover({
         </div>
 
         <div>
-          <p className="text-[11px] font-medium text-muted-foreground uppercase tracking-wide mb-1.5 font-heading">
+          <p className="text-[11px] font-medium text-muted-foreground tracking-wide mb-1.5 font-heading">
             Status
           </p>
           <button
@@ -208,7 +208,7 @@ export function CardFilterPopover({
         </div>
 
         <div>
-          <p className="text-[11px] font-medium text-muted-foreground uppercase tracking-wide mb-1.5 font-heading">
+          <p className="text-[11px] font-medium text-muted-foreground tracking-wide mb-1.5 font-heading">
             Downloaded
           </p>
           <button
