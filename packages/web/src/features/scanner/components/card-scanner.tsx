@@ -7,6 +7,7 @@ import { useBinConfigs } from "@/features/bins/api/use-bin-configs";
 import { reportSerialEvent } from "@/features/notifications/api/notification-settings";
 import { useCardScanner } from "@/features/scanner/api/use-card-scanner";
 import { useScannedCards } from "@/features/scanner/api/use-scanned-cards";
+import { SCANNABLE_STATUSES } from "@/features/scanner/constants";
 import { useRegisterScannerIsland } from "@/features/scanner/api/use-scanner-island";
 import { useSerial, useSerialMessage } from "@/features/scanner/api/use-serial";
 import { ScannerMenu } from "@/features/scanner/components/scanner-menu";
@@ -78,9 +79,26 @@ export function CardScanner({ className, compact }: CardScannerProps) {
       (msg as Record<string, unknown>).error === "jam"
     ) {
       const raw = msg as Record<string, unknown>;
+
+      // Module 1 with no bin means the card was never scanned/routed — it's
+      // just sitting there unidentified. Try to auto-recover by forcing a
+      // scan instead of stopping for a human, as long as the scanner is
+      // actually in a state where a scan can run.
+      if (
+        raw.module === 1 &&
+        raw.bin === undefined &&
+        SCANNABLE_STATUSES.includes(status)
+      ) {
+        toast.info("Card stuck at module 1 — forcing a scan", {
+          description: "It was never identified, so we're scanning it automatically.",
+        });
+        handleForceScan();
+        return;
+      }
+
       handlePause();
       toast.error("Card jam detected", {
-        description: `Card stuck at module ${raw.module} (heading to bin ${raw.bin}). Check the sorter and resume.`,
+        description: `Card stuck at module ${raw.module}${raw.bin ? ` (heading to bin ${raw.bin})` : ""}. Check the sorter and resume.`,
         duration: Infinity,
         dismissible: true,
       });

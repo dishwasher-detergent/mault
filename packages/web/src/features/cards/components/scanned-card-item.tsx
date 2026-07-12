@@ -5,6 +5,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { BinLocationDiagram } from "@/features/bins/components/bin-location-diagram";
 import type { ScannedCardItemProps } from "@/features/cards/types";
 import { cn } from "@/lib/utils";
 import { getCardImageUris } from "@magic-vault/shared";
@@ -98,13 +99,22 @@ export const ScannedCardItem = memo(function ScannedCardItem({
                 }
               />
               <TooltipContent>
-                How closely the scanned image matches this card, based on
-                visual similarity search
+                How closely the scanned image matches this card, based on visual
+                similarity search
               </TooltipContent>
             </Tooltip>
-            <Badge variant="secondary" className="shadow-md">
-              Bin {binNumber}
-            </Badge>
+            <Tooltip>
+              <TooltipTrigger
+                render={
+                  <Badge variant="secondary" className="shadow-md">
+                    Bin {binNumber}
+                  </Badge>
+                }
+              />
+              <TooltipContent side="top" className="p-0">
+                <BinLocationDiagram binNumber={binNumber} />
+              </TooltipContent>
+            </Tooltip>
           </div>
           <img
             src={getCardImageUris(card)?.normal || ""}

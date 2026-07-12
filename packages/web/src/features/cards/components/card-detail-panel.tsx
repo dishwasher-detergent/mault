@@ -11,6 +11,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
+import { BinLocationDiagram } from "@/features/bins/components/bin-location-diagram";
 import { Search } from "@/features/cards/api/scryfall";
 import { useScannedCards } from "@/features/scanner/api/use-scanned-cards";
 import { cn } from "@/lib/utils";
@@ -51,6 +52,7 @@ interface CardDetailPanelProps {
   alternativeMatches?: ScryfallCardWithDistance[];
   capturedImageUrl?: string;
   isFoil?: boolean;
+  binNumber?: number;
   onPrev?: () => void;
   onNext?: () => void;
   hasPrev?: boolean;
@@ -67,6 +69,7 @@ export function CardDetailPanel({
   alternativeMatches,
   capturedImageUrl,
   isFoil = false,
+  binNumber,
   onPrev,
   onNext,
   hasPrev,
@@ -381,6 +384,19 @@ export function CardDetailPanel({
                             {selectedCard.collector_number}
                           </span>
                         </div>
+                        {binNumber != null && (
+                          <div className="flex flex-col gap-1.5">
+                            <p className="text-xs font-medium text-muted-foreground">
+                              Bin location
+                            </p>
+                            <div className="w-48 rounded-lg border">
+                              <BinLocationDiagram
+                                binNumber={binNumber}
+                                inverted={false}
+                              />
+                            </div>
+                          </div>
+                        )}
                         {prices.length > 0 && (
                           <p className="text-xs text-muted-foreground">
                             {prices.join(" · ")}

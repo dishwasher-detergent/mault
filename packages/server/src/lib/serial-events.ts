@@ -53,7 +53,7 @@ export function classifySerialEvent(
   if (res.error === "jam") {
     return {
       title: "Card Jam Detected",
-      description: `Card stuck at module ${res.module} (heading to bin ${res.bin}). Check the sorter and resume.`,
+      description: `Card stuck at module ${res.module}${res.bin ? ` (heading to bin ${res.bin})` : ""}. Check the sorter and resume.`,
     };
   }
 
