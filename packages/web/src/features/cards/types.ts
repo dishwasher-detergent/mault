@@ -24,6 +24,7 @@ export interface CardFilters {
   bins: Array<number | null>;
   needsAttention: boolean;
   showDownloaded: boolean;
+  sets: string[];
 }
 
 export interface CardToolbarProps {

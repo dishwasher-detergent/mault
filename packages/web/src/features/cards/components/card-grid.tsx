@@ -2,6 +2,7 @@ import { DeleteDialog } from "@/components/delete-dialog";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useCardFilterSort } from "@/features/cards/api/use-card-filter-sort";
+import { useCardFilters } from "@/features/cards/api/use-card-filters";
 import { CardDetailPanel } from "@/features/cards/components/card-detail-panel";
 import { CardToolbar } from "@/features/cards/components/card-toolbar";
 import { ScannedCardItem } from "@/features/cards/components/scanned-card-item";
@@ -48,16 +49,15 @@ export function CardGrid() {
     refetchInterval: 5000,
   });
   const viewers = viewersRaw?.filter((v) => v.userId !== currentUserId);
+  const { filters, setFilters } = useCardFilters();
   const {
     filteredAndSorted,
     searchQuery,
     setSearchQuery,
     sortKey,
     setSortKey,
-    filters,
-    setFilters,
     activeFilterCount,
-  } = useCardFilterSort(cards);
+  } = useCardFilterSort(cards, { filters, setFilters });
 
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [confirmOpen, setConfirmOpen] = useState(false);

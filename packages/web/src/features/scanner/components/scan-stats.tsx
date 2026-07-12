@@ -1,6 +1,8 @@
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { useCardFilters } from "@/features/cards/api/use-card-filters";
 import { useScannedCards } from "@/features/scanner/api/use-scanned-cards";
 import { computeStats } from "@/features/scanner/lib/compute-stats";
+import { cn } from "@/lib/utils";
 import { useMemo, useState } from "react";
 
 export function formatUsd(value: number): string {
@@ -20,6 +22,7 @@ export function formatElapsed(ms: number): string {
 export function ScanStats() {
   const [expandedSets, setExpandedSets] = useState(false);
   const { cards, elapsedMs, isTimerActive } = useScannedCards();
+  const { filters, toggleRarity, toggleColor, toggleSet } = useCardFilters();
 
   const stats = useMemo(() => computeStats(cards), [cards]);
 
@@ -94,21 +97,31 @@ export function ScanStats() {
             By Rarity
           </p>
           <div className="flex flex-col gap-1">
-            {stats.rarities.map((r) => (
-              <div
-                key={r.key}
-                className="flex items-center justify-between text-xs"
-              >
-                <div className="flex items-center gap-1.5">
-                  <div
-                    className="size-2.5 rounded-full"
-                    style={{ backgroundColor: `var(--${r.key})` }}
-                  />
-                  <span>{r.label}</span>
-                </div>
-                <span className="text-muted-foreground">{r.count}</span>
-              </div>
-            ))}
+            {stats.rarities.map((r) => {
+              const active = filters.rarities.includes(r.key);
+              return (
+                <button
+                  key={r.key}
+                  type="button"
+                  onClick={() => toggleRarity(r.key)}
+                  className={cn(
+                    "flex items-center justify-between text-xs rounded px-1 -mx-1 py-0.5 cursor-pointer transition-colors",
+                    active ? "bg-primary/15" : "hover:bg-muted",
+                  )}
+                >
+                  <div className="flex items-center gap-1.5">
+                    <div
+                      className="size-2.5 rounded-full"
+                      style={{ backgroundColor: `var(--${r.key})` }}
+                    />
+                    <span className={active ? "font-medium" : undefined}>
+                      {r.label}
+                    </span>
+                  </div>
+                  <span className="text-muted-foreground">{r.count}</span>
+                </button>
+              );
+            })}
           </div>
         </div>
         <div className="rounded-lg bg-input/20 dark:bg-input/30 border border-input p-2">
@@ -116,21 +129,31 @@ export function ScanStats() {
             By Color
           </p>
           <div className="flex flex-col gap-1">
-            {stats.colors.map((c) => (
-              <div
-                key={c.key}
-                className="flex items-center justify-between text-xs"
-              >
-                <div className="flex items-center gap-1.5">
-                  <div
-                    className="size-2.5 rounded-full border border-border"
-                    style={{ backgroundColor: c.bg }}
-                  />
-                  <span>{c.label}</span>
-                </div>
-                <span className="text-muted-foreground">{c.count}</span>
-              </div>
-            ))}
+            {stats.colors.map((c) => {
+              const active = filters.colors.includes(c.key);
+              return (
+                <button
+                  key={c.key}
+                  type="button"
+                  onClick={() => toggleColor(c.key)}
+                  className={cn(
+                    "flex items-center justify-between text-xs rounded px-1 -mx-1 py-0.5 cursor-pointer transition-colors",
+                    active ? "bg-primary/15" : "hover:bg-muted",
+                  )}
+                >
+                  <div className="flex items-center gap-1.5">
+                    <div
+                      className="size-2.5 rounded-full border border-border"
+                      style={{ backgroundColor: c.bg }}
+                    />
+                    <span className={active ? "font-medium" : undefined}>
+                      {c.label}
+                    </span>
+                  </div>
+                  <span className="text-muted-foreground">{c.count}</span>
+                </button>
+              );
+            })}
           </div>
         </div>
         <div className="rounded-lg bg-input/20 dark:bg-input/30 border border-input p-2">
@@ -138,22 +161,33 @@ export function ScanStats() {
             By Set
           </p>
           <div className="flex flex-col gap-1">
-            {visibleSets.map((s) => (
-              <div
-                key={s.code}
-                className="flex items-center justify-between text-xs gap-2"
-              >
-                <span className="truncate" title={s.name}>
-                  {s.name}
-                </span>
-                <div className="flex items-center gap-2 shrink-0">
-                  <span className="text-muted-foreground">{s.count}</span>
-                  <span className="text-muted-foreground w-14 text-right">
-                    {formatUsd(s.value)}
+            {visibleSets.map((s) => {
+              const active = filters.sets.includes(s.code);
+              return (
+                <button
+                  key={s.code}
+                  type="button"
+                  onClick={() => toggleSet(s.code)}
+                  className={cn(
+                    "flex items-center justify-between text-xs gap-2 rounded px-1 -mx-1 py-0.5 cursor-pointer transition-colors",
+                    active ? "bg-primary/15" : "hover:bg-muted",
+                  )}
+                >
+                  <span
+                    className={cn("truncate", active && "font-medium")}
+                    title={s.name}
+                  >
+                    {s.name}
                   </span>
-                </div>
-              </div>
-            ))}
+                  <div className="flex items-center gap-2 shrink-0">
+                    <span className="text-muted-foreground">{s.count}</span>
+                    <span className="text-muted-foreground w-14 text-right">
+                      {formatUsd(s.value)}
+                    </span>
+                  </div>
+                </button>
+              );
+            })}
           </div>
           {stats.sets.length > 5 && (
             <button

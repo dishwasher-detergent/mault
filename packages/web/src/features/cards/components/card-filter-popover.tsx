@@ -3,7 +3,12 @@ import { DynamicPopover } from "@/components/ui/responsive-popover";
 import type { CardFilters } from "@/features/cards/types";
 import { cn } from "@/lib/utils";
 import { BIN_COUNT } from "@magic-vault/shared";
-import { IconDownload, IconFilter, IconHelpCircle } from "@tabler/icons-react";
+import {
+  IconDownload,
+  IconFilter,
+  IconHelpCircle,
+  IconX,
+} from "@tabler/icons-react";
 
 const EMPTY_FILTERS: CardFilters = {
   colors: [],
@@ -11,6 +16,7 @@ const EMPTY_FILTERS: CardFilters = {
   bins: [],
   needsAttention: false,
   showDownloaded: false,
+  sets: [],
 };
 
 const COLORS = ["W", "U", "B", "R", "G", "C"] as const;
@@ -231,6 +237,35 @@ export function CardFilterPopover({
             Show downloaded cards
           </button>
         </div>
+
+        {activeFilters.sets.length > 0 && (
+          <div>
+            <p className="text-[11px] font-medium text-muted-foreground tracking-wide mb-1.5 font-heading">
+              Sets
+            </p>
+            <div className="flex gap-1 flex-wrap">
+              {activeFilters.sets.map((setCode) => (
+                <button
+                  key={setCode}
+                  type="button"
+                  onClick={() =>
+                    onFiltersChange({
+                      ...activeFilters,
+                      sets: toggle(activeFilters.sets, setCode),
+                    })
+                  }
+                  className={cn(
+                    chipBase,
+                    "flex items-center gap-1 px-2 h-7 uppercase bg-primary text-primary-foreground border-primary",
+                  )}
+                >
+                  {setCode}
+                  <IconX className="size-3" />
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
 
         {activeFilterCount > 0 && (
           <Button

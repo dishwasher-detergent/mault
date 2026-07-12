@@ -8,12 +8,18 @@ const EMPTY_FILTERS: CardFilters = {
   bins: [],
   needsAttention: false,
   showDownloaded: false,
+  sets: [],
 };
 
-export function useCardFilterSort(cards: ScannedCard[]) {
+export function useCardFilterSort(
+  cards: ScannedCard[],
+  external?: { filters: CardFilters; setFilters: (filters: CardFilters) => void },
+) {
   const [searchQuery, setSearchQuery] = useState("");
   const [sortKey, setSortKey] = useState<string | null>("scan-desc");
-  const [filters, setFilters] = useState<CardFilters>(EMPTY_FILTERS);
+  const [internalFilters, setInternalFilters] = useState<CardFilters>(EMPTY_FILTERS);
+  const filters = external?.filters ?? internalFilters;
+  const setFilters = external?.setFilters ?? setInternalFilters;
 
   const filteredAndSorted = useMemo(() => {
     let result = cards;
@@ -46,6 +52,10 @@ export function useCardFilterSort(cards: ScannedCard[]) {
 
     if (!filters.showDownloaded) {
       result = result.filter((entry) => !entry.isDownloaded);
+    }
+
+    if (filters.sets.length > 0) {
+      result = result.filter((entry) => filters.sets.includes(entry.card.set));
     }
 
     const query = searchQuery.toLowerCase().trim();
@@ -107,6 +117,7 @@ export function useCardFilterSort(cards: ScannedCard[]) {
     filters.colors.length +
     filters.rarities.length +
     filters.bins.length +
+    filters.sets.length +
     (filters.needsAttention ? 1 : 0) +
     (filters.showDownloaded ? 1 : 0);
 
