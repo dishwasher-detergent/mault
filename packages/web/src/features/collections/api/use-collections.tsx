@@ -6,7 +6,11 @@ import {
   deleteCollection as deleteCollectionFn,
   renameCollection as renameCollectionFn,
 } from "@/features/collections/api/collections";
-import { createSet as createSetFn } from "@/features/bins/api/sort-bins";
+import {
+  activateSet as activateSetFn,
+  binsQueryOptions,
+  createSet as createSetFn,
+} from "@/features/bins/api/sort-bins";
 import { useOrg } from "@/features/companies/api/use-organization";
 import { createDefaultColorBins, type Collection } from "@magic-vault/shared";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -79,9 +83,21 @@ export function CollectionsProvider({ children }: { children: React.ReactNode })
         setCollections(r.data);
         const created = r.data.find((c) => c.isActive);
         if (created) setActiveGuid(created.guid);
-        const binsResult = await createSetFn(name, createDefaultColorBins());
-        if (binsResult.success && binsResult.data) {
-          queryClient.setQueryData(["bins"], binsResult.data);
+
+        // Only spin up a new default rule set when the org has none yet —
+        // otherwise reuse (activate) the existing one instead of creating
+        // a fresh set per collection.
+        const existingSets = await queryClient.ensureQueryData(binsQueryOptions);
+        if (existingSets.length === 0) {
+          const binsResult = await createSetFn(name, createDefaultColorBins());
+          if (binsResult.success && binsResult.data) {
+            queryClient.setQueryData(["bins"], binsResult.data);
+          }
+        } else {
+          const activateResult = await activateSetFn(existingSets[0].guid);
+          if (activateResult.success && activateResult.data) {
+            queryClient.setQueryData(["bins"], activateResult.data);
+          }
         }
       }
     },
