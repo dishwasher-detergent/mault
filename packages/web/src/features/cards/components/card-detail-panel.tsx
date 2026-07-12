@@ -240,8 +240,8 @@ export function CardDetailPanel({
               {hasMultipleCandidates && (
                 <div className="flex flex-col gap-3">
                   {capturedImageUrl ? (
-                    <div className="flex items-center gap-3">
-                      <div className="w-14 aspect-[2.5/3.5] rounded-lg overflow-hidden border shrink-0">
+                    <div className="flex items-center gap-4">
+                      <div className="w-40 aspect-[2.5/3.5] rounded-lg overflow-hidden border shadow-sm shrink-0">
                         <img
                           src={capturedImageUrl}
                           alt="Scanned"
