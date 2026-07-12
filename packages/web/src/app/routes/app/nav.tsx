@@ -296,7 +296,7 @@ export function AppNav() {
           const isMonitor = item.to === "/app/monitor";
 
           return (
-            <div key={item.to}>
+            <div key={item.to} className="mx-1">
               <ExpandedNavItem {...item} />
               {isCollections && topCollections.length > 0 && (
                 <div className="mt-0.5 flex flex-col gap-0.5">

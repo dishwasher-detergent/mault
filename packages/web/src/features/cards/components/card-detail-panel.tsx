@@ -3,7 +3,6 @@ import { ButtonGroup } from "@/components/ui/button-group";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Switch } from "@/components/ui/switch";
 import {
   Select,
   SelectContent,
@@ -11,6 +10,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
 import { Search } from "@/features/cards/api/scryfall";
 import { useScannedCards } from "@/features/scanner/api/use-scanned-cards";
 import { cn } from "@/lib/utils";
@@ -434,6 +434,20 @@ export function CardDetailPanel({
             </>
           ) : (
             <>
+              {capturedImageUrl && (
+                <div className="flex items-center gap-4">
+                  <div className="w-40 aspect-[2.5/3.5] rounded-lg overflow-hidden border shadow-sm shrink-0">
+                    <img
+                      src={capturedImageUrl}
+                      alt="Scanned"
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                  <p className="text-sm text-muted-foreground leading-snug">
+                    Your scanned card — search for the correct version below
+                  </p>
+                </div>
+              )}
               <div className="flex gap-2">
                 <div className="relative flex-1">
                   <IconSearch className="absolute left-2 top-1/2 -translate-y-1/2 size-3 text-muted-foreground" />
@@ -487,7 +501,7 @@ export function CardDetailPanel({
                     </p>
                   )}
                 {!loading && filteredResults.length > 0 && (
-                  <div className="grid grid-cols-3 gap-1">
+                  <div className="grid grid-cols-[repeat(auto-fill,minmax(200px,1fr))] gap-1.5">
                     {filteredResults.map((card) => (
                       <Button
                         key={card.id}
