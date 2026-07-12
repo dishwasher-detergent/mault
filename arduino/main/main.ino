@@ -20,6 +20,11 @@ Adafruit_PWMServoDriver pwm = Adafruit_PWMServoDriver();
 #define IR_PIN_MODULE3 4
 #define IR_TIMEOUT_MS  3000  // max ms to wait for a card before aborting
 
+// Module 1 is where every card lands right after feeding, before any routing
+// decision is made — if it sits there this long with no routing command in
+// progress (e.g. the app never sent a bin command), something's stuck.
+#define MODULE1_JAM_TIMEOUT_MS 20000
+
 // Hopper IR sensor — active LOW: pin reads LOW while cards remain in the feeder stack
 #define IR_PIN_HOPPER 5
 
@@ -80,6 +85,10 @@ FeederConfig feederConfig = {400, 3000, 80, 50, 150};
 #define DELAY_PUSH         600  // time for pusher to complete its stroke
 
 String inputBuffer = "";
+
+// Idle-time jam watch for module 1 — see checkModule1Jam().
+unsigned long module1PresentSince = 0;
+bool module1JamAlerted = false;
 
 int getChannel(int module, int servoOffset) {
   return MODULE_CHANNEL_OFFSET + (module - 1) * 3 + servoOffset;
@@ -171,6 +180,33 @@ FeedResult runFeeder() {
     delay(feederConfig.pauseDuration);
   }
   return FEED_TIMEOUT;
+}
+
+// Watches module 1's IR sensor while idle (only runs between commands, since
+// routeCard()/runFeeder() block loop() for their duration). If a card has
+// been sitting there continuously longer than MODULE1_JAM_TIMEOUT_MS — e.g.
+// the app never followed up with a bin command — report it once so it isn't
+// silently left for the operator to discover. Clears itself (and re-arms)
+// as soon as the sensor sees the card leave.
+void checkModule1Jam() {
+  bool present = digitalRead(IR_PIN_MODULE1) == LOW;
+  if (!present) {
+    module1PresentSince = 0;
+    module1JamAlerted = false;
+    return;
+  }
+  if (module1PresentSince == 0) {
+    module1PresentSince = millis();
+    return;
+  }
+  if (!module1JamAlerted && millis() - module1PresentSince > MODULE1_JAM_TIMEOUT_MS) {
+    module1JamAlerted = true;
+    JsonDocument res;
+    res["error"] = "jam";
+    res["module"] = 1;
+    serializeJson(res, Serial);
+    Serial.println();
+  }
 }
 
 void setAllNeutral() {
@@ -548,4 +584,5 @@ void loop() {
       if (inputBuffer.length() > 256) inputBuffer = "";
     }
   }
+  checkModule1Jam();
 }
