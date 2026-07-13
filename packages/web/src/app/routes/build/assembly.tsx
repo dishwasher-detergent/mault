@@ -15,7 +15,7 @@ interface Step {
   key: string;
   text: ReactNode;
   note?: ReactNode;
-  image?: string;
+  images?: string[];
 }
 
 interface Phase {
@@ -59,6 +59,11 @@ const PHASES: Phase[] = [
       {
         key: "dry-fit",
         text: "Dry-fit each module housing before inserting any electronics — sand or adjust any tight servo pockets now.",
+        images: [
+          "/instructions/top_down_view_device.jpg",
+          "/instructions/corner_view_device.jpg",
+          "/instructions/front_view_device.jpg",
+        ],
       },
       {
         key: "mount-boards-to-panels",
@@ -79,21 +84,25 @@ const PHASES: Phase[] = [
         key: "mount-module-servos",
         text: "Install the bottom, paddle, and pusher servo into each of the 3 module housings (9 servos total).",
         note: "Center each servo at its neutral pulse before screwing down the horn, so mechanical range matches the firmware's open/closed travel.",
+        images: ["/instructions/top_down_view_module.jpg"],
       },
       {
         key: "mount-bottom-flapper",
         text: "Attach the bottom flapper to the bottom servo's horn with M2×4 screws, servo held at its closed pulse so the flapper seats flush across the card path.",
         note: "This is the trapdoor a card falls through to reach the next module, or the current one on a match.",
+        images: ["/instructions/bottom_paddle.jpg"],
       },
       {
         key: "mount-side-flappers",
         text: "Before attaching anything, command each paddle servo through its full range to confirm the linkage can reach fully open without binding. Then, with the servo held at its closed position, attach the left and right flapper to the shared linkage with M2×4 screws (one pair per module) so both sit flush and even.",
         note: "One paddle servo drives both flappers together — they open and close as a pair, not independently. Fit the flappers closed first; the exact open-position pulse gets fine-tuned later from the Module Calibration Grid.",
+        images: ["/instructions/side_paddles.jpg"],
       },
       {
         key: "mount-pusher-arm",
         text: "Before fitting the arm, sweep the pusher servo through its full left-to-right range and find its true mechanical middle. With the servo held at that middle position, attach the card pusher arm to the horn with M2×4 screws so it sits centered between the left and right bins.",
         note: "Fitting the arm off-center biases the push distance to one side — the exact left/right pulses get fine-tuned later from the Module Calibration Grid.",
+        images: ["/instructions/pusher_arms.jpg"],
       },
       {
         key: "fit-feeder-orings",
@@ -103,10 +112,12 @@ const PHASES: Phase[] = [
       {
         key: "mount-feeder-roller",
         text: "Attach the roller to the feeder module.",
+        images: ["/instructions/feeder_roller.jpg"],
       },
       {
         key: "mount-feeder-servo",
         text: "Install the continuous-rotation feeder servo to the roller, at the base of the hopper.",
+        images: ["/instructions/feeder_servo.jpg"],
       },
     ],
   },
@@ -337,12 +348,17 @@ export function BuildAssembly() {
                         {step.note}
                       </p>
                     )}
-                    {step.image && (
-                      <img
-                        src={step.image}
-                        alt=""
-                        className="mt-2 max-w-sm rounded-md border"
-                      />
+                    {step.images && step.images.length > 0 && (
+                      <div className="mt-2 flex flex-wrap gap-2">
+                        {step.images.map((src) => (
+                          <img
+                            key={src}
+                            src={src}
+                            alt=""
+                            className="max-w-sm rounded-md border"
+                          />
+                        ))}
+                      </div>
                     )}
                   </div>
                 </label>
