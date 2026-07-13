@@ -2,22 +2,26 @@ const RARITIES = [
   {
     key: "common",
     label: "Common",
-    description: "The bulk of every collection, finally accounted for.",
+    description:
+      "The cards that pile up fastest. Route them straight to a bulk bin so they stop clogging your scan queue.",
   },
   {
     key: "uncommon",
     label: "Uncommon",
-    description: "See exactly how many you've got of each.",
+    description:
+      "Build-arounds and playset staples, sorted separately from bulk so you can actually find the fourth copy.",
   },
   {
     key: "rare",
     label: "Rare",
-    description: "Track your rares across every set you own.",
+    description:
+      "Know what you're holding before you buy a duplicate — see your full rare count for a set at a glance.",
   },
   {
     key: "mythic",
     label: "Mythic",
-    description: "Your best pulls, never lost in a shoebox again.",
+    description:
+      "Your best pulls get flagged and routed to their own bin automatically, never mixed in with the rest.",
   },
 ];
 
