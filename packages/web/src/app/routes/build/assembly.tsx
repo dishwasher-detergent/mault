@@ -333,7 +333,7 @@ export function BuildAssembly() {
                     onChange={() => toggle(step.key)}
                     className="mt-0.5 size-4 shrink-0 accent-primary"
                   />
-                  <div>
+                  <div className="min-w-0 flex-1">
                     <p
                       className={cn(
                         "text-xs/relaxed",
@@ -355,7 +355,7 @@ export function BuildAssembly() {
                             key={src}
                             src={src}
                             alt=""
-                            className="max-w-sm rounded-md border"
+                            className="w-full max-w-40 rounded-md border sm:max-w-sm"
                           />
                         ))}
                       </div>
