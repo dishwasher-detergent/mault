@@ -9,6 +9,7 @@ import MonitorPage from "@/app/routes/app/monitor";
 import MonitorSessionsPage from "@/app/routes/app/monitor-sessions";
 import SettingsPage from "@/app/routes/app/settings";
 import AuthPage from "@/app/routes/auth";
+import BuildGuidePage from "@/app/routes/build";
 import LandingPage from "@/app/routes/index";
 import { useIsMobile } from "@/hooks/use-is-mobile";
 import { useRole } from "@/hooks/use-role";
@@ -43,6 +44,10 @@ export const router = createBrowserRouter([
   {
     path: "/",
     element: <LandingPage />,
+  },
+  {
+    path: "/build",
+    element: <BuildGuidePage />,
   },
   {
     path: "/auth/:path",

@@ -4,13 +4,13 @@ import { neon } from "@/lib/auth/client";
 import { cn } from "@/lib/utils";
 import { Link } from "react-router-dom";
 
-export function LandingNav() {
+export function BuildNav() {
   const { data, isPending } = neon.auth.useSession();
   const isSignedIn = !isPending && !!data?.user;
 
   return (
     <header className="sticky top-0 z-20 border-b bg-background/80 backdrop-blur-sm">
-      <div className="mx-auto flex h-14 max-w-6xl items-center justify-between px-4">
+      <div className="mx-auto flex h-14 max-w-4xl items-center justify-between px-4">
         <Link to="/" className="flex items-center gap-2">
           <span className="grid size-7 shrink-0 place-items-center rounded-lg bg-primary font-heading text-sm font-bold text-primary-foreground">
             MV
@@ -21,27 +21,29 @@ export function LandingNav() {
         </Link>
 
         <nav className="hidden items-center gap-6 text-xs/relaxed font-medium text-muted-foreground md:flex">
-          <a
-            href="#features"
-            className="transition-colors hover:text-foreground"
-          >
-            Features
+          <a href="#parts" className="transition-colors hover:text-foreground">
+            Parts list
           </a>
           <a
-            href="#how-it-works"
+            href="#wiring"
             className="transition-colors hover:text-foreground"
           >
-            How it works
+            Wiring
           </a>
           <a
-            href="#open-source"
+            href="#assembly"
             className="transition-colors hover:text-foreground"
           >
-            Open source
+            Assembly
           </a>
-          <Link to="/build" className="transition-colors hover:text-foreground">
-            Build
-          </Link>
+          <a
+            href="https://github.com/dishwasher-detergent/mault/issues/new"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="transition-colors hover:text-foreground"
+          >
+            Report an issue
+          </a>
         </nav>
 
         <div className="flex items-center gap-2">
@@ -54,25 +56,12 @@ export function LandingNav() {
               Open app
             </Link>
           ) : (
-            <>
-              <Link
-                to="/auth/sign-in"
-                className={cn(
-                  buttonVariants({ variant: "ghost", size: "lg" }),
-                  "hidden sm:inline-flex",
-                )}
-              >
-                Sign in
-              </Link>
-              <Link
-                to="/auth/sign-up"
-                className={cn(
-                  buttonVariants({ variant: "default", size: "lg" }),
-                )}
-              >
-                Get started
-              </Link>
-            </>
+            <Link
+              to="/auth/sign-up"
+              className={cn(buttonVariants({ variant: "default", size: "lg" }))}
+            >
+              Get started
+            </Link>
           )}
         </div>
       </div>

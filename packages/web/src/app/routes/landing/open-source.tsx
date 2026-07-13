@@ -1,6 +1,7 @@
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { IconBrandGithub, IconCube, IconDownload } from "@tabler/icons-react";
+import { Link } from "react-router-dom";
 
 const REPO_URL = "https://github.com/dishwasher-detergent/mault";
 const MODEL_URL = `${REPO_URL}/tree/master/3d%20model`;
@@ -57,18 +58,23 @@ export function LandingOpenSource() {
               included in the repo.
             </p>
           </div>
-          <a
-            href={MODEL_URL}
-            target="_blank"
-            rel="noreferrer"
-            className={cn(
-              buttonVariants({ variant: "outline", size: "sm" }),
-              "mt-2 self-start",
-            )}
-          >
-            <IconDownload size={16} />
-            Get the 3D model
-          </a>
+          <div className="mt-2 flex flex-wrap gap-2">
+            <a
+              href={MODEL_URL}
+              target="_blank"
+              rel="noreferrer"
+              className={cn(buttonVariants({ variant: "outline", size: "sm" }))}
+            >
+              <IconDownload size={16} />
+              Get the 3D model
+            </a>
+            <Link
+              to="/build"
+              className={cn(buttonVariants({ variant: "ghost", size: "sm" }))}
+            >
+              Read the build guide
+            </Link>
+          </div>
         </div>
       </div>
     </section>
