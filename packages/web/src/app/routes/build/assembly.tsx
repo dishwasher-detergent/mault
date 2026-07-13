@@ -128,6 +128,7 @@ const PHASES: Phase[] = [
       {
         key: "mount-module-ir",
         text: "Fix one IR sensor at the gate of each module (1, 2, 3), aimed across the card path.",
+        images: ["/instructions/ir_sensor.jpg"],
       },
       {
         key: "mount-hopper-ir",
