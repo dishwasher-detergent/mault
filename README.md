@@ -2,6 +2,9 @@
 
 A Magic: The Gathering card scanner and physical sorter. A webcam identifies cards via AI image embeddings, a rule engine decides which bin each card belongs in, and an Arduino-driven feeder and servo mechanism physically routes the card there.
 
+## MakerWorld
+https://makerworld.com/en/models/3066180-tcg-card-sorting-machine#profileId-3451252
+
 ## How it works
 
 1. A feeder mechanism (continuous-rotation servo + roller) pulls a card from the hopper into view of the webcam
