@@ -2,7 +2,7 @@ import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import type { ScryfallCard } from "@magic-vault/shared";
 import { getCardFaceName, getCardImageUris } from "@magic-vault/shared";
-import { IconArrowRight, IconCamera } from "@tabler/icons-react";
+import { IconArrowRight } from "@tabler/icons-react";
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 
@@ -42,10 +42,6 @@ export function LandingHero() {
   return (
     <section className="mx-auto grid max-w-6xl items-center gap-10 px-4 pt-16 pb-20 md:grid-cols-2 md:pt-24 md:pb-28">
       <div className="flex flex-col items-start gap-5">
-        <span className="inline-flex items-center gap-1.5 rounded-full border bg-secondary/60 px-3 py-1 text-[0.625rem] font-medium text-muted-foreground">
-          <IconCamera size={13} />
-          Know exactly what's in your collection
-        </span>
         <h1 className="text-4xl font-heading font-semibold leading-tight tracking-tight md:text-5xl">
           Every card,
           <br />
