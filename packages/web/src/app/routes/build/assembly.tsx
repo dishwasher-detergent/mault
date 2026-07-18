@@ -119,6 +119,12 @@ const PHASES: Phase[] = [
         text: "Install the continuous-rotation feeder servo to the roller, at the base of the hopper.",
         images: ["/instructions/feeder_servo.jpg"],
       },
+      {
+        key: "mount-feeder-wall",
+        text: "Attach the wall piece to the tube that guides cards from the hopper to the feeder roller.",
+        note: "When mounting the wall, attach it to the feeder module first, then put 2 cards below the wall and slide it down before tighting it into place.",
+        images: ["/instructions/feeder_tube_wall.jpg"],
+      },
     ],
   },
   {
