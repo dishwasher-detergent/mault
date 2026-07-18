@@ -14,7 +14,7 @@ export function BuildHero() {
         Parts list and assembly instructions for the physical sorting unit: a
         hopper feeds cards one at a time through three stacked routing modules,
         each capable of dropping a card into one of two side bins or passing it
-        down to the next module — seven bins total, driven by an Arduino Uno R4
+        down to the next module - seven bins total, driven by an Arduino Uno R4
         Minima over I²C.
       </p>
 
@@ -47,12 +47,12 @@ export function BuildHero() {
       <div className="mt-10 overflow-hidden rounded-lg border bg-card">
         <div className="divide-y divide-border">
           <p className="p-5 text-xs/relaxed text-muted-foreground md:p-6">
-            Each module has three servos — a{" "}
+            Each module has three servos - a{" "}
             <strong className="font-medium text-foreground">bottom</strong>{" "}
             trapdoor, a{" "}
             <strong className="font-medium text-foreground">paddle</strong>{" "}
             gate, and a left/right{" "}
-            <strong className="font-medium text-foreground">pusher</strong> —
+            <strong className="font-medium text-foreground">pusher</strong> -
             plus an IR sensor. Closing every trapdoor above the target bin and
             opening only the ones beneath it lets a card fall to the right
             module before the pusher ejects it.
@@ -82,7 +82,7 @@ export function BuildHero() {
             <div className="flex items-center justify-center gap-2 dark:bg-primary/15 bg-primary/5 px-3 py-3 font-mono text-xs font-semibold dark:text-primary-foreground text-primary">
               Bin 7
               <span className="font-sans text-[10px] font-normal dark:text-primary-foreground/70 text-primary/70">
-                — catch-all, all three bottoms open
+                - catch-all, all three bottoms open
               </span>
             </div>
           </div>

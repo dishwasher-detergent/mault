@@ -54,7 +54,7 @@ export function LandingOpenSource() {
               3D printable sorter
             </p>
             <p className="mt-1 text-xs/relaxed text-muted-foreground">
-              Print the card sorter yourself — Fusion 360 and 3MF files are
+              Print the card sorter yourself - Fusion 360 and 3MF files are
               included in the repo.
             </p>
           </div>

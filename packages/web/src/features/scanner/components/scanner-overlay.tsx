@@ -62,7 +62,7 @@ export function ScannerOverlay({
       <StatusPill variant="warning">
         <IconAlertTriangle className="size-3.5 shrink-0" />
         <span>
-          No catch-all bin configured — unmatched cards won't be sorted.
+          No catch-all bin configured - unmatched cards won't be sorted.
         </span>
       </StatusPill>
     );
@@ -106,20 +106,20 @@ export function ScannerOverlay({
       );
     case "paused":
       return (
-        <StatusPill>Scanner paused — press Resume to continue.</StatusPill>
+        <StatusPill>Scanner paused - press Resume to continue.</StatusPill>
       );
     case "duplicate":
       return (
         <StatusPill variant="warning">
           <IconAlertTriangle className="size-3.5 shrink-0" />
-          <span>Same card scanned — use Add Again to add it anyway.</span>
+          <span>Same card scanned - use Add Again to add it anyway.</span>
         </StatusPill>
       );
     case "no-match":
       return (
         <StatusPill variant="warning">
           <IconAlertTriangle className="size-3.5 shrink-0" />
-          <span>Card not recognized — try Scan Again or adjust lighting.</span>
+          <span>Card not recognized - try Scan Again or adjust lighting.</span>
         </StatusPill>
       );
     default:

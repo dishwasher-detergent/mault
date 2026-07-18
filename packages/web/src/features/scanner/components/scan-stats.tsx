@@ -72,7 +72,7 @@ export function ScanStats() {
               value={
                 elapsedMs > 0
                   ? String(Math.round((cards.length / elapsedMs) * 3_600_000))
-                  : "—"
+                  : "-"
               }
             />
           </div>

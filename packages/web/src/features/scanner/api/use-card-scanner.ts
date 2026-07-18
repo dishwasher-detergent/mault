@@ -30,16 +30,20 @@ function lerpPoint(a: Point, b: Point, t: number): Point {
   return { x: a.x + (b.x - a.x) * t, y: a.y + (b.y - a.y) * t };
 }
 
-function smoothContour(prev: CardContour, next: CardContour, alpha: number): CardContour {
+function smoothContour(
+  prev: CardContour,
+  next: CardContour,
+  alpha: number,
+): CardContour {
   return {
-    topLeft:     lerpPoint(prev.topLeft,     next.topLeft,     alpha),
-    topRight:    lerpPoint(prev.topRight,    next.topRight,    alpha),
+    topLeft: lerpPoint(prev.topLeft, next.topLeft, alpha),
+    topRight: lerpPoint(prev.topRight, next.topRight, alpha),
     bottomRight: lerpPoint(prev.bottomRight, next.bottomRight, alpha),
-    bottomLeft:  lerpPoint(prev.bottomLeft,  next.bottomLeft,  alpha),
+    bottomLeft: lerpPoint(prev.bottomLeft, next.bottomLeft, alpha),
   };
 }
 
-// Singleton AudioContext — browsers cap concurrent contexts (~6).
+// Singleton AudioContext - browsers cap concurrent contexts (~6).
 // Creating one per scan exhausts the limit quickly.
 let sharedAudioCtx: AudioContext | null = null;
 function getAudioContext(): AudioContext {
@@ -75,7 +79,11 @@ const CLOSE_MATCH_DELTA = 0.05;
 async function searchCardImage(
   canvas: HTMLCanvasElement,
   contour?: CardContour | null,
-): Promise<{ card: ScryfallCardWithDistance | null; alternativeMatches: ScryfallCardWithDistance[]; debugImageUrl: string }> {
+): Promise<{
+  card: ScryfallCardWithDistance | null;
+  alternativeMatches: ScryfallCardWithDistance[];
+  debugImageUrl: string;
+}> {
   const warpedCanvas = contour ? extractCardImage(canvas, contour) : canvas;
   const debugImageUrl = warpedCanvas.toDataURL("image/jpeg", 0.8);
   const blob = await canvasToBlob(warpedCanvas);
@@ -83,9 +91,12 @@ async function searchCardImage(
   formData.append("image", blob, "card.jpg");
 
   const { data } = await Search(formData);
-  if (!data || data.length === 0) return { card: null, alternativeMatches: [], debugImageUrl };
+  if (!data || data.length === 0)
+    return { card: null, alternativeMatches: [], debugImageUrl };
 
-  const closeMatches = data.filter((m) => m.distance - data[0].distance <= CLOSE_MATCH_DELTA);
+  const closeMatches = data.filter(
+    (m) => m.distance - data[0].distance <= CLOSE_MATCH_DELTA,
+  );
   const resolved = await Promise.all(
     closeMatches.map((m) =>
       SearchById(m.scryfallId).then((r) =>
@@ -95,7 +106,8 @@ async function searchCardImage(
   );
 
   const cards = resolved.filter(Boolean) as ScryfallCardWithDistance[];
-  if (cards.length === 0) return { card: null, alternativeMatches: [], debugImageUrl };
+  if (cards.length === 0)
+    return { card: null, alternativeMatches: [], debugImageUrl };
 
   const [card, ...alternativeMatches] = cards;
   return { card, alternativeMatches, debugImageUrl };
@@ -207,17 +219,25 @@ export function useCardScanner({
       }
 
       try {
-        const { card, alternativeMatches, debugImageUrl } = await searchCardImage(canvas, contour);
+        const { card, alternativeMatches, debugImageUrl } =
+          await searchCardImage(canvas, contour);
         setDebugImageUrl(debugImageUrl);
         debugImageUrlRef.current = debugImageUrl;
 
         if (card) {
-          if (checkDuplicate && !allowDuplicates && lastScannedCardIdRef.current === card.id) {
+          if (
+            checkDuplicate &&
+            !allowDuplicates &&
+            lastScannedCardIdRef.current === card.id
+          ) {
             setDuplicateCard(card);
             updateStatus("duplicate");
           } else {
             lastScannedCardIdRef.current = card.id;
-            onSearchResultsRef.current?.([card, ...alternativeMatches], debugImageUrl);
+            onSearchResultsRef.current?.(
+              [card, ...alternativeMatches],
+              debugImageUrl,
+            );
             updateStatus("scanning");
           }
         } else {
@@ -280,16 +300,26 @@ export function useCardScanner({
       // Smooth corner positions to reduce jitter in the overlay
       if (result.detected && result.contour) {
         smoothedContourRef.current = smoothedContourRef.current
-          ? smoothContour(smoothedContourRef.current, result.contour, SMOOTH_ALPHA)
+          ? smoothContour(
+              smoothedContourRef.current,
+              result.contour,
+              SMOOTH_ALPHA,
+            )
           : result.contour;
       } else {
         smoothedContourRef.current = null;
       }
 
       overlayCtx.clearRect(0, 0, overlayCanvas.width, overlayCanvas.height);
-      drawDetectionOverlay(overlayCtx, smoothedContourRef.current
-        ? { detected: true, contour: smoothedContourRef.current, confidence: result.confidence }
-        : result,
+      drawDetectionOverlay(
+        overlayCtx,
+        smoothedContourRef.current
+          ? {
+              detected: true,
+              contour: smoothedContourRef.current,
+              confidence: result.confidence,
+            }
+          : result,
       );
 
       if (result.detected) {
@@ -331,7 +361,7 @@ export function useCardScanner({
 
   // Attach stream to video/canvases and start the detection loop.
   // Re-runs if the stream is replaced (e.g. after retryCamera).
-  // On unmount: cancels the RAF loop but does NOT stop the stream tracks —
+  // On unmount: cancels the RAF loop but does NOT stop the stream tracks -
   // the CameraProvider owns the stream lifetime.
   useEffect(() => {
     if (!stream) return;
@@ -409,7 +439,10 @@ export function useCardScanner({
 
   const handleForceAddDuplicate = useCallback(() => {
     if (duplicateCard) {
-      onSearchResultsRef.current?.([duplicateCard], debugImageUrlRef.current ?? undefined);
+      onSearchResultsRef.current?.(
+        [duplicateCard],
+        debugImageUrlRef.current ?? undefined,
+      );
       setDuplicateCard(null);
       updateStatus("scanning");
     }

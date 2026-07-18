@@ -27,7 +27,7 @@ export function loadOpenCv(): Promise<void> {
     script.async = true;
 
     script.onload = () => {
-      // OpenCV.js sets cv as a module factory — wait for it to initialize
+      // OpenCV.js sets cv as a module factory - wait for it to initialize
       const waitForCv = () => {
         if (isOpenCvReady()) {
           resolve();

@@ -10,7 +10,7 @@ const STEPS = [
     icon: IconCamera,
     title: "Show it a card",
     description:
-      "Hold any card up to your webcam — no scanner or app on your phone required.",
+      "Hold any card up to your webcam - no scanner or app on your phone required.",
   },
   {
     icon: IconSparkles,
@@ -22,7 +22,7 @@ const STEPS = [
     icon: IconRoute,
     title: "Sorted by your rules",
     description:
-      "Set up rules once — by rarity, color, set, type, or anything else — and every card routes itself.",
+      "Set up rules once - by rarity, color, set, type, or anything else - and every card routes itself.",
   },
   {
     icon: IconLayoutGrid,
@@ -56,9 +56,7 @@ export function LandingPipeline() {
                   Step {i + 1}
                 </span>
               </div>
-              <p className="font-heading text-sm font-semibold">
-                {step.title}
-              </p>
+              <p className="font-heading text-sm font-semibold">{step.title}</p>
               <p className="text-xs/relaxed text-muted-foreground">
                 {step.description}
               </p>

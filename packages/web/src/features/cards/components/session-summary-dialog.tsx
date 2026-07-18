@@ -97,22 +97,22 @@ export function SessionSummaryDialog({
               <StatCell label="Total Cards" value={String(cards.length)} />
               <StatCell
                 label="Unique"
-                value={stats ? String(stats.uniqueCount) : "—"}
+                value={stats ? String(stats.uniqueCount) : "-"}
               />
               <StatCell
                 label="Total Value"
-                value={stats ? formatUsd(stats.totalValue) : "—"}
+                value={stats ? formatUsd(stats.totalValue) : "-"}
               />
             </div>
             <div className="grid grid-cols-3 divide-x divide-border">
               <StatCell
                 label="Avg Value"
-                value={stats ? formatUsd(stats.avgValue) : "—"}
+                value={stats ? formatUsd(stats.avgValue) : "-"}
               />
               <StatCell label="Duration" value={formatElapsed(elapsedMs)} />
               <StatCell
                 label="Cards / hr"
-                value={cardsPerHour != null ? String(cardsPerHour) : "—"}
+                value={cardsPerHour != null ? String(cardsPerHour) : "-"}
               />
             </div>
             {stats?.mostValuable && (

@@ -58,7 +58,7 @@ const PHASES: Phase[] = [
       },
       {
         key: "dry-fit",
-        text: "Dry-fit each module housing before inserting any electronics — sand or adjust any tight servo pockets now.",
+        text: "Dry-fit each module housing before inserting any electronics - sand or adjust any tight servo pockets now.",
         images: [
           "/instructions/top_down_view_device.jpg",
           "/instructions/corner_view_device.jpg",
@@ -72,7 +72,7 @@ const PHASES: Phase[] = [
       {
         key: "attach-base-panels",
         text: "Attach the base panels to the base with 8 M3×6 screws and 8 M3 nuts.",
-        note: "Do this after the Arduino and PCA9685 are mounted to the panels — the boards are much harder to reach once the panels are on the base.",
+        note: "Do this after the Arduino and PCA9685 are mounted to the panels - the boards are much harder to reach once the panels are on the base.",
       },
     ],
   },
@@ -95,19 +95,19 @@ const PHASES: Phase[] = [
       {
         key: "mount-side-flappers",
         text: "Before attaching anything, command each paddle servo through its full range to confirm the linkage can reach fully open without binding. Then, with the servo held at its closed position, attach the left and right flapper to the shared linkage with M2×4 screws (one pair per module) so both sit flush and even.",
-        note: "One paddle servo drives both flappers together — they open and close as a pair, not independently. Fit the flappers closed first; the exact open-position pulse gets fine-tuned later from the Module Calibration Grid.",
+        note: "One paddle servo drives both flappers together - they open and close as a pair, not independently. Fit the flappers closed first; the exact open-position pulse gets fine-tuned later from the Module Calibration Grid.",
         images: ["/instructions/side_paddles.jpg"],
       },
       {
         key: "mount-pusher-arm",
         text: "Before fitting the arm, sweep the pusher servo through its full left-to-right range and find its true mechanical middle. With the servo held at that middle position, attach the card pusher arm to the horn with M2×4 screws so it sits centered between the left and right bins.",
-        note: "Fitting the arm off-center biases the push distance to one side — the exact left/right pulses get fine-tuned later from the Module Calibration Grid.",
+        note: "Fitting the arm off-center biases the push distance to one side - the exact left/right pulses get fine-tuned later from the Module Calibration Grid.",
         images: ["/instructions/pusher_arms.jpg"],
       },
       {
         key: "fit-feeder-orings",
         text: "Fit 6 G20 o-rings onto the feeder roller.",
-        note: "These give the roller grip on the card face — space them evenly along the roller's length.",
+        note: "These give the roller grip on the card face - space them evenly along the roller's length.",
       },
       {
         key: "mount-feeder-roller",
@@ -139,7 +139,7 @@ const PHASES: Phase[] = [
       {
         key: "mount-hopper-ir",
         text: "Fix the fourth IR sensor in the hopper throat, just above the feeder.",
-        note: "This one tells the feeder when the hopper is empty — placement matters more than the module sensors.",
+        note: "This one tells the feeder when the hopper is empty - placement matters more than the module sensors.",
       },
     ],
   },
@@ -197,7 +197,7 @@ const PHASES: Phase[] = [
       },
       {
         key: "watch-modules",
-        text: "Watch each module during the test — confirm nothing binds or grinds at the end of its travel.",
+        text: "Watch each module during the test - confirm nothing binds or grinds at the end of its travel.",
         note: "If a servo strains at open or closed, its housing cutout likely needs adjusting before calibration.",
       },
     ],
@@ -212,19 +212,19 @@ const PHASES: Phase[] = [
       },
       {
         key: "calibrate-modules",
-        text: "Module Calibration Grid — set the open/closed pulse for each bottom and paddle, and left/neutral/right for each pusher, module by module.",
+        text: "Module Calibration Grid - set the open/closed pulse for each bottom and paddle, and left/neutral/right for each pusher, module by module.",
       },
       {
         key: "calibrate-feeder",
-        text: "Feeder Calibration Panel — tune feed speed, pulse/pause timing, and settle duration against your actual hopper.",
+        text: "Feeder Calibration Panel - tune feed speed, pulse/pause timing, and settle duration against your actual hopper.",
       },
       {
         key: "check-ir",
-        text: "IR Sensor Panel — verify all 4 sensors report present/absent correctly with a card in hand.",
+        text: "IR Sensor Panel - verify all 4 sensors report present/absent correctly with a card in hand.",
       },
       {
         key: "test-bins",
-        text: "Bin Routing Controls — send a test card to each of the 7 bins in turn and confirm it lands correctly.",
+        text: "Bin Routing Controls - send a test card to each of the 7 bins in turn and confirm it lands correctly.",
       },
     ],
   },

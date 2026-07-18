@@ -78,7 +78,7 @@ function scoreContour(contour: CardContour, frameArea: number): number {
   return Math.max(0, aspectScore * 0.6 + areaScore * 0.2 + symmetryScore * 0.2);
 }
 
-// Processing width for detection — scale down for speed and noise reduction.
+// Processing width for detection - scale down for speed and noise reduction.
 // Points are scaled back up to original coordinates before returning.
 const PROC_WIDTH = 640;
 
@@ -112,7 +112,7 @@ export function detectCard(imageData: ImageData): DetectionResult {
   let kernel: cv.Mat | null = null;
 
   try {
-    // Scale down — dramatically reduces noise and speeds up processing
+    // Scale down - dramatically reduces noise and speeds up processing
     cv.resize(src, scaled, new cv.Size(PROC_WIDTH, procH));
 
     cv.cvtColor(scaled, gray, cv.COLOR_RGBA2GRAY);
@@ -162,7 +162,7 @@ export function detectCard(imageData: ImageData): DetectionResult {
 
         if (!approx) continue;
 
-        // Cards are convex — skip anything that isn't
+        // Cards are convex - skip anything that isn't
         if (!cv.isContourConvex(approx)) continue;
 
         // Scale points back to original image coordinates
@@ -180,7 +180,10 @@ export function detectCard(imageData: ImageData): DetectionResult {
           imageData.width * imageData.height,
         );
 
-        if (confidence > bestResult.confidence && confidence > CONFIDENCE_THRESHOLD) {
+        if (
+          confidence > bestResult.confidence &&
+          confidence > CONFIDENCE_THRESHOLD
+        ) {
           bestResult = { detected: true, contour: ordered, confidence };
         }
       } finally {

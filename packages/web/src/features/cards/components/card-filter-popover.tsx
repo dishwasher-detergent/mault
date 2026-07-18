@@ -183,7 +183,7 @@ export function CardFilterPopover({
               )}
               title="Unassigned"
             >
-              —
+              -
             </button>
           </div>
         </div>

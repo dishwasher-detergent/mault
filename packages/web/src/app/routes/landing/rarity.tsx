@@ -15,7 +15,7 @@ const RARITIES = [
     key: "rare",
     label: "Rare",
     description:
-      "Know what you're holding before you buy a duplicate — see your full rare count for a set at a glance.",
+      "Know what you're holding before you buy a duplicate - see your full rare count for a set at a glance.",
   },
   {
     key: "mythic",
@@ -34,7 +34,7 @@ export function LandingRarity() {
         </h2>
         <p className="mt-3 text-sm/relaxed text-muted-foreground md:text-base/relaxed">
           Every card gets tagged with its rarity, set, and color as it's
-          scanned, so you always know what you have — without digging through
+          scanned, so you always know what you have - without digging through
           boxes to find out.
         </p>
       </div>

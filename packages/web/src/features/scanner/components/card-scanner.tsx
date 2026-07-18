@@ -7,11 +7,11 @@ import { useBinConfigs } from "@/features/bins/api/use-bin-configs";
 import { reportSerialEvent } from "@/features/notifications/api/notification-settings";
 import { useCardScanner } from "@/features/scanner/api/use-card-scanner";
 import { useScannedCards } from "@/features/scanner/api/use-scanned-cards";
-import { SCANNABLE_STATUSES } from "@/features/scanner/constants";
 import { useRegisterScannerIsland } from "@/features/scanner/api/use-scanner-island";
 import { useSerial, useSerialMessage } from "@/features/scanner/api/use-serial";
 import { ScannerMenu } from "@/features/scanner/components/scanner-menu";
 import { ScannerOverlay } from "@/features/scanner/components/scanner-overlay";
+import { SCANNABLE_STATUSES } from "@/features/scanner/constants";
 import { useIsMobile } from "@/hooks/use-is-mobile";
 import { useRole } from "@/hooks/use-role";
 import { cn } from "@/lib/utils";
@@ -80,7 +80,7 @@ export function CardScanner({ className, compact }: CardScannerProps) {
     ) {
       const raw = msg as Record<string, unknown>;
 
-      // Module 1 with no bin means the card was never scanned/routed — it's
+      // Module 1 with no bin means the card was never scanned/routed - it's
       // just sitting there unidentified. Try to auto-recover by forcing a
       // scan instead of stopping for a human, as long as the scanner is
       // actually in a state where a scan can run.
@@ -89,8 +89,9 @@ export function CardScanner({ className, compact }: CardScannerProps) {
         raw.bin === undefined &&
         SCANNABLE_STATUSES.includes(status)
       ) {
-        toast.info("Card stuck at module 1 — forcing a scan", {
-          description: "It was never identified, so we're scanning it automatically.",
+        toast.info("Card stuck at module 1 - forcing a scan", {
+          description:
+            "It was never identified, so we're scanning it automatically.",
         });
         handleForceScan();
         return;
@@ -114,7 +115,11 @@ export function CardScanner({ className, compact }: CardScannerProps) {
         toast.error("Feed failed", {
           description: "Could not send feeder command.",
         });
-        void reportSerialEvent({ command: "feeder", sent: false, response: null });
+        void reportSerialEvent({
+          command: "feeder",
+          sent: false,
+          response: null,
+        });
         return;
       }
       const response = await receiveResponse(10000);
@@ -122,25 +127,38 @@ export function CardScanner({ className, compact }: CardScannerProps) {
         toast.error("Feed timeout", {
           description: "Feeder did not respond in time.",
         });
-        void reportSerialEvent({ command: "feeder", sent: true, response: null });
+        void reportSerialEvent({
+          command: "feeder",
+          sent: true,
+          response: null,
+        });
         return;
       }
       try {
         const parsed = JSON.parse(response) as Record<string, unknown>;
         if (parsed.empty) {
           toast.error("Feeder empty", {
-            description: "No cards remaining in the hopper. Add more cards to continue.",
+            description:
+              "No cards remaining in the hopper. Add more cards to continue.",
             duration: Infinity,
             dismissible: true,
           });
-          void reportSerialEvent({ command: "feeder", sent: true, response: parsed });
+          void reportSerialEvent({
+            command: "feeder",
+            sent: true,
+            response: parsed,
+          });
         } else if (parsed.error) {
           toast.error("Feeder error", {
             description: String(parsed.error),
             duration: Infinity,
             dismissible: true,
           });
-          void reportSerialEvent({ command: "feeder", sent: true, response: parsed });
+          void reportSerialEvent({
+            command: "feeder",
+            sent: true,
+            response: parsed,
+          });
         }
       } catch {
         toast.error("Feed error", {
@@ -162,13 +180,27 @@ export function CardScanner({ className, compact }: CardScannerProps) {
       isFeeding,
       handleForceAddDuplicate,
       handleForceScan,
-      handlePause: () => { setAutoFeed(false); handlePause(); },
+      handlePause: () => {
+        setAutoFeed(false);
+        handlePause();
+      },
       handleResume,
       handleFeed,
     });
-  }, [status, isCameraActive, isConnected, isReady, isFeeding,
-      handleForceAddDuplicate, handleForceScan, handlePause, handleResume,
-      handleFeed, setAutoFeed, registerIsland]);
+  }, [
+    status,
+    isCameraActive,
+    isConnected,
+    isReady,
+    isFeeding,
+    handleForceAddDuplicate,
+    handleForceScan,
+    handlePause,
+    handleResume,
+    handleFeed,
+    setAutoFeed,
+    registerIsland,
+  ]);
 
   useEffect(() => () => registerIsland(null), [registerIsland]);
 
@@ -191,13 +223,24 @@ export function CardScanner({ className, compact }: CardScannerProps) {
         className,
       )}
     >
-      <div className={cn("relative overflow-hidden bg-background w-full h-full max-w-full rounded-lg border", !compact && "md:aspect-[2.5/3.5]")}>
+      <div
+        className={cn(
+          "relative overflow-hidden bg-background w-full h-full max-w-full rounded-lg border",
+          !compact && "md:aspect-[2.5/3.5]",
+        )}
+      >
         <video ref={videoRef} className="hidden" playsInline muted />
         <canvas ref={processingCanvasRef} className="hidden" />
-        <canvas ref={displayCanvasRef} className={cn("absolute", !isMobile && "rotate-90")} />
+        <canvas
+          ref={displayCanvasRef}
+          className={cn("absolute", !isMobile && "rotate-90")}
+        />
         <canvas
           ref={overlayCanvasRef}
-          className={cn("absolute z-20 pointer-events-none", !isMobile && "rotate-90")}
+          className={cn(
+            "absolute z-20 pointer-events-none",
+            !isMobile && "rotate-90",
+          )}
         />
         {isAdmin && debugImageUrl && (
           <Tooltip>

@@ -26,14 +26,18 @@ export type NotificationTestType =
   | "card-search-error"
   | "sync-failure";
 
-export async function sendTestNotification(type: NotificationTestType): Promise<Response> {
+export async function sendTestNotification(
+  type: NotificationTestType,
+): Promise<Response> {
   return apiPost<Response>("/api/notifications/test", { type });
 }
 
 // Reports the raw command/response pair from a serial exchange as-is. The
-// backend decides whether it's notification-worthy and what it says — this
+// backend decides whether it's notification-worthy and what it says - this
 // function never interprets the outcome.
-export async function reportSerialEvent(event: SerialEventReport): Promise<void> {
+export async function reportSerialEvent(
+  event: SerialEventReport,
+): Promise<void> {
   await apiPost("/api/notifications/serial-event", event).catch(() => {});
 }
 

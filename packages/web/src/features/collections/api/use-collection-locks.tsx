@@ -20,12 +20,21 @@ const CollectionLocksContext = createContext<CollectionLocksContextValue>({
   isLockedByOther: () => false,
 });
 
-export function CollectionLocksProvider({ children }: { children: React.ReactNode }) {
+export function CollectionLocksProvider({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   const [locks, setLocks] = useState<Record<string, ScanLockInfo>>({});
   const { data: sessionData } = neon.auth.useSession();
-  const session = (sessionData as { session?: { activeOrganizationId?: string | null }; user?: { id?: string } } | null);
+  const session = sessionData as {
+    session?: { activeOrganizationId?: string | null };
+    user?: { id?: string };
+  } | null;
   const currentUserId = session?.user?.id;
-  const orgId = session?.session?.activeOrganizationId ?? localStorage.getItem("activeOrgId");
+  const orgId =
+    session?.session?.activeOrganizationId ??
+    localStorage.getItem("activeOrgId");
 
   const esRef = useRef<EventSource | null>(null);
 
@@ -34,32 +43,49 @@ export function CollectionLocksProvider({ children }: { children: React.ReactNod
 
     let cancelled = false;
 
-    createLockEventsSource().then((es) => {
-      if (cancelled) { es.close(); return; }
-      esRef.current = es;
+    createLockEventsSource()
+      .then((es) => {
+        if (cancelled) {
+          es.close();
+          return;
+        }
+        esRef.current = es;
 
-      es.addEventListener("init", (e) => {
-        const { locks: initial } = JSON.parse((e as MessageEvent).data) as { locks: Record<string, ScanLockInfo> };
-        setLocks(initial);
-      });
-
-      es.addEventListener("lock_acquired", (e) => {
-        const { guid, userId, displayName } = JSON.parse((e as MessageEvent).data) as { guid: string; userId: string; displayName: string };
-        setLocks((prev) => ({
-          ...prev,
-          [guid]: { userId, displayName, expiresAt: Date.now() + 5 * 60 * 1000 },
-        }));
-      });
-
-      es.addEventListener("lock_released", (e) => {
-        const { guid } = JSON.parse((e as MessageEvent).data) as { guid: string };
-        setLocks((prev) => {
-          const next = { ...prev };
-          delete next[guid];
-          return next;
+        es.addEventListener("init", (e) => {
+          const { locks: initial } = JSON.parse((e as MessageEvent).data) as {
+            locks: Record<string, ScanLockInfo>;
+          };
+          setLocks(initial);
         });
+
+        es.addEventListener("lock_acquired", (e) => {
+          const { guid, userId, displayName } = JSON.parse(
+            (e as MessageEvent).data,
+          ) as { guid: string; userId: string; displayName: string };
+          setLocks((prev) => ({
+            ...prev,
+            [guid]: {
+              userId,
+              displayName,
+              expiresAt: Date.now() + 5 * 60 * 1000,
+            },
+          }));
+        });
+
+        es.addEventListener("lock_released", (e) => {
+          const { guid } = JSON.parse((e as MessageEvent).data) as {
+            guid: string;
+          };
+          setLocks((prev) => {
+            const next = { ...prev };
+            delete next[guid];
+            return next;
+          });
+        });
+      })
+      .catch(() => {
+        /* silent - will degrade gracefully */
       });
-    }).catch(() => { /* silent — will degrade gracefully */ });
 
     return () => {
       cancelled = true;

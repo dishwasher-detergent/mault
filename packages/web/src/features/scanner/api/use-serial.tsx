@@ -71,7 +71,7 @@ export function SerialProvider({ children }: { children: React.ReactNode }) {
           }
         }
       } catch (e) {
-        // Reader was cancelled (disconnect) — expected
+        // Reader was cancelled (disconnect) - expected
         if (!(e instanceof DOMException && e.name === "NetworkError")) {
           console.error("[Serial] Read error:", e);
         }
@@ -159,7 +159,7 @@ export function SerialProvider({ children }: { children: React.ReactNode }) {
     pendingRef.current = [];
     bufferRef.current = "";
 
-    // Async cleanup — stored so connect() can await it
+    // Async cleanup - stored so connect() can await it
     const cleanup = (async () => {
       if (reader) {
         try {
@@ -191,7 +191,11 @@ export function SerialProvider({ children }: { children: React.ReactNode }) {
             description:
               "Failed to open port. Make sure no other application is using it.",
           });
-          void reportSerialEvent({ command: "connect", sent: false, response: null });
+          void reportSerialEvent({
+            command: "connect",
+            sent: false,
+            response: null,
+          });
           return false;
         }
       }
@@ -229,7 +233,11 @@ export function SerialProvider({ children }: { children: React.ReactNode }) {
           toast.error("Device test failed", {
             description: "Connected but got no response. Try reconnecting.",
           });
-          void reportSerialEvent({ command: "test", sent: true, response: null });
+          void reportSerialEvent({
+            command: "test",
+            sent: true,
+            response: null,
+          });
         }
       })();
 

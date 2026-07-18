@@ -68,7 +68,7 @@ export const ScannedCardItem = memo(function ScannedCardItem({
           {hasAlternatives && (
             <div
               className="absolute top-1 left-1 z-20 rounded-full bg-amber-500 p-0.5 shadow-md"
-              title="Multiple close matches — tap to review"
+              title="Multiple close matches - tap to review"
             >
               <IconHelpCircle className="size-3 text-white" />
             </div>

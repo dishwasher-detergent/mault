@@ -54,19 +54,19 @@ function MiniTable({
 }
 
 const CHANNEL_MAP: [string, string][] = [
-  ["0", "Unused — reserved for LEDs in firmware, not part of this build"],
-  ["1", "Unused — reserved for LEDs in firmware, not part of this build"],
-  ["2", "Unused — reserved for LEDs in firmware, not part of this build"],
-  ["3", "Unused — reserved for LEDs in firmware, not part of this build"],
-  ["4", "Module 1 — bottom"],
-  ["5", "Module 1 — paddle"],
-  ["6", "Module 1 — pusher"],
-  ["7", "Module 2 — bottom"],
-  ["8", "Module 2 — paddle"],
-  ["9", "Module 2 — pusher"],
-  ["10", "Module 3 — bottom"],
-  ["11", "Module 3 — paddle"],
-  ["12", "Module 3 — pusher"],
+  ["0", "Unused - reserved for LEDs in firmware, not part of this build"],
+  ["1", "Unused - reserved for LEDs in firmware, not part of this build"],
+  ["2", "Unused - reserved for LEDs in firmware, not part of this build"],
+  ["3", "Unused - reserved for LEDs in firmware, not part of this build"],
+  ["4", "Module 1 - bottom"],
+  ["5", "Module 1 - paddle"],
+  ["6", "Module 1 - pusher"],
+  ["7", "Module 2 - bottom"],
+  ["8", "Module 2 - paddle"],
+  ["9", "Module 2 - pusher"],
+  ["10", "Module 3 - bottom"],
+  ["11", "Module 3 - paddle"],
+  ["12", "Module 3 - pusher"],
   ["13", "Feeder (continuous rotation)"],
 ];
 
@@ -77,12 +77,11 @@ export function BuildWiring() {
         Wiring
       </h2>
       <p className="mt-3 max-w-2xl text-sm/relaxed text-muted-foreground">
-        Everything hangs off one I²C bus (PCA9685) and four digital input
-        pins (IR sensors). The PCA9685's logic side runs off the Arduino's
-        5V; its <Pin>V+</Pin> servo rail must come from the external supply,
-        and that supply's ground must be tied back to the Arduino's ground —
-        a floating servo ground is the most common reason a freshly wired
-        unit won't move.
+        Everything hangs off one I²C bus (PCA9685) and four digital input pins
+        (IR sensors). The PCA9685's logic side runs off the Arduino's 5V; its{" "}
+        <Pin>V+</Pin> servo rail must come from the external supply, and that
+        supply's ground must be tied back to the Arduino's ground - a floating
+        servo ground is the most common reason a freshly wired unit won't move.
       </p>
 
       <div className="mt-8 flex flex-col gap-8">
@@ -131,10 +130,11 @@ export function BuildWiring() {
             IR sensors
           </h3>
           <p className="mb-3 text-xs/relaxed text-muted-foreground">
-            All four read active-<strong className="text-foreground">LOW</strong>{" "}
-            (pin goes low when a card is present) using the Arduino's
-            internal pull-up — wire the sensor's digital <Pin>OUT</Pin>{" "}
-            straight to the pin, no external pull-up resistor needed.
+            All four read active-
+            <strong className="text-foreground">LOW</strong> (pin goes low when
+            a card is present) using the Arduino's internal pull-up - wire the
+            sensor's digital <Pin>OUT</Pin> straight to the pin, no external
+            pull-up resistor needed.
           </p>
           <MiniTable
             columns={["Sensor", "Arduino pin"]}

@@ -18,7 +18,7 @@ const FEATURES = [
     icon: IconAdjustments,
     title: "Rules you control",
     description:
-      "Mix and match conditions — rarity, color, set, type and more — to route cards exactly where you want.",
+      "Mix and match conditions - rarity, color, set, type and more - to route cards exactly where you want.",
   },
   {
     icon: IconFolders,
@@ -30,7 +30,7 @@ const FEATURES = [
     icon: IconChartBar,
     title: "Know what you own",
     description:
-      "See counts, rarities, and sets across your whole library — no more guessing what's in the box.",
+      "See counts, rarities, and sets across your whole library - no more guessing what's in the box.",
   },
   {
     icon: IconStack2,
@@ -42,7 +42,7 @@ const FEATURES = [
     icon: IconDeviceDesktop,
     title: "Built for the table",
     description:
-      "Pairs with a physical sorter, so cards land in real bins — not just another spreadsheet.",
+      "Pairs with a physical sorter, so cards land in real bins - not just another spreadsheet.",
   },
 ];
 

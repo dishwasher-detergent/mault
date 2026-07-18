@@ -68,7 +68,7 @@ export function CardSelectDialog({
   const [selectedSet, setSelectedSet] = useState<string | null>("all");
   const debounceRef = useRef<ReturnType<typeof setTimeout>>(null);
 
-  // Stable candidates list — built once per scanId, not rebuilt on correction
+  // Stable candidates list - built once per scanId, not rebuilt on correction
   const [candidates, setCandidates] = useState<ScryfallCardWithDistance[]>([]);
   const [selectedId, setSelectedId] = useState<string | undefined>(undefined);
   const prevScanIdRef = useRef<string | undefined>(undefined);
@@ -121,7 +121,7 @@ export function CardSelectDialog({
     debounceRef.current = setTimeout(() => setDebouncedQuery(value), 300);
   };
 
-  // Used by the Scryfall search picker — corrects and closes
+  // Used by the Scryfall search picker - corrects and closes
   const handleSelect = useCallback(
     (card: ScryfallCard) => {
       if (scanId) {
@@ -135,7 +135,7 @@ export function CardSelectDialog({
     [scanId, addCard, correctCard],
   );
 
-  // Used by the candidates picker — corrects but stays open
+  // Used by the candidates picker - corrects but stays open
   const handleSelectCandidate = useCallback(
     (card: ScryfallCardWithDistance) => {
       setSelectedId(card.id);
@@ -246,13 +246,13 @@ export function CardSelectDialog({
                       />
                     </div>
                     <p className="text-xs text-muted-foreground leading-snug">
-                      Your scanned card — select the correct version below
+                      Your scanned card - select the correct version below
                     </p>
                   </div>
                 )}
                 {!capturedImageUrl && (
                   <p className="text-xs text-muted-foreground font-medium">
-                    Multiple close matches — select the correct version:
+                    Multiple close matches - select the correct version:
                   </p>
                 )}
                 <div className="flex gap-2 overflow-x-auto pb-1">

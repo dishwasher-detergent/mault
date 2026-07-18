@@ -1,4 +1,9 @@
 import {
+  activateSet as activateSetFn,
+  binsQueryOptions,
+  createSet as createSetFn,
+} from "@/features/bins/api/sort-bins";
+import {
   activateCollection as activateCollectionFn,
   clearCollectionCards,
   collectionsQueryOptions,
@@ -6,11 +11,6 @@ import {
   deleteCollection as deleteCollectionFn,
   renameCollection as renameCollectionFn,
 } from "@/features/collections/api/collections";
-import {
-  activateSet as activateSetFn,
-  binsQueryOptions,
-  createSet as createSetFn,
-} from "@/features/bins/api/sort-bins";
 import { useOrg } from "@/features/companies/api/use-organization";
 import { createDefaultColorBins, type Collection } from "@magic-vault/shared";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -41,13 +41,20 @@ interface CollectionsContextValue {
 
 const CollectionsContext = createContext<CollectionsContextValue | null>(null);
 
-export function CollectionsProvider({ children }: { children: React.ReactNode }) {
+export function CollectionsProvider({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   const queryClient = useQueryClient();
   const { activeOrg } = useOrg();
-  const { data: collections = [], isLoading } = useQuery({ ...collectionsQueryOptions, enabled: !!activeOrg });
+  const { data: collections = [], isLoading } = useQuery({
+    ...collectionsQueryOptions,
+    enabled: !!activeOrg,
+  });
 
-  const [activeGuid, setActiveGuidState] = useState<string | null>(
-    () => localStorage.getItem(ACTIVE_KEY),
+  const [activeGuid, setActiveGuidState] = useState<string | null>(() =>
+    localStorage.getItem(ACTIVE_KEY),
   );
 
   const setActiveGuid = useCallback((guid: string | null) => {
@@ -58,7 +65,11 @@ export function CollectionsProvider({ children }: { children: React.ReactNode })
 
   // If the stored guid no longer exists (e.g. collection deleted), clear it
   useEffect(() => {
-    if (activeGuid && collections.length > 0 && !collections.find((c) => c.guid === activeGuid)) {
+    if (
+      activeGuid &&
+      collections.length > 0 &&
+      !collections.find((c) => c.guid === activeGuid)
+    ) {
       setActiveGuid(null);
     }
   }, [collections, activeGuid, setActiveGuid]);
@@ -68,7 +79,7 @@ export function CollectionsProvider({ children }: { children: React.ReactNode })
       const found = collections.find((c) => c.guid === activeGuid);
       if (found) return found;
     }
-    // First load or no stored preference — fall back to most recently updated
+    // First load or no stored preference - fall back to most recently updated
     return collections[0] ?? null;
   }, [collections, activeGuid]);
 
@@ -84,10 +95,11 @@ export function CollectionsProvider({ children }: { children: React.ReactNode })
         const created = r.data.find((c) => c.isActive);
         if (created) setActiveGuid(created.guid);
 
-        // Only spin up a new default rule set when the org has none yet —
+        // Only spin up a new default rule set when the org has none yet -
         // otherwise reuse (activate) the existing one instead of creating
         // a fresh set per collection.
-        const existingSets = await queryClient.ensureQueryData(binsQueryOptions);
+        const existingSets =
+          await queryClient.ensureQueryData(binsQueryOptions);
         if (existingSets.length === 0) {
           const binsResult = await createSetFn(name, createDefaultColorBins());
           if (binsResult.success && binsResult.data) {
@@ -107,13 +119,17 @@ export function CollectionsProvider({ children }: { children: React.ReactNode })
   const renameMutation = useMutation({
     mutationFn: ({ guid, name }: { guid: string; name: string }) =>
       renameCollectionFn(guid, name),
-    onSuccess: (r) => { if (r.success && r.data) setCollections(r.data); },
+    onSuccess: (r) => {
+      if (r.success && r.data) setCollections(r.data);
+    },
     onError: () => toast.error("Failed to rename collection"),
   });
 
   const deleteMutation = useMutation({
     mutationFn: deleteCollectionFn,
-    onSuccess: (r) => { if (r.success && r.data) setCollections(r.data); },
+    onSuccess: (r) => {
+      if (r.success && r.data) setCollections(r.data);
+    },
     onError: () => toast.error("Failed to delete collection"),
   });
 
@@ -138,7 +154,9 @@ export function CollectionsProvider({ children }: { children: React.ReactNode })
     emptyMutation.isPending;
 
   const create = useCallback(
-    async (name: string) => { await createMutation.mutateAsync(name); },
+    async (name: string) => {
+      await createMutation.mutateAsync(name);
+    },
     [createMutation],
   );
 
@@ -149,7 +167,7 @@ export function CollectionsProvider({ children }: { children: React.ReactNode })
     [renameMutation],
   );
 
-  // Switching is purely local — just update localStorage
+  // Switching is purely local - just update localStorage
   const activate = useCallback(
     async (guid: string) => {
       setActiveGuid(guid);
@@ -160,12 +178,16 @@ export function CollectionsProvider({ children }: { children: React.ReactNode })
   );
 
   const remove = useCallback(
-    async (guid: string) => { await deleteMutation.mutateAsync(guid); },
+    async (guid: string) => {
+      await deleteMutation.mutateAsync(guid);
+    },
     [deleteMutation],
   );
 
   const empty = useCallback(
-    async (guid: string) => { await emptyMutation.mutateAsync(guid); },
+    async (guid: string) => {
+      await emptyMutation.mutateAsync(guid);
+    },
     [emptyMutation],
   );
 

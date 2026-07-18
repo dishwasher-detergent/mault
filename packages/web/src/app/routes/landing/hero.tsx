@@ -49,7 +49,7 @@ export function LandingHero() {
         </h1>
         <p className="max-w-md text-sm/relaxed text-muted-foreground md:text-base/relaxed">
           Magic Vault recognizes your cards the moment you show them to a
-          webcam, then sorts them into bins using rules you set — by rarity,
+          webcam, then sorts them into bins using rules you set - by rarity,
           color, set, type, or anything else. No spreadsheets, no guesswork.
         </p>
         <div className="flex flex-wrap items-center gap-3 pt-2">

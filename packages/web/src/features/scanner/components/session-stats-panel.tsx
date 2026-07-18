@@ -17,7 +17,10 @@ interface SessionStatsPanelProps {
   totalCards: number;
 }
 
-export function SessionStatsPanel({ stats, totalCards }: SessionStatsPanelProps) {
+export function SessionStatsPanel({
+  stats,
+  totalCards,
+}: SessionStatsPanelProps) {
   return (
     <>
       <div className="rounded-lg border bg-input/20 dark:bg-input/30">
@@ -25,16 +28,26 @@ export function SessionStatsPanel({ stats, totalCards }: SessionStatsPanelProps)
           <div className="col-span-2 divide-y divide-border">
             <StatCell label="Total Cards" value={String(totalCards)} />
           </div>
-          <StatCell label="Unique" value={stats ? String(stats.uniqueCount) : "—"} />
-          <StatCell label="Value" value={stats ? formatUsd(stats.totalValue) : "—"} />
+          <StatCell
+            label="Unique"
+            value={stats ? String(stats.uniqueCount) : "-"}
+          />
+          <StatCell
+            label="Value"
+            value={stats ? formatUsd(stats.totalValue) : "-"}
+          />
         </div>
         {stats?.mostValuable && (
           <div className="p-2 border-t border-input">
             <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-wide mb-0.5">
               Most Valuable
             </p>
-            <p className="text-xs font-semibold truncate">{stats.mostValuable.name}</p>
-            <p className="text-xs text-muted-foreground">{formatUsd(stats.mostValuable.price)}</p>
+            <p className="text-xs font-semibold truncate">
+              {stats.mostValuable.name}
+            </p>
+            <p className="text-xs text-muted-foreground">
+              {formatUsd(stats.mostValuable.price)}
+            </p>
           </div>
         )}
       </div>
@@ -46,9 +59,15 @@ export function SessionStatsPanel({ stats, totalCards }: SessionStatsPanelProps)
           </p>
           <div className="flex flex-col gap-1">
             {stats.rarities.map((r) => (
-              <div key={r.key} className="flex items-center justify-between text-xs">
+              <div
+                key={r.key}
+                className="flex items-center justify-between text-xs"
+              >
                 <div className="flex items-center gap-1.5">
-                  <div className="size-2.5 rounded-full" style={{ backgroundColor: `var(--${r.key})` }} />
+                  <div
+                    className="size-2.5 rounded-full"
+                    style={{ backgroundColor: `var(--${r.key})` }}
+                  />
                   <span>{r.label}</span>
                 </div>
                 <span className="text-muted-foreground">{r.count}</span>

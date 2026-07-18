@@ -19,10 +19,14 @@ export function DocumentTitleUpdater() {
     if (activeCollection) result.push(activeCollection.name);
     if (selectedSet) result.push(`Sorting: ${selectedSet.name}`);
     result.push(
-      stats ? `${stats.totalCount} card${stats.totalCount === 1 ? "" : "s"} scanned` : "No cards scanned",
+      stats
+        ? `${stats.totalCount} card${stats.totalCount === 1 ? "" : "s"} scanned`
+        : "No cards scanned",
     );
     if (stats?.mostValuable) {
-      result.push(`${formatUsd(stats.mostValuable.price)} · ${stats.mostValuable.name}`);
+      result.push(
+        `${formatUsd(stats.mostValuable.price)} · ${stats.mostValuable.name}`,
+      );
     }
     return result;
   }, [activeCollection, selectedSet, stats]);
@@ -40,10 +44,15 @@ export function DocumentTitleUpdater() {
 
   useEffect(() => {
     const slide = slides[index % slides.length];
-    document.title = slide ? `${slide} — ${BASE_TITLE}` : BASE_TITLE;
+    document.title = slide ? `${slide} - ${BASE_TITLE}` : BASE_TITLE;
   }, [slides, index]);
 
-  useEffect(() => () => { document.title = BASE_TITLE; }, []);
+  useEffect(
+    () => () => {
+      document.title = BASE_TITLE;
+    },
+    [],
+  );
 
   return null;
 }

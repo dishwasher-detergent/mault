@@ -33,20 +33,20 @@ const GROUPS: Group[] = [
         key: "pca9685",
         qty: "1",
         part: "Adafruit PCA9685 16-channel 12-bit PWM/servo driver",
-        notes: "I²C servo driver — drives all 10 servos",
+        notes: "I²C servo driver - drives all 10 servos",
       },
       {
         key: "sg90-positional",
         qty: "9",
         part: "SG90 micro servo, positional (180°)",
         notes:
-          "3 per module × 3 modules — bottom trapdoor, paddle gate, pusher",
+          "3 per module × 3 modules - bottom trapdoor, paddle gate, pusher",
       },
       {
         key: "sg90-continuous",
         qty: "1",
         part: "SG90 servo, modified for continuous rotation",
-        notes: "Feeder — drives cards out of the hopper into module 1",
+        notes: "Feeder - drives cards out of the hopper into module 1",
       },
     ],
   },
@@ -77,7 +77,7 @@ const GROUPS: Group[] = [
         qty: "1",
         part: "5V regulated power supply, 4–10A",
         notes:
-          "Dedicated servo bus power into the PCA9685 V+ terminal — do not power 10 servos off the Arduino's onboard 5V",
+          "Dedicated servo bus power into the PCA9685 V+ terminal - do not power 10 servos off the Arduino's onboard 5V",
       },
       {
         key: "usb-cable",
@@ -126,7 +126,7 @@ const GROUPS: Group[] = [
       },
       {
         key: "filament",
-        qty: "—",
+        qty: "-",
         part: "PLA or PETG filament",
         notes: "Quantity per your slicer's estimate for the model above",
       },
@@ -176,7 +176,8 @@ const GROUPS: Group[] = [
         key: "m2x6-screw",
         qty: "8",
         part: "M2×6 screw",
-        notes: "Mounts the Arduino and PCA9685 servo driver board to the base panels",
+        notes:
+          "Mounts the Arduino and PCA9685 servo driver board to the base panels",
       },
       {
         key: "servo-horn-screw",
@@ -265,7 +266,7 @@ function GroupTable({
                 <td className="px-3 py-2.5">
                   <input
                     type="checkbox"
-                    aria-label={`Have ${row.qty === "—" ? "" : row.qty} part`}
+                    aria-label={`Have ${row.qty === "-" ? "" : row.qty} part`}
                     checked={!!checked[row.key]}
                     onChange={() => toggle(row.key)}
                     className="size-4 accent-primary"
@@ -310,10 +311,10 @@ export function BuildBom() {
         Bill of materials
       </h2>
       <p className="mt-3 max-w-2xl text-sm/relaxed text-muted-foreground">
-        Quantities match the firmware exactly — 3 modules × 3 servos, 1 feeder,
+        Quantities match the firmware exactly - 3 modules × 3 servos, 1 feeder,
         4 IR sensors, 10 of the PCA9685's 16 channels in use. Channels 0–3 are
         wired for status LEDs in firmware but aren't part of the current build.
-        Check off each part as you gather it — checkmarks are saved in this
+        Check off each part as you gather it - checkmarks are saved in this
         browser.
       </p>
 

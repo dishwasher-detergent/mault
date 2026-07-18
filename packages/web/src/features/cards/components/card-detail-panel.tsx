@@ -252,12 +252,12 @@ export function CardDetailPanel({
                         />
                       </div>
                       <p className="text-sm text-muted-foreground leading-snug">
-                        Your scanned card — select the correct version below
+                        Your scanned card - select the correct version below
                       </p>
                     </div>
                   ) : (
                     <p className="text-sm text-muted-foreground font-medium">
-                      Multiple close matches — select the correct version:
+                      Multiple close matches - select the correct version:
                     </p>
                   )}
                   <div className="flex gap-3 overflow-x-auto pb-1">
@@ -460,7 +460,7 @@ export function CardDetailPanel({
                     />
                   </div>
                   <p className="text-sm text-muted-foreground leading-snug">
-                    Your scanned card — search for the correct version below
+                    Your scanned card - search for the correct version below
                   </p>
                 </div>
               )}
