@@ -1,6 +1,7 @@
 #include <ArduinoJson.h>
 #include <Wire.h>
 #include <Adafruit_PWMServoDriver.h>
+#include <EEPROM.h>
 
 Adafruit_PWMServoDriver pwm = Adafruit_PWMServoDriver();
 
@@ -10,6 +11,8 @@ Adafruit_PWMServoDriver pwm = Adafruit_PWMServoDriver();
 //   ch7-9   = Module 2
 //   ch10-12 = Module 3
 //   ch13    = Feeder (360° continuous rotation servo)
+//   ch14    = Scan light (LED 5) — spare channel for a small angled light the
+//             web app toggles for two-frame foil detection (see {"led": 5})
 #define NUM_MODULES 3
 #define MODULE_CHANNEL_OFFSET 4
 #define FEEDER_CHANNEL 13
@@ -78,6 +81,56 @@ struct FeederConfig {
 };
 
 FeederConfig feederConfig = {315, 1000, 40, 100, 100};
+
+// ─── Calibration persistence (EEPROM) ───────────────────────────────────────
+// Module/feeder config is persisted so a reboot (e.g. a power blip mid-run)
+// restores the tuned values instead of silently reverting to stock pulses.
+// The magic + version guard detects stale data from older firmware or a
+// hardware change (e.g. servo swap) and falls back to factory defaults.
+#define CONFIG_MAGIC       0x4D56  // "MV"
+#define CONFIG_VERSION     1
+#define CONFIG_EEPROM_ADDR 0
+
+struct PersistedCalibration {
+  uint16_t magic;
+  uint8_t version;
+  ModuleConfig modules[NUM_MODULES];
+  FeederConfig feeder;
+};
+
+// Factory defaults — keep in sync with the moduleConfig/feederConfig
+// initializers above; resetConfig restores these.
+void setFactoryDefaults() {
+  ModuleConfig factoryModules[NUM_MODULES] = {
+    {150, 307, 150, 307, 150, 307, 460},
+    {150, 307, 150, 307, 150, 307, 460},
+    {150, 307, 150, 307, 150, 307, 460},
+  };
+  memcpy(moduleConfig, factoryModules, sizeof(moduleConfig));
+  feederConfig.speed = 400;
+  feederConfig.duration = 3000;
+  feederConfig.pulseDuration = 80;
+  feederConfig.pauseDuration = 50;
+  feederConfig.settleDuration = 150;
+}
+
+void loadCalibration() {
+  PersistedCalibration stored;
+  EEPROM.get(CONFIG_EEPROM_ADDR, stored);
+  if (stored.magic == CONFIG_MAGIC && stored.version == CONFIG_VERSION) {
+    memcpy(moduleConfig, stored.modules, sizeof(moduleConfig));
+    feederConfig = stored.feeder;
+  }
+}
+
+void saveCalibration() {
+  PersistedCalibration data;
+  data.magic = CONFIG_MAGIC;
+  data.version = CONFIG_VERSION;
+  memcpy(data.modules, moduleConfig, sizeof(moduleConfig));
+  data.feeder = feederConfig;
+  EEPROM.put(CONFIG_EEPROM_ADDR, data);
+}
 
 // Routing delays (ms) — tune to match your hardware timing
 #define DELAY_CARD_ENTER   300  // time for card to settle after target bottom opens
@@ -446,7 +499,7 @@ void handleCommand(char* json) {
     return;
   }
 
-  // {"led": 1, "on": true} — control LED by position (1 or 2)
+  // {"led": 1, "on": true} — control LED by position (1..4) or the scan light (5)
   if (doc["led"].is<int>()) {
     int led = doc["led"].as<int>();
     if (led < 1 || led > 4) {
@@ -454,7 +507,9 @@ void handleCommand(char* json) {
       return;
     }
     bool on = doc["on"] | false;
-    pwm.setPin(led - 1, on ? 4095 : 0);
+    // LEDs 1-4 live on ch0-3; the scan light is LED 5 on spare ch14.
+    int channel = led <= 4 ? led - 1 : 14;
+    pwm.setPin(channel, on ? 4095 : 0);
 
     Serial.print(F("{\"status\":\"ok\",\"led\":"));
     Serial.print(led);
@@ -515,6 +570,7 @@ void handleCommand(char* json) {
     c.pusherLeft    = cfg["pusherLeft"]    | c.pusherLeft;
     c.pusherNeutral = cfg["pusherNeutral"] | c.pusherNeutral;
     c.pusherRight   = cfg["pusherRight"]   | c.pusherRight;
+    saveCalibration();  // persist so a reboot keeps the tuned values
 
     Serial.print(F("{\"status\":\"ok\",\"module\":"));
     Serial.print(module);
@@ -556,7 +612,27 @@ void handleCommand(char* json) {
     feederConfig.pauseDuration  = cfg["pauseDuration"]  | feederConfig.pauseDuration;
     feederConfig.settleDuration = cfg["settleDuration"] | feederConfig.settleDuration;
     stopFeeder();
-    Serial.println(F("{\"status\":\"ok\"}"));
+    saveCalibration();  // persist so a reboot keeps the tuned values
+    JsonDocument res;
+    res["status"] = "ok";
+    serializeJson(res, Serial);
+    Serial.println();
+    return;
+  }
+
+  // {"saveConfig": true} — persist current module + feeder config to EEPROM
+  if (doc["saveConfig"].is<bool>() && doc["saveConfig"].as<bool>()) {
+    saveCalibration();
+    Serial.println("{\"status\":\"saved\"}");
+    return;
+  }
+
+  // {"resetConfig": true} — restore factory defaults in RAM and EEPROM
+  if (doc["resetConfig"].is<bool>() && doc["resetConfig"].as<bool>()) {
+    setFactoryDefaults();
+    saveCalibration();
+    setAllNeutral();
+    Serial.println("{\"status\":\"reset\"}");
     return;
   }
 
@@ -585,6 +661,8 @@ void handleCommand(char* json) {
 void setup() {
   Serial.begin(9600);
   while (!Serial);
+
+  loadCalibration();  // restore tuned config before any servo moves
 
   // IR sensors: active LOW (internal pull-up, sensor pulls LOW when card present)
   pinMode(IR_PIN_MODULE1, INPUT_PULLUP);
