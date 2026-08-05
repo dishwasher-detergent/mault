@@ -116,9 +116,9 @@ struct ModuleConfig {
 };
 
 ModuleConfig moduleConfig[NUM_MODULES] = {
-  {300, 310, 300, 310, 295, 300, 305},
-  {300, 310, 300, 310, 295, 300, 305},
-  {300, 310, 300, 310, 295, 300, 305},
+  {150, 307, 150, 307, 150, 307, 460},
+  {150, 307, 150, 307, 150, 307, 460},
+  {150, 307, 150, 307, 150, 307, 460},
 };
 
 struct FeederConfig {
@@ -645,15 +645,8 @@ void runMachine() {
 
 void handleCommand(const char* json) {
   JsonDocument doc;
-  DeserializationError err = deserializeJson(doc, json);
-  if (err) {
-    Serial.print(F("{\"error\":\"invalid JSON\",\"reason\":\""));
-    Serial.print(err.c_str());
-    Serial.print(F("\",\"length\":"));
-    Serial.print(strlen(json));
-    Serial.print(F(",\"received\":\""));
-    printJsonEscaped(json);
-    Serial.println(F("\"}"));
+  if (deserializeJson(doc, json)) {
+    Serial.println("{\"error\":\"invalid JSON\"}");
     return;
   }
 
@@ -880,10 +873,11 @@ void handleCommand(const char* json) {
 
   // {"readIR": true} — read current IR sensor state for all modules + hopper
   if (doc["readIR"].is<bool>() && doc["readIR"].as<bool>()) {
-    Serial.print(F("{\"status\":\"ok\",\"ir\":["));
+    JsonDocument res;
+    res["status"] = "ok";
+    JsonArray ir = res["ir"].to<JsonArray>();
     for (int m = 1; m <= NUM_MODULES; m++) {
-      if (m > 1) Serial.print(',');
-      Serial.print(digitalRead(irPin(m)) == LOW ? F("true") : F("false"));  // true = card present
+      ir.add(digitalRead(irPin(m)) == LOW);  // true = card present
     }
     res["hopper"] = hopperHasCards();  // true = cards remain in feeder stack
     replyJson(res);
