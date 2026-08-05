@@ -6,13 +6,16 @@
 Adafruit_PWMServoDriver pwm = Adafruit_PWMServoDriver();
 
 // PWM channel layout (PCA9685):
-//   ch0-3   = LEDs (1-indexed: LED 1 = ch0 ... LED 4 = ch3)
+//   ch0    = LED 1 — scan light (angled holo-detection light, toggled by the
+//            web app for two-frame foil scans)
+//   ch1    = LED 2 — green “operating” indicator
+//   ch2    = LED 3 — red “machine fault” indicator (jam / timeout)
+//   ch3    = LED 4 — orange “software/comms fault” indicator
 //   ch4-6   = Module 1 (bottom, paddle, pusher)
 //   ch7-9   = Module 2
 //   ch10-12 = Module 3
 //   ch13    = Feeder (360° continuous rotation servo)
-//   ch14    = Scan light (LED 5) — spare channel for a small angled light the
-//             web app toggles for two-frame foil detection (see {"led": 5})
+//   ch14-15 = Spare
 #define NUM_MODULES 3
 #define MODULE_CHANNEL_OFFSET 4
 #define FEEDER_CHANNEL 13
@@ -499,7 +502,8 @@ void handleCommand(char* json) {
     return;
   }
 
-  // {"led": 1, "on": true} — control LED by position (1..4) or the scan light (5)
+  // {"led": 1, "on": true} — control the LEDs on channels 0-3. LED 1 is the
+  // scan light; LEDs 2-4 are spare indicator lamps.
   if (doc["led"].is<int>()) {
     int led = doc["led"].as<int>();
     if (led < 1 || led > 4) {
@@ -507,8 +511,8 @@ void handleCommand(char* json) {
       return;
     }
     bool on = doc["on"] | false;
-    // LEDs 1-4 live on ch0-3; the scan light is LED 5 on spare ch14.
-    int channel = led <= 4 ? led - 1 : 14;
+    // LEDs live on channels 0-3; there is no spare-channel LED 5 anymore.
+    int channel = led - 1;
     pwm.setPin(channel, on ? 4095 : 0);
 
     Serial.print(F("{\"status\":\"ok\",\"led\":"));
