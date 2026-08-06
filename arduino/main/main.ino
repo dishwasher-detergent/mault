@@ -20,10 +20,10 @@ Adafruit_PWMServoDriver pwm = Adafruit_PWMServoDriver();
 #define IR_PIN_MODULE3 4
 #define IR_TIMEOUT_MS  3000  // max ms to wait for a card before aborting
 
-// Module 1 is where every card lands right after feeding, before any routing
-// decision is made — if it sits there this long with no routing command in
-// progress (e.g. the app never sent a bin command), something's stuck.
-#define MODULE1_JAM_TIMEOUT_MS 20000
+// Any module where a card sits at the gate continuously for this long with no
+// routing command in progress (e.g. the app never sent a bin command) is
+// reported as a jam. Only checked while idle (loop()).
+#define JAM_TIMEOUT_MS 20000
 
 // Hopper IR sensor — active LOW: pin reads LOW while cards remain in the feeder stack
 #define IR_PIN_HOPPER 5
@@ -62,9 +62,9 @@ struct ModuleConfig {
 };
 
 ModuleConfig moduleConfig[NUM_MODULES] = {
-  {300, 310, 300, 310, 295, 300, 305},
-  {300, 310, 300, 310, 295, 300, 305},
-  {300, 310, 300, 310, 295, 300, 305},
+  {150, 307, 150, 307, 150, 307, 460},
+  {150, 307, 150, 307, 150, 307, 460},
+  {150, 307, 150, 307, 150, 307, 460},
 };
 
 struct FeederConfig {
@@ -77,21 +77,49 @@ struct FeederConfig {
                        // stopping right at the sensor's beam
 };
 
-FeederConfig feederConfig = {315, 1000, 40, 100, 100};
+FeederConfig feederConfig = {400, 3000, 80, 50, 150};
 
 // Routing delays (ms) — tune to match your hardware timing
 #define DELAY_CARD_ENTER   300  // time for card to settle after target bottom opens
 #define DELAY_PADDLE       300  // time for paddle to engage
 #define DELAY_PUSH         600  // time for pusher to complete its stroke
 
-#define MAX_CMD_LEN 200
-char inputBuffer[MAX_CMD_LEN + 1];
-uint8_t inputLen = 0;
-bool inputOverflowed = false;
+// Fixed-size serial line buffer — avoids String heap fragmentation on long
+// sessions. Oversized lines are discarded cleanly (and reported).
+#define INPUT_BUFFER_MAX 256
+char inputBuffer[INPUT_BUFFER_MAX + 1];
+int inputBufferLen = 0;
 
-// Idle-time jam watch for module 1 — see checkModule1Jam().
-unsigned long module1PresentSince = 0;
-bool module1JamAlerted = false;
+// Request/response correlation. A command may carry an optional numeric "id";
+// every reply to that command then echoes it, so the web app can match
+// responses to requests even while the firmware emits asynchronous messages
+// (e.g. a jam alert) in between. Messages that are NOT replies to a command
+// (boot "ready", jam alerts) intentionally never carry an id.
+int g_cmdId = 0;
+bool g_hasCmdId = false;
+
+void replyJson(JsonDocument& res) {
+  if (g_hasCmdId) res["id"] = g_cmdId;
+  serializeJson(res, Serial);
+  Serial.println();
+}
+
+void replyLiteral(const char* json) {
+  if (!g_hasCmdId) {
+    Serial.println(json);
+    return;
+  }
+  JsonDocument res;
+  deserializeJson(res, json);
+  res["id"] = g_cmdId;
+  serializeJson(res, Serial);
+  Serial.println();
+}
+
+// Idle-time jam watch — one entry per module index (1..NUM_MODULES; see
+// checkModuleJams()).
+unsigned long modulePresentSince[NUM_MODULES + 1] = {0, 0, 0, 0};
+bool moduleJamAlerted[NUM_MODULES + 1] = {false, false, false, false};
 
 int getChannel(int module, int servoOffset) {
   return MODULE_CHANNEL_OFFSET + (module - 1) * 3 + servoOffset;
@@ -192,26 +220,32 @@ FeedResult runFeeder() {
   return FEED_TIMEOUT;
 }
 
-// Watches module 1's IR sensor while idle (only runs between commands, since
-// routeCard()/runFeeder() block loop() for their duration). If a card has
-// been sitting there continuously longer than MODULE1_JAM_TIMEOUT_MS — e.g.
-// the app never followed up with a bin command — report it once so it isn't
-// silently left for the operator to discover. Clears itself (and re-arms)
-// as soon as the sensor sees the card leave.
-void checkModule1Jam() {
-  bool present = digitalRead(IR_PIN_MODULE1) == LOW;
-  if (!present) {
-    module1PresentSince = 0;
-    module1JamAlerted = false;
-    return;
-  }
-  if (module1PresentSince == 0) {
-    module1PresentSince = millis();
-    return;
-  }
-  if (!module1JamAlerted && millis() - module1PresentSince > MODULE1_JAM_TIMEOUT_MS) {
-    module1JamAlerted = true;
-    Serial.println(F("{\"error\":\"jam\",\"module\":1}"));
+// Watches every module's IR sensor while idle (only runs between commands,
+// since routeCard()/runFeeder() block loop() for their duration). If a card
+// has been sitting at a module's gate continuously longer than JAM_TIMEOUT_MS
+// — e.g. the app never followed up with a bin command — report it once so it
+// isn't silently left for the operator to discover. Clears itself (and
+// re-arms) as soon as the sensor sees the card leave.
+void checkModuleJams() {
+  for (int m = 1; m <= NUM_MODULES; m++) {
+    bool present = digitalRead(irPin(m)) == LOW;
+    if (!present) {
+      modulePresentSince[m] = 0;
+      moduleJamAlerted[m] = false;
+      continue;
+    }
+    if (modulePresentSince[m] == 0) {
+      modulePresentSince[m] = millis();
+      continue;
+    }
+    if (!moduleJamAlerted[m] && millis() - modulePresentSince[m] > JAM_TIMEOUT_MS) {
+      moduleJamAlerted[m] = true;
+      JsonDocument res;
+      res["error"] = "jam";
+      res["module"] = m;
+      serializeJson(res, Serial);  // async — deliberately no command id
+      Serial.println();
+    }
   }
 }
 
@@ -256,20 +290,19 @@ int getServoOffset(const char* servo) {
 //   Bin 7: wait for card at module 1, open all bottoms (catch-all)
 void routeCard(int bin) {
   if (bin < 1 || bin > 7) {
-    Serial.println(F("{\"error\":\"bin must be 1-7\"}"));
+    replyLiteral("{\"error\":\"bin must be 1-7\"}");
     return;
   }
 
   // Run feeder until module 1 IR detects the card (or timeout/empty hopper)
   FeedResult feedResult = runFeeder();
   if (feedResult != FEED_DETECTED) {
-    Serial.print(F("{\"error\":\""));
-    Serial.print(feedResult == FEED_EMPTY
-      ? F("empty: feeder hopper is out of cards")
-      : F("timeout: feeder did not deliver card to module 1"));
-    Serial.print(F("\",\"empty\":"));
-    Serial.print(feedResult == FEED_EMPTY ? F("true") : F("false"));
-    Serial.println(F("}"));
+    JsonDocument res;
+    res["error"] = feedResult == FEED_EMPTY
+      ? "empty: feeder hopper is out of cards"
+      : "timeout: feeder did not deliver card to module 1";
+    res["empty"] = feedResult == FEED_EMPTY;
+    replyJson(res);
     setAllNeutral();
     return;
   }
@@ -299,7 +332,7 @@ void routeCard(int bin) {
     setServoPosition(getChannel(1, 0), moduleConfig[0].bottomOpen);
 
     if (!waitForCard(2)) {
-      Serial.println(F("{\"error\":\"timeout: no card detected at module 2\"}"));
+      replyLiteral("{\"error\":\"timeout: no card detected at module 2\"}");
       setAllNeutral();
       return;
     }
@@ -321,14 +354,14 @@ void routeCard(int bin) {
     setServoPosition(getChannel(1, 0), moduleConfig[0].bottomOpen);
 
     if (!waitForCard(2)) {
-      Serial.println(F("{\"error\":\"timeout: no card detected at module 2\"}"));
+      replyLiteral("{\"error\":\"timeout: no card detected at module 2\"}");
       setAllNeutral();
       return;
     }
     setServoPosition(getChannel(2, 0), moduleConfig[1].bottomOpen);
 
     if (!waitForCard(3)) {
-      Serial.println(F("{\"error\":\"timeout: no card detected at module 3\"}"));
+      replyLiteral("{\"error\":\"timeout: no card detected at module 3\"}");
       setAllNeutral();
       return;
     }
@@ -345,40 +378,23 @@ void routeCard(int bin) {
     delay(200);
   }
 
-  Serial.print(F("{\"status\":\"routed\",\"bin\":"));
-  Serial.print(bin);
-  Serial.println(F("}"));
+  JsonDocument res;
+  res["status"] = "routed";
+  res["bin"]    = bin;
+  replyJson(res);
 }
 
-void printJsonEscaped(const char* s) {
-  for (const char* p = s; *p; p++) {
-    char c = *p;
-    if (c == '"' || c == '\\') {
-      Serial.write('\\');
-      Serial.write(c);
-    } else if (c == '\n') {
-      Serial.print(F("\\n"));
-    } else if (c == '\r') {
-      Serial.print(F("\\r"));
-    } else if ((unsigned char)c >= 0x20) {
-      Serial.write(c);
-    }
-  }
-}
-
-void handleCommand(char* json) {
+void handleCommand(const char* json) {
   JsonDocument doc;
-  DeserializationError err = deserializeJson(doc, json);
-  if (err) {
-    Serial.print(F("{\"error\":\"invalid JSON\",\"reason\":\""));
-    Serial.print(err.c_str());
-    Serial.print(F("\",\"length\":"));
-    Serial.print(strlen(json));
-    Serial.print(F(",\"received\":\""));
-    printJsonEscaped(json);
-    Serial.println(F("\"}"));
+  if (deserializeJson(doc, json)) {
+    replyLiteral("{\"error\":\"invalid JSON\"}");
     return;
   }
+
+  // Optional numeric "id" — echoed on every reply to this command so the web
+  // app can correlate the response (see replyJson/replyLiteral).
+  g_cmdId = doc["id"] | 0;
+  g_hasCmdId = doc["id"].is<int>();
 
   // {"test": true} — run a full mechanical test sequence then confirm connection
   if (doc["test"].is<bool>() && doc["test"].as<bool>()) {
@@ -419,14 +435,14 @@ void handleCommand(char* json) {
       delay(100);
     }
 
-    Serial.println(F("{\"status\":\"test_complete\"}"));
+    replyLiteral("{\"status\":\"test_complete\"}");
     return;
   }
 
   // {"neutral": true} — reset all servos
   if (doc["neutral"].is<bool>() && doc["neutral"].as<bool>()) {
     setAllNeutral();
-    Serial.println(F("{\"status\":\"ok\"}"));
+    replyLiteral("{\"status\":\"ok\"}");
     return;
   }
 
@@ -442,7 +458,7 @@ void handleCommand(char* json) {
     delay(DELAY_PUSH);
     setAllNeutral();
     delay(200);
-    Serial.println(F("{\"status\":\"cleared\"}"));
+    replyLiteral("{\"status\":\"cleared\"}");
     return;
   }
 
@@ -450,17 +466,17 @@ void handleCommand(char* json) {
   if (doc["led"].is<int>()) {
     int led = doc["led"].as<int>();
     if (led < 1 || led > 4) {
-      Serial.println(F("{\"error\":\"led must be 1 to 4\"}"));
+      replyLiteral("{\"error\":\"led must be 1 to 4\"}");
       return;
     }
     bool on = doc["on"] | false;
     pwm.setPin(led - 1, on ? 4095 : 0);
 
-    Serial.print(F("{\"status\":\"ok\",\"led\":"));
-    Serial.print(led);
-    Serial.print(F(",\"on\":"));
-    Serial.print(on ? F("true") : F("false"));
-    Serial.println(F("}"));
+    JsonDocument res;
+    res["status"] = "ok";
+    res["led"] = led;
+    res["on"] = on;
+    replyJson(res);
     return;
   }
 
@@ -470,12 +486,12 @@ void handleCommand(char* json) {
     const char* servo = doc["servo"];
     int module = doc["module"] | 0;
     if (module < 1 || module > NUM_MODULES) {
-      Serial.println(F("{\"error\":\"module must be 1-3\"}"));
+      replyLiteral("{\"error\":\"module must be 1-3\"}");
       return;
     }
     int offset = getServoOffset(servo);
     if (offset < 0) {
-      Serial.println(F("{\"error\":\"servo must be bottom, paddle, or pusher\"}"));
+      replyLiteral("{\"error\":\"servo must be bottom, paddle, or pusher\"}");
       return;
     }
     int pulse;
@@ -484,18 +500,18 @@ void handleCommand(char* json) {
     } else {
       pulse = getPositionPulse(module, offset, doc["position"] | "neutral");
       if (pulse < 0) {
-        Serial.println(F("{\"error\":\"invalid position\"}"));
+        replyLiteral("{\"error\":\"invalid position\"}");
         return;
       }
     }
     setServoPosition(getChannel(module, offset), pulse);
     delay(200);
 
-    Serial.print(F("{\"status\":\"ok\",\"servo\":\""));
-    Serial.print(servo);
-    Serial.print(F("\",\"module\":"));
-    Serial.print(module);
-    Serial.println(F("}"));
+    JsonDocument res;
+    res["status"] = "ok";
+    res["servo"] = servo;
+    res["module"] = module;
+    replyJson(res);
     return;
   }
 
@@ -504,7 +520,7 @@ void handleCommand(char* json) {
     JsonObject cfg = doc["setConfig"];
     int module = cfg["module"] | 0;
     if (module < 1 || module > NUM_MODULES) {
-      Serial.println(F("{\"error\":\"module must be 1-3\"}"));
+      replyLiteral("{\"error\":\"module must be 1-3\"}");
       return;
     }
     ModuleConfig& c = moduleConfig[module - 1];
@@ -516,34 +532,39 @@ void handleCommand(char* json) {
     c.pusherNeutral = cfg["pusherNeutral"] | c.pusherNeutral;
     c.pusherRight   = cfg["pusherRight"]   | c.pusherRight;
 
-    Serial.print(F("{\"status\":\"ok\",\"module\":"));
-    Serial.print(module);
-    Serial.println(F("}"));
+    JsonDocument res;
+    res["status"] = "ok";
+    res["module"] = module;
+    replyJson(res);
     return;
   }
 
   // {"feeder": true} — run feeder until module 1 IR detects a card (or timeout/empty hopper)
   if (doc["feeder"].is<bool>() && doc["feeder"].as<bool>()) {
     FeedResult result = runFeeder();
-    Serial.print(F("{\"status\":\"ok\",\"detected\":"));
-    Serial.print(result == FEED_DETECTED ? F("true") : F("false"));
-    Serial.print(F(",\"empty\":"));
-    Serial.print(result == FEED_EMPTY ? F("true") : F("false"));
-    Serial.println(F("}"));
+    JsonDocument res;
+    res["status"] = "ok";
+    res["detected"] = result == FEED_DETECTED;
+    res["empty"] = result == FEED_EMPTY;
+    replyJson(res);
     return;
   }
 
   // {"feederValue": N} — set raw PWM (for calibration preview, does not auto-stop)
   if (doc["feederValue"].is<int>()) {
     setServoPosition(FEEDER_CHANNEL, doc["feederValue"].as<int>());
-    Serial.println(F("{\"status\":\"ok\"}"));
+    JsonDocument res;
+    res["status"] = "ok";
+    replyJson(res);
     return;
   }
 
   // {"feederStop": true} — stop feeder immediately
   if (doc["feederStop"].is<bool>() && doc["feederStop"].as<bool>()) {
     stopFeeder();
-    Serial.println(F("{\"status\":\"ok\"}"));
+    JsonDocument res;
+    res["status"] = "ok";
+    replyJson(res);
     return;
   }
 
@@ -556,20 +577,22 @@ void handleCommand(char* json) {
     feederConfig.pauseDuration  = cfg["pauseDuration"]  | feederConfig.pauseDuration;
     feederConfig.settleDuration = cfg["settleDuration"] | feederConfig.settleDuration;
     stopFeeder();
-    Serial.println(F("{\"status\":\"ok\"}"));
+    JsonDocument res;
+    res["status"] = "ok";
+    replyJson(res);
     return;
   }
 
   // {"readIR": true} — read current IR sensor state for all modules + hopper
   if (doc["readIR"].is<bool>() && doc["readIR"].as<bool>()) {
-    Serial.print(F("{\"status\":\"ok\",\"ir\":["));
+    JsonDocument res;
+    res["status"] = "ok";
+    JsonArray ir = res["ir"].to<JsonArray>();
     for (int m = 1; m <= NUM_MODULES; m++) {
-      if (m > 1) Serial.print(',');
-      Serial.print(digitalRead(irPin(m)) == LOW ? F("true") : F("false"));  // true = card present
+      ir.add(digitalRead(irPin(m)) == LOW);  // true = card present
     }
-    Serial.print(F("],\"hopper\":"));
-    Serial.print(hopperHasCards() ? F("true") : F("false"));  // true = cards remain in feeder stack
-    Serial.println(F("}"));
+    res["hopper"] = hopperHasCards();  // true = cards remain in feeder stack
+    replyJson(res);
     return;
   }
 
@@ -579,7 +602,7 @@ void handleCommand(char* json) {
     return;
   }
 
-  Serial.println(F("{\"error\":\"unknown command\"}"));
+  replyLiteral("{\"error\":\"unknown command\"}");
 }
 
 void setup() {
@@ -596,29 +619,36 @@ void setup() {
   pwm.setPWMFreq(50);
   delay(10);
   setAllNeutral();
-  Serial.println(F("{\"status\":\"ready\"}"));
+  Serial.println("{\"status\":\"ready\"}");
+
+  // Report cards already resting at a module gate on boot (e.g. power loss
+  // mid-run) so the operator can clear the device before the first feed.
+  for (int m = 1; m <= NUM_MODULES; m++) {
+    if (digitalRead(irPin(m)) == LOW) {
+      JsonDocument res;
+      res["error"] = "recovered";
+      res["module"] = m;
+      serializeJson(res, Serial);
+      Serial.println();
+    }
+  }
 }
 
 void loop() {
   while (Serial.available()) {
     char c = Serial.read();
     if (c == '\n' || c == '\r') {
-      if (inputOverflowed) {
-        Serial.println(F("{\"error\":\"command too long\"}"));
-        inputOverflowed = false;
-      } else if (inputLen > 0) {
-        inputBuffer[inputLen] = '\0';
+      if (inputBufferLen > 0) {
+        inputBuffer[inputBufferLen] = '\0';
         handleCommand(inputBuffer);
+        inputBufferLen = 0;
       }
-      inputLen = 0;
-    } else if (!inputOverflowed) {
-      if (inputLen < MAX_CMD_LEN) {
-        inputBuffer[inputLen++] = c;
-      } else {
-        inputOverflowed = true;
-        inputLen = 0;
-      }
+    } else if (inputBufferLen < INPUT_BUFFER_MAX) {
+      inputBuffer[inputBufferLen++] = c;
+    } else {
+      inputBufferLen = 0;  // oversized line — discard
+      Serial.println("{\"error\":\"line too long\"}");
     }
   }
-  checkModule1Jam();
+  checkModuleJams();
 }
