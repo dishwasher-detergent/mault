@@ -157,7 +157,7 @@ async function syncOneCard(
   }
   const baseUrl = await resolveGameDataSourceUrl(gameKey, source.defaultUrl);
 
-  const card = await source.fetchOne(scryfallId, baseUrl);
+  const card = await source.fetchOne(scryfallId, baseUrl, lang);
   if (!card) {
     return {
       success: false,

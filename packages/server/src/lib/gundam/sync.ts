@@ -50,7 +50,7 @@ async function fetchCards(
   }));
 }
 
-async function fetchOne(id: string, baseUrl: string) {
+async function fetchOne(id: string, baseUrl: string, _lang: string) {
   const res = await fetch(`${baseUrl}/${id}`, { headers: GUNDAM_HEADERS });
   if (!res.ok) return null;
 

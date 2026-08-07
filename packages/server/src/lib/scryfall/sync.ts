@@ -92,7 +92,7 @@ async function fetchCards(
     : downloadBulkData(baseUrl, addLog, "all_cards", lang, signal);
 }
 
-async function fetchOne(id: string, baseUrl: string) {
+async function fetchOne(id: string, baseUrl: string, _lang: string) {
   const res = await fetch(`${baseUrl}/${id}`, { headers: SCRYFALL_HEADERS });
   if (!res.ok) return null;
   const card = (await res.json()) as {
