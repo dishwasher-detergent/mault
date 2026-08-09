@@ -111,6 +111,9 @@ export function startSync(
 const VECTORIZE_CONCURRENCY = parseInt(
   process.env.VECTORIZE_CONCURRENCY ?? "10",
 );
+const INSERT_BATCH_SIZE = parseInt(
+  process.env.SYNC_INSERT_BATCH_SIZE ?? "50",
+);
 
 async function runSync(source: SyncSource, lang: string): Promise<void> {
   const baseUrl = await resolveGameDataSourceUrl(
@@ -156,6 +159,16 @@ async function runSync(source: SyncSource, lang: string): Promise<void> {
     `Found ${existingSet.size} existing ${source.label} cards in DB. Starting vectorization (${VECTORIZE_CONCURRENCY} in parallel)...`,
   );
 
+  let pendingInserts: (typeof cardImageVectors.$inferInsert)[] = [];
+
+  async function flushInserts(force = false): Promise<void> {
+    if (pendingInserts.length === 0) return;
+    if (!force && pendingInserts.length < INSERT_BATCH_SIZE) return;
+    const batch = pendingInserts;
+    pendingInserts = [];
+    await db.insert(cardImageVectors).values(batch).onConflictDoNothing();
+  }
+
   async function processCard(card: SyncSourceCard): Promise<void> {
     if (!card.imageUrl || existingSet.has(card.id)) {
       state = { ...state, skipped: state.skipped + 1 };
@@ -178,17 +191,15 @@ async function runSync(source: SyncSource, lang: string): Promise<void> {
       const buffer = Buffer.from(await imageRes.arrayBuffer());
       const embedding = await vectorizeImageFromBuffer(buffer);
 
-      await db
-        .insert(cardImageVectors)
-        .values({
-          scryfallId: card.id,
-          gameKey: source.gameKey,
-          lang,
-          name: card.name,
-          setCode: card.setCode,
-          embedding,
-        })
-        .onConflictDoNothing();
+      pendingInserts.push({
+        scryfallId: card.id,
+        gameKey: source.gameKey,
+        lang,
+        name: card.name,
+        setCode: card.setCode,
+        embedding,
+      });
+      await flushInserts();
 
       existingSet.add(card.id);
       state = { ...state, processed: state.processed + 1 };
@@ -230,6 +241,8 @@ async function runSync(source: SyncSource, lang: string): Promise<void> {
       worker,
     ),
   );
+
+  await flushInserts(true);
 
   if (cancelled) {
     state = { ...state, status: "cancelled" };
