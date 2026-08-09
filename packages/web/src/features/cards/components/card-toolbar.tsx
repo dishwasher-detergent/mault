@@ -30,6 +30,21 @@ function sortLabels(
     : [t("cardToolbar.sortAscDefault"), t("cardToolbar.sortDescDefault")];
 }
 
+function sortValueLabel(
+  sortKey: string | null,
+  sortableFields: FieldMeta[],
+  t: TFunction<"cards">,
+): string {
+  if (!sortKey || sortKey === "scan-desc") return t("cardToolbar.scanOrder");
+  const i = sortKey.lastIndexOf("-");
+  const field = sortKey.slice(0, i);
+  const dir = sortKey.slice(i + 1);
+  const meta = sortableFields.find((f) => f.field === field);
+  if (!meta) return "";
+  const [asc, desc] = sortLabels(meta.type, t);
+  return `${meta.label} (${dir === "asc" ? asc : desc})`;
+}
+
 export function CardToolbar({
   searchQuery,
   onSearchChange,
@@ -75,7 +90,9 @@ export function CardToolbar({
       />
       <Select value={sortKey} onValueChange={onSortChange}>
         <SelectTrigger className="w-full sm:w-64">
-          <SelectValue placeholder={t("cardToolbar.sortPlaceholder")} />
+          <SelectValue placeholder={t("cardToolbar.sortPlaceholder")}>
+            {sortValueLabel(sortKey, sortableFields, t)}
+          </SelectValue>
         </SelectTrigger>
         <SelectContent>
           <SelectItem value="scan-desc">{t("cardToolbar.scanOrder")}</SelectItem>

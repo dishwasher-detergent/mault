@@ -209,7 +209,7 @@ export function OrgSettings() {
                       }
                     >
                       <SelectTrigger className="w-28 shrink-0">
-                        <SelectValue />
+                        <SelectValue>{ROLE_LABELS[m.role as OrgRole]}</SelectValue>
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="admin">{t("orgSettings.roleAdmin")}</SelectItem>
@@ -259,7 +259,7 @@ export function OrgSettings() {
                   render={({ field }) => (
                     <Select value={field.value} onValueChange={field.onChange}>
                       <SelectTrigger className="w-28 shrink-0">
-                        <SelectValue />
+                        <SelectValue>{ROLE_LABELS[field.value as OrgRole]}</SelectValue>
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="admin">{t("orgSettings.roleAdmin")}</SelectItem>

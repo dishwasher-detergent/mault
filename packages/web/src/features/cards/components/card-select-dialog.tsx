@@ -392,7 +392,13 @@ export function CardSelectDialog({
                   onValueChange={(value) => setSelectedSet(value)}
                 >
                   <SelectTrigger className="w-40 shrink-0">
-                    <SelectValue placeholder={t("cardSelectDialog.allSets")} />
+                    <SelectValue placeholder={t("cardSelectDialog.allSets")}>
+                      {selectedSet === "all"
+                        ? t("cardSelectDialog.allSetsCount", {
+                            count: results.length,
+                          })
+                        : sets.find((s) => s.code === selectedSet)?.name}
+                    </SelectValue>
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="all">
