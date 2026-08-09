@@ -103,10 +103,6 @@ export async function clearCollectionCards(guid: string): Promise<Result<null>> 
   return apiDelete<Result<null>>(`/api/collections/${guid}/cards`);
 }
 
-export async function getLiveSessionCounts(): Promise<Result<Record<string, number>>> {
-  return apiGet<Result<Record<string, number>>>("/api/collections/live");
-}
-
 export async function releaseScanLock(guid: string): Promise<Result<null>> {
   return apiDelete<Result<null>>(`/api/collections/${guid}/scan-lock`);
 }

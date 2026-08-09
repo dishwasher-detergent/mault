@@ -6,10 +6,9 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { getLiveSessionCounts } from "@/features/collections/api/collections";
 import { useCollectionLocks } from "@/features/collections/api/use-collection-locks";
 import { useCollections } from "@/features/collections/api/use-collections";
-import { useOrg } from "@/features/companies/api/use-organization";
+import { useLiveSessionCounts } from "@/features/collections/api/use-live-counts";
 import { OrgSwitcher } from "@/features/companies/components/org-switcher";
 import { useIsMobile } from "@/hooks/use-is-mobile";
 import { useRole } from "@/hooks/use-role";
@@ -26,7 +25,6 @@ import {
   IconPigFilled,
   IconSettings,
 } from "@tabler/icons-react";
-import { useQuery } from "@tanstack/react-query";
 import { useCallback, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { NavLink } from "react-router-dom";
@@ -150,7 +148,6 @@ export function AppNav() {
   const { t } = useTranslation("common");
   const { isAdmin } = useRole();
   const isMobile = useIsMobile();
-  const { activeOrg } = useOrg();
   const { collections } = useCollections();
   const { locks, currentUserId } = useCollectionLocks();
 
@@ -182,16 +179,11 @@ export function AppNav() {
     return () => document.removeEventListener("keydown", handleKeyDown);
   }, [toggle]);
 
-  const { data: liveCounts } = useQuery({
-    queryKey: ["live-sessions"],
-    queryFn: () => getLiveSessionCounts().then((r) => r.data ?? {}),
-    refetchInterval: 10000,
-    enabled: !!activeOrg,
-  });
+  const liveCounts = useLiveSessionCounts();
 
   const hasLiveSessions = !!(
     currentUserId &&
-    Object.entries(liveCounts ?? {}).some(
+    Object.entries(liveCounts).some(
       ([guid, count]) => locks[guid]?.userId === currentUserId && count > 0,
     )
   );

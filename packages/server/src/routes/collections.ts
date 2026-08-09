@@ -18,8 +18,9 @@ import {
 } from "../lib/scan-lock";
 import {
   emitToSession,
+  getLiveCountsForGuids,
   getSessionViewers,
-  sessionListenerCount,
+  subscribeOrgLiveCounts,
   subscribeSession,
 } from "../lib/session-stream";
 import {
@@ -220,29 +221,54 @@ router.get("/locks", requireAuth, requireOrg, async (c) => {
   }
 });
 
-// GET /collections/live — returns { [guid]: monitorCount } for sessions with active monitors
-router.get("/live", requireAuth, requireOrg, async (c) => {
-  const orgId = c.get("orgId");
-  try {
-    const allCollections = await authQuery(c.get("jwtClaims"), async (tx) => {
-      return tx
-        .select({ guid: collections.guid })
-        .from(collections)
-        .where(eq(collections.orgId, orgId));
-    });
+// GET /collections/live-events — SSE stream of live viewer-count changes for all org collections
+router.get("/live-events", async (c) => {
+  const token = c.req.query("token");
+  const orgId = c.req.query("orgId");
 
-    const live: Record<string, number> = {};
-    for (const { guid } of allCollections) {
-      if (!guid) continue;
-      const n = sessionListenerCount(guid);
-      if (n > 0) live[guid] = n;
+  if (!token || !orgId)
+    return c.json({ success: false, message: "Unauthorized" }, 401);
+
+  const payload = await verifyToken(token);
+  if (!payload?.sub)
+    return c.json({ success: false, message: "Unauthorized" }, 401);
+
+  const rows = await db.execute<{ role: string }>(
+    sql`SELECT role FROM neon_auth.member WHERE "organizationId" = ${orgId} AND "userId" = ${payload.sub} LIMIT 1`,
+  );
+  if (!rows.rows[0])
+    return c.json({ success: false, message: "Forbidden" }, 403);
+
+  const jwtClaims = JSON.stringify({ sub: payload.sub, role: "authenticated" });
+
+  return streamSSE(c, async (stream) => {
+    try {
+      const guids = await authQuery(jwtClaims, async (tx) =>
+        tx
+          .select({ guid: collections.guid })
+          .from(collections)
+          .where(eq(collections.orgId, orgId)),
+      );
+      const initial = getLiveCountsForGuids(
+        guids.map((r) => r.guid!).filter(Boolean),
+      );
+      await stream.writeSSE({
+        event: "init",
+        data: JSON.stringify({ counts: initial }),
+      });
+    } catch {
+      /* non-fatal */
     }
 
-    return c.json({ success: true, data: live });
-  } catch (err) {
-    console.error(err);
-    return c.json({ success: false, message: "Database error." }, 500);
-  }
+    const unsubscribe = subscribeOrgLiveCounts(orgId, (event, data) => {
+      stream.writeSSE({ event, data: JSON.stringify(data) }).catch(() => {});
+    });
+
+    await new Promise<void>((resolve) => {
+      stream.onAbort(resolve);
+    });
+    unsubscribe();
+  });
 });
 
 // GET /collections/viewers — viewers for all collections { [guid]: ViewerInfo[] }
@@ -792,6 +818,7 @@ router.get("/:guid/stream", async (c) => {
     // Subscribe first so viewers_updated includes this viewer
     const unsubscribe = subscribeSession(
       guid,
+      orgId,
       payload.sub!,
       viewerDisplayName,
       writer,
