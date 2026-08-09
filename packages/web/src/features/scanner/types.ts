@@ -82,7 +82,9 @@ export interface ScannerOverlayProps {
   isConnected: boolean;
   isReady: boolean;
   hasCatchAll: boolean;
+  autoFeed: boolean;
   onRetryError: () => void;
+  onConnectScanner: () => void;
 }
 
 export interface SetStats {

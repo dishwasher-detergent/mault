@@ -39,11 +39,16 @@ export function DynamicPopover({
     return (
       <Drawer>
         <DrawerTrigger asChild>{trigger}</DrawerTrigger>
-        <DrawerContent>
+        <DrawerContent className="min-h-0">
           <DrawerHeader className="sr-only">
             <DrawerTitle>Details</DrawerTitle>
           </DrawerHeader>
-          <div className={cn("flex flex-col gap-2 p-4", contentClassName)}>
+          <div
+            className={cn(
+              "flex flex-col gap-2 p-4 overflow-y-auto min-h-0",
+              contentClassName,
+            )}
+          >
             {children}
           </div>
         </DrawerContent>

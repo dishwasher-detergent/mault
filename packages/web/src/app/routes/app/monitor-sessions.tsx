@@ -3,11 +3,11 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { WatcherStack } from "@/components/ui/watcher-stack";
 import {
   collectionsQueryOptions,
-  getAllSessionViewers,
   releaseScanLock,
 } from "@/features/collections/api/collections";
 import type { ScanLockInfo } from "@/features/collections/api/use-collection-locks";
 import { useCollectionLocks } from "@/features/collections/api/use-collection-locks";
+import { useSessionViewersByGuid } from "@/features/collections/api/use-live-counts";
 import { useOrg } from "@/features/companies/api/use-organization";
 import {
   IconHeartRateMonitor,
@@ -105,15 +105,9 @@ export default function MonitorSessionsPage() {
   const { activeOrg } = useOrg();
   const { data: collections, isLoading } = useQuery({
     ...collectionsQueryOptions,
-    refetchInterval: 8000,
     enabled: !!activeOrg,
   });
-  const { data: allViewers } = useQuery({
-    queryKey: ["session-viewers-all"],
-    queryFn: getAllSessionViewers,
-    refetchInterval: 5000,
-    enabled: !!activeOrg,
-  });
+  const allViewers = useSessionViewersByGuid();
   const { locks, currentUserId } = useCollectionLocks();
   const navigate = useNavigate();
 

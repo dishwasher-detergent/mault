@@ -1,3 +1,4 @@
+import { Button } from "@/components/ui/button";
 import {
   Drawer,
   DrawerContent,
@@ -10,26 +11,55 @@ import { CardToolbar } from "@/features/cards/components/card-toolbar";
 import { ScannedCardItem } from "@/features/cards/components/scanned-card-item";
 import { useCollectionLocks } from "@/features/collections/api/use-collection-locks";
 import { useSessionMonitor } from "@/features/scanner/api/use-session-monitor";
+import { RecentScannedCards } from "@/features/scanner/components/recent-scanned-cards";
 import { SessionErrorsPanel } from "@/features/scanner/components/session-errors-panel";
 import { SessionStatsPanel } from "@/features/scanner/components/session-stats-panel";
 import { computeStats } from "@/features/scanner/lib/compute-stats";
 import { useIsMobile } from "@/hooks/use-is-mobile";
+import { cn } from "@/lib/utils";
 import { FIELD_DEFINITIONS } from "@magic-vault/shared";
-import { IconCards, IconLoader2, IconWifiOff } from "@tabler/icons-react";
-import { useMemo } from "react";
+import {
+  IconCards,
+  IconChevronLeft,
+  IconChevronRight,
+  IconLoader2,
+  IconWifiOff,
+} from "@tabler/icons-react";
+import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useParams } from "react-router-dom";
+
+const PAGE_SIZE = 96;
 
 function CardGrid({
   filteredAndSorted,
   status,
   cardCount,
+  isMobile,
 }: {
   filteredAndSorted: ReturnType<typeof useCardFilterSort>["filteredAndSorted"];
   status: string;
   cardCount: number;
+  isMobile: boolean;
 }) {
   const { t } = useTranslation("scanner");
+  const { t: tCards } = useTranslation("cards");
+  const [page, setPage] = useState(0);
+
+  const pageCount = Math.max(
+    1,
+    Math.ceil(filteredAndSorted.length / PAGE_SIZE),
+  );
+  const clampedPage = Math.min(page, pageCount - 1);
+  const pagedCards = filteredAndSorted.slice(
+    clampedPage * PAGE_SIZE,
+    (clampedPage + 1) * PAGE_SIZE,
+  );
+
+  useEffect(() => {
+    setPage(0);
+  }, [filteredAndSorted.length]);
+
   return (
     <>
       {status === "connecting" && cardCount === 0 && (
@@ -56,8 +86,15 @@ function CardGrid({
             {t("monitorPage.noCardsMatchSearch")}
           </div>
         )}
-      <div className="grid grid-cols-3 @md:grid-cols-4 @4xl:grid-cols-6 @5xl:grid-cols-8 gap-2 p-4">
-        {filteredAndSorted.map((card) => (
+      <div
+        className={cn(
+          "grid gap-2 p-4",
+          isMobile
+            ? "grid-cols-2"
+            : "grid-cols-3 @md:grid-cols-4 @4xl:grid-cols-6 @5xl:grid-cols-8",
+        )}
+      >
+        {pagedCards.map((card) => (
           <ScannedCardItem
             key={card.scanId}
             card={card.card}
@@ -66,6 +103,32 @@ function CardGrid({
           />
         ))}
       </div>
+      {pageCount > 1 && (
+        <div className="flex items-center justify-center gap-3 pb-4">
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={() => setPage((p) => Math.max(0, p - 1))}
+            disabled={clampedPage === 0}
+          >
+            <IconChevronLeft />
+          </Button>
+          <span className="text-sm text-muted-foreground">
+            {tCards("cardGrid.pageOf", {
+              page: clampedPage + 1,
+              total: pageCount,
+            })}
+          </span>
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={() => setPage((p) => Math.min(pageCount - 1, p + 1))}
+            disabled={clampedPage === pageCount - 1}
+          >
+            <IconChevronRight />
+          </Button>
+        </div>
+      )}
     </>
   );
 }
@@ -131,6 +194,7 @@ export default function MonitorPage() {
 
         <div className="flex-1 overflow-y-auto p-3 flex flex-col gap-3">
           <SessionStatsPanel stats={stats} totalCards={cards.length} />
+          <RecentScannedCards cards={cards} />
           <SessionErrorsPanel errors={errors} />
         </div>
 
@@ -166,6 +230,7 @@ export default function MonitorPage() {
                   filteredAndSorted={filteredAndSorted}
                   status={status}
                   cardCount={cards.length}
+                  isMobile
                 />
               </div>
             </div>
@@ -207,6 +272,7 @@ export default function MonitorPage() {
           filteredAndSorted={filteredAndSorted}
           status={status}
           cardCount={cards.length}
+          isMobile={false}
         />
       </main>
     </div>

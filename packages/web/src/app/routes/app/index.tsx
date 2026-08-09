@@ -1,4 +1,5 @@
 import { Drawer, DrawerContent, DrawerTrigger } from "@/components/ui/drawer";
+import { ResizeHandle } from "@/components/ui/resize-handle";
 import { PresetSelector } from "@/features/bins/components/preset-selector";
 import { CardGrid } from "@/features/cards/components/card-grid";
 import { CollectionSwitcher } from "@/features/collections/components/collection-switcher";
@@ -10,6 +11,7 @@ import { GameSwitchAlert } from "@/features/scanner/components/game-switch-alert
 import { ScanStats } from "@/features/scanner/components/scan-stats";
 import { ScannerDebug } from "@/features/scanner/components/scanner-debug";
 import { useIsMobile } from "@/hooks/use-is-mobile";
+import { useResizablePanel } from "@/hooks/use-resizable-panel";
 import { IconCards } from "@tabler/icons-react";
 import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
@@ -59,6 +61,30 @@ export default function App() {
   );
   const isVertical = orgSettings?.scannerLayout === "vertical";
 
+  const {
+    size: scannerHeight,
+    isDragging: isResizingHeight,
+    onPointerDown: onHeightPointerDown,
+  } = useResizablePanel({
+    axis: "height",
+    defaultSize: 384,
+    min: 220,
+    max: 640,
+    storageKey: "scannerPanelHeight",
+  });
+
+  const {
+    size: scannerWidth,
+    isDragging: isResizingWidth,
+    onPointerDown: onWidthPointerDown,
+  } = useResizablePanel({
+    axis: "width",
+    defaultSize: 340,
+    min: 260,
+    max: 640,
+    storageKey: "scannerPanelWidth",
+  });
+
   if (isMobile) {
     return <MobileScanner />;
   }
@@ -66,7 +92,10 @@ export default function App() {
   if (isVertical) {
     return (
       <div className="flex flex-col flex-1 min-h-0 overflow-hidden">
-        <section className="flex items-stretch gap-2 p-2 border-b bg-sidebar/70 shrink-0 h-96">
+        <section
+          style={{ height: scannerHeight }}
+          className="flex items-stretch gap-2 p-2 bg-sidebar/70 shrink-0"
+        >
           <div className="flex flex-col gap-2 min-w-0">
             <CardScanner className="flex-1 min-h-0" />
           </div>
@@ -78,6 +107,11 @@ export default function App() {
             <GameSwitchAlert />
           </div>
         </section>
+        <ResizeHandle
+          orientation="horizontal"
+          isDragging={isResizingHeight}
+          onPointerDown={onHeightPointerDown}
+        />
         <section className="flex-1 min-h-0 overflow-y-auto @container flex flex-col">
           <CardGrid />
         </section>
@@ -86,8 +120,11 @@ export default function App() {
   }
 
   return (
-    <div className="grid grid-cols-12 flex-1 min-h-0 overflow-hidden">
-      <section className="col-span-4 lg:col-span-3 xl:col-span-4 2xl:col-span-2 overflow-hidden flex flex-col h-full p-2 border-r gap-2 bg-sidebar/70">
+    <div className="flex flex-1 min-h-0 overflow-hidden">
+      <section
+        style={{ width: scannerWidth }}
+        className="shrink-0 overflow-hidden flex flex-col h-full p-2 gap-2 bg-sidebar/70"
+      >
         <CollectionSwitcher />
         <PresetSelector readOnly />
         <CardScanner className="flex-none" />
@@ -95,7 +132,12 @@ export default function App() {
         <ScannerDebug />
         <ScanStats />
       </section>
-      <section className="col-span-8 lg:col-span-9 xl:col-span-8 2xl:col-span-10 overflow-y-auto h-full @container flex flex-col">
+      <ResizeHandle
+        orientation="vertical"
+        isDragging={isResizingWidth}
+        onPointerDown={onWidthPointerDown}
+      />
+      <section className="flex-1 min-w-0 overflow-y-auto h-full @container flex flex-col">
         <CardGrid />
       </section>
     </div>

@@ -4,6 +4,8 @@ import { cn } from "@/lib/utils";
 import {
   IconAlertTriangle,
   IconCameraSpark,
+  IconDeviceUsb,
+  IconHandStop,
   IconLoader2,
   IconRefresh,
 } from "@tabler/icons-react";
@@ -45,7 +47,9 @@ export function ScannerOverlay({
   isConnected,
   isReady,
   hasCatchAll,
+  autoFeed,
   onRetryError,
+  onConnectScanner,
 }: ScannerOverlayProps) {
   const { t } = useTranslation("scanner");
 
@@ -60,7 +64,30 @@ export function ScannerOverlay({
     );
   }
 
-  if (isConnected && isReady && !hasCatchAll) {
+  if (!isConnected) {
+    return (
+      <StatusPill variant="warning">
+        <IconDeviceUsb className="size-3.5 shrink-0" />
+        <span className="flex-1">
+          {t("scannerOverlay.scannerNotConnected")}
+        </span>
+        <Button size="sm" onClick={onConnectScanner}>
+          {t("scannerOverlay.connectScannerButton")}
+        </Button>
+      </StatusPill>
+    );
+  }
+
+  if (!isReady) {
+    return (
+      <StatusPill variant="loading">
+        <IconLoader2 className="size-3.5 animate-spin shrink-0" />
+        <span>{t("scannerOverlay.testingScanner")}</span>
+      </StatusPill>
+    );
+  }
+
+  if (!hasCatchAll) {
     return (
       <StatusPill variant="warning">
         <IconAlertTriangle className="size-3.5 shrink-0" />
@@ -122,6 +149,14 @@ export function ScannerOverlay({
         </StatusPill>
       );
     default:
+      if (!autoFeed) {
+        return (
+          <StatusPill>
+            <IconHandStop className="size-3.5 shrink-0" />
+            <span>{t("scannerOverlay.autoFeedOff")}</span>
+          </StatusPill>
+        );
+      }
       return null;
   }
 }

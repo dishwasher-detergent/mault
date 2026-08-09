@@ -6,6 +6,7 @@ import { FeederConfigProvider } from "@/features/calibration/api/use-feeder-conf
 import { ModuleConfigsProvider } from "@/features/calibration/api/use-module-configs";
 import { CollectionLocksProvider } from "@/features/collections/api/use-collection-locks";
 import { CollectionsProvider } from "@/features/collections/api/use-collections";
+import { LiveSessionStatusProvider } from "@/features/collections/api/use-live-counts";
 import { CameraProvider } from "@/features/scanner/api/use-camera";
 import { ScannedCardsProvider } from "@/features/scanner/api/use-scanned-cards";
 import { ScannerIslandProvider } from "@/features/scanner/api/use-scanner-island";
@@ -54,6 +55,7 @@ export function AppProviders({ children }: { children: React.ReactNode }) {
           <CollectionsProvider>
             <BinConfigsProvider>
               <CollectionLocksProvider>
+              <LiveSessionStatusProvider>
               <ModuleConfigsProvider>
                 <FeederConfigProvider>
                   <ScannedCardsProvider>
@@ -65,6 +67,7 @@ export function AppProviders({ children }: { children: React.ReactNode }) {
                   </ScannedCardsProvider>
                 </FeederConfigProvider>
               </ModuleConfigsProvider>
+              </LiveSessionStatusProvider>
               </CollectionLocksProvider>
             </BinConfigsProvider>
           </CollectionsProvider>

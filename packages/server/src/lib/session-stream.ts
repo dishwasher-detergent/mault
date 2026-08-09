@@ -17,7 +17,7 @@ interface SessionEntry {
 const sessions = new Map<string, SessionEntry>();
 const orgCountWriters = new Map<string, Set<SseWriter>>();
 
-function emitToOrg(orgId: string, event: string, data: unknown) {
+export function emitToOrg(orgId: string, event: string, data: unknown) {
   const writers = orgCountWriters.get(orgId);
   if (!writers) return;
   for (const writer of writers) {
@@ -41,6 +41,7 @@ function broadcastViewers(guid: string, session: SessionEntry) {
     }
   }
   emitToOrg(session.orgId, "live_count", { guid, count: session.viewers.size });
+  emitToOrg(session.orgId, "session_viewers", { guid, viewers });
 }
 
 export function subscribeSession(
@@ -64,6 +65,7 @@ export function subscribeSession(
     if (session!.viewers.size === 0) {
       sessions.delete(guid);
       emitToOrg(session!.orgId, "live_count", { guid, count: 0 });
+      emitToOrg(session!.orgId, "session_viewers", { guid, viewers: [] });
     } else {
       broadcastViewers(guid, session!);
     }
@@ -101,6 +103,18 @@ export function getLiveCountsForGuids(guids: string[]): Record<string, number> {
   for (const guid of guids) {
     const n = sessionListenerCount(guid);
     if (n > 0) result[guid] = n;
+  }
+  return result;
+}
+
+export function getAllSessionViewers(): Record<string, ViewerInfo[]> {
+  const result: Record<string, ViewerInfo[]> = {};
+  for (const [guid, session] of sessions) {
+    if (session.viewers.size > 0) {
+      result[guid] = Array.from(session.viewers).map(
+        ({ userId, displayName }) => ({ userId, displayName }),
+      );
+    }
   }
   return result;
 }

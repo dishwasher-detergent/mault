@@ -323,7 +323,9 @@ export function CardScanner({ className, compact }: CardScannerProps) {
           isConnected={isConnected}
           isReady={isReady}
           hasCatchAll={hasCatchAll}
+          autoFeed={autoFeed}
           onRetryError={handleRetryError}
+          onConnectScanner={connect}
         />
         <ScannerMenu
           isCameraActive={isCameraActive}

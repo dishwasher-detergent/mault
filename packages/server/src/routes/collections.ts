@@ -17,7 +17,9 @@ import {
   subscribeOrgLocks,
 } from "../lib/scan-lock";
 import {
+  emitToOrg,
   emitToSession,
+  getAllSessionViewers,
   getLiveCountsForGuids,
   getSessionViewers,
   subscribeOrgLiveCounts,
@@ -173,7 +175,12 @@ router.get("/lock-events", async (c) => {
   const jwtClaims = JSON.stringify({ sub: payload.sub, role: "authenticated" });
 
   return streamSSE(c, async (stream) => {
-    // Send current lock state as initial event
+    const aborted = new Promise<void>((resolve) => stream.onAbort(resolve));
+
+    const unsubscribe = subscribeOrgLocks(orgId, (event, data) => {
+      stream.writeSSE({ event, data: JSON.stringify(data) }).catch(() => {});
+    });
+
     try {
       const guids = await authQuery(jwtClaims, async (tx) =>
         tx
@@ -192,13 +199,7 @@ router.get("/lock-events", async (c) => {
       /* non-fatal */
     }
 
-    const unsubscribe = subscribeOrgLocks(orgId, (event, data) => {
-      stream.writeSSE({ event, data: JSON.stringify(data) }).catch(() => {});
-    });
-
-    await new Promise<void>((resolve) => {
-      stream.onAbort(resolve);
-    });
+    await aborted;
     unsubscribe();
   });
 });
@@ -242,6 +243,12 @@ router.get("/live-events", async (c) => {
   const jwtClaims = JSON.stringify({ sub: payload.sub, role: "authenticated" });
 
   return streamSSE(c, async (stream) => {
+    const aborted = new Promise<void>((resolve) => stream.onAbort(resolve));
+
+    const unsubscribe = subscribeOrgLiveCounts(orgId, (event, data) => {
+      stream.writeSSE({ event, data: JSON.stringify(data) }).catch(() => {});
+    });
+
     try {
       const guids = await authQuery(jwtClaims, async (tx) =>
         tx
@@ -254,45 +261,18 @@ router.get("/live-events", async (c) => {
       );
       await stream.writeSSE({
         event: "init",
-        data: JSON.stringify({ counts: initial }),
+        data: JSON.stringify({
+          counts: initial,
+          viewers: getAllSessionViewers(),
+        }),
       });
     } catch {
       /* non-fatal */
     }
 
-    const unsubscribe = subscribeOrgLiveCounts(orgId, (event, data) => {
-      stream.writeSSE({ event, data: JSON.stringify(data) }).catch(() => {});
-    });
-
-    await new Promise<void>((resolve) => {
-      stream.onAbort(resolve);
-    });
+    await aborted;
     unsubscribe();
   });
-});
-
-// GET /collections/viewers — viewers for all collections { [guid]: ViewerInfo[] }
-router.get("/viewers", requireAuth, requireOrg, async (c) => {
-  const orgId = c.get("orgId");
-  const allCollections = await authQuery(c.get("jwtClaims"), async (tx) =>
-    tx
-      .select({ guid: collections.guid })
-      .from(collections)
-      .where(eq(collections.orgId, orgId)),
-  );
-  const result: Record<string, ReturnType<typeof getSessionViewers>> = {};
-  for (const { guid } of allCollections) {
-    if (!guid) continue;
-    const viewers = getSessionViewers(guid);
-    if (viewers.length > 0) result[guid] = viewers;
-  }
-  return c.json({ success: true, data: result });
-});
-
-// GET /collections/:guid/viewers — current session viewers for a collection
-router.get("/:guid/viewers", requireAuth, requireOrg, async (c) => {
-  const guid = c.req.param("guid");
-  return c.json({ success: true, data: getSessionViewers(guid) });
 });
 
 // POST /collections — create and activate
@@ -327,6 +307,7 @@ router.post("/", requireAuth, requireOrg, async (c) => {
 
       return _loadCollections(tx, orgId);
     });
+    if (result.success) emitToOrg(orgId, "collections_changed", {});
     return c.json(result);
   } catch (err) {
     console.error(err);
@@ -352,6 +333,7 @@ router.put("/:guid", requireAuth, requireOrg, async (c) => {
         .where(eq(collections.id, target.id));
       return _loadCollections(tx, orgId);
     });
+    if (result.success) emitToOrg(orgId, "collections_changed", { guid });
     return c.json(result);
   } catch (err) {
     console.error(err);
@@ -384,6 +366,7 @@ router.put("/:guid/active", requireAuth, requireOrg, async (c) => {
 
       return _loadCollections(tx, orgId);
     });
+    if (result.success) emitToOrg(orgId, "collections_changed", { guid });
     return c.json(result);
   } catch (err) {
     console.error(err);
@@ -423,6 +406,7 @@ router.delete("/:guid", requireAuth, requireOrg, async (c) => {
 
       return _loadCollections(tx, orgId);
     });
+    if (result.success) emitToOrg(orgId, "collections_changed", { guid });
     return c.json(result);
   } catch (err) {
     console.error(err);
@@ -564,6 +548,7 @@ router.post("/:guid/cards", requireAuth, requireOrg, async (c) => {
     });
     if (result.success) {
       emitToSession(guid, "card_added", result.data);
+      emitToOrg(orgId, "collections_changed", { guid });
 
       db.query.orgSettings
         .findFirst({
@@ -677,7 +662,10 @@ router.delete("/:guid/cards", requireAuth, requireOrg, async (c) => {
 
       return { success: true, data: null };
     });
-    if (result.success) emitToSession(guid, "cards_cleared", {});
+    if (result.success) {
+      emitToSession(guid, "cards_cleared", {});
+      emitToOrg(orgId, "collections_changed", { guid });
+    }
     return c.json(result);
   } catch (err) {
     console.error(err);
@@ -704,7 +692,10 @@ router.post("/:guid/cards/remove-bulk", requireAuth, requireOrg, async (c) => {
       }
       return { success: true, data: null };
     });
-    if (result.success) emitToSession(guid, "cards_removed", { scanIds });
+    if (result.success) {
+      emitToSession(guid, "cards_removed", { scanIds });
+      emitToOrg(orgId, "collections_changed", { guid });
+    }
     return c.json(result);
   } catch (err) {
     console.error(err);
@@ -761,7 +752,10 @@ router.delete("/:guid/cards/:scanId", requireAuth, requireOrg, async (c) => {
         );
       return { success: true, data: null };
     });
-    if (result.success) emitToSession(guid, "card_removed", { scanId });
+    if (result.success) {
+      emitToSession(guid, "card_removed", { scanId });
+      emitToOrg(orgId, "collections_changed", { guid });
+    }
     return c.json(result);
   } catch (err) {
     console.error(err);
@@ -811,11 +805,12 @@ router.get("/:guid/stream", async (c) => {
   const viewerDisplayName = await getUserDisplayName(payload.sub);
 
   return streamSSE(c, async (stream) => {
+    const aborted = new Promise<void>((resolve) => stream.onAbort(resolve));
+
     const writer = (event: string, data: unknown) => {
       stream.writeSSE({ event, data: JSON.stringify(data) }).catch(() => {});
     };
 
-    // Subscribe first so viewers_updated includes this viewer
     const unsubscribe = subscribeSession(
       guid,
       orgId,
@@ -900,9 +895,7 @@ router.get("/:guid/stream", async (c) => {
       // non-fatal — subscriber will still receive live events
     }
 
-    await new Promise<void>((resolve) => {
-      stream.onAbort(resolve);
-    });
+    await aborted;
 
     unsubscribe();
   });

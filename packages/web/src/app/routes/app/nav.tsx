@@ -229,7 +229,6 @@ export function AppNav() {
       to: "/app/settings",
       icon: <IconSettings size={20} />,
       label: t("nav.settings"),
-      desktopOnly: true,
     },
     ...(isAdmin
       ? [

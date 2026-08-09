@@ -160,6 +160,10 @@
   },
   "scannerOverlay": {
     "connectCamera": "Connect a camera to start scanning.",
+    "scannerNotConnected": "Card sorter not connected.",
+    "connectScannerButton": "Connect",
+    "testingScanner": "Testing card sorter connection…",
+    "autoFeedOff": "Auto-feed is off - feed cards manually.",
     "noCatchAllBin": "No catch-all bin configured - unmatched cards won't be sorted.",
     "initializing": "Initializing scanner…",
     "requestingCameraAccess": "Requesting camera access…",
@@ -181,6 +185,9 @@
   "appScanner": {
     "cardCount_one": "{{count}} card",
     "cardCount_other": "{{count}} cards"
+  },
+  "recentScannedCards": {
+    "heading": "Recently Scanned"
   },
   "monitorPage": {
     "loadingSession": "Loading session…",
