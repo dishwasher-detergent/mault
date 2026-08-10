@@ -1,4 +1,5 @@
 import { Button } from "@/components/ui/button";
+import { ButtonGroup } from "@/components/ui/button-group";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   orgSettingsQueryOptions,
@@ -8,6 +9,7 @@ import { useOrg } from "@/features/companies/api/use-organization";
 import { useCameraContext } from "@/features/scanner/api/use-camera";
 import { getDefaultCardContour } from "@/features/scanner/lib/card-detection";
 import {
+  DEFAULT_CAPTURE_SETTLE_DELAY_MS,
   DEFAULT_SCAN_REGION,
   type CardContour,
   type ScanRegion,
@@ -86,11 +88,19 @@ export function ScanRegionCalibrationPanel() {
   const queryOpts = orgSettingsQueryOptions(activeOrg?.id);
   const { data, isLoading } = useQuery(queryOpts);
   const savedRegion = data?.scanRegion ?? DEFAULT_SCAN_REGION;
+  const savedCaptureSettleDelayMs =
+    data?.captureSettleDelayMs ?? DEFAULT_CAPTURE_SETTLE_DELAY_MS;
 
   const [draft, setDraft] = useState<ScanRegion | null>(null);
   const region = draft ?? savedRegion;
   const regionRef = useRef(region);
   regionRef.current = region;
+
+  const [captureSettleDraft, setCaptureSettleDraft] = useState<number | null>(
+    null,
+  );
+  const captureSettleDelayMsValue =
+    captureSettleDraft ?? savedCaptureSettleDelayMs;
 
   const {
     stream,
@@ -282,6 +292,17 @@ export function ScanRegionCalibrationPanel() {
     },
   });
 
+  const saveCaptureSettleMutation = useMutation({
+    mutationFn: (next: number) =>
+      saveOrgSettings({ captureSettleDelayMs: next }),
+    onSuccess: (result) => {
+      if (result.success && result.data) {
+        queryClient.setQueryData(queryOpts.queryKey, result.data);
+        setCaptureSettleDraft(null);
+      }
+    },
+  });
+
   return (
     <div className="flex flex-col gap-2">
       <p className="text-xs text-muted-foreground">
@@ -373,6 +394,78 @@ export function ScanRegionCalibrationPanel() {
             })}
           </p>
         )}
+
+        <div className="flex flex-col gap-2 pt-2 border-t">
+          <p className="text-xs text-muted-foreground">
+            {t("scanRegionCalibrationPanel.captureSettleLabel")}
+          </p>
+          <p className="text-[10px] text-muted-foreground/70">
+            {t("scanRegionCalibrationPanel.captureSettleDescription")}
+          </p>
+          <ButtonGroup className="w-full">
+            <Button
+              variant="secondary"
+              disabled={captureSettleDelayMsValue <= 0}
+              onClick={() =>
+                setCaptureSettleDraft(
+                  Math.max(0, captureSettleDelayMsValue - 100),
+                )
+              }
+              className="px-2 text-xs"
+            >
+              -100
+            </Button>
+            <Button
+              variant="secondary"
+              disabled={captureSettleDelayMsValue <= 0}
+              onClick={() =>
+                setCaptureSettleDraft(
+                  Math.max(0, captureSettleDelayMsValue - 10),
+                )
+              }
+              className="px-2 text-xs"
+            >
+              -10
+            </Button>
+            <div className="flex flex-row flex-1 bg-background border-y justify-center px-2 items-center">
+              <p className="font-bold text-sm">
+                {t("scanRegionCalibrationPanel.msValue", {
+                  value: captureSettleDelayMsValue,
+                })}
+              </p>
+            </div>
+            <Button
+              variant="secondary"
+              onClick={() =>
+                setCaptureSettleDraft(captureSettleDelayMsValue + 10)
+              }
+              className="px-2 text-xs"
+            >
+              +10
+            </Button>
+            <Button
+              variant="secondary"
+              onClick={() =>
+                setCaptureSettleDraft(captureSettleDelayMsValue + 100)
+              }
+              className="px-2 text-xs"
+            >
+              +100
+            </Button>
+          </ButtonGroup>
+          <Button
+            disabled={
+              captureSettleDraft === null || saveCaptureSettleMutation.isPending
+            }
+            onClick={() =>
+              saveCaptureSettleMutation.mutate(captureSettleDelayMsValue)
+            }
+          >
+            {saveCaptureSettleMutation.isPending
+              ? t("scanRegionCalibrationPanel.saving")
+              : t("scanRegionCalibrationPanel.setCaptureSettle")}
+          </Button>
+        </div>
       </div>
     </div>
   );

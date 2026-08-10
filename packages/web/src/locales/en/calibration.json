@@ -39,9 +39,9 @@
     "setPulseDuration": "Set Pulse Duration",
     "pauseDurationLabel": "Pause Duration (ms)",
     "setPauseDuration": "Set Pause Duration",
-    "settleDurationLabel": "Settle Duration (ms)",
-    "settleDurationDescription": "Extra time to keep feeding once the module 1 sensor sees the card, so it travels all the way into the mechanism before the motor stops.",
-    "setSettleDuration": "Set Settle Duration"
+    "settleDurationLabel": "Final Card Detection Delay (ms)",
+    "settleDurationDescription": "Extra time to keep feeding once the module 1 sensor sees the last card in the hopper, so it travels all the way into the mechanism before the motor stops.",
+    "setSettleDuration": "Set Final Card Detection Delay"
   },
   "irSensorPanel": {
     "label": "IR Sensors",
@@ -82,7 +82,11 @@
     "resetToDefault": "Reset to default",
     "saving": "Saving…",
     "saveScanRegion": "Save Scan Region",
-    "savedSummary": "Saved: {{coverage}}% coverage, {{offsetX}}% / {{offsetY}}% offset"
+    "savedSummary": "Saved: {{coverage}}% coverage, {{offsetX}}% / {{offsetY}}% offset",
+    "msValue": "{{value}} ms",
+    "captureSettleLabel": "Capture Settle Delay (ms)",
+    "captureSettleDescription": "How long to wait after the feeder confirms a card has arrived before capturing a frame, so the card is fully still and in focus.",
+    "setCaptureSettle": "Set Capture Settle Delay"
   },
   "useCalibrationPage": {
     "toasts": {
@@ -126,7 +130,7 @@
       "duration": "Duration",
       "pulse": "Pulse",
       "pause": "Pause",
-      "settle": "Settle",
+      "settle": "Final Detection Delay",
       "continuous": "Continuous",
       "msValue": "{{value}}ms"
     },

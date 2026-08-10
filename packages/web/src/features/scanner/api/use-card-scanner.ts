@@ -4,10 +4,7 @@ import { useCollections } from "@/features/collections/api/use-collections";
 import { orgSettingsQueryOptions } from "@/features/companies/api/org-settings";
 import { useOrg } from "@/features/companies/api/use-organization";
 import { useCameraContext } from "@/features/scanner/api/use-camera";
-import {
-  CARD_SETTLE_DELAY_MS,
-  SCANNABLE_STATUSES,
-} from "@/features/scanner/constants";
+import { SCANNABLE_STATUSES } from "@/features/scanner/constants";
 import {
   canvasToBlob,
   drawDetectionOverlay,
@@ -15,6 +12,7 @@ import {
   getDefaultCardContour,
 } from "@/features/scanner/lib/card-detection";
 import {
+  DEFAULT_CAPTURE_SETTLE_DELAY_MS,
   DEFAULT_SCAN_REGION,
   type CardContour,
   type CardScannerProps,
@@ -135,6 +133,11 @@ export function useCardScanner({
     scanRegionProp ?? orgSettingsData?.scanRegion ?? DEFAULT_SCAN_REGION;
   const scanRegionRef = useRef(scanRegion);
   scanRegionRef.current = scanRegion;
+
+  const captureSettleDelayMs =
+    orgSettingsData?.captureSettleDelayMs ?? DEFAULT_CAPTURE_SETTLE_DELAY_MS;
+  const captureSettleDelayMsRef = useRef(captureSettleDelayMs);
+  captureSettleDelayMsRef.current = captureSettleDelayMs;
 
   const activeCollectionGuidRef = useRef(activeCollection?.guid);
   activeCollectionGuidRef.current = activeCollection?.guid;
@@ -420,7 +423,7 @@ export function useCardScanner({
     settleTimeoutRef.current = setTimeout(() => {
       settleTimeoutRef.current = null;
       performCapture(true, contour);
-    }, CARD_SETTLE_DELAY_MS);
+    }, captureSettleDelayMsRef.current);
   }, [updateStatus, performCapture]);
 
   const handleSkipDuplicate = useCallback(() => {

@@ -273,6 +273,7 @@ export const orgSettings = pgTable(
     scanCoverage: integer("scan_coverage"),
     scanOffsetX: integer("scan_offset_x"),
     scanOffsetY: integer("scan_offset_y"),
+    captureSettleDelayMs: integer("capture_settle_delay_ms"),
     createdAt: timestamp("created_at").defaultNow().notNull(),
     updatedAt: timestamp("updated_at").defaultNow().notNull(),
   },

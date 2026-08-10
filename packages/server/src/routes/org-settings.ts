@@ -3,6 +3,7 @@ import { Hono } from "hono";
 import { authQuery } from "../db";
 import { orgSettings } from "../db/schema";
 import { requireAuth, requireOrg, type AppEnv } from "../middleware/auth";
+import { DEFAULT_CAPTURE_SETTLE_DELAY_MS } from "@magic-vault/shared";
 
 const router = new Hono<AppEnv>();
 
@@ -46,6 +47,8 @@ router.get("/", requireAuth, requireOrg, async (c) => {
           discordWebhookUrl: row?.discordWebhookUrl ?? null,
           discordNotifyOnScan: row?.discordNotifyOnScan ?? false,
           scanRegion: toScanRegion(row),
+          captureSettleDelayMs:
+            row?.captureSettleDelayMs ?? DEFAULT_CAPTURE_SETTLE_DELAY_MS,
         },
       };
     });
@@ -64,6 +67,7 @@ router.put("/", requireAuth, requireOrg, async (c) => {
     discordWebhookUrl?: string | null;
     discordNotifyOnScan?: boolean;
     scanRegion?: { coverage: number; offsetX: number; offsetY: number } | null;
+    captureSettleDelayMs?: number | null;
   }>();
   try {
     const result = await authQuery(c.get("jwtClaims"), async (tx) => {
@@ -105,6 +109,10 @@ router.put("/", requireAuth, requireOrg, async (c) => {
               ? Math.round(body.scanRegion.offsetY * 100)
               : null
             : (existing?.scanOffsetY ?? null),
+        captureSettleDelayMs:
+          "captureSettleDelayMs" in body
+            ? (body.captureSettleDelayMs ?? null)
+            : (existing?.captureSettleDelayMs ?? null),
       };
       await tx
         .insert(orgSettings)
@@ -123,6 +131,8 @@ router.put("/", requireAuth, requireOrg, async (c) => {
           discordWebhookUrl: merged.discordWebhookUrl,
           discordNotifyOnScan: merged.discordNotifyOnScan,
           scanRegion: toScanRegion(merged),
+          captureSettleDelayMs:
+            merged.captureSettleDelayMs ?? DEFAULT_CAPTURE_SETTLE_DELAY_MS,
         },
       };
     });

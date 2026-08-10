@@ -39,9 +39,9 @@
     "setPulseDuration": "Impulsdauer setzen",
     "pauseDurationLabel": "Pausendauer (ms)",
     "setPauseDuration": "Pausendauer setzen",
-    "settleDurationLabel": "Einlaufzeit (ms)",
-    "settleDurationDescription": "Zusätzliche Zeit, um die Zuführung fortzusetzen, nachdem der Sensor von Modul 1 die Karte erkannt hat, damit sie vollständig in den Mechanismus einläuft, bevor der Motor stoppt.",
-    "setSettleDuration": "Einlaufzeit setzen"
+    "settleDurationLabel": "Verzögerung für letzte Kartenerkennung (ms)",
+    "settleDurationDescription": "Zusätzliche Zeit, um die Zuführung fortzusetzen, nachdem der Sensor von Modul 1 die letzte Karte im Zuführbehälter erkannt hat, damit sie vollständig in den Mechanismus einläuft, bevor der Motor stoppt.",
+    "setSettleDuration": "Verzögerung für letzte Kartenerkennung setzen"
   },
   "irSensorPanel": {
     "label": "IR-Sensoren",
@@ -82,7 +82,11 @@
     "resetToDefault": "Auf Standard zurücksetzen",
     "saving": "Wird gespeichert…",
     "saveScanRegion": "Scanbereich speichern",
-    "savedSummary": "Gespeichert: {{coverage}}% Abdeckung, {{offsetX}}% / {{offsetY}}% Versatz"
+    "savedSummary": "Gespeichert: {{coverage}}% Abdeckung, {{offsetX}}% / {{offsetY}}% Versatz",
+    "msValue": "{{value}} ms",
+    "captureSettleLabel": "Aufnahme-Verzögerung (ms)",
+    "captureSettleDescription": "Wie lange nach der Bestätigung der Zuführung gewartet wird, bevor ein Bild aufgenommen wird, damit die Karte vollständig still liegt und scharf ist.",
+    "setCaptureSettle": "Aufnahme-Verzögerung setzen"
   },
   "useCalibrationPage": {
     "toasts": {
@@ -126,7 +130,7 @@
       "duration": "Dauer",
       "pulse": "Impuls",
       "pause": "Pause",
-      "settle": "Einlaufzeit",
+      "settle": "Verzögerung (letzte Karte)",
       "continuous": "Dauerbetrieb",
       "msValue": "{{value}}ms"
     },
