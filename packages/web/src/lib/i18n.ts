@@ -33,8 +33,6 @@ import settingsEn from "@/locales/en/settings.json";
 export const SUPPORTED_LANGUAGES = ["en", "de"] as const;
 export type SupportedLanguage = (typeof SUPPORTED_LANGUAGES)[number];
 
-// Language names are shown in their own language regardless of the active
-// UI locale (i.e. "Deutsch" stays "Deutsch" even when viewing the English UI).
 export const LANGUAGE_NATIVE_NAMES: Record<SupportedLanguage, string> = {
   en: "English",
   de: "Deutsch",
@@ -85,16 +83,14 @@ function getInitialLanguage(): SupportedLanguage {
   return navigator.language.toLowerCase().startsWith("de") ? "de" : "en";
 }
 
-void i18n
-  .use(initReactI18next)
-  .init({
-    resources,
-    lng: getInitialLanguage(),
-    fallbackLng: "en",
-    ns: Object.keys(resources.en),
-    defaultNS: "common",
-    interpolation: { escapeValue: false },
-  });
+void i18n.use(initReactI18next).init({
+  resources,
+  lng: getInitialLanguage(),
+  fallbackLng: "en",
+  ns: Object.keys(resources.en),
+  defaultNS: "common",
+  interpolation: { escapeValue: false },
+});
 
 i18n.on("languageChanged", (lng) => {
   localStorage.setItem(LANGUAGE_STORAGE_KEY, lng);

@@ -71,7 +71,7 @@ export const pokemonSyncSource: SyncSource = {
   label: "Pokémon (TCGdex)",
   defaultUrl: POKEMON_DEFAULT_URL,
   fetchHeaders: POKEMON_HEADERS,
-  languages: ["en"],
+  languages: ["en", "de", "ja"],
   fetchCards,
   fetchOne,
 };

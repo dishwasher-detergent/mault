@@ -112,7 +112,7 @@ export const scryfallSyncSource: SyncSource = {
   label: "Magic: The Gathering (Scryfall)",
   defaultUrl: SCRYFALL_DEFAULT_URL,
   fetchHeaders: SCRYFALL_HEADERS,
-  languages: ["en", "de"],
+  languages: ["en", "de", "ja"],
   fetchCards,
   fetchOne,
 };
