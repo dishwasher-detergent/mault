@@ -85,10 +85,6 @@ export const router = createBrowserRouter([
                 element: <CalibratePage />,
               },
               {
-                path: "/app/settings",
-                element: <SettingsPage />,
-              },
-              {
                 element: <AdminGuard />,
                 children: [
                   {
@@ -96,10 +92,6 @@ export const router = createBrowserRouter([
                     element: <AdminPage />,
                   },
                 ],
-              },
-              {
-                path: "/app/account/:path",
-                element: <AccountPage />,
               },
             ],
           },
@@ -110,6 +102,14 @@ export const router = createBrowserRouter([
           {
             path: "/app/monitor/:collectionGuid",
             element: <MonitorPage />,
+          },
+          {
+            path: "/app/settings",
+            element: <SettingsPage />,
+          },
+          {
+            path: "/app/account/:path",
+            element: <AccountPage />,
           },
         ],
       },

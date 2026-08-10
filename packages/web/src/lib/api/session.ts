@@ -19,3 +19,8 @@ export async function createLockEventsSource(): Promise<EventSource> {
   const params = await getSessionParams();
   return new EventSource(`${API_BASE}/api/collections/lock-events?${params}`);
 }
+
+export async function createLiveCountEventsSource(): Promise<EventSource> {
+  const params = await getSessionParams();
+  return new EventSource(`${API_BASE}/api/collections/live-events?${params}`);
+}

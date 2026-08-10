@@ -91,7 +91,12 @@ export function GameFieldDefinitionsEditor() {
                 render={({ field }) => (
                   <Select value={field.value} onValueChange={field.onChange}>
                     <SelectTrigger>
-                      <SelectValue />
+                      <SelectValue>
+                        {
+                          fieldTypeOptions.find((opt) => opt.value === field.value)
+                            ?.label
+                        }
+                      </SelectValue>
                     </SelectTrigger>
                     <SelectContent>
                       {fieldTypeOptions.map((opt) => (

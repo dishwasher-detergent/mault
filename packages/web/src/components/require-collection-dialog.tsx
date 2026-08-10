@@ -130,7 +130,9 @@ export function RequireCollectionDialog() {
                   }}
                 >
                   <SelectTrigger id="first-collection-game">
-                    <SelectValue placeholder={t("createDialog.gamePlaceholder")} />
+                    <SelectValue placeholder={t("createDialog.gamePlaceholder")}>
+                      {activeGames.find((g) => g.guid === field.value)?.name}
+                    </SelectValue>
                   </SelectTrigger>
                   <SelectContent>
                     {activeGames.map((game) => (

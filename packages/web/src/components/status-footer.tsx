@@ -73,8 +73,6 @@ function SyncStatusItem() {
   const { isAdmin } = useRole();
 
   useEffect(() => {
-    if (!isAdmin) return;
-
     let es: EventSource | null = null;
     let cancelled = false;
 
@@ -108,9 +106,7 @@ function SyncStatusItem() {
       cancelled = true;
       es?.close();
     };
-  }, [isAdmin]);
-
-  if (!isAdmin) return null;
+  }, []);
 
   const { status, total, processed, skipped } = syncState;
   const done = processed + skipped;
@@ -150,8 +146,10 @@ function SyncStatusItem() {
   return (
     <Tooltip>
       <TooltipTrigger
-        onClick={() => navigate("/app/admin")}
-        className="flex items-center gap-1.5 cursor-pointer hover:text-foreground transition-colors min-w-0"
+        onClick={isAdmin ? () => navigate("/app/admin") : undefined}
+        className={`flex items-center gap-1.5 transition-colors min-w-0 ${
+          isAdmin ? "cursor-pointer hover:text-foreground" : "cursor-default"
+        }`}
       >
         <StatusDot variant={dot} />
         <span className="text-xs text-muted-foreground tabular-nums shrink-0">

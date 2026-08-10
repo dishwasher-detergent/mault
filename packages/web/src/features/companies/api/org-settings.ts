@@ -1,5 +1,9 @@
 import { apiGet, apiPut } from "@/lib/api/client";
-import { DEFAULT_SCAN_REGION, type ScanRegion } from "@magic-vault/shared";
+import {
+  DEFAULT_CAPTURE_SETTLE_DELAY_MS,
+  DEFAULT_SCAN_REGION,
+  type ScanRegion,
+} from "@magic-vault/shared";
 import { queryOptions } from "@tanstack/react-query";
 
 export interface OrgSettings {
@@ -8,6 +12,7 @@ export interface OrgSettings {
   discordWebhookUrl: string | null;
   discordNotifyOnScan: boolean;
   scanRegion: ScanRegion;
+  captureSettleDelayMs: number;
 }
 
 export async function getOrgSettings(): Promise<{
@@ -35,6 +40,7 @@ export const orgSettingsQueryOptions = (orgId: string | undefined) =>
             discordWebhookUrl: null,
             discordNotifyOnScan: false,
             scanRegion: DEFAULT_SCAN_REGION,
+            captureSettleDelayMs: DEFAULT_CAPTURE_SETTLE_DELAY_MS,
           },
       ),
     staleTime: Infinity,

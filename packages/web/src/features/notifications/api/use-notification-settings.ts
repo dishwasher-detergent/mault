@@ -4,7 +4,10 @@ import {
   type OrgSettings,
 } from "@/features/companies/api/org-settings";
 import { useOrg } from "@/features/companies/api/use-organization";
-import { DEFAULT_SCAN_REGION } from "@magic-vault/shared";
+import {
+  DEFAULT_CAPTURE_SETTLE_DELAY_MS,
+  DEFAULT_SCAN_REGION,
+} from "@magic-vault/shared";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -34,18 +37,24 @@ export function useNotificationSettings() {
     onMutate: async (patch) => {
       await queryClient.cancelQueries({ queryKey: queryOpts.queryKey });
       const previous = queryClient.getQueryData(queryOpts.queryKey);
-      queryClient.setQueryData(queryOpts.queryKey, (old: typeof data): typeof data => ({
-        primaryColor: old?.primaryColor ?? null,
-        scannerLayout: old?.scannerLayout ?? "horizontal",
-        scanRegion: old?.scanRegion ?? DEFAULT_SCAN_REGION,
-        discordWebhookUrl: old?.discordWebhookUrl ?? null,
-        discordNotifyOnScan: old?.discordNotifyOnScan ?? false,
-        ...patch,
-      }));
+      queryClient.setQueryData(
+        queryOpts.queryKey,
+        (old: typeof data): typeof data => ({
+          primaryColor: old?.primaryColor ?? null,
+          scannerLayout: old?.scannerLayout ?? "horizontal",
+          scanRegion: old?.scanRegion ?? DEFAULT_SCAN_REGION,
+          discordWebhookUrl: old?.discordWebhookUrl ?? null,
+          discordNotifyOnScan: old?.discordNotifyOnScan ?? false,
+          captureSettleDelayMs:
+            old?.captureSettleDelayMs ?? DEFAULT_CAPTURE_SETTLE_DELAY_MS,
+          ...patch,
+        }),
+      );
       return { previous };
     },
     onError: (_err, _vars, ctx) => {
-      if (ctx?.previous) queryClient.setQueryData(queryOpts.queryKey, ctx.previous);
+      if (ctx?.previous)
+        queryClient.setQueryData(queryOpts.queryKey, ctx.previous);
       toast.error(t("toasts.saveError"));
     },
     onSuccess: (result) => {

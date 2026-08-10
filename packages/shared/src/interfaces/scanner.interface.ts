@@ -24,6 +24,8 @@ export const DEFAULT_SCAN_REGION: ScanRegion = {
   offsetY: 0,
 };
 
+export const DEFAULT_CAPTURE_SETTLE_DELAY_MS = 500;
+
 export interface DetectionResult {
   detected: boolean;
   contour: CardContour | null;

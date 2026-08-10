@@ -103,25 +103,6 @@ export async function clearCollectionCards(guid: string): Promise<Result<null>> 
   return apiDelete<Result<null>>(`/api/collections/${guid}/cards`);
 }
 
-export async function getLiveSessionCounts(): Promise<Result<Record<string, number>>> {
-  return apiGet<Result<Record<string, number>>>("/api/collections/live");
-}
-
 export async function releaseScanLock(guid: string): Promise<Result<null>> {
   return apiDelete<Result<null>>(`/api/collections/${guid}/scan-lock`);
-}
-
-export interface SessionViewer {
-  userId: string;
-  displayName: string;
-}
-
-export async function getCollectionViewers(guid: string): Promise<SessionViewer[]> {
-  const result = await apiGet<Result<SessionViewer[]>>(`/api/collections/${guid}/viewers`);
-  return result.data ?? [];
-}
-
-export async function getAllSessionViewers(): Promise<Record<string, SessionViewer[]>> {
-  const result = await apiGet<Result<Record<string, SessionViewer[]>>>("/api/collections/viewers");
-  return result.data ?? {};
 }

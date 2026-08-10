@@ -6,10 +6,13 @@ import {
 import { BinConfigPanel } from "@/features/bins/components/bin-config-panel";
 import { BinList } from "@/features/bins/components/bin-list";
 import { PresetSelector } from "@/features/bins/components/preset-selector";
+import { CollectionSwitcher } from "@/features/collections/components/collection-switcher";
+import { useCollections } from "@/features/collections/api/use-collections";
 import { useIsMobile } from "@/hooks/use-is-mobile";
 import { IconLayoutGrid } from "@tabler/icons-react";
+import { useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 
 function MobileBins() {
   const { t } = useTranslation("bins");
@@ -32,6 +35,7 @@ function MobileBins() {
         </DrawerTrigger>
         <DrawerContent>
           <div className="overflow-y-auto p-4 flex flex-col gap-4 max-h-[calc(80vh-2rem)]">
+            <CollectionSwitcher />
             <PresetSelector />
             <BinList />
           </div>
@@ -44,12 +48,32 @@ function MobileBins() {
 export default function BinsPage() {
   const isMobile = useIsMobile();
   const { collectionGuid } = useParams<{ collectionGuid: string }>();
+  const { activeCollection } = useCollections();
+  const navigate = useNavigate();
+
+  // Keep the URL in sync when the user switches collections from this page
+  // (but don't hijack the URL on mount just because it points at a
+  // collection other than the currently-active one).
+  const seenGuid = useRef(activeCollection?.guid);
+  useEffect(() => {
+    if (
+      activeCollection &&
+      activeCollection.guid !== seenGuid.current &&
+      activeCollection.guid !== collectionGuid
+    ) {
+      navigate(`/app/collections/${activeCollection.guid}/bins`, {
+        replace: true,
+      });
+    }
+    seenGuid.current = activeCollection?.guid;
+  }, [activeCollection, collectionGuid, navigate]);
 
   const content = isMobile ? (
     <MobileBins />
   ) : (
     <div className="grid grid-cols-12 flex-1 min-h-0 overflow-hidden">
       <section className="col-span-4 lg:col-span-3 overflow-hidden flex flex-col h-full border-r p-2 gap-2 bg-sidebar/70">
+        <CollectionSwitcher />
         <PresetSelector />
         <BinList />
       </section>

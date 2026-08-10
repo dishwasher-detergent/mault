@@ -160,6 +160,10 @@
   },
   "scannerOverlay": {
     "connectCamera": "Verbinde eine Kamera, um mit dem Scannen zu beginnen.",
+    "scannerNotConnected": "Kartensortierer nicht verbunden.",
+    "connectScannerButton": "Verbinden",
+    "testingScanner": "Verbindung zum Kartensortierer wird getestet…",
+    "autoFeedOff": "Automatische Zufuhr ist deaktiviert - Karten manuell zuführen.",
     "noCatchAllBin": "Kein Sammelfach konfiguriert - nicht zugeordnete Karten werden nicht sortiert.",
     "initializing": "Scanner wird initialisiert…",
     "requestingCameraAccess": "Kamerazugriff wird angefordert…",
@@ -181,6 +185,9 @@
   "appScanner": {
     "cardCount_one": "{{count}} Karte",
     "cardCount_other": "{{count}} Karten"
+  },
+  "recentScannedCards": {
+    "heading": "Zuletzt gescannt"
   },
   "monitorPage": {
     "loadingSession": "Sitzung wird geladen…",

@@ -13,7 +13,6 @@ import {
 } from "../lib/sync-job";
 import { vectorizeImageFromBuffer } from "../lib/vectorize";
 import {
-  getUserRole,
   requireAuth,
   requireRole,
   verifyToken,
@@ -30,9 +29,6 @@ router.get("/sync/stream", async (c) => {
   const payload = await verifyToken(token);
   if (!payload?.sub)
     return c.json({ success: false, message: "Unauthorized" }, 401);
-  const role = await getUserRole(payload.sub);
-  if (role !== "admin")
-    return c.json({ success: false, message: "Forbidden" }, 403);
 
   return streamSSE(c, async (stream) => {
     const unsubscribe = subscribeSSE((event, data) => {
@@ -47,8 +43,9 @@ router.get("/sync/stream", async (c) => {
   });
 });
 
-// GET /admin/sync
-router.get("/sync", requireAuth, requireRole("admin"), (c) => {
+// GET /admin/sync — status is visible to any authenticated user; only
+// admins can start/cancel a sync (see POST/DELETE below)
+router.get("/sync", requireAuth, (c) => {
   return c.json({ success: true, data: getStatus() });
 });
 

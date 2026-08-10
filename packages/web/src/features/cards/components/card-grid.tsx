@@ -13,9 +13,9 @@ import { CardDetailPanel } from "@/features/cards/components/card-detail-panel";
 import { CardToolbar } from "@/features/cards/components/card-toolbar";
 import { ScannedCardItem } from "@/features/cards/components/scanned-card-item";
 import { SessionSummaryDialog } from "@/features/cards/components/session-summary-dialog";
-import { getCollectionViewers } from "@/features/collections/api/collections";
 import { useCollectionLocks } from "@/features/collections/api/use-collection-locks";
 import { useCollections } from "@/features/collections/api/use-collections";
+import { useSessionViewersByGuid } from "@/features/collections/api/use-live-counts";
 import { useScannedCards } from "@/features/scanner/api/use-scanned-cards";
 import { useScannerIsland } from "@/features/scanner/api/use-scanner-island";
 import { ScannerControls } from "@/features/scanner/components/scanner-controls";
@@ -29,7 +29,6 @@ import {
   IconChevronLeft,
   IconChevronRight,
 } from "@tabler/icons-react";
-import { useQuery } from "@tanstack/react-query";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
@@ -60,13 +59,13 @@ export function CardGrid() {
   const isScanningActive = !!(
     activeCollection && locks[activeCollection.guid]?.userId === currentUserId
   );
-  const { data: viewersRaw } = useQuery({
-    queryKey: ["collection-viewers", activeCollection?.guid],
-    queryFn: () => getCollectionViewers(activeCollection!.guid),
-    enabled: isScanningActive,
-    refetchInterval: 5000,
-  });
-  const viewers = viewersRaw?.filter((v) => v.userId !== currentUserId);
+  const viewersByGuid = useSessionViewersByGuid();
+  const viewers =
+    isScanningActive && activeCollection
+      ? viewersByGuid[activeCollection.guid]?.filter(
+          (v) => v.userId !== currentUserId,
+        )
+      : undefined;
   const { filters, setFilters } = useCardFilters();
   const { fieldDefinitions } = useBinConfigs();
   const {
