@@ -4,7 +4,10 @@ import {
 } from "@/features/companies/api/org-settings";
 import { useOrg } from "@/features/companies/api/use-organization";
 import { cn } from "@/lib/utils";
-import { DEFAULT_SCAN_REGION } from "@magic-vault/shared";
+import {
+  DEFAULT_CAPTURE_SETTLE_DELAY_MS,
+  DEFAULT_SCAN_REGION,
+} from "@magic-vault/shared";
 import { IconLayoutColumns, IconLayoutRows } from "@tabler/icons-react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
@@ -46,6 +49,8 @@ export function ScannerLayoutToggle() {
           discordWebhookUrl: old?.discordWebhookUrl ?? null,
           discordNotifyOnScan: old?.discordNotifyOnScan ?? false,
           scanRegion: old?.scanRegion ?? DEFAULT_SCAN_REGION,
+          captureSettleDelayMs:
+            old?.captureSettleDelayMs ?? DEFAULT_CAPTURE_SETTLE_DELAY_MS,
         }),
       );
       return { previous };
