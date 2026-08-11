@@ -168,7 +168,7 @@ const GROUPS: Group[] = [
         part: (t) => t("bom.groups.structural.items.oRing.part"),
         notes: (t) => t("bom.groups.structural.items.oRing.notes"),
         buyUrl:
-          "https://www.harborfreight.com/397-piece-metric-o-ring-assortment-67580.html",
+          "https://www.amazon.com/uxcell-Silicone-Rings-Diameter-Gasket/dp/B07MNJXJSG",
       },
     ],
   },
