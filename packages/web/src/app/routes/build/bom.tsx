@@ -164,7 +164,7 @@ const GROUPS: Group[] = [
       {
         key: "o-ring",
         qty: "6",
-        name: "G20 o-ring",
+        name: "20mm ID 26mm OD 3mm Width O-Ring",
         part: (t) => t("bom.groups.structural.items.oRing.part"),
         notes: (t) => t("bom.groups.structural.items.oRing.notes"),
         buyUrl:
