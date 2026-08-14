@@ -32,14 +32,6 @@ function clampRegion(region: ScanRegion): ScanRegion {
   };
 }
 
-// The live preview draws the camera feed pre-rotated 90° CW into a portrait
-// canvas (same rotation extractCardImage applies when warping a captured
-// card - see card-detection.ts), so the box the user drags matches what
-// they see during real scanning without any CSS transform math. The scan
-// region itself is still stored/consumed in raw (landscape) frame
-// fractions - getDefaultCardContour always runs against the unrotated
-// display canvas at capture time - so contour corners are re-projected into
-// portrait fractions here purely for drawing the box each render.
 function rawContourToPortraitBox(
   contour: CardContour,
   rawWidth: number,
@@ -146,15 +138,10 @@ export function ScanRegionCalibrationPanel() {
 
         const canvas = canvasRef.current;
         if (canvas) {
-          // Portrait buffer - swapped vs the raw (landscape) video dims.
           canvas.width = videoHeight;
           canvas.height = videoWidth;
         }
 
-        // Size/position the frame wrapper (not the canvas directly) so the
-        // drag box, positioned as a percentage-based child of this same
-        // wrapper, resolves against the canvas's actual displayed
-        // rectangle instead of the outer (fixed card-aspect) container.
         const frame = frameRef.current;
         const container = frame?.parentElement;
         if (container && frame && canvas) {
@@ -188,9 +175,7 @@ export function ScanRegionCalibrationPanel() {
           rafRef.current = requestAnimationFrame(loop);
         };
         rafRef.current = requestAnimationFrame(loop);
-      } catch {
-        // useCameraContext surfaces failures via errorMessage/status
-      }
+      } catch {}
     })();
 
     return () => {
@@ -251,8 +236,6 @@ export function ScanRegionCalibrationPanel() {
 
     if (drag.type === "move") {
       const rect = frame.getBoundingClientRect();
-      // Feed is drawn pre-rotated 90° CW, so a horizontal drag on screen
-      // maps to the raw frame's vertical axis and vice versa.
       const dxFrac = (e.clientX - drag.startClientX) / rect.width;
       const dyFrac = (e.clientY - drag.startClientY) / rect.height;
       setDraft(
@@ -333,7 +316,7 @@ export function ScanRegionCalibrationPanel() {
             />
             {box && (
               <div
-                className="absolute rounded-2xl border-[6px] border-primary cursor-move touch-none select-none"
+                className="absolute rounded-xl border-[6px] border-primary! cursor-move touch-none select-none"
                 style={{
                   left: `${box.left * 100}%`,
                   top: `${box.top * 100}%`,
@@ -355,7 +338,8 @@ export function ScanRegionCalibrationPanel() {
           {!isCameraActive && (
             <div className="absolute inset-0 flex items-center justify-center p-4 text-center">
               <p className="text-xs text-muted-foreground">
-                {errorMessage || t("scanRegionCalibrationPanel.waitingForCamera")}
+                {errorMessage ||
+                  t("scanRegionCalibrationPanel.waitingForCamera")}
               </p>
             </div>
           )}
