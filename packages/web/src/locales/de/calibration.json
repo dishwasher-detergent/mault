@@ -28,7 +28,9 @@
     "standard": "Standard",
     "standardDescription": "Modul 1 beginnt bei Kanal 0. Unterstützt bis zu 5 Module.",
     "legacy": "Legacy",
-    "legacyDescription": "Modul 1 beginnt bei Kanal 4 (Kanäle 0-3 für Status-LEDs reserviert). Unterstützt bis zu 3 Module. Verwende dies, wenn deine Hardware vor der Modul-Erweiterung verkabelt wurde."
+    "legacyDescription": "Modul 1 beginnt bei Kanal 4 (Kanäle 0-3 für Status-LEDs reserviert). Unterstützt bis zu 3 Module. Verwende dies, wenn deine Hardware vor der Modul-Erweiterung verkabelt wurde.",
+    "legacyBanner": "Du verwendest die Legacy-Kanalbelegung, begrenzt auf 3 Module. Verkabele Modul 1 neu, sodass es bei Kanal 0 beginnt, um bis zu 5 Module zu unterstützen.",
+    "legacyBannerAction": "Auf Standard aktualisieren"
   },
   "sections": {
     "moduleSetup": "Module & Routing",

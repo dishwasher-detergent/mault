@@ -28,7 +28,9 @@
     "standard": "Standard",
     "standardDescription": "Module 1 starts at channel 0. Supports up to 5 modules.",
     "legacy": "Legacy",
-    "legacyDescription": "Module 1 starts at channel 4 (channels 0-3 reserved for status LEDs). Supports up to 3 modules. Use this if your hardware was wired before module expansion was added."
+    "legacyDescription": "Module 1 starts at channel 4 (channels 0-3 reserved for status LEDs). Supports up to 3 modules. Use this if your hardware was wired before module expansion was added.",
+    "legacyBanner": "You're on the legacy channel layout, capped at 3 modules. Rewire module 1 to start at channel 0 to support up to 5 modules.",
+    "legacyBannerAction": "Update to Standard"
   },
   "sections": {
     "moduleSetup": "Modules & Routing",
