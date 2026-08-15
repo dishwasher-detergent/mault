@@ -1,13 +1,7 @@
 import { useBinConfigs } from "@/features/bins/api/use-bin-configs";
+import { useBinRoutes } from "@/features/calibration/api/use-bin-routes";
 import { cn } from "@/lib/utils";
 import { useTranslation } from "react-i18next";
-
-const MODULES = [
-  { module: 1, left: 1, right: 2 },
-  { module: 2, left: 3, right: 4 },
-  { module: 3, left: 5, right: 6 },
-] as const;
-const OVERFLOW_BIN = 7;
 
 function BinCell({
   binNumber,
@@ -63,32 +57,55 @@ export function BinLocationDiagram({
   inverted = true,
 }: BinLocationDiagramProps) {
   const { configs } = useBinConfigs();
+  const { routes } = useBinRoutes();
   const catchAllBin = configs.find((c) => c.isCatchAll)?.binNumber;
+
+  const modules = Array.from(
+    new Set(
+      routes.filter((r) => r.direction !== "bottom").map((r) => r.module),
+    ),
+  ).sort((a, b) => a - b);
+  const bottomRoutes = routes.filter((r) => r.direction === "bottom");
 
   return (
     <div className="overflow-hidden rounded-lg">
-      {MODULES.map(({ module, left, right }) => (
-        <div key={module} className="grid grid-cols-2">
-          <BinCell
-            binNumber={left}
-            active={binNumber === left}
-            isCatchAll={catchAllBin === left}
-            inverted={inverted}
-          />
-          <BinCell
-            binNumber={right}
-            active={binNumber === right}
-            isCatchAll={catchAllBin === right}
-            inverted={inverted}
-          />
-        </div>
+      {modules.map((module) => {
+        const left = routes.find(
+          (r) => r.module === module && r.direction === "left",
+        )?.binNumber;
+        const right = routes.find(
+          (r) => r.module === module && r.direction === "right",
+        )?.binNumber;
+        return (
+          <div key={module} className="grid grid-cols-2">
+            {left !== undefined && (
+              <BinCell
+                binNumber={left}
+                active={binNumber === left}
+                isCatchAll={catchAllBin === left}
+                inverted={inverted}
+              />
+            )}
+            {right !== undefined && (
+              <BinCell
+                binNumber={right}
+                active={binNumber === right}
+                isCatchAll={catchAllBin === right}
+                inverted={inverted}
+              />
+            )}
+          </div>
+        );
+      })}
+      {bottomRoutes.map((route) => (
+        <BinCell
+          key={route.binNumber}
+          binNumber={route.binNumber}
+          active={binNumber === route.binNumber}
+          isCatchAll={catchAllBin === route.binNumber}
+          inverted={inverted}
+        />
       ))}
-      <BinCell
-        binNumber={OVERFLOW_BIN}
-        active={binNumber === OVERFLOW_BIN}
-        isCatchAll={catchAllBin === OVERFLOW_BIN}
-        inverted={inverted}
-      />
     </div>
   );
 }

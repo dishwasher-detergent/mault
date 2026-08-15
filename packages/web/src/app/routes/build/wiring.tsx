@@ -57,75 +57,26 @@ function MiniTable({
 export function BuildWiring() {
   const { t } = useTranslation("build");
 
+  const REFERENCE_MODULE_COUNT = 3;
+  const moduleChannelRows: [string, string][] = Array.from(
+    { length: REFERENCE_MODULE_COUNT },
+    (_, m) => m + 1,
+  ).flatMap((n) =>
+    (["bottom", "paddle", "pusher"] as const).map((part, offset) => [
+      String((n - 1) * 3 + offset),
+      t("wiring.channelMap.modulePart", { n, part: t(`wiring.parts.${part}`) }),
+    ] as [string, string]),
+  );
+  const feederChannel = REFERENCE_MODULE_COUNT * 3;
+  const unusedChannels: [string, string][] = Array.from(
+    { length: 15 - feederChannel },
+    (_, i) => [String(feederChannel + 1 + i), t("wiring.channelMap.unused")] as [string, string],
+  );
+
   const CHANNEL_MAP: [string, string][] = [
-    ["0", t("wiring.channelMap.unused")],
-    ["1", t("wiring.channelMap.unused")],
-    ["2", t("wiring.channelMap.unused")],
-    ["3", t("wiring.channelMap.unused")],
-    [
-      "4",
-      t("wiring.channelMap.modulePart", {
-        n: 1,
-        part: t("wiring.parts.bottom"),
-      }),
-    ],
-    [
-      "5",
-      t("wiring.channelMap.modulePart", {
-        n: 1,
-        part: t("wiring.parts.paddle"),
-      }),
-    ],
-    [
-      "6",
-      t("wiring.channelMap.modulePart", {
-        n: 1,
-        part: t("wiring.parts.pusher"),
-      }),
-    ],
-    [
-      "7",
-      t("wiring.channelMap.modulePart", {
-        n: 2,
-        part: t("wiring.parts.bottom"),
-      }),
-    ],
-    [
-      "8",
-      t("wiring.channelMap.modulePart", {
-        n: 2,
-        part: t("wiring.parts.paddle"),
-      }),
-    ],
-    [
-      "9",
-      t("wiring.channelMap.modulePart", {
-        n: 2,
-        part: t("wiring.parts.pusher"),
-      }),
-    ],
-    [
-      "10",
-      t("wiring.channelMap.modulePart", {
-        n: 3,
-        part: t("wiring.parts.bottom"),
-      }),
-    ],
-    [
-      "11",
-      t("wiring.channelMap.modulePart", {
-        n: 3,
-        part: t("wiring.parts.paddle"),
-      }),
-    ],
-    [
-      "12",
-      t("wiring.channelMap.modulePart", {
-        n: 3,
-        part: t("wiring.parts.pusher"),
-      }),
-    ],
-    ["13", t("wiring.channelMap.feeder")],
+    ...moduleChannelRows,
+    [String(feederChannel), t("wiring.channelMap.feeder")],
+    ...unusedChannels,
   ];
 
   return (

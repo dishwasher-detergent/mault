@@ -9,6 +9,7 @@ import {
 import { useTranslation } from "react-i18next";
 
 interface IrSensorPanelProps {
+  modules: number[];
   irStates: boolean[] | null;
   hopperHasCards: boolean | null;
   isConnected: boolean;
@@ -18,6 +19,7 @@ interface IrSensorPanelProps {
 }
 
 export function IrSensorPanel({
+  modules,
   irStates,
   hopperHasCards,
   isConnected,
@@ -67,7 +69,7 @@ export function IrSensorPanel({
             <TooltipContent>{t("irSensorPanel.readTooltip")}</TooltipContent>
           </Tooltip>
         )}
-        {([1, 2, 3] as const).map((m) => {
+        {modules.map((m) => {
           const detected = irStates?.[m - 1];
           return (
             <Tooltip key={m}>

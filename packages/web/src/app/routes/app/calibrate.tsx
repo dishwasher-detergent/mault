@@ -1,4 +1,10 @@
 import { AuditDrawer, type AuditEntry } from "@/components/audit-drawer";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import {
@@ -14,11 +20,13 @@ import {
   type ModuleConfigAuditEntry,
 } from "@/features/calibration/api/module-configs";
 import { useCalibrationPage } from "@/features/calibration/api/use-calibration-page";
+import { BinRoutingAssignment } from "@/features/calibration/components/bin-routing-assignment";
 import { BinRoutingControls } from "@/features/calibration/components/bin-routing-controls";
+import { ChannelLayoutToggle } from "@/features/calibration/components/channel-layout-toggle";
 import { FeederCalibrationPanel } from "@/features/calibration/components/feeder-calibration-panel";
 import { IrSensorPanel } from "@/features/calibration/components/ir-sensor-panel";
-import { LedControls } from "@/features/calibration/components/led-controls";
 import { ModuleCalibrationGrid } from "@/features/calibration/components/module-calibration-grid";
+import { ModuleCountStepper } from "@/features/calibration/components/module-count-stepper";
 import { ScanRegionCalibrationPanel } from "@/features/calibration/components/scan-region-calibration-panel";
 import { IconClockHour3, IconDeviceUsb, IconDeviceUsbFilled } from "@tabler/icons-react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -137,17 +145,16 @@ export default function CalibratePage() {
     connect,
     disconnect,
     configs,
+    modules,
     isLoading,
     active,
     sliderValues,
-    ledStates,
     activeBin,
     isTesting,
     isUnconfigured,
     handleControl,
     handleReset,
     handleSliderChange,
-    handleLedToggle,
     handleTest,
     handleTestBin,
     handleCenterModule,
@@ -206,94 +213,113 @@ export default function CalibratePage() {
         )}
       </div>
 
-      <LedControls
-        ledStates={ledStates}
-        isConnected={isConnected}
-        onToggle={handleLedToggle}
-      />
+      <Accordion multiple defaultValue={["modules"]} className="flex flex-col rounded-lg border">
+        <AccordionItem value="modules">
+          <AccordionTrigger className="px-4">
+            {t("sections.moduleSetup")}
+          </AccordionTrigger>
+          <AccordionContent className="px-4">
+            <div className="flex flex-col gap-1.5">
+              <Label>{t("channelLayoutToggle.label")}</Label>
+              <ChannelLayoutToggle />
+            </div>
+            <div className="flex flex-col gap-1.5">
+              <Label>{t("moduleCountStepper.label")}</Label>
+              <ModuleCountStepper />
+            </div>
+            <BinRoutingAssignment />
+            <IrSensorPanel
+              modules={modules}
+              irStates={irStates}
+              hopperHasCards={hopperHasCards}
+              isConnected={isConnected}
+              isMonitoring={irMonitoring}
+              onRead={handleReadIR}
+              onToggleMonitor={handleToggleIrMonitor}
+            />
+            <BinRoutingControls
+              activeBin={activeBin}
+              isConnected={isConnected}
+              isSampleRunning={isSampleRunning}
+              onTestBin={handleTestBin}
+              onFeed={handleFeed}
+              onSampleRun={handleSampleRun}
+            />
+          </AccordionContent>
+        </AccordionItem>
 
-      <IrSensorPanel
-        irStates={irStates}
-        hopperHasCards={hopperHasCards}
-        isConnected={isConnected}
-        isMonitoring={irMonitoring}
-        onRead={handleReadIR}
-        onToggleMonitor={handleToggleIrMonitor}
-      />
+        <AccordionItem value="scanRegion">
+          <AccordionTrigger className="px-4">
+            {t("sections.scanRegion")}
+          </AccordionTrigger>
+          <AccordionContent className="px-4">
+            <ScanRegionCalibrationPanel />
+          </AccordionContent>
+        </AccordionItem>
 
-      <BinRoutingControls
-        activeBin={activeBin}
-        isConnected={isConnected}
-        isSampleRunning={isSampleRunning}
-        onTestBin={handleTestBin}
-        onFeed={handleFeed}
-        onSampleRun={handleSampleRun}
-      />
+        <AccordionItem value="calibration">
+          <AccordionTrigger className="px-4">
+            {t("sections.calibration")}
+          </AccordionTrigger>
+          <AccordionContent className="px-4">
+            <div className="flex justify-end">
+              <button
+                type="button"
+                onClick={() => setFeederHistoryOpen(true)}
+                className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors"
+              >
+                <IconClockHour3 size={12} />
+                {t("calibratePage.history")}
+              </button>
+            </div>
+            <FeederCalibrationPanel
+              speedValue={feederSpeedValue}
+              durationValue={feederDurationValue}
+              pulseDurationValue={feederPulseDurationValue}
+              pauseDurationValue={feederPauseDurationValue}
+              settleDurationValue={feederSettleDurationValue}
+              calibration={feederConfig}
+              isLoading={isLoading}
+              isConnected={isConnected}
+              onSpeedChange={handleFeederSpeedChange}
+              onDurationChange={handleFeederDurationChange}
+              onPulseDurationChange={handleFeederPulseDurationChange}
+              onPauseDurationChange={handleFeederPauseDurationChange}
+              onSettleDurationChange={handleFeederSettleDurationChange}
+              onSetSpeed={handleFeederSetSpeed}
+              onSetDuration={handleFeederSetDuration}
+              onSetPulseDuration={handleFeederSetPulseDuration}
+              onSetPauseDuration={handleFeederSetPauseDuration}
+              onSetSettleDuration={handleFeederSetSettleDuration}
+            />
 
-      <div className="flex flex-col gap-2">
-        <Label>{t("calibratePage.scanRegionLabel")}</Label>
-        <ScanRegionCalibrationPanel />
-      </div>
-
-      <div className="flex flex-col gap-2">
-        <div className="flex items-center justify-between">
-          <Label>{t("calibratePage.feederCalibrationLabel")}</Label>
-          <button
-            type="button"
-            onClick={() => setFeederHistoryOpen(true)}
-            className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors"
-          >
-            <IconClockHour3 size={12} />
-            {t("calibratePage.history")}
-          </button>
-        </div>
-        <FeederCalibrationPanel
-          speedValue={feederSpeedValue}
-          durationValue={feederDurationValue}
-          pulseDurationValue={feederPulseDurationValue}
-          pauseDurationValue={feederPauseDurationValue}
-          settleDurationValue={feederSettleDurationValue}
-          calibration={feederConfig}
-          isLoading={isLoading}
-          isConnected={isConnected}
-          onSpeedChange={handleFeederSpeedChange}
-          onDurationChange={handleFeederDurationChange}
-          onPulseDurationChange={handleFeederPulseDurationChange}
-          onPauseDurationChange={handleFeederPauseDurationChange}
-          onSettleDurationChange={handleFeederSettleDurationChange}
-          onSetSpeed={handleFeederSetSpeed}
-          onSetDuration={handleFeederSetDuration}
-          onSetPulseDuration={handleFeederSetPulseDuration}
-          onSetPauseDuration={handleFeederSetPauseDuration}
-          onSetSettleDuration={handleFeederSetSettleDuration}
-        />
-      </div>
-
-      <div className="flex flex-col gap-2">
-        <div className="flex items-center justify-between">
-          <Label>{t("calibratePage.moduleCalibrationLabel")}</Label>
-          <button
-            type="button"
-            onClick={() => setModuleHistoryOpen(true)}
-            className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors"
-          >
-            <IconClockHour3 size={12} />
-            {t("calibratePage.history")}
-          </button>
-        </div>
-        <ModuleCalibrationGrid
-          configs={configs}
-          active={active}
-          sliderValues={sliderValues}
-          isLoading={isLoading}
-          isConnected={isConnected}
-          onControl={handleControl}
-          onReset={handleReset}
-          onSliderChange={handleSliderChange}
-          onSetPosition={handleSetPosition}
-          onCenter={handleCenterModule}
-        />
-      </div>
+            <div className="flex items-center justify-between">
+              <Label>{t("sections.moduleCalibration")}</Label>
+              <button
+                type="button"
+                onClick={() => setModuleHistoryOpen(true)}
+                className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors"
+              >
+                <IconClockHour3 size={12} />
+                {t("calibratePage.history")}
+              </button>
+            </div>
+            <ModuleCalibrationGrid
+              modules={modules}
+              configs={configs}
+              active={active}
+              sliderValues={sliderValues}
+              isLoading={isLoading}
+              isConnected={isConnected}
+              onControl={handleControl}
+              onReset={handleReset}
+              onSliderChange={handleSliderChange}
+              onSetPosition={handleSetPosition}
+              onCenter={handleCenterModule}
+            />
+          </AccordionContent>
+        </AccordionItem>
+      </Accordion>
 
       <AuditDrawer
         open={feederHistoryOpen}

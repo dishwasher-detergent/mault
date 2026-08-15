@@ -6,6 +6,8 @@ import { useOrg } from "@/features/companies/api/use-organization";
 import { cn } from "@/lib/utils";
 import {
   DEFAULT_CAPTURE_SETTLE_DELAY_MS,
+  DEFAULT_CHANNEL_LAYOUT,
+  DEFAULT_MODULE_COUNT,
   DEFAULT_SCAN_REGION,
 } from "@magic-vault/shared";
 import { IconLayoutColumns, IconLayoutRows } from "@tabler/icons-react";
@@ -51,6 +53,8 @@ export function ScannerLayoutToggle() {
           scanRegion: old?.scanRegion ?? DEFAULT_SCAN_REGION,
           captureSettleDelayMs:
             old?.captureSettleDelayMs ?? DEFAULT_CAPTURE_SETTLE_DELAY_MS,
+          moduleCount: old?.moduleCount ?? DEFAULT_MODULE_COUNT,
+          channelLayout: old?.channelLayout ?? DEFAULT_CHANNEL_LAYOUT,
         }),
       );
       return { previous };

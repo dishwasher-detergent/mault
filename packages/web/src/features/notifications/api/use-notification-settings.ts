@@ -6,6 +6,8 @@ import {
 import { useOrg } from "@/features/companies/api/use-organization";
 import {
   DEFAULT_CAPTURE_SETTLE_DELAY_MS,
+  DEFAULT_CHANNEL_LAYOUT,
+  DEFAULT_MODULE_COUNT,
   DEFAULT_SCAN_REGION,
 } from "@magic-vault/shared";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -47,6 +49,8 @@ export function useNotificationSettings() {
           discordNotifyOnScan: old?.discordNotifyOnScan ?? false,
           captureSettleDelayMs:
             old?.captureSettleDelayMs ?? DEFAULT_CAPTURE_SETTLE_DELAY_MS,
+          moduleCount: old?.moduleCount ?? DEFAULT_MODULE_COUNT,
+          channelLayout: old?.channelLayout ?? DEFAULT_CHANNEL_LAYOUT,
           ...patch,
         }),
       );

@@ -1,9 +1,10 @@
 import { Button } from "@/components/ui/button";
 import { DynamicPopover } from "@/components/ui/responsive-popover";
 import { Slider } from "@/components/ui/slider";
+import { useModuleCount } from "@/features/calibration/api/use-module-count";
 import type { CardFilters } from "@/features/cards/types";
 import { cn } from "@/lib/utils";
-import { BIN_COUNT } from "@magic-vault/shared";
+import { computeBinCount } from "@magic-vault/shared";
 import {
   IconDownload,
   IconFilter,
@@ -56,7 +57,8 @@ export function CardFilterPopover({
   availableColors,
 }: CardFilterPopoverProps) {
   const { t } = useTranslation("cards");
-  const bins = Array.from({ length: BIN_COUNT }, (_, i) => i + 1);
+  const moduleCount = useModuleCount();
+  const bins = Array.from({ length: computeBinCount(moduleCount) }, (_, i) => i + 1);
 
   return (
     <DynamicPopover

@@ -17,6 +17,33 @@
       "right": "Rechts setzen"
     }
   },
+  "moduleCountStepper": {
+    "label": "Sortiermodule",
+    "value": "{{count}} Modul",
+    "value_other": "{{count}} Module",
+    "description": "Wie viele physische Sortiermodule verbaut sind. Ändert die Anzahl der verfügbaren Fächer sowie die Abschnitte unten."
+  },
+  "channelLayoutToggle": {
+    "label": "PCA9685-Kanalbelegung",
+    "standard": "Standard",
+    "standardDescription": "Modul 1 beginnt bei Kanal 0. Unterstützt bis zu 5 Module.",
+    "legacy": "Legacy",
+    "legacyDescription": "Modul 1 beginnt bei Kanal 4 (Kanäle 0-3 für Status-LEDs reserviert). Unterstützt bis zu 3 Module. Verwende dies, wenn deine Hardware vor der Modul-Erweiterung verkabelt wurde."
+  },
+  "sections": {
+    "moduleSetup": "Module & Routing",
+    "scanRegion": "Scanbereich",
+    "calibration": "Zuführungs- & Modulkalibrierung",
+    "moduleCalibration": "Modulkalibrierung"
+  },
+  "binRoutingAssignment": {
+    "label": "Fach-Zuordnung",
+    "resetToDefaults": "Auf Standard zurücksetzen",
+    "binLabel": "Fach {{bin}}",
+    "moduleLeft": "Modul {{module}} — Links",
+    "moduleRight": "Modul {{module}} — Rechts",
+    "moduleBottom": "Modul {{module}} — Unten"
+  },
   "binRoutingControls": {
     "label": "Fach-Routing",
     "feed": "Zuführen",
@@ -57,10 +84,6 @@
     "hopperEmpty": "Zuführbehälter leer",
     "hopper": "Zuführbehälter",
     "hopperTooltip": "Ob der IR-Sensor des Kartenbehälters derzeit auf die Zuführung wartende Karten erkennt"
-  },
-  "ledControls": {
-    "label": "LEDs",
-    "ledLabel": "LED {{led}}"
   },
   "moduleCalibrationGrid": {
     "moduleHeading": "Modul {{module}}",
@@ -116,6 +139,13 @@
       "unexpectedResponse": "Unerwartete Antwort: {{response}}",
       "noResponse": "Keine Antwort vom Sortierer.",
       "saveFailed": "Modulkonfiguration konnte nicht gespeichert werden"
+    }
+  },
+  "useBinRoutes": {
+    "toasts": {
+      "saveFailed": "Fach-Route konnte nicht gespeichert werden",
+      "resetSuccess": "Fach-Routen auf Standard zurückgesetzt",
+      "resetFailed": "Fach-Routen konnten nicht zurückgesetzt werden"
     }
   },
   "calibratePage": {

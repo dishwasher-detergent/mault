@@ -11,8 +11,10 @@ import {
   deleteCollection as deleteCollectionFn,
   renameCollection as renameCollectionFn,
 } from "@/features/collections/api/collections";
+import { useModuleCount } from "@/features/calibration/api/use-module-count";
 import { useOrg } from "@/features/companies/api/use-organization";
 import {
+  computeBinCount,
   createDefaultCatchAllOnlyBins,
   createDefaultColorBins,
   type BinSet,
@@ -59,6 +61,7 @@ export function CollectionsProvider({
   const { t } = useTranslation("collections");
   const queryClient = useQueryClient();
   const { activeOrg } = useOrg();
+  const moduleCount = useModuleCount();
   const { data: collections = [], isLoading } = useQuery({
     ...collectionsQueryOptions,
     enabled: !!activeOrg,
@@ -124,7 +127,9 @@ export function CollectionsProvider({
           const isMtg = created?.game?.key === "mtg";
           const binsResult = await createSetFn(
             name,
-            isMtg ? createDefaultColorBins() : createDefaultCatchAllOnlyBins(),
+            isMtg
+              ? createDefaultColorBins(computeBinCount(moduleCount))
+              : createDefaultCatchAllOnlyBins(computeBinCount(moduleCount)),
             gameGuid,
           );
           if (binsResult.success && binsResult.data) {

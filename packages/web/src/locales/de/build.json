@@ -27,7 +27,7 @@
   },
   "bom": {
     "heading": "Stückliste",
-    "description": "Die Mengen entsprechen exakt der Firmware – 3 Module × 3 Servos, 1 Zuführung, 4 IR-Sensoren, 10 der 16 Kanäle des PCA9685 in Gebrauch. Kanäle 0–3 sind in der Firmware für Status-LEDs vorgesehen, gehören aber nicht zum aktuellen Aufbau. Hake jedes Teil ab, sobald du es besorgt hast – die Häkchen werden in diesem Browser gespeichert.",
+    "description": "Die Mengen entsprechen exakt der Firmware – 3 Module × 3 Servos, 1 Zuführung, 4 IR-Sensoren, 10 der 16 Kanäle des PCA9685 in Gebrauch. Die restlichen Kanäle stehen für zusätzliche Sortiermodule zur Verfügung (bis zu 5 Module an einem einzelnen PCA9685). Hake jedes Teil ab, sobald du es besorgt hast – die Häkchen werden in diesem Browser gespeichert.",
     "progress": {
       "partsCount": "{{done}} von {{total}} Teilen"
     },
@@ -188,7 +188,7 @@
       "colAssignment": "Belegung"
     },
     "channelMap": {
-      "unused": "Unbenutzt – in der Firmware für LEDs reserviert, nicht Teil dieses Aufbaus",
+      "unused": "Unbenutzt – verfügbar für zusätzliche Sortiermodule",
       "modulePart": "Modul {{n}} – {{part}}",
       "feeder": "Zuführung (Dauerdrehung)"
     },

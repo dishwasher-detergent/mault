@@ -55,9 +55,9 @@ export async function saveBinConfig({
   rules: BinRuleGroup;
   isCatchAll?: boolean;
   gameGuid?: string;
-}): Promise<Result<BinConfig>> {
+}): Promise<Result<BinConfig[]>> {
   const params = gameGuid ? `?${new URLSearchParams({ gameGuid })}` : "";
-  return apiPut<Result<BinConfig>>(`/api/bins/bins/${binNumber}${params}`, {
+  return apiPut<Result<BinConfig[]>>(`/api/bins/bins/${binNumber}${params}`, {
     rules,
     isCatchAll,
   });

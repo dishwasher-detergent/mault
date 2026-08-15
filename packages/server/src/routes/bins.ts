@@ -1,5 +1,6 @@
 import {
-  BIN_COUNT,
+  computeBinCount,
+  DEFAULT_MODULE_COUNT,
   type BinConfig,
   type BinRuleGroup,
   type BinSet,
@@ -12,6 +13,17 @@ import type { Transaction } from "../db";
 import { authQuery } from "../db";
 import { bins, binSetAudit, binSets } from "../db/schema";
 import { requireAuth, requireOrg, type AppEnv } from "../middleware/auth";
+
+async function _getModuleCount(
+  tx: Transaction,
+  orgId: string,
+): Promise<number> {
+  const row = await tx.query.orgSettings.findFirst({
+    where: (t, { eq }) => eq(t.orgId, orgId),
+    columns: { moduleCount: true },
+  });
+  return row?.moduleCount ?? DEFAULT_MODULE_COUNT;
+}
 
 const router = new Hono<AppEnv>();
 
@@ -224,11 +236,14 @@ router.post("/", requireAuth, requireOrg, async (c) => {
         .returning({ id: binSets.id });
       const binsToInsert = Array.isArray(initialBins)
         ? initialBins
-        : Array.from({ length: BIN_COUNT }, (_, i) => ({
-            binNumber: i + 1,
-            rules: emptyRules(),
-            isCatchAll: false,
-          }));
+        : Array.from(
+            { length: computeBinCount(await _getModuleCount(tx, orgId)) },
+            (_, i) => ({
+              binNumber: i + 1,
+              rules: emptyRules(),
+              isCatchAll: false,
+            }),
+          );
       await tx.insert(bins).values(
         binsToInsert.map((b) => ({
           binNumber: b.binNumber,
@@ -332,59 +347,54 @@ router.put("/bins/:binNumber", requireAuth, requireOrg, async (c) => {
       if (!activeBinSet)
         return { message: "No active set found.", success: false };
 
+      if (isCatchAll) {
+        await tx
+          .update(bins)
+          .set({ isCatchAll: false, updatedAt: new Date() })
+          .where(
+            and(eq(bins.binSet, activeBinSet.id), eq(bins.isCatchAll, true)),
+          );
+      }
+
       const existing = activeBinSet.bins.find((b) => b.binNumber === binNumber);
-      let savedBin: BinConfig;
 
       if (existing) {
-        const [updated] = await tx
+        await tx
           .update(bins)
           .set({
             rules,
             isCatchAll: isCatchAll ?? false,
             updatedAt: new Date(),
           })
-          .where(eq(bins.id, existing.id))
-          .returning({
-            guid: bins.guid,
-            binNumber: bins.binNumber,
-            rules: bins.rules,
-            isCatchAll: bins.isCatchAll,
-          });
-        savedBin = {
-          guid: updated.guid!,
-          binNumber: updated.binNumber,
-          rules: updated.rules as BinRuleGroup,
-          isCatchAll: updated.isCatchAll,
-        };
+          .where(eq(bins.id, existing.id));
       } else {
-        const [inserted] = await tx
-          .insert(bins)
-          .values({
-            binNumber,
-            rules,
-            isCatchAll: isCatchAll ?? false,
-            binSet: activeBinSet.id,
-            orgId,
-          })
-          .returning({
-            guid: bins.guid,
-            binNumber: bins.binNumber,
-            rules: bins.rules,
-            isCatchAll: bins.isCatchAll,
-          });
-        savedBin = {
-          guid: inserted.guid!,
-          binNumber: inserted.binNumber,
-          rules: inserted.rules as BinRuleGroup,
-          isCatchAll: inserted.isCatchAll,
-        };
+        await tx.insert(bins).values({
+          binNumber,
+          rules,
+          isCatchAll: isCatchAll ?? false,
+          binSet: activeBinSet.id,
+          orgId,
+        });
       }
 
       await _snapshotBinSet(tx, activeBinSet.id, activeBinSet.guid!, orgId);
+
+      const updatedBins = await tx.query.bins.findMany({
+        where: (t, { eq }) => eq(t.binSet, activeBinSet.id),
+        columns: { guid: true, binNumber: true, rules: true, isCatchAll: true },
+      });
+
       return {
         message: "Successfully saved bin config.",
         success: true,
-        data: savedBin,
+        data: updatedBins.map(
+          (b): BinConfig => ({
+            guid: b.guid!,
+            binNumber: b.binNumber,
+            rules: b.rules as BinRuleGroup,
+            isCatchAll: b.isCatchAll,
+          }),
+        ),
       };
     });
     return c.json(result);
@@ -556,25 +566,21 @@ router.post("/history/:guid/revert", requireAuth, requireOrg, async (c) => {
             })
             .where(eq(bins.id, existing.id));
         } else {
-          await tx
-            .insert(bins)
-            .values({
-              binNumber: config.binNumber,
-              rules: config.rules,
-              isCatchAll: config.isCatchAll,
-              binSet: binSet.id,
-              orgId,
-            });
+          await tx.insert(bins).values({
+            binNumber: config.binNumber,
+            rules: config.rules,
+            isCatchAll: config.isCatchAll,
+            binSet: binSet.id,
+            orgId,
+          });
         }
       }
 
-      await tx
-        .insert(binSetAudit)
-        .values({
-          binSetGuid: entry.binSetGuid,
-          snapshot: entry.snapshot,
-          orgId,
-        });
+      await tx.insert(binSetAudit).values({
+        binSetGuid: entry.binSetGuid,
+        snapshot: entry.snapshot,
+        orgId,
+      });
       return _loadSets(tx, orgId);
     });
     return c.json(result);

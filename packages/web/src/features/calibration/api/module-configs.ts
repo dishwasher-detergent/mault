@@ -4,12 +4,12 @@ import type {
   Result,
   ServoCalibration,
 } from "@magic-vault/shared";
-import { DEFAULT_CALIBRATION } from "@magic-vault/shared";
+import { DEFAULT_CALIBRATION, DEFAULT_MODULE_COUNT } from "@magic-vault/shared";
 import { queryOptions } from "@tanstack/react-query";
 
 function defaultModuleConfigs(): ModuleConfig[] {
-  return ([1, 2, 3] as const).map((n) => ({
-    moduleNumber: n,
+  return Array.from({ length: DEFAULT_MODULE_COUNT }, (_, i) => ({
+    moduleNumber: i + 1,
     calibration: { ...DEFAULT_CALIBRATION },
   }));
 }
@@ -26,7 +26,7 @@ export async function getModuleConfigs(): Promise<Result<ModuleConfig[]>> {
 }
 
 export async function saveModuleConfig(
-  moduleNumber: 1 | 2 | 3,
+  moduleNumber: number,
   calibration: ServoCalibration,
 ): Promise<Result<ModuleConfig[]>> {
   return apiPut<Result<ModuleConfig[]>>(
@@ -37,7 +37,7 @@ export async function saveModuleConfig(
 
 export interface ModuleConfigAuditEntry {
   guid: string;
-  moduleNumber: 1 | 2 | 3;
+  moduleNumber: number;
   calibration: ServoCalibration;
   createdAt: string;
 }

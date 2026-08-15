@@ -135,6 +135,28 @@ export const bins = pgTable(
   ],
 ).enableRLS();
 
+export const binRoutes = pgTable(
+  "bin_routes",
+  {
+    id: serial().primaryKey(),
+    guid: uuid("guid").defaultRandom(),
+    binNumber: integer("bin_number").notNull(),
+    module: integer("module").notNull(),
+    direction: text("direction").notNull(),
+    orgId: text("org_id").notNull(),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+    updatedAt: timestamp("updated_at").defaultNow().notNull(),
+  },
+  (table) => [
+    unique("bin_routes_org_bin_idx").on(table.orgId, table.binNumber),
+    crudPolicy({
+      role: authenticatedRole,
+      read: orgRls(table.orgId),
+      modify: orgRls(table.orgId),
+    }),
+  ],
+).enableRLS();
+
 export const moduleConfigs = pgTable(
   "module_configs",
   {
@@ -274,6 +296,8 @@ export const orgSettings = pgTable(
     scanOffsetX: integer("scan_offset_x"),
     scanOffsetY: integer("scan_offset_y"),
     captureSettleDelayMs: integer("capture_settle_delay_ms"),
+    moduleCount: integer("module_count").notNull().default(3),
+    channelLayout: text("channel_layout"),
     createdAt: timestamp("created_at").defaultNow().notNull(),
     updatedAt: timestamp("updated_at").defaultNow().notNull(),
   },
@@ -301,6 +325,27 @@ export const binSetAudit = pgTable(
   },
   (table) => [
     unique("bin_set_audit_guid_idx").on(table.guid),
+    crudPolicy({
+      role: authenticatedRole,
+      read: orgRls(table.orgId),
+      modify: orgRls(table.orgId),
+    }),
+  ],
+).enableRLS();
+
+export const binRouteAudit = pgTable(
+  "bin_route_audit",
+  {
+    id: serial().primaryKey(),
+    guid: uuid("guid").defaultRandom(),
+    binNumber: integer("bin_number").notNull(),
+    module: integer("module").notNull(),
+    direction: text("direction").notNull(),
+    orgId: text("org_id").notNull(),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+  },
+  (table) => [
+    unique("bin_route_audit_guid_idx").on(table.guid),
     crudPolicy({
       role: authenticatedRole,
       read: orgRls(table.orgId),

@@ -3,6 +3,7 @@ import type {
   SerialContextValue,
   SerialMessageListener,
 } from "@/features/scanner/types";
+import type { BinRoute } from "@magic-vault/shared";
 import {
   createContext,
   useCallback,
@@ -327,15 +328,17 @@ export function SerialProvider({ children }: { children: React.ReactNode }) {
 
   const binBusyRef = useRef(false);
 
-  const sendBin = useCallback(
-    async (binNumber: number): Promise<unknown | null> => {
+  const sendRoute = useCallback(
+    async (route: BinRoute): Promise<unknown | null> => {
       if (!portRef.current || !writableRef.current) return null;
       if (binBusyRef.current) return null;
 
       binBusyRef.current = true;
       try {
         const sent = await sendCommand(
-          JSON.stringify({ bin: binNumber }) + "\n",
+          JSON.stringify({
+            route: { module: route.module, direction: route.direction },
+          }) + "\n",
         );
         if (!sent) return null;
 
@@ -362,7 +365,7 @@ export function SerialProvider({ children }: { children: React.ReactNode }) {
         isReady,
         connect,
         disconnect,
-        sendBin,
+        sendRoute,
         sendTest,
         sendCommand: sendCommandWithNewline,
         receiveResponse,

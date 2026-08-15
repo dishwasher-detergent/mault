@@ -17,7 +17,7 @@ export function BinList() {
     return (
       <ScrollArea>
         <div className="flex flex-col rounded-lg overflow-hidden border">
-          {Array.from({ length: 7 }).map((_, i) => (
+          {Array.from({ length: configs.length || 7 }).map((_, i) => (
             <Skeleton
               key={i}
               className="h-13 rounded-none border-b last:border-b-0"

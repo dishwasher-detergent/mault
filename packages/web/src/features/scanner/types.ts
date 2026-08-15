@@ -1,4 +1,5 @@
 import type {
+  BinRoute,
   PlayingCard,
   PlayingCardWithDistance,
   ScannedCard,
@@ -57,7 +58,7 @@ export interface SerialContextValue {
   isReady: boolean;
   connect: () => Promise<void>;
   disconnect: () => Promise<void>;
-  sendBin: (binNumber: number) => Promise<unknown | null>;
+  sendRoute: (route: BinRoute) => Promise<unknown | null>;
   sendTest: () => Promise<boolean>;
   sendCommand: (data: string) => Promise<boolean>;
   receiveResponse: (timeoutMs?: number) => Promise<string>;

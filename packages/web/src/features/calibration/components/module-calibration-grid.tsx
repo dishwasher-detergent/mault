@@ -6,7 +6,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { MODULES, SERVOS } from "@/features/calibration/constants";
+import { SERVOS } from "@/features/calibration/constants";
 import type {
   ActivePositions,
   ServoConfig,
@@ -17,7 +17,7 @@ import { IconRotateClockwise } from "@tabler/icons-react";
 import { useTranslation } from "react-i18next";
 
 interface ServoControlProps {
-  module: 1 | 2 | 3;
+  module: number;
   servo: ServoConfig;
   sliderValue: number;
   activePosition: string | null | undefined;
@@ -25,18 +25,18 @@ interface ServoControlProps {
   isLoading: boolean;
   isConnected: boolean;
   onControl: (
-    module: 1 | 2 | 3,
+    module: number,
     servo: "bottom" | "paddle" | "pusher",
     position: string,
   ) => void;
   onReset: (module: number, servo: ServoConfig) => void;
   onSliderChange: (
-    module: 1 | 2 | 3,
+    module: number,
     servo: "bottom" | "paddle" | "pusher",
     value: number,
   ) => void;
   onSetPosition: (
-    module: 1 | 2 | 3,
+    module: number,
     posKey: keyof ServoCalibration,
     value: number,
   ) => void;
@@ -172,31 +172,33 @@ function ServoControl({
 }
 
 interface ModuleCalibrationGridProps {
+  modules: number[];
   configs: ModuleConfig[];
   active: ActivePositions;
   sliderValues: Record<SliderKey, number>;
   isLoading: boolean;
   isConnected: boolean;
   onControl: (
-    module: 1 | 2 | 3,
+    module: number,
     servo: "bottom" | "paddle" | "pusher",
     position: string,
   ) => void;
   onReset: (module: number, servo: ServoConfig) => void;
   onSliderChange: (
-    module: 1 | 2 | 3,
+    module: number,
     servo: "bottom" | "paddle" | "pusher",
     value: number,
   ) => void;
   onSetPosition: (
-    module: 1 | 2 | 3,
+    module: number,
     posKey: keyof ServoCalibration,
     value: number,
   ) => void;
-  onCenter: (module: 1 | 2 | 3) => void;
+  onCenter: (module: number) => void;
 }
 
 export function ModuleCalibrationGrid({
+  modules,
   configs,
   active,
   sliderValues,
@@ -209,8 +211,13 @@ export function ModuleCalibrationGrid({
 }: ModuleCalibrationGridProps) {
   const { t } = useTranslation("calibration");
   return (
-    <div className="grid grid-cols-1 md:grid-cols-3 rounded-lg border overflow-hidden">
-      {MODULES.map((module) => {
+    <div
+      className="grid rounded-lg border overflow-hidden"
+      style={{
+        gridTemplateColumns: `repeat(${modules.length}, minmax(0, 1fr))`,
+      }}
+    >
+      {modules.map((module) => {
         const cal = configs.find((c) => c.moduleNumber === module)?.calibration;
         return (
           <div
