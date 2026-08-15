@@ -1,12 +1,12 @@
 import { Button } from "@/components/ui/button";
 import {
-  Drawer,
-  DrawerContent,
-  DrawerDescription,
-  DrawerFooter,
-  DrawerHeader,
-  DrawerTitle,
-} from "@/components/ui/drawer";
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Field, FieldError, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -135,23 +135,23 @@ export function GameFormDialog({
   }
 
   return (
-    <Drawer open={open} onOpenChange={onOpenChange} direction="right">
-      <DrawerContent className="sm:max-w-2xl flex flex-col">
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="sm:max-w-2xl max-h-[85vh] flex flex-col">
         <FormProvider {...form}>
           <form
             onSubmit={handleSubmit(handleFormSubmit)}
             className="flex flex-col min-h-0 flex-1 overflow-hidden"
           >
-            <DrawerHeader>
-              <DrawerTitle>
+            <DialogHeader>
+              <DialogTitle>
                 {game
                   ? t("gameFormDialog.editTitle", { name: game.name })
                   : t("gameFormDialog.addTitle")}
-              </DrawerTitle>
-              <DrawerDescription>
+              </DialogTitle>
+              <DialogDescription>
                 {t("gameFormDialog.description")}
-              </DrawerDescription>
-            </DrawerHeader>
+              </DialogDescription>
+            </DialogHeader>
 
             <div className="flex flex-col gap-4 px-4 shrink-0">
               <div className="grid grid-cols-2 gap-3">
@@ -204,7 +204,7 @@ export function GameFormDialog({
               <GameFieldDefinitionsEditor />
             </ScrollArea>
 
-            <DrawerFooter className="shrink-0 flex-row justify-end">
+            <DialogFooter className="shrink-0 flex-row justify-end">
               <Button
                 type="button"
                 variant="outline"
@@ -219,10 +219,10 @@ export function GameFormDialog({
                     ? t("gameFormDialog.saveChanges")
                     : t("gameFormDialog.createGame")}
               </Button>
-            </DrawerFooter>
+            </DialogFooter>
           </form>
         </FormProvider>
-      </DrawerContent>
-    </Drawer>
+      </DialogContent>
+    </Dialog>
   );
 }

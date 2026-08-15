@@ -6,6 +6,7 @@ import { resolveGameDataSourceUrl } from "./card-search/resolve";
 import type { SyncSource, SyncSourceCard } from "./card-search/sync-types";
 import { sendDiscordNotification } from "./discord";
 import { gundamSyncSource } from "./gundam/sync";
+import { lorcanaSyncSource } from "./lorcana/sync";
 import { pokemonSyncSource } from "./pokemon/sync";
 import { scryfallSyncSource } from "./scryfall/sync";
 import { vectorizeImageFromBuffer } from "./vectorize";
@@ -14,6 +15,7 @@ export const SYNC_SOURCES: Record<string, SyncSource> = {
   mtg: scryfallSyncSource,
   gundam: gundamSyncSource,
   pokemon: pokemonSyncSource,
+  lorcana: lorcanaSyncSource,
 };
 
 type SseWriter = (event: string, data: unknown) => void;
