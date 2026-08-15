@@ -212,7 +212,7 @@ export function ModuleCalibrationGrid({
   const { t } = useTranslation("calibration");
   return (
     <div
-      className="grid rounded-lg border overflow-hidden"
+      className="grid rounded-lg border"
       style={{
         gridTemplateColumns: `repeat(${modules.length}, minmax(0, 1fr))`,
       }}
