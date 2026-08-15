@@ -169,7 +169,7 @@ function SyncStatusItem() {
 export function StatusFooter() {
   const { t } = useTranslation("common");
   const { status: cameraStatus } = useCameraContext();
-  const { isConnected, isReady } = useSerial();
+  const { isConnected, isReady, firmwareVersion } = useSerial();
   const { cards } = useScannedCards();
 
   const totalValue = cards.reduce(
@@ -200,7 +200,13 @@ export function StatusFooter() {
     ? t("statusFooter.sorterDisconnected")
     : !isReady
       ? t("statusFooter.sorterSelfTest")
-      : t("statusFooter.sorterReady");
+      : firmwareVersion
+        ? t("statusFooter.sorterReadyWithVersion", { version: firmwareVersion })
+        : t("statusFooter.sorterReady");
+  const deviceLabel =
+    isConnected && firmwareVersion
+      ? t("statusFooter.sorterWithVersion", { version: firmwareVersion })
+      : t("statusFooter.sorter");
 
   return (
     <div className="flex items-center gap-3 text-muted-foreground">
@@ -210,11 +216,7 @@ export function StatusFooter() {
           dot={cameraDot}
           tooltip={cameraTooltip}
         />
-        <StatusItem
-          label={t("statusFooter.sorter")}
-          dot={deviceDot}
-          tooltip={deviceTooltip}
-        />
+        <StatusItem label={deviceLabel} dot={deviceDot} tooltip={deviceTooltip} />
         <SyncStatusItem />
       </div>
       {cards.length > 0 && (

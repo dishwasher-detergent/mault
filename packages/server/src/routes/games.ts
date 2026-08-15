@@ -1,9 +1,9 @@
+import type { FieldMeta, Game } from "@magic-vault/shared";
 import { eq } from "drizzle-orm";
 import { Hono } from "hono";
 import { db } from "../db";
 import { cardImageVectors, games } from "../db/schema";
 import { requireAuth, requireRole, type AppEnv } from "../middleware/auth";
-import type { FieldMeta, Game } from "@magic-vault/shared";
 
 const router = new Hono<AppEnv>();
 
@@ -47,7 +47,8 @@ router.get("/:guid/languages", requireAuth, async (c) => {
       where: (t, { eq }) => eq(t.guid, guid),
       columns: { key: true },
     });
-    if (!game) return c.json({ success: false, message: "Game not found." }, 404);
+    if (!game)
+      return c.json({ success: false, message: "Game not found." }, 404);
 
     const rows = await db
       .select({ lang: cardImageVectors.lang })
@@ -56,7 +57,7 @@ router.get("/:guid/languages", requireAuth, async (c) => {
       .groupBy(cardImageVectors.lang)
       .orderBy(cardImageVectors.lang);
 
-    return c.json({ success: true, data: rows.map((r) => r.lang) });
+    return c.json({ success: true, data: rows?.map((r) => r.lang) ?? [] });
   } catch (err) {
     console.error(err);
     return c.json({ success: false, message: "Database error." }, 500);
@@ -110,13 +111,18 @@ router.put("/:guid", requireAuth, requireRole("admin"), async (c) => {
       where: (t, { eq }) => eq(t.guid, guid),
       columns: { id: true },
     });
-    if (!target) return c.json({ success: false, message: "Game not found." }, 404);
+    if (!target)
+      return c.json({ success: false, message: "Game not found." }, 404);
 
-    const updates: Partial<typeof games.$inferInsert> = { updatedAt: new Date() };
+    const updates: Partial<typeof games.$inferInsert> = {
+      updatedAt: new Date(),
+    };
     if (key !== undefined) updates.key = key.trim();
     if (name !== undefined) updates.name = name.trim();
-    if (dataSourceUrl !== undefined) updates.dataSourceUrl = dataSourceUrl.trim();
-    if (fieldDefinitions !== undefined) updates.fieldDefinitions = fieldDefinitions;
+    if (dataSourceUrl !== undefined)
+      updates.dataSourceUrl = dataSourceUrl.trim();
+    if (fieldDefinitions !== undefined)
+      updates.fieldDefinitions = fieldDefinitions;
     if (isActive !== undefined) updates.isActive = isActive;
 
     const [row] = await db
@@ -145,7 +151,8 @@ router.delete("/:guid", requireAuth, requireRole("admin"), async (c) => {
       where: (t, { eq }) => eq(t.guid, guid),
       columns: { id: true },
     });
-    if (!target) return c.json({ success: false, message: "Game not found." }, 404);
+    if (!target)
+      return c.json({ success: false, message: "Game not found." }, 404);
 
     await db.delete(games).where(eq(games.id, target.id));
     return c.json({ success: true, data: null });

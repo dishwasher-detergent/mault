@@ -18,7 +18,8 @@
     "deviceTestFailed": {
       "title": "Device test failed",
       "description": "Connected but got no response. Try reconnecting."
-    }
+    },
+    "firmwareOutdatedBanner": "Your sorter is running firmware v{{version}}, older than the latest v{{latest}}. Re-upload arduino/main/main.ino to update it."
   },
   "sessionMonitor": {
     "connectionLost": "Connection to session lost."

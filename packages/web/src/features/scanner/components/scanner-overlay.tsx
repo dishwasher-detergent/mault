@@ -17,11 +17,10 @@ const statusPill = cva(
   {
     variants: {
       variant: {
-        default: "bg-background/50 border-border/60",
-        loading: "bg-background/50 border-border/60",
-        warning:
-          "bg-amber-500/10 border-amber-500/30 text-amber-600 dark:text-amber-400",
-        error: "bg-red-500/10 border-red-500/30 text-red-600 dark:text-red-400",
+        default: "bg-background border-border",
+        loading: "bg-background border-border",
+        warning: "bg-amber-500 border-amber-600 text-white dark:text-amber-400",
+        error: "bg-red-500 border-red-600 text-white dark:text-red-400",
       },
     },
     defaultVariants: { variant: "default" },

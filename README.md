@@ -76,6 +76,7 @@ VITE_API_URL=                 # base URL of the Hono API, e.g. http://localhost:
 VITE_APP_ENV=                 # local/developement/QA/production
 VITE_NEON_AUTH_URL=
 VITE_NEON_DATA_API_URL=
+VITE_LATEST_ARDUINO_VERSION=  # keep in sync with FIRMWARE_VERSION in arduino/main/main.ino - shows an outdated-firmware banner when a connected device reports an older version
 ```
 
 ## Database

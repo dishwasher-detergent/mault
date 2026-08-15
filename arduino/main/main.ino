@@ -2,6 +2,8 @@
 #include <Wire.h>
 #include <Adafruit_PWMServoDriver.h>
 
+#define FIRMWARE_VERSION "1.0.0"
+
 Adafruit_PWMServoDriver pwm = Adafruit_PWMServoDriver();
 
 // PWM channel layout (PCA9685, 16 channels total, valid channels 0-15):
@@ -598,7 +600,9 @@ void setup() {
   pwm.setPWMFreq(50);
   delay(10);
   setAllNeutral();
-  Serial.println(F("{\"status\":\"ready\"}"));
+  Serial.print(F("{\"status\":\"ready\",\"version\":\""));
+  Serial.print(FIRMWARE_VERSION);
+  Serial.println(F("\"}"));
 }
 
 void loop() {

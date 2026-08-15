@@ -23,6 +23,7 @@ export function SerialProvider({ children }: { children: React.ReactNode }) {
   const { t } = useTranslation("scanner");
   const [isConnected, setIsConnected] = useState(false);
   const [isReady, setIsReady] = useState(false);
+  const [firmwareVersion, setFirmwareVersion] = useState<string | null>(null);
   const portRef = useRef<SerialPort | null>(null);
   const readerRef = useRef<ReadableStreamDefaultReader<Uint8Array> | null>(
     null,
@@ -155,6 +156,7 @@ export function SerialProvider({ children }: { children: React.ReactNode }) {
     writeQueueRef.current = Promise.resolve();
     setIsConnected(false);
     setIsReady(false);
+    setFirmwareVersion(null);
 
     // Reject any outstanding waiters
     for (const pending of pendingRef.current) {
@@ -220,9 +222,16 @@ export function SerialProvider({ children }: { children: React.ReactNode }) {
       });
 
       (async () => {
-        // Consume the Arduino's boot message before sending the test
-        await waitForLine(5000);
+        const bootLine = await waitForLine(5000);
         if (!portRef.current) return;
+        try {
+          const parsed = bootLine ? JSON.parse(bootLine) : null;
+          if (typeof parsed?.version === "string") {
+            setFirmwareVersion(parsed.version);
+          }
+        } catch {
+          // ignore - version just stays unknown
+        }
         if (preTestHookRef.current) {
           await preTestHookRef.current();
         }
@@ -310,7 +319,11 @@ export function SerialProvider({ children }: { children: React.ReactNode }) {
     const previous = preTestHookRef.current;
     preTestHookRef.current = previous
       ? async () => {
-          await previous();
+          try {
+            await previous();
+          } catch (e) {
+            console.error("[Serial] Pre-test hook failed:", e); // eslint-disable-line no-console -- hardware debug trace
+          }
           await fn();
         }
       : fn;
@@ -363,6 +376,7 @@ export function SerialProvider({ children }: { children: React.ReactNode }) {
       value={{
         isConnected,
         isReady,
+        firmwareVersion,
         connect,
         disconnect,
         sendRoute,

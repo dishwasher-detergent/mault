@@ -33,6 +33,8 @@
     "sorterDisconnected": "No sorter connected",
     "sorterSelfTest": "Sorter connected, running self-test…",
     "sorterReady": "Sorter ready",
+    "sorterReadyWithVersion": "Sorter ready (firmware v{{version}})",
+    "sorterWithVersion": "Sorter v{{version}}",
     "syncProgress": "Sync {{done}}/{{total}}",
     "syncStatus": "Sync {{status}}",
     "syncing": "Syncing card image vectors…",

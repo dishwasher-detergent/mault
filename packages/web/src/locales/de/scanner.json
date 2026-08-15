@@ -18,7 +18,8 @@
     "deviceTestFailed": {
       "title": "Gerätetest fehlgeschlagen",
       "description": "Verbunden, aber keine Antwort erhalten. Versuche eine erneute Verbindung."
-    }
+    },
+    "firmwareOutdatedBanner": "Dein Sortierer läuft mit Firmware v{{version}}, älter als die aktuelle v{{latest}}. Lade arduino/main/main.ino erneut hoch, um zu aktualisieren."
   },
   "sessionMonitor": {
     "connectionLost": "Verbindung zur Sitzung verloren."

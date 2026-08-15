@@ -56,6 +56,7 @@ export type SerialMessageListener = (message: unknown) => void;
 export interface SerialContextValue {
   isConnected: boolean;
   isReady: boolean;
+  firmwareVersion: string | null;
   connect: () => Promise<void>;
   disconnect: () => Promise<void>;
   sendRoute: (route: BinRoute) => Promise<unknown | null>;

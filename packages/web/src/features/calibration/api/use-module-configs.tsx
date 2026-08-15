@@ -40,19 +40,27 @@ export function ModuleConfigsProvider({
   const { activeOrg } = useOrg();
   const { sendCommand, receiveResponse, registerPreTestHook } = useSerial();
 
-  const { data: configs = defaultConfigs() } = useQuery({ ...modulesQueryOptions, enabled: !!activeOrg });
+  const { data: configs = defaultConfigs() } = useQuery({
+    ...modulesQueryOptions,
+    enabled: !!activeOrg,
+  });
 
   useEffect(() => {
     registerPreTestHook(async () => {
-      const orgSettings = await queryClient.fetchQuery(
-        orgSettingsQueryOptions(activeOrg?.id),
-      );
-      const channelLayout = orgSettings?.channelLayout ?? DEFAULT_CHANNEL_LAYOUT;
-      const offsetResponse = receiveResponse();
-      await sendCommand(
-        JSON.stringify({ setChannelOffset: CHANNEL_OFFSET[channelLayout] }),
-      );
-      await offsetResponse;
+      try {
+        const orgSettings = await queryClient.fetchQuery(
+          orgSettingsQueryOptions(activeOrg?.id),
+        );
+        const channelLayout =
+          orgSettings?.channelLayout ?? DEFAULT_CHANNEL_LAYOUT;
+        const offsetResponse = receiveResponse();
+        await sendCommand(
+          JSON.stringify({ setChannelOffset: CHANNEL_OFFSET[channelLayout] }),
+        );
+        await offsetResponse;
+      } catch (e) {
+        console.error("[Serial] Failed to sync channel offset:", e); // eslint-disable-line no-console -- hardware debug trace
+      }
 
       const fresh = await queryClient.fetchQuery(modulesQueryOptions);
       for (const config of fresh) {
@@ -118,7 +126,9 @@ export function ModuleConfigsProvider({
       if (result.success && result.data) {
         queryClient.setQueryData(["modules"], result.data);
         sendCommand(
-          JSON.stringify({ setConfig: { module: moduleNumber, ...calibration } }),
+          JSON.stringify({
+            setConfig: { module: moduleNumber, ...calibration },
+          }),
         );
       }
     },
@@ -132,11 +142,7 @@ export function ModuleConfigsProvider({
   );
 
   const moveServo = useCallback(
-    (
-      module: number,
-      servo: "bottom" | "paddle" | "pusher",
-      value: number,
-    ) => {
+    (module: number, servo: "bottom" | "paddle" | "pusher", value: number) => {
       sendCommand(JSON.stringify({ servo, module, value }));
     },
     [sendCommand],

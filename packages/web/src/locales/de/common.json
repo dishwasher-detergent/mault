@@ -33,6 +33,8 @@
     "sorterDisconnected": "Kein Sortierer verbunden",
     "sorterSelfTest": "Sortierer verbunden, Selbsttest läuft…",
     "sorterReady": "Sortierer bereit",
+    "sorterReadyWithVersion": "Sortierer bereit (Firmware v{{version}})",
+    "sorterWithVersion": "Sortierer v{{version}}",
     "syncProgress": "Sync {{done}}/{{total}}",
     "syncStatus": "Sync {{status}}",
     "syncing": "Kartenbild-Vektoren werden synchronisiert…",
