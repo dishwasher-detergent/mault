@@ -180,6 +180,47 @@ const PIKACHU_BASE1_1ST_EDITION: PlayingCardWithDistance = {
 
 const POKEMON_MOCK_CARDS: PlayingCardWithDistance[] = [PIKACHU_BASE1];
 
+// Lorcast images aren't proxied (unlike Gundam/Pokemon) — direct CDN URLs,
+// same as the Scryfall mock cards above.
+const ARIEL_IMG =
+  "https://cards.lorcast.io/card/digital/normal/crd_d9f3b86af85f48579ed9d0d7ce0de129.avif?1709690747";
+
+const ARIEL_ON_HUMAN_LEGS: PlayingCardWithDistance = {
+  id: "1-1",
+  name: "Ariel - On Human Legs",
+  image: { small: ARIEL_IMG, normal: ARIEL_IMG },
+  cmc: 4,
+  typeLine: "Character — Storyborn, Hero, Princess",
+  text: "VOICELESS This character can't {E} to sing songs.",
+  power: "3",
+  toughness: "4",
+  colorIdentity: ["Amber"],
+  set: "1",
+  setName: "The First Chapter",
+  collectorNumber: "1",
+  rarity: "uncommon",
+  artist: "Matthew Robert Davies",
+  price: 0.1,
+  sourceUrl: undefined,
+  distance: 0.03,
+};
+
+const ARIEL_ON_HUMAN_LEGS_FOIL: PlayingCardWithDistance = {
+  ...ARIEL_ON_HUMAN_LEGS,
+  id: "1-1_foil",
+  distance: 0.05,
+};
+
+const ARIEL_ON_HUMAN_LEGS_ENCHANTED: PlayingCardWithDistance = {
+  ...ARIEL_ON_HUMAN_LEGS,
+  id: "1-1_enchanted",
+  rarity: "enchanted",
+  price: 45,
+  distance: 0.06,
+};
+
+const LORCANA_MOCK_CARDS: PlayingCardWithDistance[] = [ARIEL_ON_HUMAN_LEGS];
+
 let mockCardIndex = 0;
 
 export function ScannerDebug() {
@@ -192,13 +233,16 @@ export function ScannerDebug() {
 
   const isGundam = activeCollection?.game?.key === "gundam";
   const isPokemon = activeCollection?.game?.key === "pokemon";
+  const isLorcana = activeCollection?.game?.key === "lorcana";
 
   const handleSimulateScan = () => {
     const cards = isGundam
       ? GUNDAM_MOCK_CARDS
       : isPokemon
         ? POKEMON_MOCK_CARDS
-        : MOCK_CARDS;
+        : isLorcana
+          ? LORCANA_MOCK_CARDS
+          : MOCK_CARDS;
     const card = cards[mockCardIndex % cards.length];
     mockCardIndex++;
     addCard(card);
@@ -216,6 +260,13 @@ export function ScannerDebug() {
       addCard(PIKACHU_BASE1, PIKACHU_IMG, [
         PIKACHU_BASE1_SHADOWLESS,
         PIKACHU_BASE1_1ST_EDITION,
+      ]);
+      return;
+    }
+    if (isLorcana) {
+      addCard(ARIEL_ON_HUMAN_LEGS, ARIEL_IMG, [
+        ARIEL_ON_HUMAN_LEGS_FOIL,
+        ARIEL_ON_HUMAN_LEGS_ENCHANTED,
       ]);
       return;
     }

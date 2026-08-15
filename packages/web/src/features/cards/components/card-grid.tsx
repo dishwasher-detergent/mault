@@ -178,15 +178,17 @@ export function CardGrid() {
       <div className="flex flex-col items-center justify-center py-16 gap-3 text-muted-foreground">
         <IconAlbum className="size-10" />
         <div className="text-center">
-          <p className="text-sm font-medium">{t("cardGrid.noCollectionSelected")}</p>
-          <p className="text-xs">
-            {t("cardGrid.createOrSelectCollection")}
+          <p className="text-sm font-medium">
+            {t("cardGrid.noCollectionSelected")}
           </p>
+          <p className="text-xs">{t("cardGrid.createOrSelectCollection")}</p>
         </div>
         <Button
           variant="outline"
           size="sm"
-          render={<Link to="/app/collections">{t("cardGrid.manageCollections")}</Link>}
+          render={
+            <Link to="/app/collections">{t("cardGrid.manageCollections")}</Link>
+          }
         ></Button>
       </div>
     );
@@ -200,7 +202,7 @@ export function CardGrid() {
           <p className="text-xs">{t("cardGrid.scanToGetStarted")}</p>
         </div>
         {scanner?.isCameraActive && (
-          <div className="sticky bottom-0 z-10 bg-background/80 backdrop-blur-2xl p-2 border-t">
+          <div className="sticky bottom-0 z-30 bg-background/80 backdrop-blur-2xl p-2 border-t">
             <div className="flex flex-row gap-2 items-center w-full">
               <ScannerControls
                 status={scanner.status}
@@ -219,13 +221,13 @@ export function CardGrid() {
                           onClick={scanner.handleFeed}
                           disabled={!scanner.isReady || scanner.isFeeding}
                         >
-                          {scanner.isFeeding ? t("cardGrid.feeding") : t("cardGrid.feed")}
+                          {scanner.isFeeding
+                            ? t("cardGrid.feeding")
+                            : t("cardGrid.feed")}
                         </Button>
                       }
                     />
-                    <TooltipContent>
-                      {t("cardGrid.feedTooltip")}
-                    </TooltipContent>
+                    <TooltipContent>{t("cardGrid.feedTooltip")}</TooltipContent>
                   </Tooltip>
                   <Tooltip>
                     <TooltipTrigger
@@ -330,9 +332,7 @@ export function CardGrid() {
           <p className="text-sm font-medium">
             {t("cardGrid.noCardsMatchFilters")}
           </p>
-          <p className="text-xs">
-            {t("cardGrid.tryAdjusting")}
-          </p>
+          <p className="text-xs">{t("cardGrid.tryAdjusting")}</p>
         </div>
       )}
       <div className="p-2 flex-1">
@@ -362,7 +362,10 @@ export function CardGrid() {
               <IconChevronLeft />
             </Button>
             <span className="text-sm text-muted-foreground">
-              {t("cardGrid.pageOf", { page: clampedPage + 1, total: pageCount })}
+              {t("cardGrid.pageOf", {
+                page: clampedPage + 1,
+                total: pageCount,
+              })}
             </span>
             <Button
               variant="outline"
@@ -377,7 +380,7 @@ export function CardGrid() {
       </div>
 
       {(scanner?.isCameraActive || selectedIds.size > 0) && (
-        <div className="sticky bottom-0 z-20 bg-background/80 backdrop-blur-2xl p-2 border-t">
+        <div className="sticky bottom-0 z-30 bg-background/80 backdrop-blur-2xl p-2 border-t">
           <div className="flex flex-row gap-2 items-center w-full">
             {scanner?.isCameraActive && (
               <>
@@ -398,7 +401,9 @@ export function CardGrid() {
                             onClick={scanner.handleFeed}
                             disabled={!scanner.isReady || scanner.isFeeding}
                           >
-                            {scanner.isFeeding ? t("cardGrid.feeding") : t("cardGrid.feed")}
+                            {scanner.isFeeding
+                              ? t("cardGrid.feeding")
+                              : t("cardGrid.feed")}
                           </Button>
                         }
                       />
@@ -487,7 +492,9 @@ export function CardGrid() {
         open={confirmOpen}
         onOpenChange={setConfirmOpen}
         title={t("cardGrid.deleteCardsTitle", { count: selectedIds.size })}
-        description={t("cardGrid.deleteCardsDescription", { count: selectedIds.size })}
+        description={t("cardGrid.deleteCardsDescription", {
+          count: selectedIds.size,
+        })}
         confirm={{ type: "keyword" }}
         onConfirm={handleBulkDelete}
       />
