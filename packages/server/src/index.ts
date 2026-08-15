@@ -11,6 +11,7 @@ import { gamesRouter } from "./routes/games";
 import { moduleConfigsRouter } from "./routes/module-configs";
 import { notificationsRouter } from "./routes/notifications";
 import { orgSettingsRouter } from "./routes/org-settings";
+import { publicRouter } from "./routes/public";
 
 const app = new Hono<AppEnv>();
 const PORT = parseInt(process.env.PORT ?? "3001");
@@ -32,6 +33,7 @@ app.route("/games", gamesRouter);
 app.route("/notifications", notificationsRouter);
 app.route("/org-settings", orgSettingsRouter);
 app.route("/admin", adminRouter);
+app.route("/public", publicRouter);
 
 serve({ fetch: app.fetch, port: PORT, hostname: "0.0.0.0" }, () => {
   console.log(`[server] Running on port:${PORT}`);

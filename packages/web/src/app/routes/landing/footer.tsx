@@ -14,7 +14,7 @@ export function LandingFooter() {
             <IconPigFilled className="size-3.5" />
           </span>
           <span className="font-heading text-xs font-semibold">
-            Magic Vault
+            Mault
           </span>
         </Link>
 

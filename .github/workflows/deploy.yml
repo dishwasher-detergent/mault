@@ -72,7 +72,7 @@ jobs:
       - name: Trigger Coolify deployment (web)
         if: steps.changes.outputs.web == 'true'
         run: |
-          curl -sf --request GET "${{ secrets.COOLIFY_WEBHOOK_WEB }}" \
+          curl -sf --request POST "${{ secrets.COOLIFY_WEBHOOK_WEB }}" \
             --header "Authorization: Bearer ${{ secrets.COOLIFY_TOKEN }}"
 
       - name: Build server image
@@ -88,7 +88,7 @@ jobs:
       - name: Trigger Coolify deployment (server)
         if: steps.changes.outputs.server == 'true'
         run: |
-          curl -sf --request GET "${{ secrets.COOLIFY_WEBHOOK_SERVER }}" \
+          curl -sf --request POST "${{ secrets.COOLIFY_WEBHOOK_SERVER }}" \
             --header "Authorization: Bearer ${{ secrets.COOLIFY_TOKEN }}"
 
       - name: Notify Discord (success)
@@ -125,7 +125,7 @@ jobs:
               allowed_mentions: { roles: [$role_id] },
               embeds: [{
                 title: $title,
-                description: "Magic Vault deployed",
+                description: "Mault deployed",
                 color: 5763719,
                 url: $url,
                 fields: [
@@ -145,20 +145,17 @@ jobs:
         if: failure()
         env:
           DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_DEPLOY_WEBHOOK_URL }}
-          DISCORD_ROLE_ID: ${{ secrets.DISCORD_DEPLOYMENTS_ROLE_ID }}
           PR_TITLE: ${{ steps.pr.outputs.title }}
         run: |
           PAYLOAD=$(jq -n \
-            --arg title "${PR_TITLE:-Magic Vault deploy failed}" \
+            --arg title "${PR_TITLE:-Mault deploy failed}" \
             --arg url "https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}" \
             --arg commit "${GITHUB_SHA::7}" \
             --arg commit_url "https://github.com/${{ github.repository }}/commit/${{ github.sha }}" \
             --arg author "${{ github.actor }}" \
             --arg ts "$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
-            --arg role_id "$DISCORD_ROLE_ID" \
             '{
-              content: ("<@&" + $role_id + ">"),
-              allowed_mentions: { roles: [$role_id] },
+              allowed_mentions: { parse: [] },
               embeds: [{
                 title: $title,
                 description: "Deploy failed - check the run log.",

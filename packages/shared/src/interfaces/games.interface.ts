@@ -10,3 +10,8 @@ export interface Game {
   createdAt: Date;
   updatedAt: Date;
 }
+
+export interface PublicGame {
+  key: string;
+  name: string;
+}
