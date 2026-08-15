@@ -10,11 +10,11 @@
     "getStarted": "Get started"
   },
   "footer": {
-    "copyright": "© {{year}} Magic Vault · v{{version}}"
+    "copyright": "© {{year}} Mault · v{{version}}"
   },
   "hero": {
     "title": "Every card,<br></br><highlight>exactly where it belongs.</highlight>",
-    "subtitle": "Magic Vault recognizes your cards the moment you show them to a webcam, then sorts them into bins using rules you set - by rarity, color, set, type, or anything else. No spreadsheets, no guesswork.",
+    "subtitle": "Mault recognizes your cards the moment you show them to a webcam, then sorts them into bins using rules you set - by rarity, color, set, type, or anything else. No spreadsheets, no guesswork.",
     "getStartedFree": "Get started free",
     "seeHowItWorks": "See how it works",
     "currentSession": "Current session",
@@ -24,32 +24,14 @@
   "stats": {
     "items": {
       "bins": "sort bins per run",
-      "rarities": "rarities tracked automatically",
+      "games": "trading card games supported",
       "collections": "collections, no limit",
-      "recognitionTime": "to recognize a card"
+      "cardsPerHour": "cards sorted per hour"
     }
   },
-  "rarity": {
-    "heading": "Your whole collection, at a glance",
-    "subtitle": "Every card gets tagged with its rarity, set, and color as it's scanned, so you always know what you have - without digging through boxes to find out.",
-    "items": {
-      "common": {
-        "label": "Common",
-        "description": "The cards that pile up fastest. Route them straight to a bulk bin so they stop clogging your scan queue."
-      },
-      "uncommon": {
-        "label": "Uncommon",
-        "description": "Build-arounds and playset staples, sorted separately from bulk so you can actually find the fourth copy."
-      },
-      "rare": {
-        "label": "Rare",
-        "description": "Know what you're holding before you buy a duplicate - see your full rare count for a set at a glance."
-      },
-      "mythic": {
-        "label": "Mythic",
-        "description": "Your best pulls get flagged and routed to their own bin automatically, never mixed in with the rest."
-      }
-    }
+  "supportedGames": {
+    "heading": "Sorts any TCG you throw at it",
+    "subtitle": "New games get added to the sorter's database, not hard-coded into the app - here's what's live right now."
   },
   "pipeline": {
     "heading": "How it works",
@@ -62,7 +44,7 @@
       },
       "recognized": {
         "title": "It's recognized instantly",
-        "description": "Magic Vault matches it against the full card database in a moment, rarity, set and all."
+        "description": "Mault matches it against the full card database in a moment, rarity, set and all."
       },
       "sorted": {
         "title": "Sorted by your rules",
@@ -76,11 +58,11 @@
   },
   "features": {
     "heading": "Everything you need to get organized",
-    "subtitle": "Magic Vault handles the sorting so you can spend more time playing and less time digging through boxes.",
+    "subtitle": "Mault handles the sorting so you can spend more time playing and less time digging through boxes.",
     "items": {
       "recognition": {
         "title": "Instant recognition",
-        "description": "No typing card names, no barcodes. Just show the card and Magic Vault knows what it is."
+        "description": "No typing card names, no barcodes. Just show the card and Mault knows what it is."
       },
       "rules": {
         "title": "Rules you control",
@@ -126,7 +108,7 @@
   },
   "cta": {
     "heading": "Stop shuffling. Start sorting.",
-    "subtitle": "Set up your first collection in minutes and let Magic Vault keep it organized from here on out.",
+    "subtitle": "Set up your first collection in minutes and let Mault keep it organized from here on out.",
     "button": "Get started free"
   }
 }

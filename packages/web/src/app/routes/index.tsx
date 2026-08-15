@@ -5,8 +5,8 @@ import { LandingHero } from "@/app/routes/landing/hero";
 import { LandingNav } from "@/app/routes/landing/nav";
 import { LandingOpenSource } from "@/app/routes/landing/open-source";
 import { LandingPipeline } from "@/app/routes/landing/pipeline";
-import { LandingRarity } from "@/app/routes/landing/rarity";
 import { LandingStats } from "@/app/routes/landing/stats";
+import { LandingSupportedGames } from "@/app/routes/landing/supported-games";
 
 export default function LandingPage() {
   return (
@@ -15,7 +15,7 @@ export default function LandingPage() {
       <main className="flex-1">
         <LandingHero />
         <LandingStats />
-        <LandingRarity />
+        <LandingSupportedGames />
         <LandingPipeline />
         <LandingFeatures />
         <LandingOpenSource />
