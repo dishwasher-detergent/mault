@@ -9,7 +9,6 @@ import {
 import { useBinConfigs } from "@/features/bins/api/use-bin-configs";
 import {
   addCollectionCard,
-  clearCollectionCards,
   loadCollectionCards,
   markCollectionCardsDownloaded,
   releaseScanLock,
@@ -51,7 +50,7 @@ export function ScannedCardsProvider({
   const { configs: binConfigs, fieldDefinitions } = useBinConfigs();
   const { sendBin, sendCommand, receiveResponse, isConnected, isReady } =
     useSerial();
-  const { activeCollection } = useCollections();
+  const { activeCollection, emptyCollection } = useCollections();
 
   const { locks, currentUserId } = useCollectionLocks();
   const locksRef = useRef(locks);
@@ -74,6 +73,7 @@ export function ScannedCardsProvider({
     isReady,
   });
   const activeCollectionRef = useRef(activeCollection);
+  const emptyCollectionRef = useRef(emptyCollection);
   const prevCollectionGuidRef = useRef<string | undefined>(undefined);
   const [autoFeed, setAutoFeedState] = useState(true);
   const autoFeedRef = useRef(true);
@@ -95,6 +95,10 @@ export function ScannedCardsProvider({
   useEffect(() => {
     fieldDefinitionsRef.current = fieldDefinitions;
   }, [fieldDefinitions]);
+
+  useEffect(() => {
+    emptyCollectionRef.current = emptyCollection;
+  }, [emptyCollection]);
 
   useEffect(() => {
     serialRef.current = {
@@ -508,7 +512,9 @@ export function ScannedCardsProvider({
     setTimerTrigger(undefined);
     setTimerResetSignal((s) => s + 1);
     if (collection) {
-      clearCollectionCards(collection.guid).catch((err) =>
+      // Empties the collection's cards without deleting the collection
+      // itself — also keeps the collections list's cardCount in sync.
+      emptyCollectionRef.current(collection.guid).catch((err) =>
         console.error("Failed to clear cards:", err),
       );
     }
