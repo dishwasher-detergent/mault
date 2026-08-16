@@ -24,7 +24,7 @@
     "description": "How many physical sorting modules are wired up. Changes the number of bins available and the sections below."
   },
   "channelLayoutToggle": {
-    "label": "PCA9685 channel layout",
+    "label": "Servo Channel layout",
     "standard": "Standard",
     "standardDescription": "Module 1 starts at channel 0. Supports up to 5 modules.",
     "legacy": "Legacy",

@@ -150,6 +150,15 @@
             "notes": "Diese werden nur benötigt, wenn du eigene Kabel in individueller Länge herstellst."
           }
         }
+      },
+      "optional": {
+        "title": "Optional",
+        "items": {
+          "webcam": {
+            "part": "USB-Webcam",
+            "notes": "Das ist die, die ich verwende - jede Webcam funktioniert, solange sich Fokus, Helligkeit usw. manuell einstellen lassen (automatische Anpassung kann Scans verfälschen)"
+          }
+        }
       }
     }
   },

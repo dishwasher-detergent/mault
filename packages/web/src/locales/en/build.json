@@ -150,6 +150,15 @@
             "notes": "These are only needed if you're making your own custom length wires."
           }
         }
+      },
+      "optional": {
+        "title": "Optional",
+        "items": {
+          "webcam": {
+            "part": "USB webcam",
+            "notes": "This is the one I use - any webcam works as long as you can manually adjust focus, brightness, etc. (auto-adjusting can throw off scans)"
+          }
+        }
       }
     }
   },
