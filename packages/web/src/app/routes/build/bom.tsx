@@ -1,15 +1,11 @@
-import { Button } from "@/components/ui/button";
 import {
   MAX_MODULES,
   MIN_MODULES,
   useModuleCount,
 } from "@/app/routes/build/use-module-count";
+import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import {
-  IconExternalLink,
-  IconMinus,
-  IconPlus,
-} from "@tabler/icons-react";
+import { IconExternalLink, IconMinus, IconPlus } from "@tabler/icons-react";
 import type { TFunction } from "i18next";
 import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { Trans, useTranslation } from "react-i18next";
@@ -268,6 +264,20 @@ const GROUPS: Group[] = [
         part: (t) => t("bom.groups.fasteners.items.dupontCrimper.part"),
         notes: (t) => t("bom.groups.fasteners.items.dupontCrimper.notes"),
         buyUrl: "https://www.amazon.com/dp/B0D1FR76Q7",
+      },
+    ],
+  },
+  {
+    key: "optional",
+    rows: [
+      {
+        key: "webcam",
+        qty: () => "1",
+        name: "Webcam",
+        part: (t) => t("bom.groups.optional.items.webcam.part"),
+        notes: (t) => t("bom.groups.optional.items.webcam.notes"),
+        buyUrl:
+          "https://www.amazon.com/Logitech-C920x-Pro-HD-Webcam/dp/B085TFF7M1",
       },
     ],
   },

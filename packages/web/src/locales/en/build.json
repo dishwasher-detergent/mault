@@ -150,6 +150,15 @@
             "notes": "These are only needed if you're making your own custom length wires."
           }
         }
+      },
+      "optional": {
+        "title": "Optional",
+        "items": {
+          "webcam": {
+            "part": "USB webcam",
+            "notes": "Logitech C920x Pro HD or similar - mounts above the scan area for card capture"
+          }
+        }
       }
     }
   },

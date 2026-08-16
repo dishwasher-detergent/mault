@@ -150,6 +150,15 @@
             "notes": "Diese werden nur benötigt, wenn du eigene Kabel in individueller Länge herstellst."
           }
         }
+      },
+      "optional": {
+        "title": "Optional",
+        "items": {
+          "webcam": {
+            "part": "USB-Webcam",
+            "notes": "Logitech C920x Pro HD oder ähnlich - wird über dem Scanbereich montiert, um Karten zu erfassen"
+          }
+        }
       }
     }
   },
