@@ -1,14 +1,14 @@
 {
   "hero": {
     "title": "Build the card sorter",
-    "description": "Parts list and assembly instructions for the physical sorting unit: a hopper feeds cards one at a time through three stacked routing modules, each capable of dropping a card into one of two side bins or passing it down to the next module - seven bins total, driven by an {{arduino}} over I²C.",
+    "description": "Parts list and assembly instructions for the physical sorting unit: a hopper feeds cards one at a time through {{modules}} stacked routing modules, each capable of dropping a card into one of two side bins or passing it down to the next module - {{bins}} bins total, driven by an {{arduino}} over I²C.",
     "firmwareLabel": "Firmware",
     "enclosureLabel": "Enclosure",
     "calibrationLabel": "Calibration",
     "modulesIntro": "Each module has three servos - a <0>bottom</0> trapdoor, a <1>paddle</1> gate, and a left/right <2>pusher</2> - plus an IR sensor. Closing every trapdoor above the target bin and opening only the ones beneath it lets a card fall to the right module before the pusher ejects it.",
     "moduleLabel": "Module {{n}}",
     "binLabel": "Bin {{n}}",
-    "bin7Note": "catch-all, all three bottoms open"
+    "catchAllBinNote": "catch-all, all {{modules}} bottoms open"
   },
   "nav": {
     "partsList": "Parts list",
@@ -27,7 +27,12 @@
   },
   "bom": {
     "heading": "Bill of materials",
-    "description": "Quantities match the firmware exactly - 3 modules × 3 servos, 1 feeder, 4 IR sensors, 10 of the PCA9685's 16 channels in use. The remaining channels are free for additional sorting modules (up to 5 modules on a single PCA9685). Check off each part as you gather it - checkmarks are saved in this browser.",
+    "description": "Quantities scale with the number of modules you're building - {{modules}} modules × 3 servos, 1 feeder, {{irSensors}} IR sensors, {{channelsUsed}} of the PCA9685's 16 channels in use. The remaining channels are free for additional sorting modules (up to 5 modules on a single PCA9685). Check off each part as you gather it - checkmarks are saved in this browser.",
+    "moduleCount": {
+      "label": "Modules",
+      "decreaseAria": "Decrease module count",
+      "increaseAria": "Increase module count"
+    },
     "progress": {
       "partsCount": "{{done}} of {{total}} parts"
     },
@@ -52,7 +57,7 @@
           },
           "sg90Positional": {
             "part": "SG90 micro servo, positional (180°)",
-            "notes": "3 per module × 3 modules - bottom trapdoor, paddle gate, pusher"
+            "notes": "3 per module × {{count}} modules - bottom trapdoor, paddle gate, pusher"
           },
           "sg90Continuous": {
             "part": "SG90 servo, modified for continuous rotation",
@@ -66,7 +71,7 @@
           "irSensor": {
             "part": "Reflective/obstacle IR sensor module",
             "partSpec": "(3-pin: VCC, GND, digital OUT)",
-            "notes": "One at the gate of modules 1, 2, 3, plus one in the hopper throat"
+            "notes": "One at the gate of each module (1-{{count}}), plus one in the hopper throat"
           }
         }
       },
@@ -122,7 +127,7 @@
           "m2x4Screw": {
             "part": "M2×4 screw",
             "partSpec": "(11 per module)",
-            "notes": "Per module: flapper (bottom/sides), pusher arms, and IR sensor mounts"
+            "notes": "11 per module ({{count}} modules): flapper (bottom/sides), pusher arms, and IR sensor mounts"
           },
           "m2x6Screw": {
             "part": "M2×6 screw",
@@ -213,6 +218,12 @@
           "printEnclosure": {
             "text": "Slice and print the enclosure and three module housings from <mesh>card_sorter.3mf</mesh> (or re-export from <source>Card Sorter.f3d</source>).",
             "note": "PLA is fine for the housings; PETG if the unit will sit somewhere warm."
+          },
+          "printSupportPieces": {
+            "text": "For {{modules}} sorting modules, print {{count}} generic base support pieces from the same file - the modules stack in a staircase, so each added tier needs one more support piece than the tier above it. Change the module count in the parts list above to update this."
+          },
+          "printBasePlates": {
+            "text": "For {{modules}} sorting modules, print {{count}} additional generic base plates - the standard build (3 modules) doesn't need any extra; print one more base plate for each sorting module beyond the initial 3. Change the module count in the parts list above to update this."
           },
           "dryFit": {
             "text": "Dry-fit each module housing before inserting any electronics - sand or adjust any tight servo pockets now."

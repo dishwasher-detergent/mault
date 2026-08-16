@@ -1,13 +1,15 @@
+import { useModuleCount } from "@/app/routes/build/use-module-count";
 import { Trans, useTranslation } from "react-i18next";
-
-const MODULE_BINS = [
-  [1, 2],
-  [3, 4],
-  [5, 6],
-] as const;
 
 export function BuildHero() {
   const { t } = useTranslation("build");
+  const { moduleCount } = useModuleCount();
+
+  const catchAllBin = moduleCount * 2 + 1;
+  const moduleBins = Array.from({ length: moduleCount }, (_, i) => [
+    i * 2 + 1,
+    i * 2 + 2,
+  ]);
 
   return (
     <section className="mx-auto max-w-4xl px-4 pt-12 pb-16">
@@ -15,7 +17,11 @@ export function BuildHero() {
         {t("hero.title")}
       </h1>
       <p className="mt-4 max-w-2xl text-sm/relaxed text-muted-foreground md:text-base/relaxed">
-        {t("hero.description", { arduino: "Arduino Uno R4 Minima" })}
+        {t("hero.description", {
+          arduino: "Arduino Uno R4 Minima",
+          modules: moduleCount,
+          bins: catchAllBin,
+        })}
       </p>
 
       <div className="mt-5 flex flex-wrap gap-x-5 gap-y-1.5 font-mono text-[11px] text-muted-foreground">
@@ -67,7 +73,7 @@ export function BuildHero() {
             />
           </p>
 
-          {MODULE_BINS.map((bins, i) => (
+          {moduleBins.map((bins, i) => (
             <div
               key={i}
               className="grid grid-cols-[110px_1fr_1fr] divide-x divide-border"
@@ -89,9 +95,9 @@ export function BuildHero() {
           <div className="grid grid-cols-[110px_1fr] divide-x divide-border">
             <div className="bg-secondary/20" />
             <div className="flex items-center justify-center gap-2 dark:bg-primary/15 bg-primary/5 px-3 py-3 font-mono text-xs font-semibold dark:text-primary-foreground text-primary">
-              {t("hero.binLabel", { n: 7 })}
+              {t("hero.binLabel", { n: catchAllBin })}
               <span className="font-sans text-[10px] font-normal dark:text-primary-foreground/70 text-primary/70">
-                - {t("hero.bin7Note")}
+                - {t("hero.catchAllBinNote", { modules: moduleCount })}
               </span>
             </div>
           </div>
