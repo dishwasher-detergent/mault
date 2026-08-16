@@ -17,7 +17,7 @@ export function LandingPipeline() {
   const { t } = useTranslation("landing");
 
   return (
-    <section id="how-it-works" className="bg-secondary/30 py-20">
+    <section id="how-it-works" className="py-20">
       <div className="mx-auto max-w-6xl px-4">
         <div className="mx-auto max-w-2xl text-center">
           <h2 className="font-heading text-2xl font-semibold tracking-tight md:text-3xl">

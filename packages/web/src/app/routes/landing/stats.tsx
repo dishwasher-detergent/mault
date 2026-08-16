@@ -1,16 +1,9 @@
 import { useTranslation } from "react-i18next";
-import { usePublicGames } from "@/app/routes/landing/use-public-games";
+import { useLandingStats } from "@/app/routes/landing/use-landing-stats";
 
 export function LandingStats() {
   const { t } = useTranslation("landing");
-  const games = usePublicGames();
-
-  const stats = [
-    { key: "bins", value: "7" },
-    { key: "games", value: games === null ? "–" : String(games.length) },
-    { key: "collections", value: "∞" },
-    { key: "cardsPerHour", value: "≤800" },
-  ] as const;
+  const stats = useLandingStats();
 
   return (
     <section className="border-y bg-secondary/30">

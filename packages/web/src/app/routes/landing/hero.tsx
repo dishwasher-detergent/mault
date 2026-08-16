@@ -1,7 +1,8 @@
 import { buttonVariants } from "@/components/ui/button";
+import { formatUsd } from "@/features/scanner/components/scan-stats";
 import { cn } from "@/lib/utils";
 import { IconArrowRight } from "@tabler/icons-react";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Trans, useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
 
@@ -14,6 +15,7 @@ interface RandomScryfallCard {
   rarity: string;
   image_uris?: { normal: string };
   card_faces?: { name: string; image_uris?: { normal: string } }[];
+  prices?: { usd?: string | null };
 }
 
 function useRandomCards(count: number) {
@@ -45,7 +47,31 @@ function useRandomCards(count: number) {
 
 export function LandingHero() {
   const { t } = useTranslation("landing");
+  const { t: tScanner } = useTranslation("scanner");
   const cards = useRandomCards(CARD_COUNT);
+
+  const stats = useMemo(() => {
+    if (cards.length === 0) return null;
+
+    const uniqueIds = new Set(cards.map((card) => card.id));
+    let totalValue = 0;
+    let priceableCount = 0;
+    for (const card of cards) {
+      const price = card.prices?.usd ? parseFloat(card.prices.usd) : 0;
+      if (price > 0) {
+        totalValue += price;
+        priceableCount++;
+      }
+    }
+
+    return {
+      totalCount: cards.length,
+      uniqueCount: uniqueIds.size,
+      totalValue,
+      avgValue: priceableCount > 0 ? totalValue / priceableCount : 0,
+      hasPricing: priceableCount > 0,
+    };
+  }, [cards]);
 
   return (
     <section className="mx-auto grid max-w-6xl items-center gap-10 px-4 pt-16 pb-20 md:grid-cols-2 md:pt-24 md:pb-28">
@@ -125,6 +151,43 @@ export function LandingHero() {
                 </div>
               );
             })}
+          </div>
+        </div>
+
+        <div className="absolute -bottom-6 -right-4 z-10 w-40 rounded-xl border bg-card shadow-lg sm:-right-8 sm:w-44">
+          <div className="grid grid-cols-2 divide-x divide-y divide-border">
+            <div className="p-2.5">
+              <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-wide">
+                {tScanner("scanStats.totalCards")}
+              </p>
+              <p className="text-sm font-semibold">
+                {stats ? stats.totalCount : "-"}
+              </p>
+            </div>
+            <div className="p-2.5">
+              <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-wide">
+                {tScanner("scanStats.unique")}
+              </p>
+              <p className="text-sm font-semibold">
+                {stats ? stats.uniqueCount : "-"}
+              </p>
+            </div>
+            <div className="p-2.5">
+              <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-wide">
+                {tScanner("scanStats.totalValue")}
+              </p>
+              <p className="text-sm font-semibold">
+                {stats?.hasPricing ? formatUsd(stats.totalValue) : "-"}
+              </p>
+            </div>
+            <div className="p-2.5">
+              <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-wide">
+                {tScanner("scanStats.avgValue")}
+              </p>
+              <p className="text-sm font-semibold">
+                {stats?.hasPricing ? formatUsd(stats.avgValue) : "-"}
+              </p>
+            </div>
           </div>
         </div>
       </div>
