@@ -20,6 +20,7 @@ import { collectionsQueryOptions } from "@/features/collections/api/collections"
 import { CreateCollectionDialog } from "@/features/collections/components/create-collection-dialog";
 import { useCollections } from "@/features/collections/api/use-collections";
 import { useOrg } from "@/features/companies/api/use-organization";
+import { cn } from "@/lib/utils";
 import {
   renameCollectionSchema,
   type RenameCollectionFormValues,
@@ -27,7 +28,6 @@ import {
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
   IconAlbum,
-  IconCheck,
   IconEdit,
   IconEraser,
   IconLayoutGrid,
@@ -166,9 +166,12 @@ export default function CollectionsPage() {
           return (
             <div
               key={collection.guid}
-              className="flex items-center gap-3 px-4 py-3"
+              className={cn(
+                "flex items-center gap-3 px-4 py-3",
+                isActive &&
+                  "rounded-lg border border-primary bg-primary/5 dark:bg-primary/15",
+              )}
             >
-              {isActive && <IconCheck className="size-4 text-primary" />}
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-medium truncate">
                   {collection.name}
