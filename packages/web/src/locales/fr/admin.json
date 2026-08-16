@@ -1,4 +1,8 @@
 {
+  "page": {
+    "title": "Admin",
+    "subtitle": "Gère les jeux, la synchronisation des cartes et la base de données de vecteurs d'image"
+  },
   "cardImageVectors": {
     "heading": "Vecteurs d'image des cartes",
     "syncStatus": {

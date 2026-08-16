@@ -143,7 +143,6 @@ async function _resolveGameId(
   return game?.id ?? null;
 }
 
-// GET /bins
 router.get("/", requireAuth, requireOrg, async (c) => {
   const orgId = c.get("orgId");
   try {
@@ -157,7 +156,6 @@ router.get("/", requireAuth, requireOrg, async (c) => {
   }
 });
 
-// PUT /bins/:guid/active
 router.put("/:guid/active", requireAuth, requireOrg, async (c) => {
   const orgId = c.get("orgId");
   const guid = c.req.param("guid");
@@ -201,7 +199,6 @@ router.put("/:guid/active", requireAuth, requireOrg, async (c) => {
   }
 });
 
-// POST /bins
 router.post("/", requireAuth, requireOrg, async (c) => {
   const orgId = c.get("orgId");
   const { name, initialBins, gameGuid } = await c.req.json<{
@@ -262,7 +259,6 @@ router.post("/", requireAuth, requireOrg, async (c) => {
   }
 });
 
-// POST /bins/copies
 router.post("/copies", requireAuth, requireOrg, async (c) => {
   const orgId = c.get("orgId");
   const { name, gameGuid } = await c.req.json<{
@@ -316,7 +312,6 @@ router.post("/copies", requireAuth, requireOrg, async (c) => {
   }
 });
 
-// PUT /bins/bins/:binNumber?gameGuid=
 router.put("/bins/:binNumber", requireAuth, requireOrg, async (c) => {
   const orgId = c.get("orgId");
   const binNumber = parseInt(c.req.param("binNumber"));
@@ -404,7 +399,6 @@ router.put("/bins/:binNumber", requireAuth, requireOrg, async (c) => {
   }
 });
 
-// DELETE /bins/bins/:binNumber?gameGuid=
 router.delete("/bins/:binNumber", requireAuth, requireOrg, async (c) => {
   const orgId = c.get("orgId");
   const binNumber = parseInt(c.req.param("binNumber"));
@@ -445,7 +439,6 @@ router.delete("/bins/:binNumber", requireAuth, requireOrg, async (c) => {
   }
 });
 
-// PUT /bins/:guid
 router.put("/:guid", requireAuth, requireOrg, async (c) => {
   const orgId = c.get("orgId");
   const guid = c.req.param("guid");
@@ -471,7 +464,6 @@ router.put("/:guid", requireAuth, requireOrg, async (c) => {
   }
 });
 
-// DELETE /bins/:guid
 router.delete("/:guid", requireAuth, requireOrg, async (c) => {
   const orgId = c.get("orgId");
   const guid = c.req.param("guid");
@@ -494,7 +486,6 @@ router.delete("/:guid", requireAuth, requireOrg, async (c) => {
   }
 });
 
-// GET /bins/history?setGuid=
 router.get("/history", requireAuth, requireOrg, async (c) => {
   const orgId = c.get("orgId");
   const setGuid = c.req.query("setGuid");
@@ -532,7 +523,6 @@ router.get("/history", requireAuth, requireOrg, async (c) => {
   }
 });
 
-// POST /bins/history/:guid/revert
 router.post("/history/:guid/revert", requireAuth, requireOrg, async (c) => {
   const orgId = c.get("orgId");
   const guid = c.req.param("guid");

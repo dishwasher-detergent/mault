@@ -104,9 +104,7 @@ export function LiveSessionStatusProvider({
           });
         });
       })
-      .catch(() => {
-        /* silent - will degrade gracefully */
-      });
+      .catch(() => {});
 
     return () => {
       cancelled = true;

@@ -1,3 +1,4 @@
+import { EmptyState } from "@/components/empty-state";
 import { getInitials, InitialsAvatar } from "@/components/ui/initials-avatar";
 import { Skeleton } from "@/components/ui/skeleton";
 import { WatcherStack } from "@/components/ui/watcher-stack";
@@ -148,13 +149,11 @@ export default function MonitorSessionsPage() {
           ))}
 
         {!isLoading && sorted.length === 0 && (
-          <div className="flex flex-col items-center justify-center py-16 gap-2 text-muted-foreground">
-            <IconHeartRateMonitor className="size-8" />
-            <p className="text-sm font-medium">
-              {t("monitorSessions.noSessionsFound")}
-            </p>
-            <p className="text-xs">{t("monitorSessions.noSessionsHint")}</p>
-          </div>
+          <EmptyState
+            icon={<IconHeartRateMonitor className="size-10" />}
+            title={t("monitorSessions.noSessionsFound")}
+            description={t("monitorSessions.noSessionsHint")}
+          />
         )}
 
         {sorted.map((collection) => {

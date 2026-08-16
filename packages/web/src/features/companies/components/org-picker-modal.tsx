@@ -1,12 +1,6 @@
 import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
+import { DynamicDialog } from "@/components/ui/responsive-dialog";
 import { neon } from "@/lib/auth/client";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { IconBuilding, IconPlus } from "@tabler/icons-react";
@@ -57,56 +51,56 @@ export function OrgPickerModal() {
   }
 
   return (
-    <Dialog open={!isLoading && !activeOrg}>
-      <DialogContent showCloseButton={false}>
-        <DialogHeader>
-          <DialogTitle>{t("orgPickerModal.title")}</DialogTitle>
-          <DialogDescription>
-            {orgs.length === 0
-              ? t("orgPickerModal.createToGetStarted")
-              : t("orgPickerModal.selectOrCreate")}
-          </DialogDescription>
-        </DialogHeader>
+    <DynamicDialog
+      open={!isLoading && !activeOrg}
+      dismissible={false}
+      title={t("orgPickerModal.title")}
+      description={
+        orgs.length === 0
+          ? t("orgPickerModal.createToGetStarted")
+          : t("orgPickerModal.selectOrCreate")
+      }
+    >
+      <div className="flex flex-col gap-2">
+        {orgs.map((org) => (
+          <Button
+            key={org.id}
+            variant="outline"
+            className="justify-start"
+            onClick={() => handlePick(org.id)}
+          >
+            <IconBuilding size={14} />
+            {org.name}
+          </Button>
+        ))}
 
-        <div className="flex flex-col gap-2">
-          {orgs.map((org) => (
-            <Button
-              key={org.id}
-              variant="outline"
-              className="justify-start"
-              onClick={() => handlePick(org.id)}
-            >
-              <IconBuilding size={14} />
-              {org.name}
+        {!showCreate ? (
+          <Button
+            variant="ghost"
+            className="justify-start"
+            onClick={() => setShowCreate(true)}
+          >
+            <IconPlus size={14} />
+            {t("orgPickerModal.newOrganization")}
+          </Button>
+        ) : (
+          <form
+            onSubmit={form.handleSubmit(handleCreate)}
+            className="flex gap-2"
+          >
+            <Input
+              placeholder={t("orgPickerModal.organizationNamePlaceholder")}
+              {...form.register("name")}
+              autoFocus
+            />
+            <Button type="submit" disabled={form.formState.isSubmitting}>
+              {form.formState.isSubmitting
+                ? t("orgPickerModal.creating")
+                : t("orgPickerModal.create")}
             </Button>
-          ))}
-
-          {!showCreate ? (
-            <Button
-              variant="ghost"
-              className="justify-start"
-              onClick={() => setShowCreate(true)}
-            >
-              <IconPlus size={14} />
-              {t("orgPickerModal.newOrganization")}
-            </Button>
-          ) : (
-            <form
-              onSubmit={form.handleSubmit(handleCreate)}
-              className="flex gap-2"
-            >
-              <Input
-                placeholder={t("orgPickerModal.organizationNamePlaceholder")}
-                {...form.register("name")}
-                autoFocus
-              />
-              <Button type="submit" disabled={form.formState.isSubmitting}>
-                {form.formState.isSubmitting ? t("orgPickerModal.creating") : t("orgPickerModal.create")}
-              </Button>
-            </form>
-          )}
-        </div>
-      </DialogContent>
-    </Dialog>
+          </form>
+        )}
+      </div>
+    </DynamicDialog>
   );
 }

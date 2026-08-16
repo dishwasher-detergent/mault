@@ -31,9 +31,7 @@ export function ModuleCountProvider({ children }: { children: ReactNode }) {
       if (parsed >= MIN_MODULES && parsed <= MAX_MODULES) {
         setModuleCountState(parsed);
       }
-    } catch {
-      // ignore malformed/unavailable storage
-    }
+    } catch {}
   }, []);
 
   const setModuleCount = (value: number) => {
@@ -41,9 +39,7 @@ export function ModuleCountProvider({ children }: { children: ReactNode }) {
     setModuleCountState(clamped);
     try {
       localStorage.setItem(MODULE_COUNT_STORAGE_KEY, String(clamped));
-    } catch {
-      // ignore unavailable storage
-    }
+    } catch {}
   };
 
   return (

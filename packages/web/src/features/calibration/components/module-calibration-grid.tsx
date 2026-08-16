@@ -216,7 +216,7 @@ export function ModuleCalibrationGrid({
         const cal = configs.find((c) => c.moduleNumber === module)?.calibration;
         return (
           <div key={module} className="p-2 flex flex-col gap-5 bg-sidebar">
-            <h2 className="text-sm font-bold font-heading">
+            <h2 className="text-sm font-semibold font-heading">
               {t("moduleCalibrationGrid.moduleHeading", { module })}
             </h2>
             {SERVOS.map((servo) => {

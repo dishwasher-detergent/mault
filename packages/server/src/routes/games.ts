@@ -39,7 +39,6 @@ router.get("/", requireAuth, async (c) => {
   }
 });
 
-// GET /games/:guid/languages — distinct languages present in the card database for this game
 router.get("/:guid/languages", requireAuth, async (c) => {
   const guid = c.req.param("guid");
   try {
@@ -64,7 +63,6 @@ router.get("/:guid/languages", requireAuth, async (c) => {
   }
 });
 
-// POST /games
 router.post("/", requireAuth, requireRole("admin"), async (c) => {
   const { key, name, dataSourceUrl, fieldDefinitions, isActive } =
     await c.req.json<GameInput>();
@@ -100,7 +98,6 @@ router.post("/", requireAuth, requireRole("admin"), async (c) => {
   }
 });
 
-// PUT /games/:guid
 router.put("/:guid", requireAuth, requireRole("admin"), async (c) => {
   const guid = c.req.param("guid");
   const { key, name, dataSourceUrl, fieldDefinitions, isActive } =
@@ -143,7 +140,6 @@ router.put("/:guid", requireAuth, requireRole("admin"), async (c) => {
   }
 });
 
-// DELETE /games/:guid
 router.delete("/:guid", requireAuth, requireRole("admin"), async (c) => {
   const guid = c.req.param("guid");
   try {

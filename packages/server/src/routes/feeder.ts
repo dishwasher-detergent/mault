@@ -6,7 +6,6 @@ import { requireAuth, requireOrg, type AppEnv } from "../middleware/auth";
 
 const router = new Hono<AppEnv>();
 
-// GET /feeder
 router.get("/", requireAuth, requireOrg, async (c) => {
   const orgId = c.get("orgId");
   try {
@@ -32,7 +31,6 @@ router.get("/", requireAuth, requireOrg, async (c) => {
   }
 });
 
-// PUT /feeder
 router.put("/", requireAuth, requireOrg, async (c) => {
   const orgId = c.get("orgId");
   const calibration = await c.req.json<FeederCalibration>();
@@ -69,7 +67,6 @@ router.put("/", requireAuth, requireOrg, async (c) => {
   }
 });
 
-// GET /feeder/history
 router.get("/history", requireAuth, requireOrg, async (c) => {
   const orgId = c.get("orgId");
   try {
@@ -102,7 +99,6 @@ router.get("/history", requireAuth, requireOrg, async (c) => {
   }
 });
 
-// POST /feeder/history/:guid/revert
 router.post("/history/:guid/revert", requireAuth, requireOrg, async (c) => {
   const orgId = c.get("orgId");
   const guid = c.req.param("guid");

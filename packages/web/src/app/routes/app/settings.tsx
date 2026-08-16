@@ -15,14 +15,14 @@ export default function SettingsPage() {
         <p className="text-xs text-muted-foreground">{t("subtitle")}</p>
       </div>
       <div className="rounded-lg border p-4 flex flex-col gap-4">
-        <h2 className="text-base font-semibold">
+        <h2 className="text-sm font-semibold font-heading">
           {t("organizations.heading")}
         </h2>
         <OrgSettings />
       </div>
       <div className="rounded-lg border p-4 flex flex-col gap-4">
         <div>
-          <h2 className="text-base font-semibold">
+          <h2 className="text-sm font-semibold font-heading">
             {t("appearance.heading")}
           </h2>
           <p className="text-xs text-muted-foreground mt-0.5">
@@ -43,7 +43,7 @@ export default function SettingsPage() {
         </div>
       </div>
       <div className="rounded-lg border p-4 flex flex-col gap-4">
-        <h2 className="text-base font-semibold">
+        <h2 className="text-sm font-semibold font-heading">
           {t("notifications.heading")}
         </h2>
         <DiscordWebhookSettings />

@@ -1,14 +1,7 @@
 import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
 import { Field, FieldError, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
+import { DynamicDialog } from "@/components/ui/responsive-dialog";
 import {
   Select,
   SelectContent,
@@ -82,17 +75,36 @@ export function RequireCollectionDialog() {
   const open = !!activeOrg && !isLoading && collections.length === 0;
 
   return (
-    <Dialog open={open}>
-      <DialogContent showCloseButton={false} className="sm:max-w-md">
-        <DialogHeader>
-          <div className="flex items-center gap-2 mb-1">
-            <IconFolderPlus className="size-5 text-primary" />
-            <DialogTitle>{t("requireDialog.title")}</DialogTitle>
-          </div>
-          <DialogDescription>{t("requireDialog.description")}</DialogDescription>
-        </DialogHeader>
-
-        <form onSubmit={form.handleSubmit(handleCreate)} className="flex flex-col gap-4">
+    <DynamicDialog
+      open={open}
+      dismissible={false}
+      className="sm:max-w-md"
+      title={
+        <div className="flex items-center gap-2">
+          <IconFolderPlus className="size-5 text-primary" />
+          {t("requireDialog.title")}
+        </div>
+      }
+      description={t("requireDialog.description")}
+      footer={
+        <Button
+          type="submit"
+          form="first-collection-form"
+          disabled={
+            !form.formState.isValid || isMutating || activeGames.length === 0
+          }
+          className="w-full"
+        >
+          {isMutating && <IconLoader2 className="size-4 animate-spin" />}
+          {t("requireDialog.submit")}
+        </Button>
+      }
+    >
+      <form
+        id="first-collection-form"
+        onSubmit={form.handleSubmit(handleCreate)}
+        className="flex flex-col gap-4"
+      >
           <Controller
             name="name"
             control={form.control}
@@ -179,21 +191,7 @@ export function RequireCollectionDialog() {
               </Field>
             )}
           />
-        </form>
-
-        <DialogFooter>
-          <Button
-            onClick={form.handleSubmit(handleCreate)}
-            disabled={
-              !form.formState.isValid || isMutating || activeGames.length === 0
-            }
-            className="w-full"
-          >
-            {isMutating && <IconLoader2 className="size-4 animate-spin" />}
-            {t("requireDialog.submit")}
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+      </form>
+    </DynamicDialog>
   );
 }

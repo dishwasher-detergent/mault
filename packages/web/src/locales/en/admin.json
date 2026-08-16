@@ -1,4 +1,8 @@
 {
+  "page": {
+    "title": "Admin",
+    "subtitle": "Manage games, sync card data, and the card image vector database"
+  },
   "cardImageVectors": {
     "heading": "Card Image Vectors",
     "syncStatus": {

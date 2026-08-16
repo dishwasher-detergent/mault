@@ -189,7 +189,6 @@ export function useCardScanner({
     handleErrorRef.current = handleError;
   }, [handleError]);
 
-  // Sync camera-level status/errors into scanner status
   useEffect(() => {
     if (cameraStatus === "requesting") {
       updateStatus("requesting-camera");

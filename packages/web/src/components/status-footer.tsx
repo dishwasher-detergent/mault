@@ -96,9 +96,7 @@ function SyncStatusItem() {
         es.addEventListener("error", (e: MessageEvent) => {
           if (e.data) setSyncState((prev) => ({ ...prev, status: "failed" }));
         });
-      } catch {
-        // ignore
-      }
+      } catch {}
     }
 
     connect();

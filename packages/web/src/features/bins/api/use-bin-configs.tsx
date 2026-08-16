@@ -107,8 +107,6 @@ export function BinConfigsProvider({
   const selectedConfig =
     configs.find((c) => c.binNumber === selectedBin) ?? configs[0];
 
-  // --- Bin-level mutations ---
-
   const saveBinMutation = useMutation({
     mutationFn: saveBinConfigAction,
     onMutate: async ({ binNumber, rules, isCatchAll }) => {
@@ -189,8 +187,6 @@ export function BinConfigsProvider({
       toast.error(t("useBinConfigs.toasts.clearBinFailed"));
     },
   });
-
-  // --- Set-level mutations ---
 
   const activateSetMutation = useMutation({
     mutationFn: activateSetAction,

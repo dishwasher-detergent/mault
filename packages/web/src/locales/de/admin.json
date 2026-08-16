@@ -1,4 +1,8 @@
 {
+  "page": {
+    "title": "Admin",
+    "subtitle": "Verwalte Spiele, die Kartensynchronisierung und die Kartenbild-Vektordatenbank"
+  },
   "cardImageVectors": {
     "heading": "Kartenbild-Vektoren",
     "syncStatus": {

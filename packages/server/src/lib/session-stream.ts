@@ -23,9 +23,7 @@ export function emitToOrg(orgId: string, event: string, data: unknown) {
   for (const writer of writers) {
     try {
       writer(event, data);
-    } catch {
-      /* writer disconnected */
-    }
+    } catch {}
   }
 }
 
@@ -36,9 +34,7 @@ function broadcastViewers(guid: string, session: SessionEntry) {
   for (const entry of session.viewers) {
     try {
       entry.writer("viewers_updated", { viewers });
-    } catch {
-      /* disconnected */
-    }
+    } catch {}
   }
   emitToOrg(session.orgId, "live_count", { guid, count: session.viewers.size });
   emitToOrg(session.orgId, "session_viewers", { guid, viewers });
@@ -82,9 +78,7 @@ export function emitToSession(
   for (const entry of session.viewers) {
     try {
       entry.writer(event, data);
-    } catch {
-      /* disconnected */
-    }
+    } catch {}
   }
 }
 

@@ -43,9 +43,7 @@ async function acquireStream(deviceId?: string): Promise<MediaStream> {
       if (constraints.length > 0) {
         await track.applyConstraints({ advanced: constraints });
       }
-    } catch {
-      // constraints not supported, ignore
-    }
+    } catch {}
   }
 
   return stream;

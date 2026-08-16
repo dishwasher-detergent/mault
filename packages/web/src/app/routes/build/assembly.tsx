@@ -296,9 +296,7 @@ function useChecklist() {
     try {
       const raw = localStorage.getItem(STORAGE_KEY);
       if (raw) setChecked(JSON.parse(raw));
-    } catch {
-      // ignore malformed/unavailable storage
-    }
+    } catch {}
   }, []);
 
   const toggle = (key: string) => {
@@ -306,9 +304,7 @@ function useChecklist() {
       const next = { ...prev, [key]: !prev[key] };
       try {
         localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
-      } catch {
-        // ignore unavailable storage
-      }
+      } catch {}
       return next;
     });
   };

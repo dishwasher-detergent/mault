@@ -295,7 +295,6 @@ export function useCalibrationPage() {
       if (Array.isArray(parsed.ir)) setIrStates(parsed.ir as boolean[]);
       if (typeof parsed.hopper === "boolean") setHopperHasCards(parsed.hopper);
     } catch {
-      // ignore parse errors
     } finally {
       irBusyRef.current = false;
     }
@@ -305,7 +304,6 @@ export function useCalibrationPage() {
     setIrMonitoring((prev) => !prev);
   }, []);
 
-  // Poll IR sensors every 300 ms while monitoring is active
   useEffect(() => {
     if (!irMonitoring || !isConnected) return;
     const id = setInterval(() => {
@@ -314,7 +312,6 @@ export function useCalibrationPage() {
     return () => clearInterval(id);
   }, [irMonitoring, isConnected, readIR]);
 
-  // Reset IR state when disconnected
   useEffect(() => {
     if (!isConnected) {
       setIrMonitoring(false);
