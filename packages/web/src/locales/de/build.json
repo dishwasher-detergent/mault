@@ -156,7 +156,7 @@
         "items": {
           "webcam": {
             "part": "USB-Webcam",
-            "notes": "Logitech C920x Pro HD oder ähnlich - wird über dem Scanbereich montiert, um Karten zu erfassen"
+            "notes": "Das ist die, die ich verwende - jede Webcam funktioniert, solange sich Fokus, Helligkeit usw. manuell einstellen lassen (automatische Anpassung kann Scans verfälschen)"
           }
         }
       }

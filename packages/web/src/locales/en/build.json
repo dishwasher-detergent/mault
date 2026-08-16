@@ -156,7 +156,7 @@
         "items": {
           "webcam": {
             "part": "USB webcam",
-            "notes": "Logitech C920x Pro HD or similar - mounts above the scan area for card capture"
+            "notes": "This is the one I use - any webcam works as long as you can manually adjust focus, brightness, etc. (auto-adjusting can throw off scans)"
           }
         }
       }
