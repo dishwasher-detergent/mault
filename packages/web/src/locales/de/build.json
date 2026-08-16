@@ -155,7 +155,7 @@
   },
   "wiring": {
     "heading": "Verkabelung",
-    "description": "Alles hängt an einem einzigen I²C-Bus (PCA9685) und vier digitalen Eingangspins (IR-Sensoren). Die Logikseite des PCA9685 wird über die 5V-Versorgung des Arduino gespeist; seine <pin>V+</pin>-Servoschiene muss von der externen Versorgung kommen, und deren Masse muss mit der Masse des Arduino verbunden sein – eine schwebende Servomasse ist der häufigste Grund, warum sich ein frisch verkabeltes Gerät nicht bewegt.",
+    "description": "Alles hängt an einem einzigen I²C-Bus (PCA9685) und {{count}} digitalen Eingangspins (IR-Sensoren). Die Logikseite des PCA9685 wird über die 5V-Versorgung des Arduino gespeist; seine <pin>V+</pin>-Servoschiene muss von der externen Versorgung kommen, und deren Masse muss mit der Masse des Arduino verbunden sein – eine schwebende Servomasse ist der häufigste Grund, warum sich ein frisch verkabeltes Gerät nicht bewegt.",
     "sections": {
       "i2c": { "title": "I²C-Bus" },
       "servoPower": { "title": "Servostromversorgung" },
@@ -180,7 +180,7 @@
       "toNegative": "PCA9685-<pin>GND</pin>-Klemmenblock <em>und</em> Arduino-<pin>GND</pin>"
     },
     "irSensors": {
-      "description": "Alle vier lesen aktiv-<strong>LOW</strong> (der Pin wird LOW, wenn eine Karte vorhanden ist) über den internen Pull-up des Arduino – verbinde den digitalen <pin>OUT</pin>-Ausgang des Sensors direkt mit dem Pin, ein externer Pull-up-Widerstand ist nicht nötig."
+      "description": "Alle {{count}} lesen aktiv-<strong>LOW</strong> (der Pin wird LOW, wenn eine Karte vorhanden ist) über den internen Pull-up des Arduino – verbinde den digitalen <pin>OUT</pin>-Ausgang des Sensors direkt mit dem Pin, ein externer Pull-up-Widerstand ist nicht nötig."
     },
     "irTable": {
       "colSensor": "Sensor",
@@ -291,10 +291,10 @@
         "title": "Die IR-Sensoren montieren",
         "steps": {
           "mountModuleIr": {
-            "text": "Befestige an jedem Modul (1, 2, 3) einen IR-Sensor am Tor, ausgerichtet quer zum Kartenweg."
+            "text": "Befestige an jedem Modul (1-{{modules}}) einen IR-Sensor am Tor, ausgerichtet quer zum Kartenweg."
           },
           "mountHopperIr": {
-            "text": "Befestige den vierten IR-Sensor im Trichterhals, direkt über der Zuführung.",
+            "text": "Befestige den verbleibenden IR-Sensor im Trichterhals, direkt über der Zuführung.",
             "note": "Dieser teilt der Zuführung mit, wann der Trichter leer ist – die Platzierung ist hier wichtiger als bei den Modulsensoren."
           }
         }
@@ -307,12 +307,12 @@
             "note": "Siehe den Abschnitt Verkabelung oben."
           },
           "wireServos": {
-            "text": "Verkabele alle 10 Servos gemäß der Kanalbelegung mit den PCA9685-Kanälen 0–13.",
+            "text": "Verkabele alle 10 Servos gemäß der Kanalbelegung mit den PCA9685-Kanälen 0–8 und 15 - die Zuführung belegt immer den letzten Kanal.",
             "note": "An der Seite der Basis gibt es Kabelkanäle mit Kabelbindern, die alles ordentlich halten."
           },
           "wireSensors": {
-            "text": "Verkabele die 4 IR-Sensoren mit D2–D5.",
-            "note": "Für Versorgung und Masse musst du 4 Leitungen zu einer zusammenführen, entweder mit einem Breadboard oder indem du sie verdrillst und verlötest. Du musst die Sensoren manuell auf eine kürzere Reichweite kalibrieren, um Fehlauslösungen zu vermeiden."
+            "text": "Verkabele die {{count}} IR-Sensoren mit den im Abschnitt „Verkabelung“ oben aufgeführten digitalen Pins - Modultore und der Trichterhals-Sensor liegen nicht durchgehend auf aufeinanderfolgenden Pins.",
+            "note": "Für Versorgung und Masse musst du {{count}} Leitungen zu einer zusammenführen, entweder mit einem Breadboard oder indem du sie verdrillst und verlötest. Du musst die Sensoren manuell auf eine kürzere Reichweite kalibrieren, um Fehlauslösungen zu vermeiden."
           },
           "wirePower": {
             "text": "Führe die externe 5V-Versorgung an die V+/GND-Klemme des PCA9685 und verbinde deren Masse mit der Masse des Arduino.",
@@ -346,7 +346,7 @@
             "text": "Zuführungs-Kalibrierungsfeld – stimme Zuführgeschwindigkeit, Impuls-/Pausenzeiten und Setzzeit auf deinen tatsächlichen Trichter ab."
           },
           "checkIr": {
-            "text": "IR-Sensorfeld – prüfe, ob alle 4 Sensoren mit einer Karte in der Hand korrekt „vorhanden“/„nicht vorhanden“ melden."
+            "text": "IR-Sensorfeld – prüfe, ob alle {{count}} Sensoren mit einer Karte in der Hand korrekt „vorhanden“/„nicht vorhanden“ melden."
           },
           "testBins": {
             "text": "Fachsteuerung – sende der Reihe nach eine Testkarte an jedes der 7 Fächer und bestätige, dass sie korrekt landet."
