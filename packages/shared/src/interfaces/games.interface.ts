@@ -15,3 +15,14 @@ export interface PublicGame {
   key: string;
   name: string;
 }
+
+export interface GameCoverage {
+  guid: string;
+  key: string;
+  name: string;
+  dataSourceUrl: string;
+  isActive: boolean;
+  cardCount: number;
+  languages: string[];
+  lastUpdated: string | null;
+}

@@ -1,5 +1,10 @@
 import { apiDelete, apiGet, apiPost, apiPut } from "@/lib/api/client";
-import type { FieldMeta, Game, Result } from "@magic-vault/shared";
+import type {
+  FieldMeta,
+  Game,
+  GameCoverage,
+  Result,
+} from "@magic-vault/shared";
 import { queryOptions } from "@tanstack/react-query";
 
 export interface GameInput {
@@ -31,6 +36,16 @@ export const gameLanguagesQueryOptions = (guid: string | undefined) =>
     enabled: !!guid,
     staleTime: Infinity,
   });
+
+export async function listGameCoverage(): Promise<Result<GameCoverage[]>> {
+  return apiGet<Result<GameCoverage[]>>("/api/games/coverage");
+}
+
+export const gameCoverageQueryOptions = queryOptions({
+  queryKey: ["games", "coverage"] as const,
+  queryFn: () => listGameCoverage().then((r) => r.data ?? []),
+  staleTime: 30_000,
+});
 
 export async function createGame(input: GameInput): Promise<Result<Game>> {
   return apiPost<Result<Game>>("/api/games", input);

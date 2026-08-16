@@ -60,5 +60,15 @@
     "numeric": "Numérique",
     "enum": "Énumération",
     "set": "Ensemble"
+  },
+  "gameCoverage": {
+    "heading": "Couverture des cartes",
+    "description": "Quels jeux de cartes à collectionner sont pris en charge, combien de cartes se trouvent dans la base de données pour chacun, et d'où proviennent ces données.",
+    "source": "Source",
+    "cardCount_one": "{{count}} carte",
+    "cardCount_other": "{{count}} cartes",
+    "inactive": "Inactif",
+    "lastUpdated": "Mis à jour le {{date}}",
+    "empty": "Aucun jeu configuré pour le moment"
   }
 }
