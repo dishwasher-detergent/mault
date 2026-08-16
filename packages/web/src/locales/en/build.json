@@ -155,7 +155,7 @@
   },
   "wiring": {
     "heading": "Wiring",
-    "description": "Everything hangs off one I²C bus (PCA9685) and four digital input pins (IR sensors). The PCA9685's logic side runs off the Arduino's 5V; its <pin>V+</pin> servo rail must come from the external supply, and that supply's ground must be tied back to the Arduino's ground - a floating servo ground is the most common reason a freshly wired unit won't move.",
+    "description": "Everything hangs off one I²C bus (PCA9685) and {{count}} digital input pins (IR sensors). The PCA9685's logic side runs off the Arduino's 5V; its <pin>V+</pin> servo rail must come from the external supply, and that supply's ground must be tied back to the Arduino's ground - a floating servo ground is the most common reason a freshly wired unit won't move.",
     "sections": {
       "i2c": { "title": "I²C bus" },
       "servoPower": { "title": "Servo power" },
@@ -180,7 +180,7 @@
       "toNegative": "PCA9685 <pin>GND</pin> terminal block <em>and</em> Arduino <pin>GND</pin>"
     },
     "irSensors": {
-      "description": "All four read active-<strong>LOW</strong> (pin goes low when a card is present) using the Arduino's internal pull-up - wire the sensor's digital <pin>OUT</pin> straight to the pin, no external pull-up resistor needed."
+      "description": "All {{count}} read active-<strong>LOW</strong> (pin goes low when a card is present) using the Arduino's internal pull-up - wire the sensor's digital <pin>OUT</pin> straight to the pin, no external pull-up resistor needed."
     },
     "irTable": {
       "colSensor": "Sensor",
@@ -291,10 +291,10 @@
         "title": "Mount the IR sensors",
         "steps": {
           "mountModuleIr": {
-            "text": "Fix one IR sensor at the gate of each module (1, 2, 3), aimed across the card path."
+            "text": "Fix one IR sensor at the gate of each module (1-{{modules}}), aimed across the card path."
           },
           "mountHopperIr": {
-            "text": "Fix the fourth IR sensor in the hopper throat, just above the feeder.",
+            "text": "Fix the remaining IR sensor in the hopper throat, just above the feeder.",
             "note": "This one tells the feeder when the hopper is empty - placement matters more than the module sensors."
           }
         }
@@ -307,12 +307,12 @@
             "note": "See the Wiring section above."
           },
           "wireServos": {
-            "text": "Wire all 10 servos into PCA9685 channels 0–13 per the channel map.",
+            "text": "Wire all 10 servos into PCA9685 channels 0–8 and 15 per the channel map - the feeder always takes the last channel.",
             "note": "There are wire channels, that use zip ties, in the side of the base to help keep everything neat."
           },
           "wireSensors": {
-            "text": "Wire the 4 IR sensors to D2–D5.",
-            "note": "For the power and ground, you will have to combine 4 wires into one, either with a breadboard or by twisting and soldering them together. You will need to manually calibrate the sensors to have a shorter throw, as to not get false positives."
+            "text": "Wire the {{count}} IR sensors to the digital pins listed in the Wiring section above - module gates and the hopper throat sensor don't all fall on consecutive pins.",
+            "note": "For the power and ground, you will have to combine {{count}} wires into one, either with a breadboard or by twisting and soldering them together. You will need to manually calibrate the sensors to have a shorter throw, as to not get false positives."
           },
           "wirePower": {
             "text": "Bring the external 5V supply into the PCA9685 V+/GND terminal, and tie its ground to the Arduino's ground.",
@@ -346,7 +346,7 @@
             "text": "Feeder Calibration Panel - tune feed speed, pulse/pause timing, and settle duration against your actual hopper."
           },
           "checkIr": {
-            "text": "IR Sensor Panel - verify all 4 sensors report present/absent correctly with a card in hand."
+            "text": "IR Sensor Panel - verify all {{count}} sensors report present/absent correctly with a card in hand."
           },
           "testBins": {
             "text": "Bin Routing Controls - send a test card to each of the 7 bins in turn and confirm it lands correctly."

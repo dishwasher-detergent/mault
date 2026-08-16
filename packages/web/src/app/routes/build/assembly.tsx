@@ -180,7 +180,9 @@ function buildPhases(t: TFunction<"build">, moduleCount: number): Phase[] {
       steps: [
         {
           key: "mount-module-ir",
-          text: t("assembly.phases.irSensors.steps.mountModuleIr.text"),
+          text: t("assembly.phases.irSensors.steps.mountModuleIr.text", {
+            modules: moduleCount,
+          }),
           images: ["/instructions/ir_sensor.jpg"],
         },
         {
@@ -207,8 +209,12 @@ function buildPhases(t: TFunction<"build">, moduleCount: number): Phase[] {
         },
         {
           key: "wire-sensors",
-          text: t("assembly.phases.wiring.steps.wireSensors.text"),
-          note: t("assembly.phases.wiring.steps.wireSensors.note"),
+          text: t("assembly.phases.wiring.steps.wireSensors.text", {
+            count: moduleCount + 1,
+          }),
+          note: t("assembly.phases.wiring.steps.wireSensors.note", {
+            count: moduleCount + 1,
+          }),
         },
         {
           key: "wire-power",
@@ -253,7 +259,9 @@ function buildPhases(t: TFunction<"build">, moduleCount: number): Phase[] {
         },
         {
           key: "check-ir",
-          text: t("assembly.phases.calibrate.steps.checkIr.text"),
+          text: t("assembly.phases.calibrate.steps.checkIr.text", {
+            count: moduleCount + 1,
+          }),
         },
         {
           key: "test-bins",

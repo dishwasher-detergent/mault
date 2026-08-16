@@ -1,3 +1,4 @@
+import { useModuleCount } from "@/app/routes/build/use-module-count";
 import { cn } from "@/lib/utils";
 import type { ReactNode } from "react";
 import { Trans, useTranslation } from "react-i18next";
@@ -56,27 +57,55 @@ function MiniTable({
 
 export function BuildWiring() {
   const { t } = useTranslation("build");
+  const { moduleCount } = useModuleCount();
+
+  const MODULE_IR_PINS = [2, 3, 4, 6, 7];
+  const HOPPER_IR_PIN = 5;
+  const irSensorCount = moduleCount + 1;
+  const irSensorRows: [string, ReactNode][] = [
+    ...Array.from({ length: moduleCount }, (_, i) => i + 1).map(
+      (n): [string, ReactNode] => [
+        t("wiring.irTable.moduleGate", { n }),
+        <Pin key={`ir-${n}`}>{`D${MODULE_IR_PINS[n - 1]}`}</Pin>,
+      ],
+    ),
+    [
+      t("wiring.irTable.hopperThroat"),
+      <Pin key="ir-hopper">{`D${HOPPER_IR_PIN}`}</Pin>,
+    ],
+  ];
 
   const REFERENCE_MODULE_COUNT = 3;
+  const FEEDER_CHANNEL = 15;
   const moduleChannelRows: [string, string][] = Array.from(
     { length: REFERENCE_MODULE_COUNT },
     (_, m) => m + 1,
   ).flatMap((n) =>
-    (["bottom", "paddle", "pusher"] as const).map((part, offset) => [
-      String((n - 1) * 3 + offset),
-      t("wiring.channelMap.modulePart", { n, part: t(`wiring.parts.${part}`) }),
-    ] as [string, string]),
+    (["bottom", "paddle", "pusher"] as const).map(
+      (part, offset) =>
+        [
+          String((n - 1) * 3 + offset),
+          t("wiring.channelMap.modulePart", {
+            n,
+            part: t(`wiring.parts.${part}`),
+          }),
+        ] as [string, string],
+    ),
   );
-  const feederChannel = REFERENCE_MODULE_COUNT * 3;
+  const lastModuleChannel = REFERENCE_MODULE_COUNT * 3;
   const unusedChannels: [string, string][] = Array.from(
-    { length: 15 - feederChannel },
-    (_, i) => [String(feederChannel + 1 + i), t("wiring.channelMap.unused")] as [string, string],
+    { length: FEEDER_CHANNEL - lastModuleChannel },
+    (_, i) =>
+      [String(lastModuleChannel + i), t("wiring.channelMap.unused")] as [
+        string,
+        string,
+      ],
   );
 
   const CHANNEL_MAP: [string, string][] = [
     ...moduleChannelRows,
-    [String(feederChannel), t("wiring.channelMap.feeder")],
     ...unusedChannels,
+    [String(FEEDER_CHANNEL), t("wiring.channelMap.feeder")],
   ];
 
   return (
@@ -88,6 +117,7 @@ export function BuildWiring() {
         <Trans
           t={t}
           i18nKey="wiring.description"
+          values={{ count: irSensorCount }}
           components={{ pin: <Pin /> }}
         />
       </p>
@@ -138,9 +168,7 @@ export function BuildWiring() {
                   i18nKey="wiring.servoPowerTable.toNegative"
                   components={{
                     pin: <Pin />,
-                    em: (
-                      <em className="text-muted-foreground not-italic" />
-                    ),
+                    em: <em className="text-muted-foreground not-italic" />,
                   }}
                 />,
               ],
@@ -156,6 +184,7 @@ export function BuildWiring() {
             <Trans
               t={t}
               i18nKey="wiring.irSensors.description"
+              values={{ count: irSensorCount }}
               components={{
                 strong: <strong className="text-foreground" />,
                 pin: <Pin />,
@@ -167,21 +196,7 @@ export function BuildWiring() {
               t("wiring.irTable.colSensor"),
               t("wiring.irTable.colPin"),
             ]}
-            rows={[
-              [
-                t("wiring.irTable.moduleGate", { n: 1 }),
-                <Pin key="p">D2</Pin>,
-              ],
-              [
-                t("wiring.irTable.moduleGate", { n: 2 }),
-                <Pin key="p">D3</Pin>,
-              ],
-              [
-                t("wiring.irTable.moduleGate", { n: 3 }),
-                <Pin key="p">D4</Pin>,
-              ],
-              [t("wiring.irTable.hopperThroat"), <Pin key="p">D5</Pin>],
-            ]}
+            rows={irSensorRows}
           />
         </div>
 
