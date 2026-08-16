@@ -49,7 +49,6 @@ router.get("/sync", requireAuth, (c) => {
   return c.json({ success: true, data: getStatus() });
 });
 
-// GET /admin/sync/sources — which games can be synced
 router.get("/sync/sources", requireAuth, requireRole("admin"), (c) => {
   const sources = Object.values(SYNC_SOURCES).map((s) => ({
     gameKey: s.gameKey,
@@ -59,7 +58,6 @@ router.get("/sync/sources", requireAuth, requireRole("admin"), (c) => {
   return c.json({ success: true, data: sources });
 });
 
-// POST /admin/sync
 router.post("/sync", requireAuth, requireRole("admin"), async (c) => {
   let gameKey: string | undefined;
   let lang = "en";
@@ -67,9 +65,7 @@ router.post("/sync", requireAuth, requireRole("admin"), async (c) => {
     const body = await c.req.json<{ gameKey?: string; lang?: string }>();
     gameKey = body.gameKey;
     if (body.lang) lang = body.lang;
-  } catch {
-    // no/invalid body
-  }
+  } catch {}
 
   if (!gameKey) {
     return c.json({ success: false, message: "gameKey is required." }, 400);
@@ -95,13 +91,11 @@ router.post("/sync", requireAuth, requireRole("admin"), async (c) => {
   return c.json({ success: true, data: getStatus() });
 });
 
-// DELETE /admin/sync
 router.delete("/sync", requireAuth, requireRole("admin"), (c) => {
   cancelSync();
   return c.json({ success: true, data: getStatus() });
 });
 
-// GET /admin/cards — paginated card list with optional search
 router.get("/cards", requireAuth, requireRole("admin"), async (c) => {
   const page = Math.max(1, Number(c.req.query("page") ?? 1));
   const limit = Math.min(100, Math.max(1, Number(c.req.query("limit") ?? 50)));
@@ -199,8 +193,6 @@ async function syncOneCard(
   return { success: true, message: `Synced: ${card.name}` };
 }
 
-// POST /admin/cards/sync — fetch + vectorize a single card by id, adding it
-// to the database if it isn't already there
 router.post("/cards/sync", requireAuth, requireRole("admin"), async (c) => {
   let gameKey: string | undefined;
   let scryfallId: string | undefined;
@@ -214,9 +206,7 @@ router.post("/cards/sync", requireAuth, requireRole("admin"), async (c) => {
     gameKey = body.gameKey;
     scryfallId = body.scryfallId?.trim();
     if (body.lang) lang = body.lang;
-  } catch {
-    // no/invalid body
-  }
+  } catch {}
 
   if (!gameKey || !scryfallId) {
     return c.json(
@@ -232,7 +222,6 @@ router.post("/cards/sync", requireAuth, requireRole("admin"), async (c) => {
   return c.json({ success: true, message: result.message });
 });
 
-// POST /admin/cards/:scryfallId/revectorize — re-fetch image and regenerate embedding
 router.post(
   "/cards/:scryfallId/revectorize",
   requireAuth,
@@ -265,7 +254,6 @@ router.post(
   },
 );
 
-// GET /admin/cards/games — distinct game keys currently in the card database, with counts
 router.get("/cards/games", requireAuth, requireRole("admin"), async (c) => {
   const rows = await db
     .select({ gameKey: cardImageVectors.gameKey, count: count() })
@@ -276,7 +264,6 @@ router.get("/cards/games", requireAuth, requireRole("admin"), async (c) => {
   return c.json({ success: true, data: rows });
 });
 
-// POST /admin/cards/dump — delete card vectors, either all of them or just one game's
 router.post("/cards/dump", requireAuth, requireRole("admin"), async (c) => {
   if (getStatus().status === "running") {
     return c.json(

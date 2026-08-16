@@ -43,6 +43,7 @@ interface DynamicDialogProps {
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
   onClose?: () => void;
+  dismissible?: boolean;
 }
 
 export function DynamicDialog({
@@ -56,6 +57,7 @@ export function DynamicDialog({
   open: controlledOpen,
   onOpenChange,
   onClose,
+  dismissible = true,
 }: DynamicDialogProps) {
   const [uncontrolledOpen, setUncontrolledOpen] = useState(false);
   const isControlled = controlledOpen !== undefined;
@@ -77,7 +79,11 @@ export function DynamicDialog({
   if (isMobile) {
     return (
       <DialogCloseContext value={close}>
-        <Drawer open={open} onOpenChange={handleOpenChange}>
+        <Drawer
+          open={open}
+          onOpenChange={handleOpenChange}
+          dismissible={dismissible}
+        >
           {trigger && <DrawerTrigger asChild>{trigger}</DrawerTrigger>}
           <DrawerContent className={className}>
             <DrawerHeader className="py-0">
@@ -104,7 +110,7 @@ export function DynamicDialog({
     <DialogCloseContext value={close}>
       <Dialog open={open} onOpenChange={handleOpenChange}>
         {trigger && <DialogTrigger render={trigger}></DialogTrigger>}
-        <DialogContent className={className}>
+        <DialogContent className={className} showCloseButton={dismissible}>
           <DialogHeader>
             <DialogTitle>{title}</DialogTitle>
             {description && (

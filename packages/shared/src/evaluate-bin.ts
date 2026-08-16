@@ -150,7 +150,6 @@ function evaluateRuleGroup(
     : results.some(Boolean);
 }
 
-/** Returns the catch-all bin config, if one exists. */
 export function getCatchAllBin(configs: BinConfig[]): BinConfig | undefined {
   return configs.find((c) => c.isCatchAll);
 }

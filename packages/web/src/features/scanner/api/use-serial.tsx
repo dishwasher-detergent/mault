@@ -149,7 +149,6 @@ export function SerialProvider({ children }: { children: React.ReactNode }) {
     const port = portRef.current;
     const reader = readerRef.current;
 
-    // Clear refs and state immediately
     portRef.current = null;
     readerRef.current = null;
     writableRef.current = null;
@@ -231,9 +230,7 @@ export function SerialProvider({ children }: { children: React.ReactNode }) {
           if (typeof parsed?.version === "string") {
             setFirmwareVersion(parsed.version);
           }
-        } catch {
-          // ignore - version just stays unknown
-        }
+        } catch {}
         if (preTestHookRef.current) {
           await preTestHookRef.current();
         }
@@ -277,7 +274,6 @@ export function SerialProvider({ children }: { children: React.ReactNode }) {
     await openPort(port);
   }, [openPort]);
 
-  // Detect physical USB unplug
   useEffect(() => {
     if (!navigator.serial) return;
     const handleDisconnect = (event: Event) => {

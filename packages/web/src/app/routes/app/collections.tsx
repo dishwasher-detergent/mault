@@ -1,4 +1,5 @@
 import { DeleteDialog } from "@/components/delete-dialog";
+import { EmptyState } from "@/components/empty-state";
 import { Button } from "@/components/ui/button";
 import { ButtonGroup } from "@/components/ui/button-group";
 import {
@@ -154,11 +155,11 @@ export default function CollectionsPage() {
           ))}
 
         {!isLoading && collections.length === 0 && (
-          <div className="flex flex-col items-center justify-center py-16 gap-2 text-muted-foreground">
-            <IconAlbum className="size-8" />
-            <p className="text-sm font-medium">{t("page.emptyTitle")}</p>
-            <p className="text-xs">{t("page.emptyDescription")}</p>
-          </div>
+          <EmptyState
+            icon={<IconAlbum className="size-10" />}
+            title={t("page.emptyTitle")}
+            description={t("page.emptyDescription")}
+          />
         )}
 
         {collections.map((collection) => {

@@ -203,9 +203,6 @@ export function extractArtRegion(
   return artCanvas;
 }
 
-/**
- * Convert a canvas to a JPEG blob for upload.
- */
 export function canvasToBlob(
   canvas: HTMLCanvasElement,
   quality = 0.95,
@@ -235,7 +232,6 @@ export function drawDetectionOverlay(
   const { topLeft, topRight, bottomRight, bottomLeft } = result.contour;
   const corners = [topLeft, topRight, bottomRight, bottomLeft];
 
-  // Read the --primary CSS variable and convert to a usable color
   const primaryRaw = getComputedStyle(document.documentElement)
     .getPropertyValue("--primary")
     .trim();

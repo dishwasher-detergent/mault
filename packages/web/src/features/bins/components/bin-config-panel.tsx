@@ -82,7 +82,7 @@ export function BinConfigPanel() {
   return (
     <div className="flex flex-col">
       <div className="flex items-center gap-4 mb-4">
-        <h2 className="font-semibold font-heading">
+        <h2 className="text-sm font-semibold font-heading">
           {t("binConfigPanel.binHeading", { number: config.binNumber })}
         </h2>
         <Controller

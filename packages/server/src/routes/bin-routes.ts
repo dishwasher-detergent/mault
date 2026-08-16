@@ -48,7 +48,6 @@ async function _buildRoutes(
   });
 }
 
-// GET /bin-routes
 router.get("/", requireAuth, requireOrg, async (c) => {
   const orgId = c.get("orgId");
   try {
@@ -65,7 +64,6 @@ router.get("/", requireAuth, requireOrg, async (c) => {
   }
 });
 
-// PUT /bin-routes/:binNumber
 router.put("/:binNumber", requireAuth, requireOrg, async (c) => {
   const orgId = c.get("orgId");
   const binNumber = parseInt(c.req.param("binNumber"));
@@ -96,7 +94,6 @@ router.put("/:binNumber", requireAuth, requireOrg, async (c) => {
   }
 });
 
-// DELETE /bin-routes/:binNumber
 router.delete("/:binNumber", requireAuth, requireOrg, async (c) => {
   const orgId = c.get("orgId");
   const binNumber = parseInt(c.req.param("binNumber"));
@@ -118,7 +115,6 @@ router.delete("/:binNumber", requireAuth, requireOrg, async (c) => {
   }
 });
 
-// GET /bin-routes/history
 router.get("/history", requireAuth, requireOrg, async (c) => {
   const orgId = c.get("orgId");
   try {
@@ -145,7 +141,6 @@ router.get("/history", requireAuth, requireOrg, async (c) => {
   }
 });
 
-// POST /bin-routes/history/:guid/revert
 router.post("/history/:guid/revert", requireAuth, requireOrg, async (c) => {
   const orgId = c.get("orgId");
   const guid = c.req.param("guid");

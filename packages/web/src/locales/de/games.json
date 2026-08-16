@@ -60,5 +60,15 @@
     "numeric": "Numerisch",
     "enum": "Enum",
     "set": "Menge"
+  },
+  "gameCoverage": {
+    "heading": "Kartenabdeckung",
+    "description": "Welche Sammelkartenspiele unterstützt werden, wie viele Karten für jedes in der Datenbank vorhanden sind und woher diese Daten stammen.",
+    "source": "Quelle",
+    "cardCount_one": "{{count}} Karte",
+    "cardCount_other": "{{count}} Karten",
+    "inactive": "Inaktiv",
+    "lastUpdated": "Aktualisiert am {{date}}",
+    "empty": "Noch keine Spiele konfiguriert"
   }
 }

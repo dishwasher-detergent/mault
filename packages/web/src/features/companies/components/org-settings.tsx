@@ -166,7 +166,7 @@ export function OrgSettings() {
               onSubmit={renameForm.handleSubmit(handleRename)}
               className="flex flex-col gap-2"
             >
-              <h3 className="text-sm font-medium">{t("orgSettings.renameHeading", { name: activeOrg.name })}</h3>
+              <h3 className="text-sm font-semibold font-heading">{t("orgSettings.renameHeading", { name: activeOrg.name })}</h3>
               <div className="flex gap-2">
                 <Input
                   placeholder={activeOrg.name}
@@ -184,7 +184,7 @@ export function OrgSettings() {
           )}
 
           <div className="flex flex-col gap-2">
-            <h3 className="text-sm font-medium">{t("orgSettings.membersHeading")}</h3>
+            <h3 className="text-sm font-semibold font-heading">{t("orgSettings.membersHeading")}</h3>
             <div className="flex flex-col divide-y divide-border rounded-lg border">
               {activeOrg.members.map((m) => (
                 <div
@@ -242,7 +242,7 @@ export function OrgSettings() {
 
           {canManage && (
             <div className="flex flex-col gap-3">
-              <h3 className="text-sm font-medium">{t("orgSettings.inviteMemberHeading")}</h3>
+              <h3 className="text-sm font-semibold font-heading">{t("orgSettings.inviteMemberHeading")}</h3>
               <form
                 onSubmit={inviteForm.handleSubmit(handleInvite)}
                 className="flex gap-2"
@@ -310,7 +310,7 @@ export function OrgSettings() {
 
           {isOwner && (
             <div className="flex flex-col gap-3 bg-destructive rounded-lg p-4 text-destructive-foreground">
-              <h3 className="text-sm font-medium">{t("orgSettings.dangerZoneHeading")}</h3>
+              <h3 className="text-sm font-semibold font-heading">{t("orgSettings.dangerZoneHeading")}</h3>
               <p className="text-xs">
                 {t("orgSettings.deleteWarning", { name: activeOrg.name })}
               </p>

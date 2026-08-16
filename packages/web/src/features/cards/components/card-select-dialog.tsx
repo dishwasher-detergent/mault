@@ -92,7 +92,6 @@ export function CardSelectDialog({
     }
   }, [open, scanId, currentCard, alternativeMatches]);
 
-  // Keyboard navigation
   useEffect(() => {
     if (!open || editing) return;
     const handler = (e: KeyboardEvent) => {

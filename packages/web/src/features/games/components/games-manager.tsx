@@ -47,7 +47,9 @@ export function GamesManager() {
         return;
       }
       setGames([...(gamesQuery.data ?? []), r.data]);
-      toast.success(t("gamesManager.toasts.createSuccess", { name: r.data.name }));
+      toast.success(
+        t("gamesManager.toasts.createSuccess", { name: r.data.name }),
+      );
     },
     onError: () => toast.error(t("gamesManager.toasts.createError")),
   });
@@ -71,7 +73,9 @@ export function GamesManager() {
           g.guid === r.data!.guid ? r.data! : g,
         ),
       );
-      toast.success(t("gamesManager.toasts.updateSuccess", { name: r.data.name }));
+      toast.success(
+        t("gamesManager.toasts.updateSuccess", { name: r.data.name }),
+      );
     },
     onError: () => toast.error(t("gamesManager.toasts.updateError")),
   });
@@ -106,7 +110,7 @@ export function GamesManager() {
             {t("gamesManager.description")}
           </p>
         </div>
-        <Button size="sm" onClick={() => setFormGame(null)}>
+        <Button onClick={() => setFormGame(null)}>
           <IconPlus size={14} />
           {t("gamesManager.addGame")}
         </Button>

@@ -180,6 +180,14 @@ const GROUPS: Group[] = [
         buyUrl:
           "https://www.amazon.com/uxcell-Silicone-Rings-Diameter-Gasket/dp/B07MNJXJSG",
       },
+      {
+        key: "bin-holders",
+        qty: (n) => String(n * 2),
+        name: "3D-printed bin holder",
+        part: (t) => t("bom.groups.structural.items.binHolders.part"),
+        notes: (t, n) =>
+          t("bom.groups.structural.items.binHolders.notes", { count: n }),
+      },
     ],
   },
   {
@@ -292,9 +300,7 @@ function usePartsChecklist() {
     try {
       const raw = localStorage.getItem(STORAGE_KEY);
       if (raw) setChecked(JSON.parse(raw));
-    } catch {
-      // ignore malformed/unavailable storage
-    }
+    } catch {}
   }, []);
 
   const toggle = (key: string) => {
@@ -302,9 +308,7 @@ function usePartsChecklist() {
       const next = { ...prev, [key]: !prev[key] };
       try {
         localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
-      } catch {
-        // ignore unavailable storage
-      }
+      } catch {}
       return next;
     });
   };

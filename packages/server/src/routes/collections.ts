@@ -140,7 +140,6 @@ async function _loadCollections(
   return { success: true, data: rows.map(toCollection) };
 }
 
-// GET /collections
 router.get("/", requireAuth, requireOrg, async (c) => {
   const orgId = c.get("orgId");
   try {
@@ -195,9 +194,7 @@ router.get("/lock-events", async (c) => {
         event: "init",
         data: JSON.stringify({ locks: initial }),
       });
-    } catch {
-      /* non-fatal */
-    }
+    } catch {}
 
     await aborted;
     unsubscribe();
@@ -266,9 +263,7 @@ router.get("/live-events", async (c) => {
           viewers: getAllSessionViewers(),
         }),
       });
-    } catch {
-      /* non-fatal */
-    }
+    } catch {}
 
     await aborted;
     unsubscribe();
@@ -315,7 +310,6 @@ router.post("/", requireAuth, requireOrg, async (c) => {
   }
 });
 
-// PUT /collections/:guid — rename
 router.put("/:guid", requireAuth, requireOrg, async (c) => {
   const orgId = c.get("orgId");
   const guid = c.req.param("guid");
@@ -341,7 +335,6 @@ router.put("/:guid", requireAuth, requireOrg, async (c) => {
   }
 });
 
-// PUT /collections/:guid/active — activate
 router.put("/:guid/active", requireAuth, requireOrg, async (c) => {
   const orgId = c.get("orgId");
   const guid = c.req.param("guid");
@@ -374,7 +367,6 @@ router.put("/:guid/active", requireAuth, requireOrg, async (c) => {
   }
 });
 
-// DELETE /collections/:guid
 router.delete("/:guid", requireAuth, requireOrg, async (c) => {
   const orgId = c.get("orgId");
   const guid = c.req.param("guid");
@@ -414,7 +406,6 @@ router.delete("/:guid", requireAuth, requireOrg, async (c) => {
   }
 });
 
-// GET /collections/:guid/cards
 router.get("/:guid/cards", requireAuth, requireOrg, async (c) => {
   const orgId = c.get("orgId");
   const guid = c.req.param("guid");
@@ -451,7 +442,6 @@ router.get("/:guid/cards", requireAuth, requireOrg, async (c) => {
   }
 });
 
-// POST /collections/:guid/cards — add card
 router.post("/:guid/cards", requireAuth, requireOrg, async (c) => {
   const guid = c.req.param("guid");
   const userId = c.get("userId");
@@ -643,7 +633,6 @@ router.put("/:guid/cards/:scanId", requireAuth, requireOrg, async (c) => {
   }
 });
 
-// DELETE /collections/:guid/cards — clear all cards in collection
 router.delete("/:guid/cards", requireAuth, requireOrg, async (c) => {
   const orgId = c.get("orgId");
   const guid = c.req.param("guid");
@@ -673,7 +662,6 @@ router.delete("/:guid/cards", requireAuth, requireOrg, async (c) => {
   }
 });
 
-// POST /collections/:guid/cards/remove-bulk — remove multiple cards
 router.post("/:guid/cards/remove-bulk", requireAuth, requireOrg, async (c) => {
   const orgId = c.get("orgId");
   const guid = c.req.param("guid");
@@ -703,7 +691,6 @@ router.post("/:guid/cards/remove-bulk", requireAuth, requireOrg, async (c) => {
   }
 });
 
-// POST /collections/:guid/cards/mark-downloaded — mark multiple cards as downloaded
 router.post(
   "/:guid/cards/mark-downloaded",
   requireAuth,
@@ -736,7 +723,6 @@ router.post(
   },
 );
 
-// DELETE /collections/:guid/cards/:scanId — remove one card
 router.delete("/:guid/cards/:scanId", requireAuth, requireOrg, async (c) => {
   const orgId = c.get("orgId");
   const { guid, scanId } = c.req.param();
@@ -763,7 +749,6 @@ router.delete("/:guid/cards/:scanId", requireAuth, requireOrg, async (c) => {
   }
 });
 
-// DELETE /collections/:guid/scan-lock — release scanner lock
 router.delete("/:guid/scan-lock", requireAuth, requireOrg, async (c) => {
   const guid = c.req.param("guid");
   const userId = c.get("userId");
@@ -819,7 +804,6 @@ router.get("/:guid/stream", async (c) => {
       writer,
     );
 
-    // Send initial state
     try {
       const initial = await authQuery(jwtClaims, async (tx) => {
         const collection = await tx.query.collections.findFirst({

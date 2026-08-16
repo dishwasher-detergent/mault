@@ -60,5 +60,15 @@
     "numeric": "Numeric",
     "enum": "Enum",
     "set": "Set"
+  },
+  "gameCoverage": {
+    "heading": "Card Coverage",
+    "description": "Which trading card games are supported, how many cards are in the database for each, and where that data comes from.",
+    "source": "Source",
+    "cardCount_one": "{{count}} card",
+    "cardCount_other": "{{count}} cards",
+    "inactive": "Inactive",
+    "lastUpdated": "Updated {{date}}",
+    "empty": "No games configured yet"
   }
 }

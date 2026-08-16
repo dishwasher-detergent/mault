@@ -86,8 +86,6 @@ export const games = pgTable(
   ],
 ).enableRLS();
 
-// ─── Org-scoped data tables ───────────────────────────────────────────────────
-
 export const binSets = pgTable(
   "bin_sets",
   {

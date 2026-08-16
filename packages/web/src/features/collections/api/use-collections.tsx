@@ -197,7 +197,6 @@ export function CollectionsProvider({
     [renameMutation],
   );
 
-  // Switching is purely local - just update localStorage
   const activate = useCallback(
     async (guid: string) => {
       setActiveGuid(guid);

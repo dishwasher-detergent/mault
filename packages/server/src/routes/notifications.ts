@@ -11,7 +11,6 @@ import { requireAuth, requireOrg, type AppEnv } from "../middleware/auth";
 
 const router = new Hono<AppEnv>();
 
-// GET /notifications
 router.get("/", requireAuth, requireOrg, async (c) => {
   const orgId = c.get("orgId");
   try {
@@ -35,7 +34,6 @@ router.get("/", requireAuth, requireOrg, async (c) => {
   }
 });
 
-// PUT /notifications
 router.put("/", requireAuth, requireOrg, async (c) => {
   const orgId = c.get("orgId");
   const body = await c.req.json<NotificationSettings>();
@@ -97,7 +95,6 @@ const TEST_EMBEDS: Record<string, { title: string; description: string }> = {
   },
 };
 
-// POST /notifications/test
 router.post("/test", requireAuth, requireOrg, async (c) => {
   const { type } = await c.req.json<{ type: string }>();
   const embed = TEST_EMBEDS[type];
@@ -116,7 +113,6 @@ router.post("/test", requireAuth, requireOrg, async (c) => {
   return c.json({ success: true, message: "Test notification sent." });
 });
 
-// POST /notifications/serial-event — raw serial command/response pair reported
 router.post("/serial-event", requireAuth, requireOrg, async (c) => {
   const event = await c.req.json<SerialEventReport>();
   const classified = classifySerialEvent(event);

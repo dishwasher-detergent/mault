@@ -83,9 +83,7 @@ export function CollectionLocksProvider({
           });
         });
       })
-      .catch(() => {
-        /* silent - will degrade gracefully */
-      });
+      .catch(() => {});
 
     return () => {
       cancelled = true;

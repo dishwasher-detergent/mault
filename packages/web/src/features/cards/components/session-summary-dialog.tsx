@@ -1,16 +1,11 @@
 import { Button } from "@/components/ui/button";
 import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { DynamicDialog } from "@/components/ui/responsive-dialog";
 import { Switch } from "@/components/ui/switch";
 import { useBinConfigs } from "@/features/bins/api/use-bin-configs";
 import {
@@ -129,13 +124,42 @@ export function SessionSummaryDialog({
   }
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md">
-        <DialogHeader>
-          <DialogTitle>{t("sessionSummaryDialog.title")}</DialogTitle>
-        </DialogHeader>
-        <div className="flex flex-col gap-3">
-          <div className="rounded-lg border bg-input/20 dark:bg-input/30 divide-y divide-border">
+    <DynamicDialog
+      open={open}
+      onOpenChange={onOpenChange}
+      className="max-w-md"
+      title={t("sessionSummaryDialog.title")}
+      footer={
+        <>
+          <Button variant="outline" onClick={() => onOpenChange(false)}>
+            {t("sessionSummaryDialog.close")}
+          </Button>
+          <DropdownMenu>
+            <DropdownMenuTrigger
+              render={<Button disabled={exportCards.length === 0} />}
+            >
+              <IconDownload className="size-4" />
+              {t("sessionSummaryDialog.download", {
+                count: exportCards.length,
+              })}
+              <IconChevronDown className="size-4" />
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              {exportOptions.map((option) => (
+                <DropdownMenuItem
+                  key={option.key}
+                  onClick={() => handleDownload(option)}
+                >
+                  {option.label}
+                </DropdownMenuItem>
+              ))}
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </>
+      }
+    >
+      <div className="flex flex-col gap-3">
+        <div className="rounded-lg border bg-input/20 dark:bg-input/30 divide-y divide-border">
             <div className="grid grid-cols-3 divide-x divide-y divide-border">
               {summaryCells.map((cell) => (
                 <StatCell
@@ -226,34 +250,7 @@ export function SessionSummaryDialog({
               />
             </label>
           )}
-
-          {/* Actions */}
-          <div className="flex gap-2 justify-end pt-1">
-            <Button variant="outline" onClick={() => onOpenChange(false)}>
-              {t("sessionSummaryDialog.close")}
-            </Button>
-            <DropdownMenu>
-              <DropdownMenuTrigger
-                render={<Button disabled={exportCards.length === 0} />}
-              >
-                <IconDownload className="size-4" />
-                {t("sessionSummaryDialog.download", { count: exportCards.length })}
-                <IconChevronDown className="size-4" />
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                {exportOptions.map((option) => (
-                  <DropdownMenuItem
-                    key={option.key}
-                    onClick={() => handleDownload(option)}
-                  >
-                    {option.label}
-                  </DropdownMenuItem>
-                ))}
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
         </div>
-      </DialogContent>
-    </Dialog>
+    </DynamicDialog>
   );
 }

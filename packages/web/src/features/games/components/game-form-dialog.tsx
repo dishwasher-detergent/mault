@@ -1,14 +1,7 @@
 import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
 import { Field, FieldError, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
+import { DynamicDialog } from "@/components/ui/responsive-dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Switch } from "@/components/ui/switch";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -135,94 +128,89 @@ export function GameFormDialog({
   }
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-2xl max-h-[85vh] flex flex-col">
-        <FormProvider {...form}>
-          <form
-            onSubmit={handleSubmit(handleFormSubmit)}
-            className="flex flex-col min-h-0 flex-1 overflow-hidden"
+    <DynamicDialog
+      open={open}
+      onOpenChange={onOpenChange}
+      className="sm:max-w-2xl"
+      title={
+        game
+          ? t("gameFormDialog.editTitle", { name: game.name })
+          : t("gameFormDialog.addTitle")
+      }
+      description={t("gameFormDialog.description")}
+      footer={
+        <>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => onOpenChange(false)}
           >
-            <DialogHeader>
-              <DialogTitle>
-                {game
-                  ? t("gameFormDialog.editTitle", { name: game.name })
-                  : t("gameFormDialog.addTitle")}
-              </DialogTitle>
-              <DialogDescription>
-                {t("gameFormDialog.description")}
-              </DialogDescription>
-            </DialogHeader>
+            {t("gameFormDialog.cancel")}
+          </Button>
+          <Button type="submit" form="game-form" disabled={isSubmitting}>
+            {isSubmitting
+              ? t("gameFormDialog.saving")
+              : game
+                ? t("gameFormDialog.saveChanges")
+                : t("gameFormDialog.createGame")}
+          </Button>
+        </>
+      }
+    >
+      <FormProvider {...form}>
+        <form
+          id="game-form"
+          onSubmit={handleSubmit(handleFormSubmit)}
+          className="flex flex-col gap-4"
+        >
+          <div className="grid grid-cols-2 gap-3">
+            <Field data-invalid={!!errors.key}>
+              <FieldLabel>{t("gameFormDialog.keyLabel")}</FieldLabel>
+              <Input
+                placeholder={t("gameFormDialog.keyPlaceholder")}
+                {...register("key")}
+                disabled={!!game}
+              />
+              <FieldError errors={[errors.key]} />
+            </Field>
+            <Field data-invalid={!!errors.name}>
+              <FieldLabel>{t("gameFormDialog.nameLabel")}</FieldLabel>
+              <Input
+                placeholder={t("gameFormDialog.namePlaceholder")}
+                {...register("name")}
+              />
+              <FieldError errors={[errors.name]} />
+            </Field>
+          </div>
 
-            <div className="flex flex-col gap-4 px-4 shrink-0">
-              <div className="grid grid-cols-2 gap-3">
-                <Field data-invalid={!!errors.key}>
-                  <FieldLabel>{t("gameFormDialog.keyLabel")}</FieldLabel>
-                  <Input
-                    placeholder={t("gameFormDialog.keyPlaceholder")}
-                    {...register("key")}
-                    disabled={!!game}
-                  />
-                  <FieldError errors={[errors.key]} />
-                </Field>
-                <Field data-invalid={!!errors.name}>
-                  <FieldLabel>{t("gameFormDialog.nameLabel")}</FieldLabel>
-                  <Input
-                    placeholder={t("gameFormDialog.namePlaceholder")}
-                    {...register("name")}
-                  />
-                  <FieldError errors={[errors.name]} />
-                </Field>
-              </div>
+          <Field data-invalid={!!errors.dataSourceUrl}>
+            <FieldLabel>{t("gameFormDialog.dataSourceUrlLabel")}</FieldLabel>
+            <Input
+              placeholder={t("gameFormDialog.dataSourceUrlPlaceholder")}
+              {...register("dataSourceUrl")}
+            />
+            <FieldError errors={[errors.dataSourceUrl]} />
+          </Field>
 
-              <Field data-invalid={!!errors.dataSourceUrl}>
-                <FieldLabel>
-                  {t("gameFormDialog.dataSourceUrlLabel")}
-                </FieldLabel>
-                <Input
-                  placeholder={t("gameFormDialog.dataSourceUrlPlaceholder")}
-                  {...register("dataSourceUrl")}
+          <Field orientation="horizontal">
+            <FieldLabel>{t("gameFormDialog.activeLabel")}</FieldLabel>
+            <Controller
+              control={control}
+              name="isActive"
+              render={({ field }) => (
+                <Switch
+                  checked={field.value}
+                  onCheckedChange={field.onChange}
                 />
-                <FieldError errors={[errors.dataSourceUrl]} />
-              </Field>
+              )}
+            />
+          </Field>
 
-              <Field orientation="horizontal">
-                <FieldLabel>{t("gameFormDialog.activeLabel")}</FieldLabel>
-                <Controller
-                  control={control}
-                  name="isActive"
-                  render={({ field }) => (
-                    <Switch
-                      checked={field.value}
-                      onCheckedChange={field.onChange}
-                    />
-                  )}
-                />
-              </Field>
-            </div>
-
-            <ScrollArea className="flex-1 min-h-0 overflow-y-auto px-4 mt-4">
-              <GameFieldDefinitionsEditor />
-            </ScrollArea>
-
-            <DialogFooter className="shrink-0 flex-row justify-end">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => onOpenChange(false)}
-              >
-                {t("gameFormDialog.cancel")}
-              </Button>
-              <Button type="submit" disabled={isSubmitting}>
-                {isSubmitting
-                  ? t("gameFormDialog.saving")
-                  : game
-                    ? t("gameFormDialog.saveChanges")
-                    : t("gameFormDialog.createGame")}
-              </Button>
-            </DialogFooter>
-          </form>
-        </FormProvider>
-      </DialogContent>
-    </Dialog>
+          <ScrollArea className="max-h-[40vh]">
+            <GameFieldDefinitionsEditor />
+          </ScrollArea>
+        </form>
+      </FormProvider>
+    </DynamicDialog>
   );
 }

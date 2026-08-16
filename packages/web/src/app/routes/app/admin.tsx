@@ -1,13 +1,5 @@
+import { DeleteDialog } from "@/components/delete-dialog";
 import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import {
   Select,
@@ -123,9 +115,7 @@ export default function AdminPage() {
             }));
           }
         });
-      } catch {
-        // ignore connection errors
-      }
+      } catch {}
     }
 
     connect();
@@ -236,7 +226,15 @@ export default function AdminPage() {
   );
 
   return (
-    <div className="flex flex-col p-6 max-w-4xl mx-auto w-full h-full overlflow-hidden">
+    <div className="flex flex-col p-4 md:p-6 max-w-4xl mx-auto w-full h-full overflow-y-auto gap-4">
+      <div>
+        <h1 className="text-lg font-semibold font-heading">
+          {t("page.title")}
+        </h1>
+        <p className="text-xs text-muted-foreground">{t("page.subtitle")}</p>
+      </div>
+
+      <div className="flex flex-col flex-none">
       <div className="rounded-lg rounded-b-none border p-4 flex flex-col gap-4">
         <div className="flex items-center justify-between gap-3">
           <div className="flex flex-col gap-0.5 min-w-0">
@@ -401,8 +399,9 @@ export default function AdminPage() {
           )}
         </div>
       </div>
+      </div>
 
-      <div className="rounded-lg border mt-4 overflow-hidden flex flex-col flex-none h-96">
+      <div className="rounded-lg border overflow-hidden flex flex-col flex-none h-96">
         <div className="px-4 py-3 border-b flex items-center justify-between gap-3">
           <div className="flex items-center gap-2 min-w-0">
             <p className="text-sm font-medium shrink-0">
@@ -499,11 +498,9 @@ export default function AdminPage() {
         )}
       </div>
 
-      <div className="mt-4">
-        <GamesManager />
-      </div>
+      <GamesManager />
 
-      <div className="rounded-lg border p-4 flex items-center justify-between mt-4 gap-3">
+      <div className="rounded-lg border p-4 flex items-center justify-between gap-3">
         <div className="flex flex-col gap-0.5 min-w-0">
           <p className="text-sm font-medium">{t("syncCardById.heading")}</p>
           <p className="text-xs text-muted-foreground">
@@ -573,7 +570,7 @@ export default function AdminPage() {
         </div>
       </div>
 
-      <div className="rounded-lg border p-4 flex items-center justify-between mt-4 gap-3">
+      <div className="rounded-lg border p-4 flex items-center justify-between gap-3">
         <div className="flex flex-col gap-0.5 min-w-0">
           <p className="text-sm font-medium">{t("dumpDatabase.heading")}</p>
           <p className="text-xs text-muted-foreground">
@@ -602,40 +599,33 @@ export default function AdminPage() {
               ))}
             </SelectContent>
           </Select>
-          <Dialog open={dumpOpen} onOpenChange={setDumpOpen}>
-            <DialogTrigger
-              render={<Button variant="destructive" disabled={isRunning} />}
-            >
-              {t("dumpDatabase.dumpButton")}
-            </DialogTrigger>
-            <DialogContent showCloseButton={false}>
-              <DialogHeader>
-                <DialogTitle>{t("dumpDatabase.dialogTitle")}</DialogTitle>
-                <DialogDescription>
-                  {dumpGameKey === "__all__"
-                    ? t("dumpDatabase.confirmAll")
-                    : t("dumpDatabase.confirmScoped", { scope: dumpGameKey })}
-                </DialogDescription>
-              </DialogHeader>
-              <DialogFooter showCloseButton>
-                <Button
-                  variant="destructive"
-                  disabled={dumpMutation.isPending}
-                  onClick={() =>
-                    dumpMutation.mutate(
-                      dumpGameKey === "__all__" ? undefined : dumpGameKey,
-                    )
-                  }
-                >
-                  {dumpMutation.isPending
-                    ? t("dumpDatabase.dumpingButton")
-                    : t("dumpDatabase.dumpButton")}
-                </Button>
-              </DialogFooter>
-            </DialogContent>
-          </Dialog>
+          <Button
+            variant="destructive"
+            disabled={isRunning}
+            onClick={() => setDumpOpen(true)}
+          >
+            {t("dumpDatabase.dumpButton")}
+          </Button>
         </div>
       </div>
+
+      <DeleteDialog
+        open={dumpOpen}
+        onOpenChange={setDumpOpen}
+        title={t("dumpDatabase.dialogTitle")}
+        description={
+          dumpGameKey === "__all__"
+            ? t("dumpDatabase.confirmAll")
+            : t("dumpDatabase.confirmScoped", { scope: dumpGameKey })
+        }
+        confirm={{ type: "keyword" }}
+        confirmLabel={t("dumpDatabase.dumpButton")}
+        onConfirm={() =>
+          dumpMutation.mutate(
+            dumpGameKey === "__all__" ? undefined : dumpGameKey,
+          )
+        }
+      />
     </div>
   );
 }

@@ -52,7 +52,6 @@ function buildConfigs(rows: CalibRow[], moduleCount: number): ModuleConfig[] {
   });
 }
 
-// GET /modules
 router.get("/", requireAuth, requireOrg, async (c) => {
   const orgId = c.get("orgId");
   try {
@@ -70,7 +69,6 @@ router.get("/", requireAuth, requireOrg, async (c) => {
   }
 });
 
-// PUT /modules/:moduleNumber
 router.put("/:moduleNumber", requireAuth, requireOrg, async (c) => {
   const orgId = c.get("orgId");
   const moduleNumber = parseInt(c.req.param("moduleNumber"));
@@ -100,7 +98,6 @@ router.put("/:moduleNumber", requireAuth, requireOrg, async (c) => {
   }
 });
 
-// GET /modules/history
 router.get("/history", requireAuth, requireOrg, async (c) => {
   const orgId = c.get("orgId");
   try {
@@ -136,7 +133,6 @@ router.get("/history", requireAuth, requireOrg, async (c) => {
   }
 });
 
-// POST /modules/history/:guid/revert
 router.post("/history/:guid/revert", requireAuth, requireOrg, async (c) => {
   const orgId = c.get("orgId");
   const guid = c.req.param("guid");

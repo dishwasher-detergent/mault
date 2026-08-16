@@ -1,4 +1,5 @@
 import { DeleteDialog } from "@/components/delete-dialog";
+import { EmptyState } from "@/components/empty-state";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
@@ -168,32 +169,33 @@ export function CardGrid() {
 
   if (!collectionsLoading && !activeCollection) {
     return (
-      <div className="flex flex-col items-center justify-center py-16 gap-3 text-muted-foreground">
-        <IconAlbum className="size-10" />
-        <div className="text-center">
-          <p className="text-sm font-medium">
-            {t("cardGrid.noCollectionSelected")}
-          </p>
-          <p className="text-xs">{t("cardGrid.createOrSelectCollection")}</p>
-        </div>
-        <Button
-          variant="outline"
-          size="sm"
-          render={
-            <Link to="/app/collections">{t("cardGrid.manageCollections")}</Link>
-          }
-        ></Button>
-      </div>
+      <EmptyState
+        icon={<IconAlbum className="size-10" />}
+        title={t("cardGrid.noCollectionSelected")}
+        description={t("cardGrid.createOrSelectCollection")}
+        action={
+          <Button
+            variant="outline"
+            size="sm"
+            render={
+              <Link to="/app/collections">
+                {t("cardGrid.manageCollections")}
+              </Link>
+            }
+          ></Button>
+        }
+      />
     );
   }
 
   if (cards.length === 0) {
     return (
       <>
-        <div className="flex flex-col items-center justify-center py-16 text-muted-foreground flex-1">
-          <p className="text-sm font-medium">{t("cardGrid.noCardsScanned")}</p>
-          <p className="text-xs">{t("cardGrid.scanToGetStarted")}</p>
-        </div>
+        <EmptyState
+          className="flex-1"
+          title={t("cardGrid.noCardsScanned")}
+          description={t("cardGrid.scanToGetStarted")}
+        />
         {scanner?.isCameraActive && (
           <div className="sticky bottom-0 z-30 bg-background/80 backdrop-blur-2xl p-2 border-t">
             <div className="flex flex-row gap-2 items-center w-full">
@@ -321,12 +323,11 @@ export function CardGrid() {
         />
       </div>
       {filteredAndSorted.length === 0 && (
-        <div className="flex flex-col items-center justify-center py-16 text-muted-foreground flex-1">
-          <p className="text-sm font-medium">
-            {t("cardGrid.noCardsMatchFilters")}
-          </p>
-          <p className="text-xs">{t("cardGrid.tryAdjusting")}</p>
-        </div>
+        <EmptyState
+          className="flex-1"
+          title={t("cardGrid.noCardsMatchFilters")}
+          description={t("cardGrid.tryAdjusting")}
+        />
       )}
       <div className="p-2 flex-1">
         <div className="grid grid-cols-3 @md:grid-cols-4 @4xl:grid-cols-6 gap-2">
