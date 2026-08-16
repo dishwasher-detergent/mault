@@ -222,7 +222,9 @@ export function SerialProvider({ children }: { children: React.ReactNode }) {
       });
 
       (async () => {
-        const bootLine = await waitForLine(5000);
+        const bootLinePromise = waitForLine(5000);
+        await sendCommand(JSON.stringify({ getStatus: true }) + "\n");
+        const bootLine = await bootLinePromise;
         if (!portRef.current) return;
         try {
           const parsed = bootLine ? JSON.parse(bootLine) : null;
@@ -255,7 +257,7 @@ export function SerialProvider({ children }: { children: React.ReactNode }) {
 
       return true;
     },
-    [startReading, waitForLine, sendTest, disconnect, t],
+    [startReading, waitForLine, sendCommand, sendTest, disconnect, t],
   );
 
   const connect = useCallback(async () => {

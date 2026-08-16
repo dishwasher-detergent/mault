@@ -95,7 +95,14 @@ export function ModuleConfigsProvider({
         }
       }
     });
-  }, [registerPreTestHook, queryClient, sendCommand, receiveResponse, t]);
+  }, [
+    registerPreTestHook,
+    queryClient,
+    sendCommand,
+    receiveResponse,
+    activeOrg,
+    t,
+  ]);
 
   const saveConfigMutation = useMutation({
     mutationFn: ({
