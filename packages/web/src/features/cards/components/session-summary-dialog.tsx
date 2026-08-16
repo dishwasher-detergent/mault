@@ -93,6 +93,7 @@ export function SessionSummaryDialog({
         },
       ]
     : [
+        { key: "tcgplayer", label: "TCGPlayer", fn: exportToTcgplayer },
         {
           key: "csv",
           label: "CSV",
