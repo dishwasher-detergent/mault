@@ -5,6 +5,7 @@ import { ChannelLayoutBanner } from "@/components/channel-layout-banner";
 import { EmailVerificationBanner } from "@/components/email-verification-banner";
 import { EnvBanner } from "@/components/env-banner";
 import { FirmwareVersionBanner } from "@/components/firmware-version-banner";
+import { FirmwareVersionMissingBanner } from "@/components/firmware-version-missing-banner";
 import { RequireCollectionDialog } from "@/components/require-collection-dialog";
 import { FooterDivider, StatusFooter } from "@/components/status-footer";
 import { useIsMobile } from "@/hooks/use-is-mobile";
@@ -21,6 +22,7 @@ export default function AppLayout() {
           <EmailVerificationBanner />
           <ChannelLayoutBanner />
           <FirmwareVersionBanner />
+          <FirmwareVersionMissingBanner />
           <main className="flex-1 min-h-0 overflow-hidden flex flex-col">
             <Outlet />
           </main>
@@ -36,6 +38,7 @@ export default function AppLayout() {
             <EmailVerificationBanner />
             <ChannelLayoutBanner />
             <FirmwareVersionBanner />
+            <FirmwareVersionMissingBanner />
             <div className="flex flex-row flex-1 min-h-0 overflow-hidden">
               <AppNav />
               <main className="flex-1 min-w-0 overflow-hidden flex flex-col bg-background/70 dark:bg-background/60">

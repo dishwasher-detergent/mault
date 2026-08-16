@@ -45,6 +45,7 @@ export function ScannerOverlay({
   isCameraActive,
   isConnected,
   isReady,
+  firmwareVersion,
   hasCatchAll,
   autoFeed,
   onRetryError,
@@ -82,6 +83,15 @@ export function ScannerOverlay({
       <StatusPill variant="loading">
         <IconLoader2 className="size-3.5 animate-spin shrink-0" />
         <span>{t("scannerOverlay.testingScanner")}</span>
+      </StatusPill>
+    );
+  }
+
+  if (!firmwareVersion) {
+    return (
+      <StatusPill variant="error">
+        <IconAlertTriangle className="size-3.5 shrink-0" />
+        <span>{t("scannerOverlay.firmwareVersionMissing")}</span>
       </StatusPill>
     );
   }
