@@ -1,0 +1,186 @@
+{
+  "servos": {
+    "bottom": {
+      "label": "Trappe inférieure",
+      "closed": "Définir fermé",
+      "open": "Définir ouvert"
+    },
+    "paddle": {
+      "label": "Palettes",
+      "closed": "Définir fermé",
+      "open": "Définir ouvert"
+    },
+    "pusher": {
+      "label": "Poussoir",
+      "left": "Définir à gauche",
+      "neutral": "Définir neutre",
+      "right": "Définir à droite"
+    }
+  },
+  "moduleCountStepper": {
+    "label": "Modules de tri",
+    "value": "{{count}} module",
+    "value_other": "{{count}} modules",
+    "description": "Nombre de modules de tri physiques câblés. Modifie le nombre de bacs disponibles et les sections ci-dessous."
+  },
+  "channelLayoutToggle": {
+    "label": "Disposition des canaux de servo",
+    "standard": "Standard",
+    "standardDescription": "Le module 1 commence au canal 0. Prend en charge jusqu'à 5 modules.",
+    "legacy": "Ancienne",
+    "legacyDescription": "Le module 1 commence au canal 4 (canaux 0-3 réservés aux LED d'état). Prend en charge jusqu'à 3 modules. Utilise cette option si ton matériel a été câblé avant l'ajout de l'extension de modules.",
+    "legacyBanner": "Tu utilises l'ancienne disposition des canaux, limitée à 3 modules. Recâble le module 1 pour qu'il commence au canal 0 afin de prendre en charge jusqu'à 5 modules.",
+    "legacyBannerAction": "Passer à la disposition standard"
+  },
+  "sections": {
+    "moduleSetup": "Modules et routage",
+    "scanRegion": "Zone de scan",
+    "calibration": "Calibration du chargeur et des modules",
+    "moduleCalibration": "Calibration des modules"
+  },
+  "binRoutingAssignment": {
+    "label": "Attribution du routage des bacs",
+    "resetToDefaults": "Réinitialiser aux valeurs par défaut",
+    "binLabel": "Bac {{bin}}",
+    "moduleLeft": "Module {{module}} — Gauche",
+    "moduleRight": "Module {{module}} — Droite",
+    "moduleBottom": "Module {{module}} — Bas"
+  },
+  "binRoutingControls": {
+    "label": "Routage des bacs",
+    "feed": "Alimenter",
+    "binActive": "Bac {{bin}}…",
+    "running": "En cours…",
+    "sampleRun": "Test d'exécution",
+    "binButton": "Bac {{bin}}"
+  },
+  "feederCalibrationPanel": {
+    "heading": "Chargeur",
+    "speedLabel": "Vitesse (PWM)",
+    "speedTooltip": "Vitesse du moteur du chargeur en valeur PWM brute (120 = le plus lent, 490 = le plus rapide accepté par le contrôleur moteur)",
+    "setSpeed": "Définir la vitesse",
+    "timeoutLabel": "Délai d'expiration (ms)",
+    "setTimeout": "Définir le délai d'expiration",
+    "msValue": "{{value}} ms",
+    "pulseDurationLabel": "Durée de l'impulsion (ms)",
+    "continuous": "Continu",
+    "continuousFeedButton": "Alimentation continue",
+    "setPulseDuration": "Définir la durée de l'impulsion",
+    "pauseDurationLabel": "Durée de la pause (ms)",
+    "setPauseDuration": "Définir la durée de la pause",
+    "settleDurationLabel": "Délai de détection de la dernière carte (ms)",
+    "settleDurationDescription": "Temps supplémentaire à continuer d'alimenter une fois que le capteur du module 1 détecte la dernière carte de la trémie, afin qu'elle parcoure tout le mécanisme avant l'arrêt du moteur.",
+    "setSettleDuration": "Définir le délai de détection de la dernière carte"
+  },
+  "irSensorPanel": {
+    "label": "Capteurs IR",
+    "tooltip": "Capteurs infrarouges détectant la présence d'une carte sur le trajet d'alimentation de chaque module",
+    "stop": "Arrêter",
+    "monitor": "Surveiller",
+    "monitorTooltip": "Interroge en continu les capteurs IR et met à jour les badges ci-dessous en temps réel",
+    "read": "Lire",
+    "readTooltip": "Effectue une lecture instantanée des capteurs IR",
+    "moduleLabel": "Module {{module}}",
+    "detectedTooltip": "Une carte est actuellement détectée au capteur IR du module {{module}}",
+    "notDetectedTooltip": "Aucune carte actuellement détectée au capteur IR du module {{module}}",
+    "hopperEmpty": "Trémie vide",
+    "hopper": "Trémie",
+    "hopperTooltip": "Indique si le capteur IR de la trémie détecte actuellement des cartes en attente d'alimentation"
+  },
+  "moduleCalibrationGrid": {
+    "moduleHeading": "Module {{module}}",
+    "resetTo": "Réinitialiser à {{position}}",
+    "sliderTooltip": "Position brute de l'impulsion du servo (120-490). Utilise les boutons de position ci-dessus, puis un bouton « Définir » pour enregistrer ce point de calibration.",
+    "positions": {
+      "open": "Ouvert",
+      "left": "Gauche",
+      "right": "Droite",
+      "neutral": "Neutre"
+    }
+  },
+  "scanRegionCalibrationPanel": {
+    "instructions": "Fais glisser le cadre pour le déplacer, ou fais glisser la poignée pour le redimensionner. Aligne-le avec une carte posée au module 1.",
+    "connecting": "Connexion…",
+    "reconnectWebcam": "Reconnecter la webcam",
+    "connectWebcam": "Connecter la webcam",
+    "waitingForCamera": "En attente de la caméra…",
+    "resetToDefault": "Réinitialiser par défaut",
+    "saving": "Enregistrement…",
+    "saveScanRegion": "Enregistrer la zone de scan",
+    "savedSummary": "Enregistré : {{coverage}} % de couverture, décalage {{offsetX}} % / {{offsetY}} %",
+    "msValue": "{{value}} ms",
+    "captureSettleLabel": "Délai avant capture (ms)",
+    "captureSettleDescription": "Temps d'attente après que le chargeur confirme l'arrivée d'une carte avant de capturer une image, pour qu'elle soit parfaitement immobile et nette.",
+    "setCaptureSettle": "Définir le délai avant capture"
+  },
+  "useCalibrationPage": {
+    "toasts": {
+      "notCalibrated": "Modules non calibrés",
+      "notCalibratedDescription": "Configure les trois modules avant de lancer la séquence de test.",
+      "runningTest": "Séquence de test en cours…",
+      "testComplete": "Test terminé",
+      "testFailed": "Échec du test",
+      "noResponse": "Aucune réponse de la trieuse.",
+      "binFailed": "Échec du bac {{bin}}",
+      "startingSampleRun": "Démarrage du test d'exécution…",
+      "sampleRunStopped": "Test d'exécution arrêté au bac {{bin}}",
+      "sampleRunComplete": "Test d'exécution terminé"
+    }
+  },
+  "useFeederConfig": {
+    "toasts": {
+      "notSynced": "Calibration du chargeur non synchronisée",
+      "unexpectedResponse": "Réponse inattendue : {{response}}",
+      "noResponse": "Aucune réponse de la trieuse.",
+      "saveFailed": "Échec de l'enregistrement de la configuration du chargeur"
+    }
+  },
+  "useModuleConfigs": {
+    "toasts": {
+      "notSynced": "Calibration du module {{module}} non synchronisée",
+      "unexpectedResponse": "Réponse inattendue : {{response}}",
+      "noResponse": "Aucune réponse de la trieuse.",
+      "saveFailed": "Échec de l'enregistrement de la configuration du module"
+    }
+  },
+  "useBinRoutes": {
+    "toasts": {
+      "saveFailed": "Échec de l'enregistrement du routage du bac",
+      "resetSuccess": "Routage des bacs réinitialisé aux valeurs par défaut",
+      "resetFailed": "Échec de la réinitialisation du routage des bacs"
+    }
+  },
+  "calibratePage": {
+    "moduleHistory": {
+      "bottom": "Bas",
+      "paddle": "Palette",
+      "pusher": "Poussoir",
+      "moduleLabel": "Module {{module}}"
+    },
+    "feederHistory": {
+      "speed": "Vitesse",
+      "duration": "Durée",
+      "pulse": "Impulsion",
+      "pause": "Pause",
+      "settle": "Délai de détection finale",
+      "continuous": "Continu",
+      "msValue": "{{value}} ms"
+    },
+    "toasts": {
+      "moduleReverted": "Calibration du module rétablie",
+      "feederReverted": "Calibration du chargeur rétablie",
+      "revertFailed": "Échec du rétablissement"
+    },
+    "disconnect": "Déconnecter",
+    "connectDevice": "Connecter l'appareil",
+    "testing": "Test en cours…",
+    "runTest": "Lancer le test",
+    "calibrateBeforeTest": "Calibre tous les modules avant de lancer le test",
+    "scanRegionLabel": "Zone de scan",
+    "feederCalibrationLabel": "Calibration du chargeur",
+    "history": "Historique",
+    "moduleCalibrationLabel": "Calibration des modules",
+    "feederHistoryTitle": "Historique du chargeur",
+    "moduleHistoryTitle": "Historique des modules"
+  }
+}

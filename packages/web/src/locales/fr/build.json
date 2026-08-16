@@ -1,0 +1,378 @@
+{
+  "hero": {
+    "title": "Construire la trieuse de cartes",
+    "description": "Liste des pièces et instructions de montage pour l'unité de tri physique : une trémie fait passer les cartes une par une à travers {{modules}} modules de routage empilés, chacun capable de faire tomber une carte dans l'un de ses deux bacs latéraux ou de la transmettre au module suivant - {{bins}} bacs au total, pilotés par un {{arduino}} via I²C.",
+    "firmwareLabel": "Firmware",
+    "enclosureLabel": "Boîtier",
+    "calibrationLabel": "Calibration",
+    "modulesIntro": "Chaque module possède trois servos - une trappe <0>inférieure</0>, une <1>palette</1> de porte, et un <2>poussoir</2> gauche/droite - plus un capteur IR. Fermer chaque trappe au-dessus du bac cible et n'ouvrir que celles en dessous permet à une carte de tomber jusqu'au bon module avant que le poussoir ne l'éjecte.",
+    "moduleLabel": "Module {{n}}",
+    "binLabel": "Bac {{n}}",
+    "catchAllBinNote": "fourre-tout, les {{modules}} fonds ouverts"
+  },
+  "nav": {
+    "partsList": "Liste des pièces",
+    "wiring": "Câblage",
+    "assembly": "Assemblage",
+    "reportIssue": "Signaler un problème",
+    "joinDiscordAria": "Rejoindre le Discord",
+    "openApp": "Ouvrir l'application",
+    "getStarted": "Commencer"
+  },
+  "footer": {
+    "openSource": "Open source",
+    "reportIssue": "Signaler un problème",
+    "signIn": "Se connecter",
+    "copyright": "© {{year}} Mault"
+  },
+  "bom": {
+    "heading": "Nomenclature",
+    "description": "Les quantités évoluent avec le nombre de modules que tu construis - {{modules}} modules × 3 servos, 1 chargeur, {{irSensors}} capteurs IR, {{channelsUsed}} des 16 canaux du PCA9685 utilisés. Les canaux restants sont libres pour des modules de tri supplémentaires (jusqu'à 5 modules sur un seul PCA9685). Coche chaque pièce au fur et à mesure que tu la récupères - les coches sont enregistrées dans ce navigateur.",
+    "moduleCount": {
+      "label": "Modules",
+      "decreaseAria": "Diminuer le nombre de modules",
+      "increaseAria": "Augmenter le nombre de modules"
+    },
+    "progress": {
+      "partsCount": "{{done}} sur {{total}} pièces"
+    },
+    "table": {
+      "qty": "Qté",
+      "part": "Pièce",
+      "notes": "Remarques",
+      "buy": "Acheter"
+    },
+    "checkboxAriaLabel": "J'ai {{qty}} pièce",
+    "buyAriaLabel": "Acheter {{part}}",
+    "groups": {
+      "electronics": {
+        "title": "Électronique",
+        "items": {
+          "arduino": {
+            "notes": "Exécute <code>{{path}}</code> ; connexion USB à l'ordinateur hôte pour le Web Serial"
+          },
+          "pca9685": {
+            "part": "Adafruit PCA9685, driver PWM/servo 16 canaux 12 bits",
+            "notes": "Driver de servo I²C - pilote les 10 servos"
+          },
+          "sg90Positional": {
+            "part": "Micro servo SG90, positionnel (180°)",
+            "notes": "3 par module × {{count}} modules - trappe inférieure, porte à palette, poussoir"
+          },
+          "sg90Continuous": {
+            "part": "Servo SG90, modifié pour rotation continue",
+            "notes": "Chargeur - fait sortir les cartes de la trémie vers le module 1"
+          }
+        }
+      },
+      "sensing": {
+        "title": "Détection",
+        "items": {
+          "irSensor": {
+            "part": "Module capteur IR réfléchissant/obstacle",
+            "partSpec": "(3 broches : VCC, GND, sortie numérique)",
+            "notes": "Un à la porte de chaque module (1 à {{count}}), plus un dans la gorge de la trémie"
+          }
+        }
+      },
+      "power": {
+        "title": "Alimentation",
+        "items": {
+          "psu": {
+            "part": "Alimentation régulée 5V, 4–10A",
+            "notes": "Alimentation dédiée au bus des servos vers la borne V+ du PCA9685 - ne pas alimenter 10 servos depuis le 5V embarqué de l'Arduino"
+          },
+          "usbCable": {
+            "part": "Câble USB-A vers USB-C",
+            "notes": "Arduino Uno R4 Minima ↔ ordinateur hôte"
+          },
+          "barrelJack": {
+            "part": "Prise jack CC ou pigtail à bornier à vis",
+            "notes": "Adapte la sortie de l'alimentation à la borne V+ / GND du PCA9685"
+          }
+        }
+      },
+      "structural": {
+        "title": "Structurel",
+        "items": {
+          "enclosure": {
+            "part": "Boîtier et logements de modules imprimés en 3D",
+            "notes": "Imprime à partir de <mesh>card_sorter.3mf</mesh> (maillage, prêt pour le trancheur) ou <source>Card Sorter.f3d</source> (source Fusion 360)"
+          },
+          "filament": {
+            "part": "Filament PLA ou PETG",
+            "notes": "Quantité selon l'estimation de ton trancheur pour le modèle ci-dessus"
+          },
+          "oRing": {
+            "part": "Joint torique 20mm DI 26mm DE 3mm largeur",
+            "notes": "Monté sur le rouleau du chargeur pour l'adhérence sur la carte"
+          }
+        }
+      },
+      "fasteners": {
+        "title": "Fixations et fournitures de câblage",
+        "items": {
+          "m3x6Screw": {
+            "part": "Vis M3×6",
+            "notes": "14 fixent chaque base de bac au boîtier ; 8 fixent les panneaux de base à la base"
+          },
+          "m3Nut": {
+            "part": "Écrou M3",
+            "notes": "Associé aux vis M3×6 des panneaux de base"
+          },
+          "m3x8Screw": {
+            "part": "Vis M3×8",
+            "notes": "Fixe le tube de la trémie"
+          },
+          "m2x4Screw": {
+            "part": "Vis M2×4",
+            "partSpec": "(11 par module)",
+            "notes": "11 par module ({{count}} modules) : trappe (bas/côtés), bras du poussoir, et supports du capteur IR"
+          },
+          "m2x6Screw": {
+            "part": "Vis M2×6",
+            "notes": "Fixe l'Arduino et la carte driver de servo PCA9685 aux panneaux de base"
+          },
+          "servoHornScrew": {
+            "part": "Vis de palonnier de servo (incluse avec les servos)",
+            "notes": "Incluse avec chaque servo ; fixe le palonnier à l'axe"
+          },
+          "hookupWire": {
+            "part": "Fil basse tension",
+            "notes": "Capteur IR/Servos. Avec ceux-ci, tu devras peut-être en chaîner certains ensemble, utilise du ruban électrique pour t'assurer qu'ils ne se séparent pas."
+          },
+          "dupontConnectors": {
+            "part": "Connecteurs Dupont (optionnel)",
+            "notes": "Nécessaires uniquement si tu fabriques tes propres câbles sur mesure."
+          },
+          "dupontCrimper": {
+            "part": "Sertisseuse Dupont (optionnel)",
+            "notes": "Nécessaire uniquement si tu fabriques tes propres câbles sur mesure."
+          }
+        }
+      },
+      "optional": {
+        "title": "Optionnel",
+        "items": {
+          "webcam": {
+            "part": "Webcam USB",
+            "notes": "C'est celle que j'utilise - n'importe quelle webcam fonctionne tant que tu peux régler manuellement la mise au point, la luminosité, etc. (le réglage automatique peut fausser les scans)"
+          }
+        }
+      }
+    }
+  },
+  "wiring": {
+    "heading": "Câblage",
+    "description": "Tout dépend d'un seul bus I²C (PCA9685) et de {{count}} broches d'entrée numériques (capteurs IR). Le côté logique du PCA9685 fonctionne sur le 5V de l'Arduino ; son rail servo <pin>V+</pin> doit provenir de l'alimentation externe, et la masse de cette alimentation doit être reliée à la masse de l'Arduino - une masse de servo flottante est la cause la plus courante d'une unité fraîchement câblée qui ne bouge pas.",
+    "sections": {
+      "i2c": { "title": "Bus I²C" },
+      "servoPower": { "title": "Alimentation des servos" },
+      "irSensors": { "title": "Capteurs IR" },
+      "channelMap": { "title": "Carte des canaux du PCA9685" },
+      "diagram": {
+        "title": "Schéma de câblage",
+        "alt": "Schéma de câblage montrant les connexions du PCA9685, de l'Arduino, des servos et des capteurs IR"
+      }
+    },
+    "i2cTable": {
+      "colPcaPin": "Broche PCA9685",
+      "colArduino": "Arduino Uno R4 Minima",
+      "vccLogic": "VCC (logique)"
+    },
+    "servoPowerTable": {
+      "colFrom": "De",
+      "colTo": "Vers",
+      "psuPlus": "Alimentation externe 5V, +",
+      "psuMinus": "Alimentation externe 5V, −",
+      "toPositive": "Bornier <pin>V+</pin> du PCA9685",
+      "toNegative": "Bornier <pin>GND</pin> du PCA9685 <em>et</em> <pin>GND</pin> de l'Arduino"
+    },
+    "irSensors": {
+      "description": "Les {{count}} capteurs sont actifs à l'état <strong>BAS</strong> (la broche passe à l'état bas quand une carte est présente) en utilisant la résistance de tirage interne de l'Arduino - câble la sortie numérique <pin>OUT</pin> du capteur directement à la broche, aucune résistance de tirage externe n'est nécessaire."
+    },
+    "irTable": {
+      "colSensor": "Capteur",
+      "colPin": "Broche Arduino",
+      "moduleGate": "Porte du module {{n}}",
+      "hopperThroat": "Gorge de la trémie"
+    },
+    "channelTable": {
+      "colCh": "Can.",
+      "colAssignment": "Affectation"
+    },
+    "channelMap": {
+      "unused": "Inutilisé - disponible pour des modules de tri supplémentaires",
+      "modulePart": "Module {{n}} - {{part}}",
+      "feeder": "Chargeur (rotation continue)"
+    },
+    "parts": {
+      "bottom": "bas",
+      "paddle": "palette",
+      "pusher": "poussoir"
+    }
+  },
+  "assembly": {
+    "heading": "Assemblage",
+    "description": "Huit phases, en commençant par le travail structurel. Les cases à cocher sont enregistrées dans ce navigateur, tu peux donc fermer l'onglet en cours de construction et reprendre plus tard.",
+    "helpText": "Bloqué sur une étape ? <a>Rejoins le Discord</a> si tu as besoin d'aide.",
+    "progress": {
+      "stepsCount": "{{done}} sur {{total}} étapes"
+    },
+    "phaseLabel": "Phase {{n}}",
+    "phases": {
+      "print": {
+        "title": "Imprimer les pièces structurelles",
+        "steps": {
+          "printEnclosure": {
+            "text": "Tranche et imprime le boîtier et les trois logements de modules à partir de <mesh>card_sorter.3mf</mesh> (ou réexporte depuis <source>Card Sorter.f3d</source>).",
+            "note": "Le PLA convient pour les logements ; le PETG si l'unité doit rester dans un endroit chaud."
+          },
+          "printSupportPieces": {
+            "text": "Pour {{modules}} modules de tri, imprime {{count}} pièces de support de base génériques à partir du même fichier - les modules s'empilent en escalier, donc chaque niveau ajouté nécessite une pièce de support de plus que le niveau au-dessus. Change le nombre de modules dans la liste des pièces ci-dessus pour mettre ce nombre à jour."
+          },
+          "printBasePlates": {
+            "text": "Pour {{modules}} modules de tri, imprime {{count}} plaques de base génériques supplémentaires - la version standard (3 modules) n'en nécessite aucune de plus ; imprime une plaque de base supplémentaire pour chaque module de tri au-delà des 3 premiers. Change le nombre de modules dans la liste des pièces ci-dessus pour mettre ce nombre à jour."
+          },
+          "dryFit": {
+            "text": "Fais un essai à sec de chaque logement de module avant d'insérer l'électronique - ponce ou ajuste dès maintenant les logements de servo trop serrés."
+          },
+          "mountBoardsToPanels": {
+            "text": "Fixe l'Arduino et la carte driver de servo PCA9685 aux panneaux de base avec 8 vis M2×6."
+          },
+          "attachBasePanels": {
+            "text": "Fixe les panneaux de base à la base avec 8 vis M3×6 et 8 écrous M3.",
+            "note": "Fais ceci après avoir monté l'Arduino et le PCA9685 sur les panneaux - les cartes sont bien plus difficiles à atteindre une fois les panneaux fixés à la base."
+          }
+        }
+      },
+      "firmware": {
+        "title": "Flasher le firmware",
+        "steps": {
+          "installLibraries": {
+            "text": "Dans l'IDE Arduino, installe les bibliothèques ArduinoJson et Adafruit PWM Servo Driver.",
+            "note": "Gestionnaire de bibliothèques → recherche chacune par son nom."
+          },
+          "uploadSketch": {
+            "text": "Sélectionne la carte « Arduino Uno R4 Minima », sélectionne le bon port, puis téléverse arduino/main/main.ino."
+          },
+          "confirmReady": {
+            "text": "Ouvre le moniteur série à 9600 bauds et confirme que tu vois {\"status\":\"ready\"} après la réinitialisation de la carte."
+          }
+        }
+      },
+      "servos": {
+        "title": "Monter les servos",
+        "steps": {
+          "mountModuleServos": {
+            "text": "Installe le servo inférieur, le servo de palette et le poussoir dans chacun des 3 logements de module (9 servos au total).",
+            "note": "Centre chaque servo à son impulsion neutre avant de visser le palonnier, afin que la course mécanique corresponde à la course ouvert/fermé du firmware."
+          },
+          "mountBottomFlapper": {
+            "text": "Fixe la trappe inférieure au palonnier du servo inférieur avec des vis M2×4, le servo maintenu à son impulsion de fermeture pour que la trappe s'aligne à fleur sur le trajet de la carte.",
+            "note": "C'est la trappe par laquelle une carte tombe pour atteindre le module suivant, ou le module actuel en cas de correspondance."
+          },
+          "mountSideFlappers": {
+            "text": "Avant de fixer quoi que ce soit, commande chaque servo de palette sur toute sa course pour confirmer que la liaison peut atteindre l'ouverture complète sans se coincer. Ensuite, le servo maintenu en position fermée, fixe la trappe gauche et droite à la liaison commune avec des vis M2×4 (une paire par module) pour qu'elles soient toutes deux bien alignées.",
+            "note": "Un seul servo de palette entraîne les deux trappes ensemble - elles s'ouvrent et se ferment en paire, pas indépendamment. Fixe d'abord les trappes fermées ; l'impulsion exacte de la position ouverte sera affinée plus tard depuis la grille de calibration des modules."
+          },
+          "mountPusherArm": {
+            "text": "Avant de fixer le bras, balaie le servo du poussoir sur toute sa course de gauche à droite et trouve son vrai centre mécanique. Le servo maintenu à cette position centrale, fixe le bras poussoir de carte au palonnier avec des vis M2×4 pour qu'il soit centré entre les bacs gauche et droit.",
+            "note": "Fixer le bras de manière décentrée biaise la distance de poussée d'un côté - les impulsions exactes gauche/droite seront affinées plus tard depuis la grille de calibration des modules."
+          },
+          "fitFeederOrings": {
+            "text": "Monte 6 joints toriques G20 sur le rouleau du chargeur.",
+            "note": "Ils donnent au rouleau de l'adhérence sur la carte - espace-les uniformément sur la longueur du rouleau."
+          },
+          "mountFeederRoller": {
+            "text": "Fixe le rouleau au module du chargeur."
+          },
+          "mountFeederServo": {
+            "text": "Installe le servo de chargeur à rotation continue sur le rouleau, à la base de la trémie."
+          },
+          "mountFeederWall": {
+            "text": "Fixe la paroi au tube qui guide les cartes de la trémie vers le rouleau du chargeur.",
+            "note": "Lors du montage de la paroi, fixe-la d'abord au module du chargeur, puis place 2 cartes sous la paroi et fais-la glisser vers le bas avant de la serrer en place."
+          }
+        }
+      },
+      "irSensors": {
+        "title": "Monter les capteurs IR",
+        "steps": {
+          "mountModuleIr": {
+            "text": "Fixe un capteur IR à la porte de chaque module (1 à {{modules}}), pointé à travers le trajet de la carte."
+          },
+          "mountHopperIr": {
+            "text": "Fixe le capteur IR restant dans la gorge de la trémie, juste au-dessus du chargeur.",
+            "note": "Celui-ci indique au chargeur quand la trémie est vide - son positionnement compte plus que celui des capteurs de module."
+          }
+        }
+      },
+      "wiring": {
+        "title": "Câbler l'électronique",
+        "steps": {
+          "wireI2c": {
+            "text": "Câble le PCA9685 au bus I²C de l'Arduino (SDA/SCL) et au 5V/GND pour l'alimentation logique.",
+            "note": "Voir la section Câblage ci-dessus."
+          },
+          "wireServos": {
+            "text": "Câble les 10 servos dans les canaux 0 à 8 et 15 du PCA9685 selon la carte des canaux - le chargeur prend toujours le dernier canal.",
+            "note": "Des passages de câbles, avec des colliers de serrage, sont prévus sur le côté de la base pour garder tout bien rangé."
+          },
+          "wireSensors": {
+            "text": "Câble les {{count}} capteurs IR aux broches numériques indiquées dans la section Câblage ci-dessus - les portes des modules et le capteur de la gorge de la trémie ne se trouvent pas tous sur des broches consécutives.",
+            "note": "Pour l'alimentation et la masse, tu devras combiner {{count}} fils en un seul, soit avec une plaque d'essai, soit en les torsadant et en les soudant ensemble. Tu devras calibrer manuellement les capteurs pour avoir une portée plus courte, afin d'éviter les faux positifs."
+          },
+          "wirePower": {
+            "text": "Amène l'alimentation externe 5V au bornier V+/GND du PCA9685, et relie sa masse à celle de l'Arduino.",
+            "note": "Oublier la masse commune est la cause n°1 des servos qui tremblent sans jamais bouger correctement."
+          }
+        }
+      },
+      "powerOnTest": {
+        "title": "Premier test de mise sous tension",
+        "steps": {
+          "runTestCommand": {
+            "text": "Avec l'alimentation externe des servos connectée, envoie {\"test\": true} en série.",
+            "note": "Ouvre chaque trappe inférieure et palette, balaie tous les poussoirs à gauche puis à droite, revient au neutre, puis fait brièvement tourner le chargeur."
+          },
+          "watchModules": {
+            "text": "Observe chaque module pendant le test - confirme que rien ne coince ou ne grince en fin de course.",
+            "note": "Si un servo force en position ouverte ou fermée, son logement a probablement besoin d'être ajusté avant la calibration."
+          }
+        }
+      },
+      "calibrate": {
+        "title": "Calibrer depuis l'application",
+        "steps": {
+          "connectSerial": {
+            "text": "Connecte l'Arduino à l'application via Web Serial, puis ouvre /app/calibrate."
+          },
+          "calibrateModules": {
+            "text": "Grille de calibration des modules - définis l'impulsion ouvert/fermé pour chaque trappe inférieure et palette, et gauche/neutre/droite pour chaque poussoir, module par module."
+          },
+          "calibrateFeeder": {
+            "text": "Panneau de calibration du chargeur - ajuste la vitesse d'alimentation, le minutage impulsion/pause et la durée de stabilisation en fonction de ta trémie réelle."
+          },
+          "checkIr": {
+            "text": "Panneau des capteurs IR - vérifie que les {{count}} capteurs signalent correctement la présence/l'absence avec une carte en main."
+          },
+          "testBins": {
+            "text": "Contrôles de routage des bacs - envoie une carte de test vers chacun des 7 bacs à tour de rôle et confirme qu'elle atterrit correctement."
+          }
+        }
+      },
+      "loadRun": {
+        "title": "Charger et lancer",
+        "steps": {
+          "loadHopper": {
+            "text": "Charge la trémie et confirme que le chargeur arrête de pulser une fois que le capteur IR de la trémie indique qu'elle est vide."
+          },
+          "fullPass": {
+            "text": "Effectue un cycle complet de scan jusqu'au bac de bout en bout avant de laisser l'unité sans surveillance."
+          }
+        }
+      }
+    }
+  }
+}

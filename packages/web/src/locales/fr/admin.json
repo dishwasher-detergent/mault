@@ -1,0 +1,61 @@
+{
+  "cardImageVectors": {
+    "heading": "Vecteurs d'image des cartes",
+    "syncStatus": {
+      "idle": "Inactif",
+      "running": "En cours",
+      "completed": "Terminé",
+      "failed": "Échoué",
+      "cancelled": "Annulé"
+    },
+    "selectGamePlaceholder": "Sélectionner un jeu...",
+    "languagePlaceholder": "Langue...",
+    "cancelButton": "Annuler",
+    "cancellingButton": "Annulation...",
+    "startSyncButton": "Démarrer la synchro",
+    "startingButton": "Démarrage...",
+    "progressCount": "{{done}} / {{total}}",
+    "vectorizedCount": "{{count}} vectorisées",
+    "skippedCount": "{{count}} ignorées",
+    "etaRemaining": "~{{duration}} restant",
+    "errorsCount": "{{count}} erreurs"
+  },
+  "log": {
+    "heading": "Journal",
+    "empty": "Aucun journal"
+  },
+  "cardDatabase": {
+    "heading": "Base de données de cartes",
+    "cardCount_one": "{{count}} carte",
+    "cardCount_other": "{{count}} cartes",
+    "searchPlaceholder": "Rechercher par nom...",
+    "loading": "Chargement...",
+    "loadError": "Échec du chargement des cartes",
+    "revectorizeTitle": "Revectoriser",
+    "empty": "Aucune carte trouvée",
+    "pageOf": "Page {{page}} sur {{total}}"
+  },
+  "syncCardById": {
+    "heading": "Synchroniser une carte par ID",
+    "description": "Récupère et vectorise une seule carte, en l'ajoutant si elle n'est pas encore dans la base de données",
+    "cardIdPlaceholder": "ID de la carte...",
+    "syncButton": "Synchroniser",
+    "syncingButton": "Synchronisation..."
+  },
+  "dumpDatabase": {
+    "heading": "Vider la base de données de cartes",
+    "description": "Supprime définitivement les vecteurs d'image des cartes, pour un jeu ou pour tous",
+    "scopePlaceholder": "Sélectionner une portée...",
+    "allGames": "Tous les jeux",
+    "dumpButton": "Vider",
+    "dumpingButton": "Suppression...",
+    "dialogTitle": "Vider la base de données de cartes",
+    "confirmAll": "Cette action supprimera définitivement tous les vecteurs d'image des cartes et ne peut pas être annulée. Es-tu sûr(e) ?",
+    "confirmScoped": "Cette action supprimera définitivement tous les vecteurs d'image des cartes « {{scope}} » et ne peut pas être annulée. Es-tu sûr(e) ?"
+  },
+  "toasts": {
+    "revectorizeError": "Échec de la revectorisation de {{name}}",
+    "syncCardError": "Échec de la synchronisation de la carte {{id}}",
+    "dumpError": "Échec de la suppression de la base de données"
+  }
+}

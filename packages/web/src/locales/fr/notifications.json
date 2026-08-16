@@ -1,0 +1,26 @@
+{
+  "discordWebhookSettings": {
+    "heading": "Webhook Discord",
+    "description": "Reçois une notification lorsque le tri des cartes échoue, que l'appareil signale une erreur (bourrage, chargeur vide, problèmes de connexion), qu'une recherche de carte échoue, ou que la tâche de synchronisation plante.",
+    "urlPlaceholder": "https://discord.com/api/webhooks/...",
+    "saveButton": "Enregistrer",
+    "notifyToggleLabel": "Notifier à chaque carte scannée",
+    "notifyToggleDescription": "Publie le nom, le prix et l'image de la carte sur Discord à chaque scan.",
+    "testHintDirty": "Enregistre l'URL du webhook pour activer les notifications de test",
+    "testHintReady": "Envoyer une notification de test",
+    "sending": "Envoi…",
+    "testTypes": {
+      "sorter-error": "Erreur de trieuse",
+      "feeder-empty": "Chargeur vide",
+      "card-jam": "Bourrage de carte",
+      "card-search-error": "Erreur de recherche de carte",
+      "sync-failure": "Échec de synchronisation"
+    }
+  },
+  "toasts": {
+    "saveError": "Échec de l'enregistrement des paramètres de notification.",
+    "saveSuccess": "Paramètres de notification enregistrés.",
+    "testSuccess": "Notification de test envoyée.",
+    "testError": "Échec de l'envoi de la notification de test."
+  }
+}

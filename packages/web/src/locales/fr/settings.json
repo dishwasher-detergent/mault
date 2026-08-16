@@ -1,0 +1,22 @@
+{
+  "title": "Paramètres",
+  "subtitle": "Gère ton organisation, l'apparence et les notifications",
+  "organizations": {
+    "heading": "Organisations"
+  },
+  "appearance": {
+    "heading": "Apparence",
+    "description": "Personnalise la couleur d'accent de l'application.",
+    "primaryColor": "Couleur principale",
+    "resetColor": "Réinitialiser",
+    "scannerLayout": "Disposition du scanner",
+    "scannerLayoutHorizontal": "Horizontale",
+    "scannerLayoutHorizontalDescription": "Scanner dans la barre latérale, cartes à droite",
+    "scannerLayoutVertical": "Verticale",
+    "scannerLayoutVerticalDescription": "Scanner en haut, grille de cartes en dessous",
+    "language": "Langue"
+  },
+  "notifications": {
+    "heading": "Notifications"
+  }
+}

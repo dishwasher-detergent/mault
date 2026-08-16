@@ -1,0 +1,81 @@
+{
+  "nav": {
+    "scanner": "Scanner",
+    "collections": "Collections",
+    "monitor": "Surveillance",
+    "calibrate": "Calibrer",
+    "settings": "Paramètres",
+    "admin": "Admin",
+    "collapse": "Réduire",
+    "collapseSidebar": "Réduire la barre latérale ([)",
+    "expandSidebar": "Développer la barre latérale ([)"
+  },
+  "breadcrumb": {
+    "account": "Compte",
+    "sortingLogic": "Logique de tri"
+  },
+  "emailVerification": {
+    "banner": "Merci de vérifier ton adresse e-mail ({{email}}) pour sécuriser ton compte.",
+    "sendCode": "Envoyer le code",
+    "haveCode": "J'ai un code",
+    "codeSentTitle": "Code de vérification envoyé",
+    "codeSentDescription": "Vérifie {{email}} pour le code.",
+    "codeFailedTitle": "Impossible d'envoyer le code de vérification",
+    "codeFailedDescription": "Réessaie dans un instant."
+  },
+  "statusFooter": {
+    "camera": "Caméra",
+    "sorter": "Trieuse",
+    "cameraConnected": "Caméra connectée",
+    "cameraError": "Erreur de caméra",
+    "cameraRequesting": "Demande d'accès à la caméra…",
+    "cameraNone": "Aucune caméra",
+    "sorterDisconnected": "Aucune trieuse connectée",
+    "sorterSelfTest": "Trieuse connectée, autotest en cours…",
+    "sorterReady": "Trieuse prête",
+    "sorterReadyWithVersion": "Trieuse prête (firmware v{{version}})",
+    "sorterWithVersion": "Trieuse v{{version}}",
+    "syncProgress": "Synchro {{done}}/{{total}}",
+    "syncStatus": "Synchro {{status}}",
+    "syncing": "Synchronisation des vecteurs d'image des cartes…",
+    "syncingCard": "Synchronisation des vecteurs d'image des cartes : {{card}}",
+    "syncCompleted": "Synchronisation des vecteurs d'image terminée",
+    "syncFailed": "Échec de la synchronisation des vecteurs d'image",
+    "sync": "Synchronisation des vecteurs d'image des cartes",
+    "cardTotal_one": "{{count}} carte · ${{value}}",
+    "cardTotal_other": "{{count}} cartes · ${{value}}"
+  },
+  "theme": {
+    "toggle": "Changer de thème",
+    "light": "Clair",
+    "dark": "Sombre",
+    "system": "Système"
+  },
+  "deleteDialog": {
+    "typeDeleteToConfirm": "Tape « delete » pour confirmer",
+    "typeNameToConfirm": "Tape « {{name}} » pour confirmer",
+    "typeKeywordLabel": "Tape <code>delete</code> pour confirmer",
+    "typeNameLabel": "Tape <code>{{name}}</code> pour confirmer"
+  },
+  "actions": {
+    "cancel": "Annuler",
+    "delete": "Supprimer",
+    "save": "Enregistrer",
+    "create": "Créer"
+  },
+  "auditDrawer": {
+    "noHistory": "Pas encore d'historique.",
+    "current": "actuel",
+    "confirm": "Confirmer",
+    "cancel": "Annuler",
+    "revert": "Rétablir"
+  },
+  "loadingGate": {
+    "loadingVault": "Chargement de ton coffre…"
+  },
+  "notFound": {
+    "title": "Page introuvable",
+    "description": "La page que tu recherches n'existe pas ou a été déplacée.",
+    "backHome": "Retour à l'accueil"
+  }
+}
