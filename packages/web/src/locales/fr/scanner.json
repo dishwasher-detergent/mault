@@ -1,0 +1,221 @@
+{
+  "camera": {
+    "permissionDenied": "Accès à la caméra refusé. Merci d'autoriser l'accès à la caméra et de réessayer.",
+    "accessError": "Impossible d'accéder à la caméra. Vérifie ton appareil."
+  },
+  "scanEngine": {
+    "searchFailed": "Échec de la recherche de la carte",
+    "videoStartFailed": "Échec du démarrage de la vidéo",
+    "cameraReinitFailed": "Échec de la réinitialisation de la caméra"
+  },
+  "serial": {
+    "connectionFailed": {
+      "title": "Échec de la connexion",
+      "description": "Impossible d'ouvrir le port. Vérifie qu'aucune autre application ne l'utilise."
+    },
+    "testingDevice": "Test de l'appareil…",
+    "deviceReady": "Appareil prêt",
+    "deviceTestFailed": {
+      "title": "Échec du test de l'appareil",
+      "description": "Connecté, mais aucune réponse reçue. Essaie de te reconnecter."
+    },
+    "firmwareOutdatedBanner": "Ta trieuse utilise le firmware v{{version}}, plus ancien que la dernière version v{{latest}}. Réimporte arduino/main/main.ino pour la mettre à jour.",
+    "firmwareVersionMissingBanner": "Le firmware de ta trieuse ne signale aucune version et ne peut pas être utilisé pour scanner. Réimporte la dernière version d'arduino/main/main.ino pour activer le scan."
+  },
+  "sessionMonitor": {
+    "connectionLost": "Connexion à la session perdue."
+  },
+  "scannedCards": {
+    "autoFeedFailed": {
+      "title": "Échec de l'alimentation automatique",
+      "description": "Impossible d'envoyer la commande au chargeur."
+    },
+    "autoFeedTimeout": {
+      "title": "Délai d'attente de l'alimentation automatique dépassé",
+      "description": "Le chargeur n'a pas répondu à temps."
+    },
+    "feederEmpty": {
+      "title": "Chargeur vide",
+      "description": "Plus de cartes dans la trémie. Ajoute des cartes pour continuer."
+    },
+    "feederError": {
+      "title": "Erreur du chargeur"
+    },
+    "autoFeedError": {
+      "title": "Erreur d'alimentation automatique",
+      "description": "Réponse inattendue du chargeur."
+    },
+    "noCollectionSelected": {
+      "title": "Aucune collection sélectionnée",
+      "description": "Crée ou sélectionne une collection avant de scanner."
+    },
+    "collectionLocked": {
+      "title": "Collection verrouillée",
+      "description": "Un autre membre de l'organisation est en train de scanner dans cette collection."
+    },
+    "routingFailed": {
+      "title": "Échec du routage",
+      "description": "Aucune réponse de la trieuse pour le bac {{binNumber}}."
+    },
+    "sorterError": {
+      "title": "Erreur de la trieuse"
+    },
+    "routingFailedCatchAll": {
+      "title": "Échec du routage",
+      "description": "Aucune réponse de la trieuse pour le bac fourre-tout {{binNumber}}."
+    }
+  },
+  "cardScanner": {
+    "jamAutoScan": {
+      "title": "Carte bloquée au module 1 - scan forcé",
+      "description": "Elle n'a jamais été identifiée, elle est donc scannée automatiquement."
+    },
+    "jamDetected": {
+      "title": "Bourrage de carte détecté",
+      "description": "Carte bloquée au module {{module}}. Vérifie la trieuse et reprends.",
+      "descriptionWithBin": "Carte bloquée au module {{module}} (en direction du bac {{bin}}). Vérifie la trieuse et reprends."
+    },
+    "feedFailed": {
+      "title": "Échec de l'alimentation",
+      "description": "Impossible d'envoyer la commande au chargeur."
+    },
+    "feedTimeout": {
+      "title": "Délai d'attente de l'alimentation dépassé",
+      "description": "Le chargeur n'a pas répondu à temps."
+    },
+    "feederEmpty": {
+      "title": "Chargeur vide",
+      "description": "Plus de cartes dans la trémie. Ajoute des cartes pour continuer."
+    },
+    "feederError": {
+      "title": "Erreur du chargeur"
+    },
+    "feedError": {
+      "title": "Erreur d'alimentation",
+      "description": "Réponse inattendue du chargeur."
+    },
+    "clearFailed": {
+      "title": "Échec du vidage",
+      "description": "Impossible d'envoyer la commande à l'appareil."
+    },
+    "clearTimeout": {
+      "title": "Délai d'attente du vidage dépassé",
+      "description": "L'appareil n'a pas répondu à temps."
+    },
+    "deviceCleared": {
+      "title": "Appareil vidé",
+      "description": "Toutes les trappes inférieures ont été ouvertes pour libérer les cartes coincées."
+    },
+    "lastSearchImageAlt": "Dernière image de recherche"
+  },
+  "documentTitle": {
+    "sorting": "Tri : {{setName}}",
+    "cardsScanned_one": "{{count}} carte scannée",
+    "cardsScanned_other": "{{count}} cartes scannées",
+    "noCardsScanned": "Aucune carte scannée",
+    "mostValuable": "{{price}} · {{name}}"
+  },
+  "gameSwitchAlert": {
+    "message": "Lors du changement de type de jeu, il se peut que tu doives réajuster la paroi du tube du module d'alimentation."
+  },
+  "scanStats": {
+    "emptyState": "Scanne des cartes pour voir leurs statistiques.",
+    "totalCards": "Total des cartes",
+    "unique": "Uniques",
+    "totalValue": "Valeur totale",
+    "avgValue": "Valeur moyenne",
+    "sessionTime": "Durée de la session",
+    "cardsPerHour": "Cartes / h",
+    "mostValuable": "La plus précieuse",
+    "byRarity": "Par rareté",
+    "byColor": "Par couleur",
+    "bySet": "Par set",
+    "showLess": "Afficher moins",
+    "showAllSets": "Afficher les {{count}} sets"
+  },
+  "scannerControls": {
+    "scanAgain": "Scanner à nouveau",
+    "addAgain": "Ajouter à nouveau",
+    "skip": "Ignorer",
+    "scanNow": "Scanner maintenant",
+    "resume": "Reprendre",
+    "pause": "Pause"
+  },
+  "scannerDebug": {
+    "heading": "Débogage",
+    "simulateScan": "Simuler un scan",
+    "simulateMultiMatch": "Simuler des correspondances multiples",
+    "forceError": "Forcer une erreur"
+  },
+  "scannerMenu": {
+    "camera": "Caméra",
+    "cameraFallbackLabel": "Caméra {{index}}",
+    "reconnect": "Reconnecter",
+    "zoom": "Zoom",
+    "disconnect": "Déconnecter",
+    "connect": "Connecter",
+    "scanner": "Scanner",
+    "autoFeed": "Alimentation auto",
+    "allowDuplicates": "Autoriser les doublons",
+    "calibrate": "Calibrer",
+    "retryConnection": "Réessayer la connexion"
+  },
+  "scannerOverlay": {
+    "connectCamera": "Connecte une caméra pour commencer à scanner.",
+    "scannerNotConnected": "Trieuse non connectée.",
+    "connectScannerButton": "Connecter",
+    "testingScanner": "Test de la connexion à la trieuse…",
+    "autoFeedOff": "L'alimentation auto est désactivée - alimente les cartes manuellement.",
+    "firmwareVersionMissing": "Le firmware de la trieuse ne signale aucune version. Réimporte la dernière version d'arduino/main/main.ino pour activer le scan.",
+    "noCatchAllBin": "Aucun bac fourre-tout configuré - les cartes non associées ne seront pas triées.",
+    "initializing": "Initialisation du scanner…",
+    "requestingCameraAccess": "Demande d'accès à la caméra…",
+    "identifyingCard": "Identification de la carte…",
+    "paused": "Scanner en pause - appuie sur Reprendre pour continuer.",
+    "duplicate": "Même carte scannée - utilise Ajouter à nouveau pour l'ajouter quand même.",
+    "noMatch": "Carte non reconnue - essaie Scanner à nouveau ou ajuste l'éclairage."
+  },
+  "sessionErrorsPanel": {
+    "heading": "Erreurs"
+  },
+  "sessionStatsPanel": {
+    "totalCards": "Total des cartes",
+    "unique": "Uniques",
+    "value": "Valeur",
+    "mostValuable": "La plus précieuse",
+    "byRarity": "Par rareté"
+  },
+  "appScanner": {
+    "cardCount_one": "{{count}} carte",
+    "cardCount_other": "{{count}} cartes"
+  },
+  "recentScannedCards": {
+    "heading": "Récemment scannées"
+  },
+  "monitorPage": {
+    "loadingSession": "Chargement de la session…",
+    "connectFailed": "Impossible de se connecter.",
+    "noCardsScannedYet": "Aucune carte scannée pour le moment.",
+    "noCardsMatchSearch": "Aucune carte ne correspond à la recherche.",
+    "isScanningTooltip": "{{name}} est en train de scanner",
+    "isWatchingTooltip": "{{name}} regarde",
+    "viewCards_one": "Voir {{count}} carte",
+    "viewCards_other": "Voir {{count}} cartes",
+    "viewCardsEmpty": "Voir les cartes",
+    "scannedCardsTitle": "Cartes scannées"
+  },
+  "monitorSessions": {
+    "yourSession": "Ta session",
+    "scanning": "Scan en cours",
+    "sessionReleased": "Session libérée",
+    "releaseFailed": "Échec de la libération de la session",
+    "leaveSession": "Quitter la session",
+    "title": "Surveillance de session",
+    "subtitle": "Rejoindre une session de scan en direct",
+    "noSessionsFound": "Aucune session trouvée",
+    "noSessionsHint": "Les sessions actives apparaîtront ici",
+    "cardCount_one": "{{count}} carte",
+    "cardCount_other": "{{count}} cartes",
+    "isScanningTooltip": "{{name}} est en train de scanner"
+  }
+}

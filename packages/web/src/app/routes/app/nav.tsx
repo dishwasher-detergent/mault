@@ -1,3 +1,4 @@
+import { LanguageSwitcherIcon } from "@/components/language-switcher";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
@@ -351,6 +352,7 @@ export function AppNav() {
         )}
       >
         <OrgSwitcher side="right" />
+        <LanguageSwitcherIcon side="right" />
         <ThemeToggle />
         <UserButton size="icon" side="right" />
       </div>

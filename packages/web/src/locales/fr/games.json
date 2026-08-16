@@ -1,0 +1,64 @@
+{
+  "gamesManager": {
+    "heading": "Jeux",
+    "description": "Configure quels jeux de cartes à collectionner peuvent être scannés et comment leurs cartes sont associées aux règles des bacs.",
+    "addGame": "Ajouter un jeu",
+    "loading": "Chargement...",
+    "active": "Actif",
+    "inactive": "Inactif",
+    "fieldCount_one": "{{count}} champ",
+    "fieldCount_other": "{{count}} champs",
+    "editTitle": "Modifier",
+    "deleteTitle": "Supprimer",
+    "empty": "Aucun jeu configuré pour le moment",
+    "deleteDialog": {
+      "title": "Supprimer le jeu",
+      "description": "Supprimer définitivement « {{name}} » ? Les collections utilisant ce jeu conserveront leurs cartes scannées, mais aucune nouvelle carte ne pourra y être associée."
+    },
+    "toasts": {
+      "createError": "Échec de la création du jeu",
+      "createSuccess": "{{name}} créé",
+      "updateError": "Échec de la mise à jour du jeu",
+      "updateSuccess": "{{name}} enregistré",
+      "deleteError": "Échec de la suppression du jeu",
+      "deleteSuccess": "Jeu supprimé"
+    }
+  },
+  "gameFormDialog": {
+    "addTitle": "Ajouter un jeu",
+    "editTitle": "Modifier {{name}}",
+    "description": "Définis comment les cartes de ce jeu sont récupérées et quels champs les règles des bacs peuvent filtrer.",
+    "keyLabel": "Clé",
+    "keyPlaceholder": "pokemon",
+    "nameLabel": "Nom",
+    "namePlaceholder": "Pokémon",
+    "dataSourceUrlLabel": "URL de la source de données",
+    "dataSourceUrlPlaceholder": "https://api.pokemontcg.io/v2/cards",
+    "activeLabel": "Actif",
+    "cancel": "Annuler",
+    "saving": "Enregistrement…",
+    "saveChanges": "Enregistrer les modifications",
+    "createGame": "Créer le jeu",
+    "validation": {
+      "required": "Obligatoire",
+      "keyFormat": "Lettres minuscules, chiffres et tirets uniquement",
+      "invalidUrl": "Doit être une URL valide",
+      "minFields": "Ajoute au moins un champ"
+    }
+  },
+  "fieldDefinitionsEditor": {
+    "heading": "Définitions des champs",
+    "addField": "Ajouter un champ",
+    "fieldKeyPlaceholder": "Clé du champ (ex. rarity)",
+    "labelPlaceholder": "Libellé (ex. Rareté)",
+    "dataPathPlaceholder": "Chemin de donnée (ex. prices.usd)",
+    "optionsPlaceholder": "Options, séparées par des virgules (ex. commune, peu commune, rare)",
+    "empty": "Pas encore de champs — ajoute-en au moins un pour pouvoir filtrer les règles des bacs."
+  },
+  "fieldTypes": {
+    "string": "Texte",
+    "numeric": "Numérique",
+    "enum": "Énumération",
+    "set": "Ensemble"
+  }
+}

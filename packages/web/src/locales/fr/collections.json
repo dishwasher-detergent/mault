@@ -1,0 +1,71 @@
+{
+  "switcher": {
+    "label": "Collection",
+    "sessionReleased": "Session libérée",
+    "releaseFailed": "Échec de la libération de la session",
+    "monitorLinkCopied": "Lien de surveillance copié",
+    "monitorLinkCopiedDescription": "Partage ce lien avec les membres de l'organisation pour qu'ils puissent suivre la session.",
+    "copyLinkFailed": "Impossible de copier le lien",
+    "noCollectionSelected": "Aucune collection sélectionnée",
+    "noCollection": "Aucune collection",
+    "noCollectionsYet": "Pas encore de collections",
+    "manageCollections": "Gérer les collections",
+    "copyMonitorLink": "Copier le lien de surveillance",
+    "giveUpSession": "Abandonner la session",
+    "noGamesHint": "Demande à un admin d'ajouter un jeu avant de créer une collection",
+    "newCollection": "Nouvelle collection"
+  },
+  "createDialog": {
+    "title": "Nouvelle collection",
+    "description": "Crée une nouvelle collection dans laquelle scanner des cartes.",
+    "duplicateName": "Une collection avec ce nom existe déjà",
+    "cancel": "Annuler",
+    "create": "Créer",
+    "nameLabel": "Nom de la collection",
+    "namePlaceholder": "ex. Collection Commander, Butin de draft...",
+    "gameLabel": "Jeu",
+    "gamePlaceholder": "Sélectionner un jeu...",
+    "langLabel": "Langue",
+    "langPlaceholder": "Sélectionner une langue..."
+  },
+  "requireDialog": {
+    "title": "Crée ta première collection",
+    "description": "Les collections organisent tes cartes scannées. Tu dois en avoir au moins une avant de pouvoir commencer à scanner.",
+    "submit": "Créer une collection"
+  },
+  "page": {
+    "title": "Collections",
+    "subtitle": "Organise les cartes scannées en collections nommées",
+    "newCollection": "Nouvelle collection",
+    "emptyTitle": "Pas encore de collections",
+    "emptyDescription": "Crée une collection pour commencer à scanner des cartes",
+    "cardCount_one": "{{count}} carte",
+    "cardCount_other": "{{count}} cartes",
+    "noGame": "Aucun jeu",
+    "setActiveCollection": "Définir comme collection active",
+    "editSortingRules": "Modifier les règles de tri",
+    "rename": "Renommer",
+    "emptyCollection": "Vider la collection",
+    "deleteCollection": "Supprimer la collection"
+  },
+  "renameDialog": {
+    "title": "Renommer la collection",
+    "description": "Saisis un nouveau nom pour cette collection.",
+    "submit": "Renommer"
+  },
+  "deleteDialog": {
+    "title": "Supprimer la collection",
+    "description": "Supprime définitivement « {{name}} » et toutes ses cartes. Cette action est irréversible."
+  },
+  "emptyDialog": {
+    "title": "Vider la collection",
+    "description": "Retire définitivement toutes les cartes de « {{name}} », mais conserve la collection elle-même. Cette action est irréversible.",
+    "confirmLabel": "Vider"
+  },
+  "errors": {
+    "createFailed": "Échec de la création de la collection",
+    "renameFailed": "Échec du renommage de la collection",
+    "deleteFailed": "Échec de la suppression de la collection",
+    "emptyFailed": "Échec du vidage de la collection"
+  }
+}

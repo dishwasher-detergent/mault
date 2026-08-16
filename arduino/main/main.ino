@@ -2,7 +2,7 @@
 #include <Wire.h>
 #include <Adafruit_PWMServoDriver.h>
 
-#define FIRMWARE_VERSION "1.0.0"
+#define FIRMWARE_VERSION "1.0.1"
 
 Adafruit_PWMServoDriver pwm = Adafruit_PWMServoDriver();
 
@@ -376,6 +376,21 @@ void handleCommand(char* json) {
     Serial.print(strlen(json));
     Serial.print(F(",\"received\":\""));
     printJsonEscaped(json);
+    Serial.println(F("\"}"));
+    return;
+  }
+
+  // {"getStatus": true} — report readiness/version on demand. setup() only
+  // prints this once per power cycle; native-USB boards like the Uno R4
+  // Minima don't reset their sketch when the host closes and reopens the
+  // CDC serial port (unlike classic Uno/FTDI boards, where that toggles DTR
+  // through a reset capacitor), so a reconnect without a physical
+  // power-cycle never re-runs setup(). The app sends this right after
+  // opening the port on every connection so it always gets a fresh
+  // status/version response instead of only on the very first connect.
+  if (doc["getStatus"].is<bool>() && doc["getStatus"].as<bool>()) {
+    Serial.print(F("{\"status\":\"ready\",\"version\":\""));
+    Serial.print(FIRMWARE_VERSION);
     Serial.println(F("\"}"));
     return;
   }

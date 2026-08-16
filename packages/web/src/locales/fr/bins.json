@@ -1,0 +1,82 @@
+{
+  "binCard": {
+    "binLabel": "Bac {{number}}",
+    "catchAll": "Fourre-tout",
+    "ruleCount_one": "{{count}} règle",
+    "ruleCount_other": "{{count}} règles",
+    "allUnmatched": "Toutes les cartes non associées",
+    "clickToConfigure": "Cliquer pour configurer"
+  },
+  "binConfigPanel": {
+    "needCatchAllError": "Au moins un bac doit être un fourre-tout.",
+    "binHeading": "Bac {{number}}",
+    "catchAllEnabled": "Fourre-tout activé",
+    "setCatchAll": "Définir comme fourre-tout",
+    "catchAllDescription": "Les cartes qui ne correspondent à aucun autre bac iront ici.",
+    "rulesLabel": "Règles",
+    "clear": "Effacer",
+    "save": "Enregistrer"
+  },
+  "binList": {
+    "needCatchAll": "Un bac doit être défini comme fourre-tout."
+  },
+  "binLocationDiagram": {
+    "binLabel": "Bac {{number}}",
+    "catchAll": "Fourre-tout"
+  },
+  "conditionRow": {
+    "selectPlaceholder": "Sélectionner...",
+    "valuePlaceholder": "Valeur..."
+  },
+  "ruleGroupEditor": {
+    "and": "ET",
+    "or": "OU",
+    "emptyState": "Aucune condition. Ajoute une condition ou un groupe pour commencer.",
+    "addCondition": "Condition",
+    "addGroup": "Groupe"
+  },
+  "ruleSummary": {
+    "noConditions": "Aucune condition",
+    "and": "ET",
+    "or": "OU"
+  },
+  "presetSelector": {
+    "binLabel": "Bac {{number}}",
+    "catchAll": "fourre-tout",
+    "noRules": "aucune règle",
+    "conditionCount_one": "{{count}} condition",
+    "conditionCount_other": "{{count}} conditions",
+    "sortingLogic": "Logique de tri",
+    "selectSetPlaceholder": "Sélectionner un ensemble...",
+    "editSortingLogic": "Modifier la logique de tri",
+    "deleteSetTitle": "Supprimer l'ensemble",
+    "deleteSetDescription": "Supprimer définitivement « {{name}} ». Cette action est irréversible.",
+    "revertSuccess": "Rétabli à l'état précédent de l'ensemble de bacs",
+    "revertFailed": "Échec du rétablissement",
+    "renameSetTitle": "Renommer l'ensemble",
+    "renameSetDescription": "Saisis un nouveau nom pour cet ensemble.",
+    "cancel": "Annuler",
+    "rename": "Renommer",
+    "setNameLabel": "Nom de l'ensemble",
+    "setNamePlaceholder": "Nom de l'ensemble...",
+    "newSetTitle": "Nouvel ensemble",
+    "newSetDescription": "Crée un nouvel ensemble avec 7 bacs vides.",
+    "create": "Créer",
+    "viewHistory": "Voir l'historique",
+    "historyTitle": "Historique de l'ensemble de bacs"
+  },
+  "useBinConfigs": {
+    "toasts": {
+      "saveBinFailed": "Échec de l'enregistrement de la configuration du bac",
+      "clearBinFailed": "Échec de l'effacement de la configuration du bac",
+      "activateSetFailed": "Échec de l'activation de l'ensemble",
+      "createSetFailed": "Échec de la création de l'ensemble",
+      "saveSetFailed": "Échec de l'enregistrement de l'ensemble",
+      "renameSetFailed": "Échec du renommage de l'ensemble",
+      "deleteSetFailed": "Échec de la suppression de l'ensemble"
+    }
+  },
+  "binsPage": {
+    "binLabel": "Bac {{number}}"
+  }
+}

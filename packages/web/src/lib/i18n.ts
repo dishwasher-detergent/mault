@@ -29,13 +29,28 @@ import landingEn from "@/locales/en/landing.json";
 import notificationsEn from "@/locales/en/notifications.json";
 import scannerEn from "@/locales/en/scanner.json";
 import settingsEn from "@/locales/en/settings.json";
+import adminFr from "@/locales/fr/admin.json";
+import authFr from "@/locales/fr/auth.json";
+import binsFr from "@/locales/fr/bins.json";
+import buildFr from "@/locales/fr/build.json";
+import calibrationFr from "@/locales/fr/calibration.json";
+import cardsFr from "@/locales/fr/cards.json";
+import collectionsFr from "@/locales/fr/collections.json";
+import commonFr from "@/locales/fr/common.json";
+import companiesFr from "@/locales/fr/companies.json";
+import gamesFr from "@/locales/fr/games.json";
+import landingFr from "@/locales/fr/landing.json";
+import notificationsFr from "@/locales/fr/notifications.json";
+import scannerFr from "@/locales/fr/scanner.json";
+import settingsFr from "@/locales/fr/settings.json";
 
-export const SUPPORTED_LANGUAGES = ["en", "de"] as const;
+export const SUPPORTED_LANGUAGES = ["en", "de", "fr"] as const;
 export type SupportedLanguage = (typeof SUPPORTED_LANGUAGES)[number];
 
 export const LANGUAGE_NATIVE_NAMES: Record<SupportedLanguage, string> = {
   en: "English",
   de: "Deutsch",
+  fr: "Français",
 };
 
 const LANGUAGE_STORAGE_KEY = "language";
@@ -73,6 +88,22 @@ const resources = {
     games: gamesDe,
     settings: settingsDe,
   },
+  fr: {
+    common: commonFr,
+    landing: landingFr,
+    build: buildFr,
+    auth: authFr,
+    collections: collectionsFr,
+    scanner: scannerFr,
+    bins: binsFr,
+    calibration: calibrationFr,
+    cards: cardsFr,
+    companies: companiesFr,
+    notifications: notificationsFr,
+    admin: adminFr,
+    games: gamesFr,
+    settings: settingsFr,
+  },
 };
 
 function getInitialLanguage(): SupportedLanguage {
@@ -80,7 +111,10 @@ function getInitialLanguage(): SupportedLanguage {
   if ((SUPPORTED_LANGUAGES as readonly string[]).includes(stored ?? "")) {
     return stored as SupportedLanguage;
   }
-  return navigator.language.toLowerCase().startsWith("de") ? "de" : "en";
+  const browserLang = navigator.language.toLowerCase();
+  if (browserLang.startsWith("de")) return "de";
+  if (browserLang.startsWith("fr")) return "fr";
+  return "en";
 }
 
 void i18n.use(initReactI18next).init({
