@@ -19,8 +19,8 @@ const statusPill = cva(
       variant: {
         default: "bg-background border-border",
         loading: "bg-background border-border",
-        warning: "bg-amber-500 border-amber-600 text-white dark:text-amber-400",
-        error: "bg-red-500 border-red-600 text-white dark:text-red-400",
+        warning: "bg-amber-500 border-amber-600 text-white",
+        error: "bg-red-500 border-red-600 text-white",
       },
     },
     defaultVariants: { variant: "default" },
