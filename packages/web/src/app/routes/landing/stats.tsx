@@ -6,7 +6,7 @@ export function LandingStats() {
   const games = usePublicGames();
 
   const stats = [
-    { key: "bins", value: "7" },
+    { key: "bins", value: "11" },
     { key: "games", value: games === null ? "–" : String(games.length) },
     { key: "collections", value: "∞" },
     { key: "cardsPerHour", value: "≤800" },

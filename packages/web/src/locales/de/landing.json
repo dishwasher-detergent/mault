@@ -23,7 +23,7 @@
   },
   "stats": {
     "items": {
-      "bins": "Sortierfächer pro Durchlauf",
+      "bins": "Sortierfächer, erweiterbar",
       "games": "unterstützte Sammelkartenspiele",
       "collections": "Sammlungen, ohne Limit",
       "cardsPerHour": "sortierte Karten pro Stunde"
@@ -82,7 +82,7 @@
       },
       "hardware": {
         "title": "Gebaut für den Tisch",
-        "description": "Funktioniert mit einem physischen Sortierer, sodass Karten in echten Fächern landen - nicht nur in einer weiteren Tabelle."
+        "description": "Funktioniert mit einem physischen Sortierer, sodass Karten in echten Fächern landen - nicht nur in einer weiteren Tabelle. Weitere Sortiermodule erweitern das System auf bis zu 11 Fächer."
       }
     }
   },
