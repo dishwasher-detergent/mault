@@ -98,7 +98,7 @@ const GROUPS: Group[] = [
       {
         key: "psu",
         qty: "1",
-        name: "5V regulated power supply, 4-10A",
+        name: "6V Power Supply",
         part: (t) => t("bom.groups.power.items.psu.part"),
         notes: (t) => t("bom.groups.power.items.psu.notes"),
         buyUrl: "https://www.amazon.com/dp/B0B2DZJQCR",
@@ -164,11 +164,11 @@ const GROUPS: Group[] = [
       {
         key: "o-ring",
         qty: "6",
-        name: "G20 o-ring",
+        name: "20mm ID 26mm OD 3mm Width O-Ring",
         part: (t) => t("bom.groups.structural.items.oRing.part"),
         notes: (t) => t("bom.groups.structural.items.oRing.notes"),
         buyUrl:
-          "https://www.harborfreight.com/397-piece-metric-o-ring-assortment-67580.html",
+          "https://www.amazon.com/uxcell-Silicone-Rings-Diameter-Gasket/dp/B07MNJXJSG",
       },
     ],
   },
