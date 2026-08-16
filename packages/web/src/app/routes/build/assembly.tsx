@@ -30,8 +30,10 @@ interface Phase {
 }
 
 function buildPhases(t: TFunction<"build">, moduleCount: number): Phase[] {
-  const supportPieces = ((moduleCount + 1) * (moduleCount + 2)) / 2;
-  const basePlates = Math.max(0, moduleCount - 3);
+  const sortingModules = moduleCount;
+  const plateBase = ((moduleCount + 1) * (moduleCount + 2)) / 2;
+  const genericBase = moduleCount;
+  const binHolders = moduleCount * 2;
 
   return [
     {
@@ -40,11 +42,12 @@ function buildPhases(t: TFunction<"build">, moduleCount: number): Phase[] {
       icon: IconCube,
       steps: [
         {
-          key: "print-enclosure",
+          key: "print-sorting-module",
           text: (
             <Trans
               t={t}
-              i18nKey="assembly.phases.print.steps.printEnclosure.text"
+              i18nKey="assembly.phases.print.steps.printSortingModule.text"
+              values={{ count: sortingModules }}
               components={{
                 mesh: (
                   <a
@@ -65,20 +68,39 @@ function buildPhases(t: TFunction<"build">, moduleCount: number): Phase[] {
               }}
             />
           ),
-          note: t("assembly.phases.print.steps.printEnclosure.note"),
+          note: t("assembly.phases.print.steps.printSortingModule.note"),
         },
         {
-          key: "print-support-pieces",
-          text: t("assembly.phases.print.steps.printSupportPieces.text", {
+          key: "print-feeder-module",
+          text: t("assembly.phases.print.steps.printFeederModule.text"),
+        },
+        {
+          key: "print-sorting-module-shroud",
+          text: t("assembly.phases.print.steps.printSortingModuleShroud.text"),
+        },
+        {
+          key: "print-plate-base",
+          text: t("assembly.phases.print.steps.printPlateBase.text", {
             modules: moduleCount,
-            count: supportPieces,
+            count: plateBase,
           }),
         },
         {
-          key: "print-base-plates",
-          text: t("assembly.phases.print.steps.printBasePlates.text", {
+          key: "print-plate-base-bottom",
+          text: t("assembly.phases.print.steps.printPlateBaseBottom.text"),
+        },
+        {
+          key: "print-generic-base",
+          text: t("assembly.phases.print.steps.printGenericBase.text", {
             modules: moduleCount,
-            count: basePlates,
+            count: genericBase,
+          }),
+        },
+        {
+          key: "print-bin-holders",
+          text: t("assembly.phases.print.steps.printBinHolders.text", {
+            modules: moduleCount,
+            count: binHolders,
           }),
         },
         {

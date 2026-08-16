@@ -180,6 +180,14 @@ const GROUPS: Group[] = [
         buyUrl:
           "https://www.amazon.com/uxcell-Silicone-Rings-Diameter-Gasket/dp/B07MNJXJSG",
       },
+      {
+        key: "bin-holders",
+        qty: (n) => String(n * 2),
+        name: "3D-printed bin holder",
+        part: (t) => t("bom.groups.structural.items.binHolders.part"),
+        notes: (t, n) =>
+          t("bom.groups.structural.items.binHolders.notes", { count: n }),
+      },
     ],
   },
   {

@@ -106,6 +106,10 @@
           "oRing": {
             "part": "20mm ID 26mm OD 3mm Width O-Ring",
             "notes": "Auf die Zuführrolle aufgezogen für Griffigkeit auf der Kartenoberfläche"
+          },
+          "binHolders": {
+            "part": "3D-gedruckter Fachhalter",
+            "notes": "2 pro Modul ({{count}} Module) - einer links, einer rechts - fängt die vom Pusher ausgeworfenen Karten auf"
           }
         }
       },
@@ -224,15 +228,27 @@
       "print": {
         "title": "Die Strukturteile drucken",
         "steps": {
-          "printEnclosure": {
-            "text": "Slice und drucke das Gehäuse sowie die drei Modulgehäuse aus <mesh>card_sorter.3mf</mesh> (oder exportiere sie erneut aus <source>Card Sorter.f3d</source>).",
+          "printSortingModule": {
+            "text": "Slice und drucke {{count}} Sorting-Module-Platten – eine pro Sortiermodul – aus <mesh>card_sorter.3mf</mesh> (oder exportiere sie erneut aus <source>Card Sorter.f3d</source>).",
             "note": "PLA reicht für die Gehäuse aus; PETG, wenn das Gerät an einem warmen Ort steht."
           },
-          "printSupportPieces": {
-            "text": "Für {{modules}} Sortiermodule drucke {{count}} generische Basis-Stützteile aus derselben Datei – die Module sind treppenförmig gestapelt, sodass jede zusätzliche Stufe ein Stützteil mehr benötigt als die Stufe darüber. Ändere die Modulanzahl in der Teileliste oben, um dies zu aktualisieren."
+          "printFeederModule": {
+            "text": "Drucke 1 Feeder-Module-Platte aus derselben Datei – unabhängig von der Modulanzahl wird nur eine benötigt. Beherbergt die Zuführrolle und den Trichterhals."
           },
-          "printBasePlates": {
-            "text": "Für {{modules}} Sortiermodule drucke {{count}} zusätzliche generische Bodenplatten – der Standardaufbau (3 Module) benötigt keine zusätzlichen; drucke eine weitere Bodenplatte für jedes Sortiermodul über die anfänglichen 3 hinaus. Ändere die Modulanzahl in der Teileliste oben, um dies zu aktualisieren."
+          "printSortingModuleShroud": {
+            "text": "Drucke 1 Sorting-Module-Shroud – es wird nur eine benötigt. Die Abdeckung, die über den gestapelten Modulen sitzt."
+          },
+          "printPlateBase": {
+            "text": "Für {{modules}} Sortiermodule drucke {{count}} Plate-Base-Stützteile aus derselben Datei – die Module sind treppenförmig gestapelt, sodass jede zusätzliche Stufe ein Stützteil mehr benötigt als die Stufe darüber. Ändere die Modulanzahl in der Teileliste oben, um dies zu aktualisieren."
+          },
+          "printPlateBaseBottom": {
+            "text": "Drucke 1 Plate-Base-Bottom – es wird nur eine benötigt. Schließt den Basisstapel nach unten ab."
+          },
+          "printGenericBase": {
+            "text": "Für {{modules}} Sortiermodule drucke {{count}} Generic-Base-Platten – eine pro Sortiermodul. Ändere die Modulanzahl in der Teileliste oben, um dies zu aktualisieren."
+          },
+          "printBinHolders": {
+            "text": "Für {{modules}} Sortiermodule drucke {{count}} Fachhalter – zwei pro Modul, einer für die linke und einer für die rechte Auswurfseite. Ändere die Modulanzahl in der Teileliste oben, um dies zu aktualisieren."
           },
           "dryFit": {
             "text": "Passe jedes Modulgehäuse trocken an, bevor du Elektronik einsetzt – schleife oder korrigiere jetzt enge Servoaussparungen."

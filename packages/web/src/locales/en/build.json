@@ -106,6 +106,10 @@
           "oRing": {
             "part": "20mm ID 26mm OD 3mm Width O-Ring",
             "notes": "Fitted onto the feeder roller for grip on the card face"
+          },
+          "binHolders": {
+            "part": "3D-printed bin holder",
+            "notes": "2 per module ({{count}} modules) - one left, one right - catches the cards the pusher ejects to each side"
           }
         }
       },
@@ -224,15 +228,27 @@
       "print": {
         "title": "Print the structural parts",
         "steps": {
-          "printEnclosure": {
-            "text": "Slice and print the enclosure and three module housings from <mesh>card_sorter.3mf</mesh> (or re-export from <source>Card Sorter.f3d</source>).",
+          "printSortingModule": {
+            "text": "Slice and print {{count}} Sorting Module plates - one per sorting module - from <mesh>card_sorter.3mf</mesh> (or re-export from <source>Card Sorter.f3d</source>).",
             "note": "PLA is fine for the housings; PETG if the unit will sit somewhere warm."
           },
-          "printSupportPieces": {
-            "text": "For {{modules}} sorting modules, print {{count}} generic base support pieces from the same file - the modules stack in a staircase, so each added tier needs one more support piece than the tier above it. Change the module count in the parts list above to update this."
+          "printFeederModule": {
+            "text": "Print 1 Feeder Module plate from the same file - only one needed, regardless of module count. Houses the feeder roller and hopper throat."
           },
-          "printBasePlates": {
-            "text": "For {{modules}} sorting modules, print {{count}} additional generic base plates - the standard build (3 modules) doesn't need any extra; print one more base plate for each sorting module beyond the initial 3. Change the module count in the parts list above to update this."
+          "printSortingModuleShroud": {
+            "text": "Print 1 Sorting Module Shroud - only one needed. The cover that sits over the stacked modules."
+          },
+          "printPlateBase": {
+            "text": "For {{modules}} sorting modules, print {{count}} Plate Base support pieces from the same file - the modules stack in a staircase, so each added tier needs one more support piece than the tier above it. Change the module count in the parts list above to update this."
+          },
+          "printPlateBaseBottom": {
+            "text": "Print 1 Plate Base Bottom - only one needed. Caps the bottom of the base stack."
+          },
+          "printGenericBase": {
+            "text": "For {{modules}} sorting modules, print {{count}} Generic Base plates - one per sorting module. Change the module count in the parts list above to update this."
+          },
+          "printBinHolders": {
+            "text": "For {{modules}} sorting modules, print {{count}} bin holders - two per module, one for the left ejection side and one for the right. Change the module count in the parts list above to update this."
           },
           "dryFit": {
             "text": "Dry-fit each module housing before inserting any electronics - sand or adjust any tight servo pockets now."

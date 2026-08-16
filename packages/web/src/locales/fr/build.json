@@ -106,6 +106,10 @@
           "oRing": {
             "part": "Joint torique 20mm DI 26mm DE 3mm largeur",
             "notes": "Monté sur le rouleau du chargeur pour l'adhérence sur la carte"
+          },
+          "binHolders": {
+            "part": "Bac imprimé en 3D",
+            "notes": "2 par module ({{count}} modules) - un à gauche, un à droite - reçoit les cartes éjectées par le poussoir"
           }
         }
       },
@@ -224,15 +228,27 @@
       "print": {
         "title": "Imprimer les pièces structurelles",
         "steps": {
-          "printEnclosure": {
-            "text": "Tranche et imprime le boîtier et les trois logements de modules à partir de <mesh>card_sorter.3mf</mesh> (ou réexporte depuis <source>Card Sorter.f3d</source>).",
+          "printSortingModule": {
+            "text": "Tranche et imprime {{count}} plaques Sorting Module - une par module de tri - à partir de <mesh>card_sorter.3mf</mesh> (ou réexporte depuis <source>Card Sorter.f3d</source>).",
             "note": "Le PLA convient pour les logements ; le PETG si l'unité doit rester dans un endroit chaud."
           },
-          "printSupportPieces": {
-            "text": "Pour {{modules}} modules de tri, imprime {{count}} pièces de support de base génériques à partir du même fichier - les modules s'empilent en escalier, donc chaque niveau ajouté nécessite une pièce de support de plus que le niveau au-dessus. Change le nombre de modules dans la liste des pièces ci-dessus pour mettre ce nombre à jour."
+          "printFeederModule": {
+            "text": "Imprime 1 plaque Feeder Module à partir du même fichier - une seule suffit, quel que soit le nombre de modules. Loge le rouleau du chargeur et la gorge de la trémie."
           },
-          "printBasePlates": {
-            "text": "Pour {{modules}} modules de tri, imprime {{count}} plaques de base génériques supplémentaires - la version standard (3 modules) n'en nécessite aucune de plus ; imprime une plaque de base supplémentaire pour chaque module de tri au-delà des 3 premiers. Change le nombre de modules dans la liste des pièces ci-dessus pour mettre ce nombre à jour."
+          "printSortingModuleShroud": {
+            "text": "Imprime 1 Sorting Module Shroud - une seule suffit. Le capot qui recouvre les modules empilés."
+          },
+          "printPlateBase": {
+            "text": "Pour {{modules}} modules de tri, imprime {{count}} pièces de support Plate Base à partir du même fichier - les modules s'empilent en escalier, donc chaque niveau ajouté nécessite une pièce de support de plus que le niveau au-dessus. Change le nombre de modules dans la liste des pièces ci-dessus pour mettre ce nombre à jour."
+          },
+          "printPlateBaseBottom": {
+            "text": "Imprime 1 Plate Base Bottom - une seule suffit. Ferme la base par le dessous."
+          },
+          "printGenericBase": {
+            "text": "Pour {{modules}} modules de tri, imprime {{count}} plaques Generic Base - une par module de tri. Change le nombre de modules dans la liste des pièces ci-dessus pour mettre ce nombre à jour."
+          },
+          "printBinHolders": {
+            "text": "Pour {{modules}} modules de tri, imprime {{count}} bacs - deux par module, un pour le côté d'éjection gauche et un pour le droit. Change le nombre de modules dans la liste des pièces ci-dessus pour mettre ce nombre à jour."
           },
           "dryFit": {
             "text": "Fais un essai à sec de chaque logement de module avant d'insérer l'électronique - ponce ou ajuste dès maintenant les logements de servo trop serrés."
