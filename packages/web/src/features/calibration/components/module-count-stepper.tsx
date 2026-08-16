@@ -59,6 +59,7 @@ export function ModuleCountStepper() {
     onSuccess: (result) => {
       if (result.success && result.data)
         queryClient.setQueryData(queryOpts.queryKey, result.data);
+      queryClient.invalidateQueries({ queryKey: ["modules"] });
     },
   });
 

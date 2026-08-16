@@ -228,8 +228,8 @@ export function useCalibrationPage() {
   const handleSetPosition = useCallback(
     (module: number, posKey: keyof ServoCalibration, value: number) => {
       const config = configsRef.current.find((c) => c.moduleNumber === module);
-      if (!config) return;
-      saveConfig(module, { ...config.calibration, [posKey]: value });
+      const calibration = config?.calibration ?? DEFAULT_CALIBRATION;
+      saveConfig(module, { ...calibration, [posKey]: value });
     },
     [saveConfig],
   );
