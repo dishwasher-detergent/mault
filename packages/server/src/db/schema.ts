@@ -53,7 +53,16 @@ export const cardImageVectors = pgTable(
     updatedAt: timestamp("updated_at").defaultNow().notNull(),
   },
   (table) => [
-    unique("card_image_vectors_scryfall_face_idx").on(table.scryfallId),
+    // Card ids are only unique within a game+language: Gundam and One Piece
+    // both print EB01-xxx/STxx-xxx card numbers, and TCGdex Pokemon ids are
+    // identical across languages. A global unique on scryfall_id makes the
+    // second sync silently skip every colliding card (inserts are
+    // onConflictDoNothing), so scope uniqueness to (game_key, lang).
+    unique("cards_game_lang_card_idx").on(
+      table.gameKey,
+      table.lang,
+      table.scryfallId,
+    ),
     crudPolicy({
       role: authenticatedRole,
       read: true,
