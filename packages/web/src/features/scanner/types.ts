@@ -83,6 +83,7 @@ export interface ScannerOverlayProps {
   isCameraActive: boolean;
   isConnected: boolean;
   isReady: boolean;
+  firmwareVersion: string | null;
   hasCatchAll: boolean;
   autoFeed: boolean;
   onRetryError: () => void;

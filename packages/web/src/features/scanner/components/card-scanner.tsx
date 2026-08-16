@@ -39,6 +39,7 @@ export function CardScanner({ className, compact }: CardScannerProps) {
   const {
     isConnected,
     isReady,
+    firmwareVersion,
     connect,
     disconnect,
     sendTest,
@@ -322,6 +323,7 @@ export function CardScanner({ className, compact }: CardScannerProps) {
           isCameraActive={isCameraActive}
           isConnected={isConnected}
           isReady={isReady}
+          firmwareVersion={firmwareVersion}
           hasCatchAll={hasCatchAll}
           autoFeed={autoFeed}
           onRetryError={handleRetryError}

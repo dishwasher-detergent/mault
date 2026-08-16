@@ -1,5 +1,15 @@
+import { Button } from "@/components/ui/button";
+import {
+  MAX_MODULES,
+  MIN_MODULES,
+  useModuleCount,
+} from "@/app/routes/build/use-module-count";
 import { cn } from "@/lib/utils";
-import { IconExternalLink } from "@tabler/icons-react";
+import {
+  IconExternalLink,
+  IconMinus,
+  IconPlus,
+} from "@tabler/icons-react";
 import type { TFunction } from "i18next";
 import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { Trans, useTranslation } from "react-i18next";
@@ -8,10 +18,10 @@ type BuildT = TFunction<"build">;
 
 interface Row {
   key: string;
-  qty: string;
+  qty: (moduleCount: number) => string;
   name: string;
   part: (t: BuildT) => ReactNode;
-  notes: (t: BuildT) => ReactNode;
+  notes: (t: BuildT, moduleCount: number) => ReactNode;
   buyUrl?: string;
 }
 
@@ -26,7 +36,7 @@ const GROUPS: Group[] = [
     rows: [
       {
         key: "arduino",
-        qty: "1",
+        qty: () => "1",
         name: "Arduino Uno R4 Minima",
         part: () => (
           <>
@@ -48,7 +58,7 @@ const GROUPS: Group[] = [
       },
       {
         key: "pca9685",
-        qty: "1",
+        qty: () => "1",
         name: "Adafruit PCA9685",
         part: (t) => t("bom.groups.electronics.items.pca9685.part"),
         notes: (t) => t("bom.groups.electronics.items.pca9685.notes"),
@@ -56,15 +66,18 @@ const GROUPS: Group[] = [
       },
       {
         key: "sg90-positional",
-        qty: "9",
+        qty: (n) => String(n * 3),
         name: "SG90 micro servo, positional",
         part: (t) => t("bom.groups.electronics.items.sg90Positional.part"),
-        notes: (t) => t("bom.groups.electronics.items.sg90Positional.notes"),
+        notes: (t, n) =>
+          t("bom.groups.electronics.items.sg90Positional.notes", {
+            count: n,
+          }),
         buyUrl: "https://www.amazon.com/dp/B07L2SF3R4",
       },
       {
         key: "sg90-continuous",
-        qty: "1",
+        qty: () => "1",
         name: "SG90 servo, continuous rotation",
         part: (t) => t("bom.groups.electronics.items.sg90Continuous.part"),
         notes: (t) => t("bom.groups.electronics.items.sg90Continuous.notes"),
@@ -77,7 +90,7 @@ const GROUPS: Group[] = [
     rows: [
       {
         key: "ir-sensor",
-        qty: "4",
+        qty: (n) => String(n + 1),
         name: "Reflective/obstacle IR sensor module",
         part: (t) => (
           <>
@@ -87,7 +100,8 @@ const GROUPS: Group[] = [
             </span>
           </>
         ),
-        notes: (t) => t("bom.groups.sensing.items.irSensor.notes"),
+        notes: (t, n) =>
+          t("bom.groups.sensing.items.irSensor.notes", { count: n }),
         buyUrl: "https://www.amazon.com/dp/B0CWKWWKYL",
       },
     ],
@@ -97,7 +111,7 @@ const GROUPS: Group[] = [
     rows: [
       {
         key: "psu",
-        qty: "1",
+        qty: () => "1",
         name: "6V Power Supply",
         part: (t) => t("bom.groups.power.items.psu.part"),
         notes: (t) => t("bom.groups.power.items.psu.notes"),
@@ -105,14 +119,14 @@ const GROUPS: Group[] = [
       },
       {
         key: "usb-cable",
-        qty: "1",
+        qty: () => "1",
         name: "USB-A-to-USB-C cable",
         part: (t) => t("bom.groups.power.items.usbCable.part"),
         notes: (t) => t("bom.groups.power.items.usbCable.notes"),
       },
       {
         key: "barrel-jack",
-        qty: "1",
+        qty: () => "1",
         name: "DC barrel jack or screw-terminal pigtail",
         part: (t) => t("bom.groups.power.items.barrelJack.part"),
         notes: (t) => t("bom.groups.power.items.barrelJack.notes"),
@@ -125,7 +139,7 @@ const GROUPS: Group[] = [
     rows: [
       {
         key: "enclosure",
-        qty: "1 set",
+        qty: () => "1 set",
         name: "3D-printed enclosure & module housings",
         part: (t) => t("bom.groups.structural.items.enclosure.part"),
         notes: (t) => (
@@ -155,7 +169,7 @@ const GROUPS: Group[] = [
       },
       {
         key: "filament",
-        qty: "-",
+        qty: () => "-",
         name: "PLA or PETG filament",
         part: (t) => t("bom.groups.structural.items.filament.part"),
         notes: (t) => t("bom.groups.structural.items.filament.notes"),
@@ -163,7 +177,7 @@ const GROUPS: Group[] = [
       },
       {
         key: "o-ring",
-        qty: "6",
+        qty: () => "6",
         name: "20mm ID 26mm OD 3mm Width O-Ring",
         part: (t) => t("bom.groups.structural.items.oRing.part"),
         notes: (t) => t("bom.groups.structural.items.oRing.notes"),
@@ -177,7 +191,7 @@ const GROUPS: Group[] = [
     rows: [
       {
         key: "m3x6-screw",
-        qty: "22",
+        qty: () => "22",
         name: "M3x6 screw",
         part: (t) => t("bom.groups.fasteners.items.m3x6Screw.part"),
         notes: (t) => t("bom.groups.fasteners.items.m3x6Screw.notes"),
@@ -185,7 +199,7 @@ const GROUPS: Group[] = [
       },
       {
         key: "m3-nut",
-        qty: "8",
+        qty: () => "8",
         name: "M3 nut",
         part: (t) => t("bom.groups.fasteners.items.m3Nut.part"),
         notes: (t) => t("bom.groups.fasteners.items.m3Nut.notes"),
@@ -193,7 +207,7 @@ const GROUPS: Group[] = [
       },
       {
         key: "m3x8-screw",
-        qty: "2",
+        qty: () => "2",
         name: "M3x8 screw",
         part: (t) => t("bom.groups.fasteners.items.m3x8Screw.part"),
         notes: (t) => t("bom.groups.fasteners.items.m3x8Screw.notes"),
@@ -201,7 +215,7 @@ const GROUPS: Group[] = [
       },
       {
         key: "m2x4-screw",
-        qty: "33",
+        qty: (n) => String(n * 11),
         name: "M2x4 screw",
         part: (t) => (
           <>
@@ -211,12 +225,13 @@ const GROUPS: Group[] = [
             </span>
           </>
         ),
-        notes: (t) => t("bom.groups.fasteners.items.m2x4Screw.notes"),
+        notes: (t, n) =>
+          t("bom.groups.fasteners.items.m2x4Screw.notes", { count: n }),
         buyUrl: "https://www.amazon.com/dp/B0CGNP4RXK",
       },
       {
         key: "m2x6-screw",
-        qty: "8",
+        qty: () => "8",
         name: "M2x6 screw",
         part: (t) => t("bom.groups.fasteners.items.m2x6Screw.part"),
         notes: (t) => t("bom.groups.fasteners.items.m2x6Screw.notes"),
@@ -224,14 +239,14 @@ const GROUPS: Group[] = [
       },
       {
         key: "servo-horn-screw",
-        qty: "10",
+        qty: (n) => String(n * 3 + 1),
         name: "Servo horn screw",
         part: (t) => t("bom.groups.fasteners.items.servoHornScrew.part"),
         notes: (t) => t("bom.groups.fasteners.items.servoHornScrew.notes"),
       },
       {
         key: "hookup-wire",
-        qty: "1 roll",
+        qty: () => "1 roll",
         name: "Low Voltage Wire",
         part: (t) => t("bom.groups.fasteners.items.hookupWire.part"),
         notes: (t) => t("bom.groups.fasteners.items.hookupWire.notes"),
@@ -240,7 +255,7 @@ const GROUPS: Group[] = [
       },
       {
         key: "dupont-connectors",
-        qty: "~50",
+        qty: () => "~50",
         name: "Dupont Connectors",
         part: (t) => t("bom.groups.fasteners.items.dupontConnectors.part"),
         notes: (t) => t("bom.groups.fasteners.items.dupontConnectors.notes"),
@@ -248,7 +263,7 @@ const GROUPS: Group[] = [
       },
       {
         key: "dupont-crimper",
-        qty: "1",
+        qty: () => "1",
         name: "Dupont Crimper",
         part: (t) => t("bom.groups.fasteners.items.dupontCrimper.part"),
         notes: (t) => t("bom.groups.fasteners.items.dupontCrimper.notes"),
@@ -289,10 +304,12 @@ function usePartsChecklist() {
 
 function GroupTable({
   group,
+  moduleCount,
   checked,
   toggle,
 }: {
   group: Group;
+  moduleCount: number;
   checked: Record<string, boolean>;
   toggle: (key: string) => void;
 }) {
@@ -323,55 +340,58 @@ function GroupTable({
             </tr>
           </thead>
           <tbody>
-            {group.rows.map((row, i) => (
-              <tr
-                key={row.key}
-                className={cn(
-                  "hover:bg-secondary/30",
-                  i !== group.rows.length - 1 && "border-b",
-                )}
-              >
-                <td className="px-3 py-2.5">
-                  <input
-                    type="checkbox"
-                    aria-label={t("bom.checkboxAriaLabel", {
-                      qty: row.qty === "-" ? "" : row.qty,
-                    })}
-                    checked={!!checked[row.key]}
-                    onChange={() => toggle(row.key)}
-                    className="size-4 accent-primary"
-                  />
-                </td>
-                <td className="px-3 py-2.5 font-mono text-muted-foreground tabular-nums">
-                  {row.qty}
-                </td>
-                <td
+            {group.rows.map((row, i) => {
+              const qty = row.qty(moduleCount);
+              return (
+                <tr
+                  key={row.key}
                   className={cn(
-                    "px-3 py-2.5 font-medium",
-                    checked[row.key] &&
-                      "text-muted-foreground line-through decoration-muted-foreground/50",
+                    "hover:bg-secondary/30",
+                    i !== group.rows.length - 1 && "border-b",
                   )}
                 >
-                  {row.part(t)}
-                </td>
-                <td className="px-3 py-2.5 text-muted-foreground">
-                  {row.notes(t)}
-                </td>
-                <td className="px-3 py-2.5">
-                  {row.buyUrl && (
-                    <a
-                      href={row.buyUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      aria-label={t("bom.buyAriaLabel", { part: row.name })}
-                      className="inline-flex items-center text-muted-foreground transition-colors hover:text-foreground"
-                    >
-                      <IconExternalLink size={14} />
-                    </a>
-                  )}
-                </td>
-              </tr>
-            ))}
+                  <td className="px-3 py-2.5">
+                    <input
+                      type="checkbox"
+                      aria-label={t("bom.checkboxAriaLabel", {
+                        qty: qty === "-" ? "" : qty,
+                      })}
+                      checked={!!checked[row.key]}
+                      onChange={() => toggle(row.key)}
+                      className="size-4 accent-primary"
+                    />
+                  </td>
+                  <td className="px-3 py-2.5 font-mono text-muted-foreground tabular-nums">
+                    {qty}
+                  </td>
+                  <td
+                    className={cn(
+                      "px-3 py-2.5 font-medium",
+                      checked[row.key] &&
+                        "text-muted-foreground line-through decoration-muted-foreground/50",
+                    )}
+                  >
+                    {row.part(t)}
+                  </td>
+                  <td className="px-3 py-2.5 text-muted-foreground">
+                    {row.notes(t, moduleCount)}
+                  </td>
+                  <td className="px-3 py-2.5">
+                    {row.buyUrl && (
+                      <a
+                        href={row.buyUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        aria-label={t("bom.buyAriaLabel", { part: row.name })}
+                        className="inline-flex items-center text-muted-foreground transition-colors hover:text-foreground"
+                      >
+                        <IconExternalLink size={14} />
+                      </a>
+                    )}
+                  </td>
+                </tr>
+              );
+            })}
           </tbody>
         </table>
       </div>
@@ -382,6 +402,7 @@ function GroupTable({
 export function BuildBom() {
   const { t } = useTranslation("build");
   const { checked, toggle } = usePartsChecklist();
+  const { moduleCount, setModuleCount } = useModuleCount();
 
   const allRows = useMemo(() => GROUPS.flatMap((g) => g.rows), []);
   const doneCount = allRows.filter((r) => checked[r.key]).length;
@@ -389,14 +410,50 @@ export function BuildBom() {
     ? Math.round((doneCount / allRows.length) * 100)
     : 0;
 
+  const channelsUsed = moduleCount * 3 + 1;
+
   return (
     <section id="parts" className="mx-auto max-w-4xl px-4 py-16">
       <h2 className="font-heading text-2xl font-semibold tracking-tight md:text-3xl">
         {t("bom.heading")}
       </h2>
       <p className="mt-3 max-w-2xl text-sm/relaxed text-muted-foreground">
-        {t("bom.description")}
+        {t("bom.description", {
+          modules: moduleCount,
+          irSensors: moduleCount + 1,
+          channelsUsed,
+          channelsFree: 16 - channelsUsed,
+        })}
       </p>
+
+      <div className="mt-6 flex items-center gap-3">
+        <span className="font-mono text-[11px] font-semibold tracking-wide text-muted-foreground uppercase">
+          {t("bom.moduleCount.label")}
+        </span>
+        <div className="flex items-center gap-1.5 rounded-md border p-0.5">
+          <Button
+            variant="ghost"
+            size="icon-sm"
+            aria-label={t("bom.moduleCount.decreaseAria")}
+            disabled={moduleCount <= MIN_MODULES}
+            onClick={() => setModuleCount(moduleCount - 1)}
+          >
+            <IconMinus />
+          </Button>
+          <span className="w-4 text-center font-mono text-xs font-medium tabular-nums">
+            {moduleCount}
+          </span>
+          <Button
+            variant="ghost"
+            size="icon-sm"
+            aria-label={t("bom.moduleCount.increaseAria")}
+            disabled={moduleCount >= MAX_MODULES}
+            onClick={() => setModuleCount(moduleCount + 1)}
+          >
+            <IconPlus />
+          </Button>
+        </div>
+      </div>
 
       <div className="mt-6">
         <div className="mb-1.5 flex items-center justify-between font-mono text-[11px] text-muted-foreground">
@@ -421,6 +478,7 @@ export function BuildBom() {
           <GroupTable
             key={group.key}
             group={group}
+            moduleCount={moduleCount}
             checked={checked}
             toggle={toggle}
           />

@@ -3,6 +3,7 @@ import { BuildBom } from "@/app/routes/build/bom";
 import { BuildFooter } from "@/app/routes/build/footer";
 import { BuildHero } from "@/app/routes/build/hero";
 import { BuildNav } from "@/app/routes/build/nav";
+import { ModuleCountProvider } from "@/app/routes/build/use-module-count";
 import { BuildWiring } from "@/app/routes/build/wiring";
 
 export default function BuildGuidePage() {
@@ -10,10 +11,12 @@ export default function BuildGuidePage() {
     <div className="flex min-h-screen flex-col bg-background text-foreground">
       <BuildNav />
       <main className="flex-1">
-        <BuildHero />
-        <BuildBom />
-        <BuildWiring />
-        <BuildAssembly />
+        <ModuleCountProvider>
+          <BuildHero />
+          <BuildBom />
+          <BuildWiring />
+          <BuildAssembly />
+        </ModuleCountProvider>
       </main>
       <BuildFooter />
     </div>

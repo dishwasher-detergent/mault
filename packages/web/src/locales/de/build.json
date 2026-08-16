@@ -1,14 +1,14 @@
 {
   "hero": {
     "title": "Den Kartensortierer bauen",
-    "description": "Teileliste und Montageanleitung für die physische Sortiereinheit: Ein Trichter führt Karten einzeln durch drei übereinander gestapelte Verteilermodule, von denen jedes eine Karte in eines von zwei seitlichen Fächern fallen lassen oder an das nächste Modul weiterreichen kann – insgesamt sieben Fächer, gesteuert von einem {{arduino}} über I²C.",
+    "description": "Teileliste und Montageanleitung für die physische Sortiereinheit: Ein Trichter führt Karten einzeln durch {{modules}} übereinander gestapelte Verteilermodule, von denen jedes eine Karte in eines von zwei seitlichen Fächern fallen lassen oder an das nächste Modul weiterreichen kann – insgesamt {{bins}} Fächer, gesteuert von einem {{arduino}} über I²C.",
     "firmwareLabel": "Firmware",
     "enclosureLabel": "Gehäuse",
     "calibrationLabel": "Kalibrierung",
     "modulesIntro": "Jedes Modul hat drei Servos – eine <0>Bodenklappe</0>, ein <1>Paddel</1>-Tor und einen Links/Rechts-<2>Schieber</2> – sowie einen IR-Sensor. Wenn alle Bodenklappen oberhalb des Zielfachs geschlossen bleiben und nur die darunter liegenden geöffnet werden, fällt die Karte bis zum richtigen Modul, bevor der Schieber sie auswirft.",
     "moduleLabel": "Modul {{n}}",
     "binLabel": "Fach {{n}}",
-    "bin7Note": "Sammelfach, alle drei Bodenklappen offen"
+    "catchAllBinNote": "Sammelfach, alle {{modules}} Bodenklappen offen"
   },
   "nav": {
     "partsList": "Teileliste",
@@ -27,7 +27,12 @@
   },
   "bom": {
     "heading": "Stückliste",
-    "description": "Die Mengen entsprechen exakt der Firmware – 3 Module × 3 Servos, 1 Zuführung, 4 IR-Sensoren, 10 der 16 Kanäle des PCA9685 in Gebrauch. Die restlichen Kanäle stehen für zusätzliche Sortiermodule zur Verfügung (bis zu 5 Module an einem einzelnen PCA9685). Hake jedes Teil ab, sobald du es besorgt hast – die Häkchen werden in diesem Browser gespeichert.",
+    "description": "Die Mengen richten sich nach der Anzahl der Module, die du baust – {{modules}} Module × 3 Servos, 1 Zuführung, {{irSensors}} IR-Sensoren, {{channelsUsed}} der 16 Kanäle des PCA9685 in Gebrauch. Die restlichen Kanäle stehen für zusätzliche Sortiermodule zur Verfügung (bis zu 5 Module an einem einzelnen PCA9685). Hake jedes Teil ab, sobald du es besorgt hast – die Häkchen werden in diesem Browser gespeichert.",
+    "moduleCount": {
+      "label": "Module",
+      "decreaseAria": "Modulanzahl verringern",
+      "increaseAria": "Modulanzahl erhöhen"
+    },
     "progress": {
       "partsCount": "{{done}} von {{total}} Teilen"
     },
@@ -52,7 +57,7 @@
           },
           "sg90Positional": {
             "part": "SG90 Mikroservo, positionierend (180°)",
-            "notes": "3 pro Modul × 3 Module – Bodenklappe, Paddeltor, Schieber"
+            "notes": "3 pro Modul × {{count}} Module – Bodenklappe, Paddeltor, Schieber"
           },
           "sg90Continuous": {
             "part": "SG90-Servo, umgebaut für Dauerdrehung",
@@ -66,7 +71,7 @@
           "irSensor": {
             "part": "Reflexions-/Hindernis-IR-Sensormodul",
             "partSpec": "(3-polig: VCC, GND, digitaler OUT)",
-            "notes": "Je einer am Tor der Module 1, 2, 3, plus einer im Trichterhals"
+            "notes": "Je einer am Tor jedes Moduls (1-{{count}}), plus einer im Trichterhals"
           }
         }
       },
@@ -122,7 +127,7 @@
           "m2x4Screw": {
             "part": "M2×4-Schraube",
             "partSpec": "(11 pro Modul)",
-            "notes": "Pro Modul: Klappen (Boden/Seiten), Schieberarme und IR-Sensorhalterungen"
+            "notes": "11 pro Modul ({{count}} Module): Klappen (Boden/Seiten), Schieberarme und IR-Sensorhalterungen"
           },
           "m2x6Screw": {
             "part": "M2×6-Schraube",
@@ -213,6 +218,12 @@
           "printEnclosure": {
             "text": "Slice und drucke das Gehäuse sowie die drei Modulgehäuse aus <mesh>card_sorter.3mf</mesh> (oder exportiere sie erneut aus <source>Card Sorter.f3d</source>).",
             "note": "PLA reicht für die Gehäuse aus; PETG, wenn das Gerät an einem warmen Ort steht."
+          },
+          "printSupportPieces": {
+            "text": "Für {{modules}} Sortiermodule drucke {{count}} generische Basis-Stützteile aus derselben Datei – die Module sind treppenförmig gestapelt, sodass jede zusätzliche Stufe ein Stützteil mehr benötigt als die Stufe darüber. Ändere die Modulanzahl in der Teileliste oben, um dies zu aktualisieren."
+          },
+          "printBasePlates": {
+            "text": "Für {{modules}} Sortiermodule drucke {{count}} zusätzliche generische Bodenplatten – der Standardaufbau (3 Module) benötigt keine zusätzlichen; drucke eine weitere Bodenplatte für jedes Sortiermodul über die anfänglichen 3 hinaus. Ändere die Modulanzahl in der Teileliste oben, um dies zu aktualisieren."
           },
           "dryFit": {
             "text": "Passe jedes Modulgehäuse trocken an, bevor du Elektronik einsetzt – schleife oder korrigiere jetzt enge Servoaussparungen."

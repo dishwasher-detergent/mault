@@ -1,3 +1,4 @@
+import { useModuleCount } from "@/app/routes/build/use-module-count";
 import { DISCORD_URL } from "@/lib/links";
 import { cn } from "@/lib/utils";
 import {
@@ -28,7 +29,10 @@ interface Phase {
   steps: Step[];
 }
 
-function buildPhases(t: TFunction<"build">): Phase[] {
+function buildPhases(t: TFunction<"build">, moduleCount: number): Phase[] {
+  const supportPieces = ((moduleCount + 1) * (moduleCount + 2)) / 2;
+  const basePlates = Math.max(0, moduleCount - 3);
+
   return [
     {
       key: "print",
@@ -62,6 +66,20 @@ function buildPhases(t: TFunction<"build">): Phase[] {
             />
           ),
           note: t("assembly.phases.print.steps.printEnclosure.note"),
+        },
+        {
+          key: "print-support-pieces",
+          text: t("assembly.phases.print.steps.printSupportPieces.text", {
+            modules: moduleCount,
+            count: supportPieces,
+          }),
+        },
+        {
+          key: "print-base-plates",
+          text: t("assembly.phases.print.steps.printBasePlates.text", {
+            modules: moduleCount,
+            count: basePlates,
+          }),
         },
         {
           key: "dry-fit",
@@ -293,8 +311,12 @@ function useChecklist() {
 export function BuildAssembly() {
   const { t } = useTranslation("build");
   const { checked, toggle } = useChecklist();
+  const { moduleCount } = useModuleCount();
 
-  const PHASES = useMemo(() => buildPhases(t), [t]);
+  const PHASES = useMemo(
+    () => buildPhases(t, moduleCount),
+    [t, moduleCount],
+  );
 
   const allSteps = useMemo(() => PHASES.flatMap((p) => p.steps), [PHASES]);
   const doneCount = allSteps.filter((s) => checked[s.key]).length;
