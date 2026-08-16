@@ -245,7 +245,7 @@
             "text": "Drucke 1 Plate-Base-Bottom – es wird nur eine benötigt. Schließt den Basisstapel nach unten ab."
           },
           "printGenericBase": {
-            "text": "Für {{modules}} Sortiermodule drucke {{count}} Generic-Base-Platten – eine pro Sortiermodul. Ändere die Modulanzahl in der Teileliste oben, um dies zu aktualisieren."
+            "text": "Für {{modules}} Sortiermodule drucke {{count}} Generic-Base-Platten. Ändere die Modulanzahl in der Teileliste oben, um dies zu aktualisieren."
           },
           "printBinHolders": {
             "text": "Für {{modules}} Sortiermodule drucke {{count}} Fachhalter – zwei pro Modul, einer für die linke und einer für die rechte Auswurfseite. Ändere die Modulanzahl in der Teileliste oben, um dies zu aktualisieren."

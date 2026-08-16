@@ -245,7 +245,7 @@
             "text": "Imprime 1 Plate Base Bottom - une seule suffit. Ferme la base par le dessous."
           },
           "printGenericBase": {
-            "text": "Pour {{modules}} modules de tri, imprime {{count}} plaques Generic Base - une par module de tri. Change le nombre de modules dans la liste des pièces ci-dessus pour mettre ce nombre à jour."
+            "text": "Pour {{modules}} modules de tri, imprime {{count}} plaques Generic Base. Change le nombre de modules dans la liste des pièces ci-dessus pour mettre ce nombre à jour."
           },
           "printBinHolders": {
             "text": "Pour {{modules}} modules de tri, imprime {{count}} bacs - deux par module, un pour le côté d'éjection gauche et un pour le droit. Change le nombre de modules dans la liste des pièces ci-dessus pour mettre ce nombre à jour."

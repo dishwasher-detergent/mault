@@ -245,7 +245,7 @@
             "text": "Print 1 Plate Base Bottom - only one needed. Caps the bottom of the base stack."
           },
           "printGenericBase": {
-            "text": "For {{modules}} sorting modules, print {{count}} Generic Base plates - one per sorting module. Change the module count in the parts list above to update this."
+            "text": "For {{modules}} sorting modules, print {{count}} Generic Base plates. Change the module count in the parts list above to update this."
           },
           "printBinHolders": {
             "text": "For {{modules}} sorting modules, print {{count}} bin holders - two per module, one for the left ejection side and one for the right. Change the module count in the parts list above to update this."

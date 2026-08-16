@@ -32,7 +32,7 @@ interface Phase {
 function buildPhases(t: TFunction<"build">, moduleCount: number): Phase[] {
   const sortingModules = moduleCount;
   const plateBase = ((moduleCount + 1) * (moduleCount + 2)) / 2;
-  const genericBase = moduleCount;
+  const genericBase = Math.max(0, moduleCount - 2);
   const binHolders = moduleCount * 2;
 
   return [
