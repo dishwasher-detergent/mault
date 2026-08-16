@@ -1,16 +1,23 @@
-import type { ModuleConfig, ServoCalibration } from "@magic-vault/shared";
+import type { BinRoute, ModuleConfig, ServoCalibration } from "@magic-vault/shared";
 
 export interface ModuleConfigsContextValue {
   configs: ModuleConfig[];
   saveConfig: (
-    moduleNumber: 1 | 2 | 3,
+    moduleNumber: number,
     calibration: ServoCalibration,
   ) => Promise<void>;
   moveServo: (
-    module: 1 | 2 | 3,
+    module: number,
     servo: "bottom" | "paddle" | "pusher",
     value: number,
   ) => void;
+}
+
+export interface BinRoutesContextValue {
+  routes: BinRoute[];
+  isPending: boolean;
+  save: (route: BinRoute) => void;
+  resetToDefaults: () => void;
 }
 
 export interface ServoConfig {
@@ -21,6 +28,6 @@ export interface ServoConfig {
   calibrationPositions: { labelKey: string; key: keyof ServoCalibration }[];
 }
 
-export type SliderKey = `${1 | 2 | 3}:${"bottom" | "paddle" | "pusher"}`;
+export type SliderKey = `${number}:${"bottom" | "paddle" | "pusher"}`;
 
 export type ActivePositions = Record<string, string | null>;

@@ -1,9 +1,9 @@
 import type { BinConfigsContextValue } from "@/features/bins/types";
 import {
-  BIN_COUNT,
   BinConfig,
   BinRuleGroup,
   BinSet,
+  computeBinCount,
   FIELD_DEFINITIONS,
 } from "@magic-vault/shared";
 
@@ -17,6 +17,7 @@ import {
   saveBinConfig as saveBinConfigAction,
   saveSet as saveSetAction,
 } from "@/features/bins/api/sort-bins";
+import { useModuleCount } from "@/features/calibration/api/use-module-count";
 import { useCollections } from "@/features/collections/api/use-collections";
 import { useOrg } from "@/features/companies/api/use-organization";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -38,9 +39,12 @@ function createEmptyConfig(binNumber: number): BinConfig {
   return { guid: crypto.randomUUID(), binNumber, rules: emptyRules() };
 }
 
-function configsFromSet(set: BinSet | undefined): BinConfig[] {
+function configsFromSet(
+  set: BinSet | undefined,
+  binCount: number,
+): BinConfig[] {
   const filled: BinConfig[] = [];
-  for (let i = 1; i <= BIN_COUNT; i++) {
+  for (let i = 1; i <= binCount; i++) {
     const existing = set?.bins.find((c) => c.binNumber === i);
     filled.push(existing ?? createEmptyConfig(i));
   }
@@ -64,6 +68,7 @@ export function BinConfigsProvider({
   const queryClient = useQueryClient();
   const { activeOrg } = useOrg();
   const { activeCollection, collections } = useCollections();
+  const moduleCount = useModuleCount();
   const [selectedBin, setSelectedBin] = useState(1);
 
   const { data: allSets = [] } = useQuery({
@@ -89,7 +94,10 @@ export function BinConfigsProvider({
     [sets],
   );
 
-  const configs = useMemo(() => configsFromSet(selectedSet), [selectedSet]);
+  const configs = useMemo(
+    () => configsFromSet(selectedSet, computeBinCount(moduleCount)),
+    [selectedSet, moduleCount],
+  );
 
   const hasCatchAll = useMemo(
     () => configs.some((c) => c.isCatchAll),
@@ -116,12 +124,19 @@ export function BinConfigsProvider({
             rules: rules!,
             isCatchAll,
           };
+          const bins =
+            idx >= 0
+              ? set.bins.map((b, i) => (i === idx ? updated : b))
+              : [...set.bins, updated];
           return {
             ...set,
-            bins:
-              idx >= 0
-                ? set.bins.map((b, i) => (i === idx ? updated : b))
-                : [...set.bins, updated],
+            bins: isCatchAll
+              ? bins.map((b) =>
+                  b.binNumber !== binNumber && b.isCatchAll
+                    ? { ...b, isCatchAll: false }
+                    : b,
+                )
+              : bins,
           };
         }),
       );
@@ -138,16 +153,11 @@ export function BinConfigsProvider({
         return;
       }
       if (result.data) {
-        const confirmed = result.data;
+        const confirmedBins = result.data;
         queryClient.setQueryData<BinSet[]>(["bins"], (old = []) =>
           old.map((set) =>
             set.isActive && matchesGame(set, activeGameGuid)
-              ? {
-                  ...set,
-                  bins: set.bins.map((b) =>
-                    b.binNumber === confirmed.binNumber ? confirmed : b,
-                  ),
-                }
+              ? { ...set, bins: confirmedBins }
               : set,
           ),
         );

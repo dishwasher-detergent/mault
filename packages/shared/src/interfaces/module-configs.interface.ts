@@ -9,9 +9,25 @@ export interface ServoCalibration {
 }
 
 export interface ModuleConfig {
-  moduleNumber: 1 | 2 | 3;
+  moduleNumber: number;
   calibration: ServoCalibration;
 }
+
+export type ChannelLayout = "legacy" | "standard";
+export const DEFAULT_CHANNEL_LAYOUT: ChannelLayout = "standard";
+
+export const CHANNEL_OFFSET: Record<ChannelLayout, number> = {
+  legacy: 4,
+  standard: 0,
+};
+
+// Largest module count whose servo channels (3 each) plus one feeder channel
+// right after them still fit in channels [offset, 15].
+export function maxModulesForLayout(layout: ChannelLayout): number {
+  return Math.floor((15 - CHANNEL_OFFSET[layout]) / 3);
+}
+
+export const DEFAULT_MODULE_COUNT = 3;
 
 export const DEFAULT_CALIBRATION: ServoCalibration = {
   bottomClosed: 400,

@@ -4,8 +4,6 @@ import type {
 } from "../interfaces/sort-bins.interface";
 import { FieldMeta } from "../interfaces/sort-bins.interface";
 
-export const BIN_COUNT = 7;
-
 export const SET_NAME_MAX_LENGTH = 50;
 export const CONDITION_STRING_MAX_LENGTH = 200;
 export const CONDITION_NUMERIC_MAX = 100_000;
@@ -141,7 +139,9 @@ const COLOR_BINS: Array<{ binNumber: number; colors: string[] }> = [
   { binNumber: 6, colors: [] },
 ];
 
-export function createDefaultColorBins(): DefaultBinInit[] {
+export function createDefaultColorBins(binCount: number): DefaultBinInit[] {
+  if (binCount !== 7) return createDefaultCatchAllOnlyBins(binCount);
+
   return [
     ...COLOR_BINS.map(({ binNumber, colors }) => ({
       binNumber,
@@ -171,10 +171,12 @@ export function createDefaultColorBins(): DefaultBinInit[] {
   ];
 }
 
-export function createDefaultCatchAllOnlyBins(): DefaultBinInit[] {
-  return Array.from({ length: BIN_COUNT }, (_, i) => ({
+export function createDefaultCatchAllOnlyBins(
+  binCount: number,
+): DefaultBinInit[] {
+  return Array.from({ length: binCount }, (_, i) => ({
     binNumber: i + 1,
-    isCatchAll: i === BIN_COUNT - 1,
+    isCatchAll: i === binCount - 1,
     rules: {
       id: crypto.randomUUID(),
       combinator: "and" as const,

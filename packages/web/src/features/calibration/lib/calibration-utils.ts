@@ -1,4 +1,3 @@
-import { MODULES } from "@/features/calibration/constants";
 import type { SliderKey } from "@/features/calibration/types";
 import type { ServoCalibration } from "@magic-vault/shared";
 
@@ -18,9 +17,9 @@ export function getCalibrationKey(
   return null;
 }
 
-export function defaultSliderValues(): Record<SliderKey, number> {
+export function defaultSliderValues(modules: number[]): Record<SliderKey, number> {
   const vals = {} as Record<SliderKey, number>;
-  for (const m of MODULES) {
+  for (const m of modules) {
     vals[`${m}:bottom`] = 307;
     vals[`${m}:paddle`] = 307;
     vals[`${m}:pusher`] = 307;

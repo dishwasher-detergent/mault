@@ -27,7 +27,7 @@
   },
   "bom": {
     "heading": "Bill of materials",
-    "description": "Quantities match the firmware exactly - 3 modules × 3 servos, 1 feeder, 4 IR sensors, 10 of the PCA9685's 16 channels in use. Channels 0–3 are wired for status LEDs in firmware but aren't part of the current build. Check off each part as you gather it - checkmarks are saved in this browser.",
+    "description": "Quantities match the firmware exactly - 3 modules × 3 servos, 1 feeder, 4 IR sensors, 10 of the PCA9685's 16 channels in use. The remaining channels are free for additional sorting modules (up to 5 modules on a single PCA9685). Check off each part as you gather it - checkmarks are saved in this browser.",
     "progress": {
       "partsCount": "{{done}} of {{total}} parts"
     },
@@ -188,7 +188,7 @@
       "colAssignment": "Assignment"
     },
     "channelMap": {
-      "unused": "Unused - reserved for LEDs in firmware, not part of this build",
+      "unused": "Unused - available for additional sorting modules",
       "modulePart": "Module {{n}} - {{part}}",
       "feeder": "Feeder (continuous rotation)"
     },

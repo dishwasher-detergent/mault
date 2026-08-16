@@ -76,6 +76,7 @@ VITE_API_URL=                 # base URL of the Hono API, e.g. http://localhost:
 VITE_APP_ENV=                 # local/developement/QA/production
 VITE_NEON_AUTH_URL=
 VITE_NEON_DATA_API_URL=
+VITE_LATEST_ARDUINO_VERSION=  # keep in sync with FIRMWARE_VERSION in arduino/main/main.ino - shows an outdated-firmware banner when a connected device reports an older version
 ```
 
 ## Database
@@ -96,11 +97,13 @@ pnpm --filter @magic-vault/server db:studio    # open Drizzle Studio
 The full bill of materials, wiring diagrams, and assembly instructions live in the app at `/build`. In short:
 
 - Arduino Uno R4 Minima, driving a PCA9685 servo controller over I2C
-- 9 positional SG90 servos (3 per module: trapdoor, paddle gate, pusher) plus 1 continuous-rotation SG90 for the feeder
+- 3 positional SG90 servos per sorting module (trapdoor, paddle gate, pusher) plus 1 continuous-rotation SG90 for the feeder — module count is configurable (up to 5 on a single PCA9685) in Calibration
 - IR sensor for card-feed detection
 - Enclosure and module parts are in `3d model/` (Fusion 360 source + printable `.3mf`)
 
-Upload `arduino/main/main.ino` (requires the ArduinoJson library). It communicates via JSON over USB serial: the web app sends `{"bin": N}` and the Arduino runs the routing sequence.
+Upload `arduino/main/main.ino` (requires the ArduinoJson library). The sketch is always compiled for the full module ceiling a single PCA9685 supports — it doesn't need to match how many modules you've actually built, since the app already knows each org's real module count and only ever sends route commands for modules that exist, so you can add modules later without reflashing. It communicates via JSON over USB serial: the web app sends `{"route": {"module": N, "direction": "left"|"right"|"bottom"}}`, resolved from the bin's routing assignment in Calibration, and the Arduino runs the routing sequence. `"bottom"` drops the card straight through the whole mechanism (any bin can be assigned to any module's bottom output — there's no single fixed catch-all bin).
+
+Where module 1 starts on the PCA9685 is also runtime-configurable, not baked into the firmware: a "PCA9685 channel layout" toggle in Calibration (Standard = channel 0, up to 5 modules; Legacy = channel 4, reserving 0-3 for the status LEDs older firmware drove, up to 3 modules) sends `{"setChannelOffset": N}` once per connection. Orgs with pre-existing module calibration data default to Legacy so already-wired hardware keeps working unchanged; new orgs default to Standard.
 
 ## Webcam
 

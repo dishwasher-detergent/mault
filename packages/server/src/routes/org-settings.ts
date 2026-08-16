@@ -1,9 +1,15 @@
+import {
+  DEFAULT_CAPTURE_SETTLE_DELAY_MS,
+  DEFAULT_CHANNEL_LAYOUT,
+  DEFAULT_MODULE_COUNT,
+  maxModulesForLayout,
+  type ChannelLayout,
+} from "@magic-vault/shared";
 import { eq } from "drizzle-orm";
 import { Hono } from "hono";
-import { authQuery } from "../db";
+import { authQuery, type Transaction } from "../db";
 import { orgSettings } from "../db/schema";
 import { requireAuth, requireOrg, type AppEnv } from "../middleware/auth";
-import { DEFAULT_CAPTURE_SETTLE_DELAY_MS } from "@magic-vault/shared";
 
 const router = new Hono<AppEnv>();
 
@@ -30,6 +36,17 @@ function toScanRegion(row?: {
   };
 }
 
+async function _detectDefaultChannelLayout(
+  tx: Transaction,
+  orgId: string,
+): Promise<ChannelLayout> {
+  const existing = await tx.query.moduleConfigs.findFirst({
+    where: (t, { eq }) => eq(t.orgId, orgId),
+    columns: { id: true },
+  });
+  return existing ? "legacy" : DEFAULT_CHANNEL_LAYOUT;
+}
+
 router.get("/", requireAuth, requireOrg, async (c) => {
   const orgId = c.get("orgId");
   try {
@@ -37,6 +54,27 @@ router.get("/", requireAuth, requireOrg, async (c) => {
       const row = await tx.query.orgSettings.findFirst({
         where: eq(orgSettings.orgId, orgId),
       });
+
+      let channelLayout = row?.channelLayout as
+        | ChannelLayout
+        | null
+        | undefined;
+      if (!channelLayout) {
+        channelLayout = await _detectDefaultChannelLayout(tx, orgId);
+        await tx
+          .insert(orgSettings)
+          .values({ orgId, channelLayout })
+          .onConflictDoUpdate({
+            target: [orgSettings.orgId],
+            set: { channelLayout, updatedAt: new Date() },
+          });
+      }
+
+      const moduleCount = Math.min(
+        row?.moduleCount ?? DEFAULT_MODULE_COUNT,
+        maxModulesForLayout(channelLayout),
+      );
+
       return {
         success: true,
         message: "Loaded.",
@@ -49,6 +87,8 @@ router.get("/", requireAuth, requireOrg, async (c) => {
           scanRegion: toScanRegion(row),
           captureSettleDelayMs:
             row?.captureSettleDelayMs ?? DEFAULT_CAPTURE_SETTLE_DELAY_MS,
+          moduleCount,
+          channelLayout,
         },
       };
     });
@@ -68,12 +108,21 @@ router.put("/", requireAuth, requireOrg, async (c) => {
     discordNotifyOnScan?: boolean;
     scanRegion?: { coverage: number; offsetX: number; offsetY: number } | null;
     captureSettleDelayMs?: number | null;
+    moduleCount?: number;
+    channelLayout?: ChannelLayout;
   }>();
   try {
     const result = await authQuery(c.get("jwtClaims"), async (tx) => {
       const existing = await tx.query.orgSettings.findFirst({
         where: eq(orgSettings.orgId, orgId),
       });
+
+      const channelLayout: ChannelLayout =
+        "channelLayout" in body && body.channelLayout
+          ? body.channelLayout
+          : ((existing?.channelLayout as ChannelLayout | null) ??
+            (await _detectDefaultChannelLayout(tx, orgId)));
+
       const merged = {
         primaryColor:
           "primaryColor" in body
@@ -113,6 +162,17 @@ router.put("/", requireAuth, requireOrg, async (c) => {
           "captureSettleDelayMs" in body
             ? (body.captureSettleDelayMs ?? null)
             : (existing?.captureSettleDelayMs ?? null),
+        channelLayout,
+        moduleCount:
+          "moduleCount" in body && body.moduleCount != null
+            ? Math.min(
+                Math.max(Math.round(body.moduleCount), 1),
+                maxModulesForLayout(channelLayout),
+              )
+            : Math.min(
+                existing?.moduleCount ?? DEFAULT_MODULE_COUNT,
+                maxModulesForLayout(channelLayout),
+              ),
       };
       await tx
         .insert(orgSettings)
@@ -133,6 +193,8 @@ router.put("/", requireAuth, requireOrg, async (c) => {
           scanRegion: toScanRegion(merged),
           captureSettleDelayMs:
             merged.captureSettleDelayMs ?? DEFAULT_CAPTURE_SETTLE_DELAY_MS,
+          moduleCount: merged.moduleCount,
+          channelLayout: merged.channelLayout,
         },
       };
     });

@@ -1,4 +1,6 @@
 import { modulesQueryOptions } from "@/features/calibration/api/module-configs";
+import { useBinRoutes } from "@/features/calibration/api/use-bin-routes";
+import { useModuleCount } from "@/features/calibration/api/use-module-count";
 import { useOrg } from "@/features/companies/api/use-organization";
 import { useFeederConfig } from "@/features/calibration/api/use-feeder-config";
 import { useModuleConfigs } from "@/features/calibration/api/use-module-configs";
@@ -9,7 +11,12 @@ import {
 } from "@/features/calibration/lib/calibration-utils";
 import type { ActivePositions, ServoConfig, SliderKey } from "@/features/calibration/types";
 import { useSerial } from "@/features/scanner/api/use-serial";
-import { DEFAULT_CALIBRATION, type ServoCalibration } from "@magic-vault/shared";
+import {
+  computeBinCount,
+  DEFAULT_CALIBRATION,
+  type BinRoute,
+  type ServoCalibration,
+} from "@magic-vault/shared";
 import { useQuery } from "@tanstack/react-query";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -17,12 +24,25 @@ import { toast } from "sonner";
 
 export function useCalibrationPage() {
   const { t } = useTranslation("calibration");
-  const { isConnected, connect, disconnect, sendCommand, sendBin, sendTest, receiveResponse } =
+  const { isConnected, connect, disconnect, sendCommand, sendRoute, sendTest, receiveResponse } =
     useSerial();
   const { configs, saveConfig, moveServo } = useModuleConfigs();
   const { feederConfig, saveConfig: saveFeeder, previewSpeed } = useFeederConfig();
   const { activeOrg } = useOrg();
   const { isLoading } = useQuery({ ...modulesQueryOptions, enabled: !!activeOrg });
+  const moduleCount = useModuleCount();
+  const modules = Array.from({ length: moduleCount }, (_, i) => i + 1);
+  const { routes: binRoutes } = useBinRoutes();
+
+  const resolveRoute = useCallback(
+    (binNumber: number): BinRoute =>
+      binRoutes.find((r) => r.binNumber === binNumber) ?? {
+        binNumber,
+        module: moduleCount,
+        direction: "bottom",
+      },
+    [binRoutes, moduleCount],
+  );
 
   const [active, setActive] = useState<ActivePositions>({});
   const activeRef = useRef(active);
@@ -39,17 +59,11 @@ export function useCalibrationPage() {
       ),
     );
 
-  const [sliderValues, setSliderValues] =
-    useState<Record<SliderKey, number>>(defaultSliderValues);
+  const [sliderValues, setSliderValues] = useState<Record<SliderKey, number>>(
+    () => defaultSliderValues(modules),
+  );
 
   const servoDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-  const [ledStates, setLedStates] = useState<Record<1 | 2 | 3 | 4, boolean>>({
-    1: false,
-    2: false,
-    3: false,
-    4: false,
-  });
 
   const [activeBin, setActiveBinState] = useState<number | null>(null);
   const activeBinRef = useRef<number | null>(null);
@@ -75,7 +89,7 @@ export function useCalibrationPage() {
 
   const handleControl = useCallback(
     (
-      module: 1 | 2 | 3,
+      module: number,
       servo: "bottom" | "paddle" | "pusher",
       position: string,
     ) => {
@@ -116,21 +130,12 @@ export function useCalibrationPage() {
   );
 
   const handleSliderChange = useCallback(
-    (module: 1 | 2 | 3, servo: "bottom" | "paddle" | "pusher", value: number) => {
+    (module: number, servo: "bottom" | "paddle" | "pusher", value: number) => {
       setSliderValues((prev) => ({ ...prev, [`${module}:${servo}`]: value }));
       if (servoDebounceRef.current) clearTimeout(servoDebounceRef.current);
       servoDebounceRef.current = setTimeout(() => moveServo(module, servo, value), 30);
     },
     [moveServo],
-  );
-
-  const handleLedToggle = useCallback(
-    (led: 1 | 2 | 3 | 4) => {
-      const next = !ledStates[led];
-      sendCommand(JSON.stringify({ led, on: next }));
-      setLedStates((prev) => ({ ...prev, [led]: next }));
-    },
-    [ledStates, sendCommand],
   );
 
   const handleTest = useCallback(async () => {
@@ -157,7 +162,7 @@ export function useCalibrationPage() {
     async (bin: number) => {
       setActiveBin(bin);
       try {
-        const response = await sendBin(bin);
+        const response = await sendRoute(resolveRoute(bin));
         if (!response) {
           toast.error(t("useCalibrationPage.toasts.binFailed", { bin }), {
             description: t("useCalibrationPage.toasts.noResponse"),
@@ -171,16 +176,17 @@ export function useCalibrationPage() {
         setActiveBin(null);
       }
     },
-    [sendBin, setActiveBin, t],
+    [sendRoute, resolveRoute, setActiveBin, t],
   );
 
   const handleSampleRun = useCallback(async () => {
     setIsSampleRunning(true);
     toast.info(t("useCalibrationPage.toasts.startingSampleRun"));
     try {
-      for (let bin = 1; bin <= 7; bin++) {
+      const binCount = computeBinCount(moduleCount);
+      for (let bin = 1; bin <= binCount; bin++) {
         setActiveBin(bin);
-        const response = await sendBin(bin);
+        const response = await sendRoute(resolveRoute(bin));
         if (!response) {
           toast.error(t("useCalibrationPage.toasts.sampleRunStopped", { bin }), {
             description: t("useCalibrationPage.toasts.noResponse"),
@@ -201,10 +207,10 @@ export function useCalibrationPage() {
       setActiveBin(null);
       setIsSampleRunning(false);
     }
-  }, [sendBin, setActiveBin, t]);
+  }, [sendRoute, resolveRoute, moduleCount, setActiveBin, t]);
 
   const handleCenterModule = useCallback(
-    (module: 1 | 2 | 3) => {
+    (module: number) => {
       const CENTER = 307;
       for (const servo of SERVOS) {
         moveServo(module, servo.name, CENTER);
@@ -220,10 +226,10 @@ export function useCalibrationPage() {
   );
 
   const handleSetPosition = useCallback(
-    (module: 1 | 2 | 3, posKey: keyof ServoCalibration, value: number) => {
+    (module: number, posKey: keyof ServoCalibration, value: number) => {
       const config = configsRef.current.find((c) => c.moduleNumber === module);
-      if (!config) return;
-      saveConfig(module, { ...config.calibration, [posKey]: value });
+      const calibration = config?.calibration ?? DEFAULT_CALIBRATION;
+      saveConfig(module, { ...calibration, [posKey]: value });
     },
     [saveConfig],
   );
@@ -322,17 +328,16 @@ export function useCalibrationPage() {
     connect,
     disconnect,
     configs,
+    modules,
     isLoading,
     active,
     sliderValues,
-    ledStates,
     activeBin,
     isTesting,
     isUnconfigured,
     handleControl,
     handleReset,
     handleSliderChange,
-    handleLedToggle,
     handleTest,
     handleTestBin,
     handleCenterModule,

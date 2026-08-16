@@ -37,11 +37,8 @@ const PAGE_SIZE = 96;
 
 export function CardGrid() {
   const { t } = useTranslation("cards");
-  const {
-    activeCollection,
-    deleteCollection,
-    isLoading: collectionsLoading,
-  } = useCollections();
+  const { activeCollection, isLoading: collectionsLoading } =
+    useCollections();
   const {
     cards,
     removeCard,
@@ -133,12 +130,8 @@ export function CardGrid() {
   }, [removeCards, selectedIds]);
 
   const handleClearSession = useCallback(async () => {
-    if (activeCollection) {
-      await deleteCollection(activeCollection.guid);
-    } else {
-      clearCards();
-    }
-  }, [activeCollection, deleteCollection, clearCards]);
+    clearCards();
+  }, [clearCards]);
 
   if (isLoading) {
     return (

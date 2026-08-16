@@ -17,6 +17,35 @@
       "right": "Set Right"
     }
   },
+  "moduleCountStepper": {
+    "label": "Sorting modules",
+    "value": "{{count}} module",
+    "value_other": "{{count}} modules",
+    "description": "How many physical sorting modules are wired up. Changes the number of bins available and the sections below."
+  },
+  "channelLayoutToggle": {
+    "label": "PCA9685 channel layout",
+    "standard": "Standard",
+    "standardDescription": "Module 1 starts at channel 0. Supports up to 5 modules.",
+    "legacy": "Legacy",
+    "legacyDescription": "Module 1 starts at channel 4 (channels 0-3 reserved for status LEDs). Supports up to 3 modules. Use this if your hardware was wired before module expansion was added.",
+    "legacyBanner": "You're on the legacy channel layout, capped at 3 modules. Rewire module 1 to start at channel 0 to support up to 5 modules.",
+    "legacyBannerAction": "Update to Standard"
+  },
+  "sections": {
+    "moduleSetup": "Modules & Routing",
+    "scanRegion": "Scan Region",
+    "calibration": "Feeder & Module Calibration",
+    "moduleCalibration": "Module Calibration"
+  },
+  "binRoutingAssignment": {
+    "label": "Bin Routing Assignment",
+    "resetToDefaults": "Reset to Defaults",
+    "binLabel": "Bin {{bin}}",
+    "moduleLeft": "Module {{module}} — Left",
+    "moduleRight": "Module {{module}} — Right",
+    "moduleBottom": "Module {{module}} — Bottom"
+  },
   "binRoutingControls": {
     "label": "Bin Routing",
     "feed": "Feed",
@@ -57,10 +86,6 @@
     "hopperEmpty": "Hopper empty",
     "hopper": "Hopper",
     "hopperTooltip": "Whether the card hopper's IR sensor currently detects cards waiting to be fed"
-  },
-  "ledControls": {
-    "label": "LEDs",
-    "ledLabel": "LED {{led}}"
   },
   "moduleCalibrationGrid": {
     "moduleHeading": "Module {{module}}",
@@ -116,6 +141,13 @@
       "unexpectedResponse": "Unexpected response: {{response}}",
       "noResponse": "No response from sorter.",
       "saveFailed": "Failed to save module config"
+    }
+  },
+  "useBinRoutes": {
+    "toasts": {
+      "saveFailed": "Failed to save bin route",
+      "resetSuccess": "Bin routes reset to defaults",
+      "resetFailed": "Failed to reset bin routes"
     }
   },
   "calibratePage": {

@@ -3,10 +3,14 @@ import {
   saveModuleConfig,
 } from "@/features/calibration/api/module-configs";
 import type { ModuleConfigsContextValue } from "@/features/calibration/types";
+import { orgSettingsQueryOptions } from "@/features/companies/api/org-settings";
 import { useOrg } from "@/features/companies/api/use-organization";
 import { useSerial } from "@/features/scanner/api/use-serial";
 import {
+  CHANNEL_OFFSET,
   DEFAULT_CALIBRATION,
+  DEFAULT_CHANNEL_LAYOUT,
+  DEFAULT_MODULE_COUNT,
   ModuleConfig,
   ServoCalibration,
 } from "@magic-vault/shared";
@@ -20,8 +24,8 @@ const ModuleConfigsContext = createContext<ModuleConfigsContextValue | null>(
 );
 
 function defaultConfigs(): ModuleConfig[] {
-  return ([1, 2, 3] as const).map((n) => ({
-    moduleNumber: n,
+  return Array.from({ length: DEFAULT_MODULE_COUNT }, (_, i) => ({
+    moduleNumber: i + 1,
     calibration: { ...DEFAULT_CALIBRATION },
   }));
 }
@@ -36,10 +40,28 @@ export function ModuleConfigsProvider({
   const { activeOrg } = useOrg();
   const { sendCommand, receiveResponse, registerPreTestHook } = useSerial();
 
-  const { data: configs = defaultConfigs() } = useQuery({ ...modulesQueryOptions, enabled: !!activeOrg });
+  const { data: configs = defaultConfigs() } = useQuery({
+    ...modulesQueryOptions,
+    enabled: !!activeOrg,
+  });
 
   useEffect(() => {
     registerPreTestHook(async () => {
+      try {
+        const orgSettings = await queryClient.fetchQuery(
+          orgSettingsQueryOptions(activeOrg?.id),
+        );
+        const channelLayout =
+          orgSettings?.channelLayout ?? DEFAULT_CHANNEL_LAYOUT;
+        const offsetResponse = receiveResponse();
+        await sendCommand(
+          JSON.stringify({ setChannelOffset: CHANNEL_OFFSET[channelLayout] }),
+        );
+        await offsetResponse;
+      } catch (e) {
+        console.error("[Serial] Failed to sync channel offset:", e); // eslint-disable-line no-console -- hardware debug trace
+      }
+
       const fresh = await queryClient.fetchQuery(modulesQueryOptions);
       for (const config of fresh) {
         const p = receiveResponse();
@@ -80,7 +102,7 @@ export function ModuleConfigsProvider({
       moduleNumber,
       calibration,
     }: {
-      moduleNumber: 1 | 2 | 3;
+      moduleNumber: number;
       calibration: ServoCalibration;
     }) => saveModuleConfig(moduleNumber, calibration),
     onMutate: async ({ moduleNumber, calibration }) => {
@@ -104,25 +126,23 @@ export function ModuleConfigsProvider({
       if (result.success && result.data) {
         queryClient.setQueryData(["modules"], result.data);
         sendCommand(
-          JSON.stringify({ setConfig: { module: moduleNumber, ...calibration } }),
+          JSON.stringify({
+            setConfig: { module: moduleNumber, ...calibration },
+          }),
         );
       }
     },
   });
 
   const saveConfig = useCallback(
-    async (moduleNumber: 1 | 2 | 3, calibration: ServoCalibration) => {
+    async (moduleNumber: number, calibration: ServoCalibration) => {
       await saveConfigMutation.mutateAsync({ moduleNumber, calibration });
     },
     [saveConfigMutation],
   );
 
   const moveServo = useCallback(
-    (
-      module: 1 | 2 | 3,
-      servo: "bottom" | "paddle" | "pusher",
-      value: number,
-    ) => {
+    (module: number, servo: "bottom" | "paddle" | "pusher", value: number) => {
       sendCommand(JSON.stringify({ servo, module, value }));
     },
     [sendCommand],

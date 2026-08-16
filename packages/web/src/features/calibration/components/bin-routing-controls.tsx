@@ -1,9 +1,9 @@
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
+import { useModuleCount } from "@/features/calibration/api/use-module-count";
+import { computeBinCount } from "@magic-vault/shared";
 import { IconPackage, IconPlayerPlay } from "@tabler/icons-react";
 import { useTranslation } from "react-i18next";
-
-const BINS = [1, 2, 3, 4, 5, 6, 7] as const;
 
 interface BinRoutingControlsProps {
   activeBin: number | null;
@@ -23,6 +23,8 @@ export function BinRoutingControls({
   onSampleRun,
 }: BinRoutingControlsProps) {
   const { t } = useTranslation("calibration");
+  const moduleCount = useModuleCount();
+  const bins = Array.from({ length: computeBinCount(moduleCount) }, (_, i) => i + 1);
   const busy = activeBin !== null || isSampleRunning;
 
   return (
@@ -45,7 +47,7 @@ export function BinRoutingControls({
             : t("binRoutingControls.sampleRun")}
         </Button>
         <div className="bg-border w-px self-stretch" />
-        {BINS.map((bin) => (
+        {bins.map((bin) => (
           <Button
             key={bin}
             variant={activeBin === bin && !isSampleRunning ? "default" : "outline"}

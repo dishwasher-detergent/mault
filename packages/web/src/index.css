@@ -2,7 +2,6 @@
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
 @import "@fontsource-variable/figtree";
-@import "@neondatabase/neon-js/ui/tailwind";
 @import "@fontsource-variable/geist-mono";
 @import "@fontsource-variable/jetbrains-mono";
 
@@ -141,9 +140,9 @@ code {
   --color-uncommon: var(--uncommon);
   --color-rare: var(--rare);
   --color-mythic: var(--mythic);
-  --color-c: var(--c);
-  --color-u: var(--u);
-  --color-r: var(--r);
+  --color-common: var(--c);
+  --color-uncommon: var(--u);
+  --color-rare: var(--r);
   --color-lr: var(--lr);
   --color-p: var(--p);
   --radius-sm: calc(var(--radius) - 4px);

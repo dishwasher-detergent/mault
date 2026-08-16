@@ -1,10 +1,24 @@
 import { Hono } from "hono";
+import type { Transaction } from "../db";
 import { authQuery } from "../db";
 import { moduleConfigAudit, moduleConfigs } from "../db/schema";
-import { DEFAULT_CALIBRATION, type ModuleConfig, type ServoCalibration } from "@magic-vault/shared";
+import {
+  DEFAULT_CALIBRATION,
+  DEFAULT_MODULE_COUNT,
+  type ModuleConfig,
+  type ServoCalibration,
+} from "@magic-vault/shared";
 import { requireAuth, requireOrg, type AppEnv } from "../middleware/auth";
 
 const router = new Hono<AppEnv>();
+
+async function _getModuleCount(tx: Transaction, orgId: string): Promise<number> {
+  const row = await tx.query.orgSettings.findFirst({
+    where: (t, { eq }) => eq(t.orgId, orgId),
+    columns: { moduleCount: true },
+  });
+  return row?.moduleCount ?? DEFAULT_MODULE_COUNT;
+}
 
 function toModuleConfig(row: {
   moduleNumber: number;
@@ -17,7 +31,7 @@ function toModuleConfig(row: {
   pusherRight: number;
 }): ModuleConfig {
   return {
-    moduleNumber: row.moduleNumber as 1 | 2 | 3,
+    moduleNumber: row.moduleNumber,
     calibration: {
       bottomClosed: row.bottomClosed,
       bottomOpen: row.bottomOpen,
@@ -31,8 +45,8 @@ function toModuleConfig(row: {
 }
 
 type CalibRow = { moduleNumber: number; bottomClosed: number; bottomOpen: number; paddleClosed: number; paddleOpen: number; pusherLeft: number; pusherNeutral: number; pusherRight: number };
-function buildConfigs(rows: CalibRow[]): ModuleConfig[] {
-  return ([1, 2, 3] as const).map((n) => {
+function buildConfigs(rows: CalibRow[], moduleCount: number): ModuleConfig[] {
+  return Array.from({ length: moduleCount }, (_, i) => i + 1).map((n) => {
     const row = rows.find((r) => r.moduleNumber === n);
     return row ? toModuleConfig(row) : { moduleNumber: n, calibration: { ...DEFAULT_CALIBRATION } };
   });
@@ -46,7 +60,8 @@ router.get("/", requireAuth, requireOrg, async (c) => {
       const rows = await tx.query.moduleConfigs.findMany({
         where: (t, { eq }) => eq(t.orgId, orgId),
       });
-      return { success: true, message: "Loaded module configs.", data: buildConfigs(rows) };
+      const moduleCount = await _getModuleCount(tx, orgId);
+      return { success: true, message: "Loaded module configs.", data: buildConfigs(rows, moduleCount) };
     });
     return c.json(result);
   } catch (err) {
@@ -58,7 +73,7 @@ router.get("/", requireAuth, requireOrg, async (c) => {
 // PUT /modules/:moduleNumber
 router.put("/:moduleNumber", requireAuth, requireOrg, async (c) => {
   const orgId = c.get("orgId");
-  const moduleNumber = parseInt(c.req.param("moduleNumber")) as 1 | 2 | 3;
+  const moduleNumber = parseInt(c.req.param("moduleNumber"));
   const calibration = await c.req.json<ServoCalibration>();
   try {
     const result = await authQuery(c.get("jwtClaims"), async (tx) => {
@@ -75,7 +90,8 @@ router.put("/:moduleNumber", requireAuth, requireOrg, async (c) => {
       const rows = await tx.query.moduleConfigs.findMany({
         where: (t, { eq }) => eq(t.orgId, orgId),
       });
-      return { success: true, message: "Saved module config.", data: buildConfigs(rows) };
+      const moduleCount = await _getModuleCount(tx, orgId);
+      return { success: true, message: "Saved module config.", data: buildConfigs(rows, moduleCount) };
     });
     return c.json(result);
   } catch (err) {
@@ -99,7 +115,7 @@ router.get("/history", requireAuth, requireOrg, async (c) => {
         message: "Loaded history.",
         data: rows.map((r) => ({
           guid: r.guid!,
-          moduleNumber: r.moduleNumber as 1 | 2 | 3,
+          moduleNumber: r.moduleNumber,
           calibration: {
             bottomClosed: r.bottomClosed,
             bottomOpen: r.bottomOpen,
@@ -154,7 +170,8 @@ router.post("/history/:guid/revert", requireAuth, requireOrg, async (c) => {
       const rows = await tx.query.moduleConfigs.findMany({
         where: (t, { eq }) => eq(t.orgId, orgId),
       });
-      return { success: true, message: "Reverted module config.", data: buildConfigs(rows) };
+      const moduleCount = await _getModuleCount(tx, orgId);
+      return { success: true, message: "Reverted module config.", data: buildConfigs(rows, moduleCount) };
     });
     return c.json(result);
   } catch (err) {

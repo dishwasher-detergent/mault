@@ -19,9 +19,9 @@ import {
   collectionsQueryOptions,
   releaseScanLock,
 } from "@/features/collections/api/collections";
-import { CreateCollectionDialog } from "@/features/collections/components/create-collection-dialog";
 import { useCollectionLocks } from "@/features/collections/api/use-collection-locks";
 import { useCollections } from "@/features/collections/api/use-collections";
+import { CreateCollectionDialog } from "@/features/collections/components/create-collection-dialog";
 import { useOrg } from "@/features/companies/api/use-organization";
 import { LANGUAGE_LABELS } from "@/lib/languages";
 import {
@@ -99,7 +99,7 @@ export function CollectionSwitcher() {
       <span className="flex items-center gap-1.5">
         <FieldLabel>{t("switcher.label")}</FieldLabel>
         {activeCollection?.game && (
-          <Badge variant="secondary" className="shrink-0">
+          <Badge variant="outline" className="shrink-0">
             {activeCollection.game.name}
           </Badge>
         )}

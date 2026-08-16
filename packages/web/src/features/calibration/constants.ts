@@ -1,7 +1,5 @@
 import type { ServoConfig } from "./types";
 
-export const MODULES = [1, 2, 3] as const;
-
 export const SERVOS: ServoConfig[] = [
   {
     name: "bottom",

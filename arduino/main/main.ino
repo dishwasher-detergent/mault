@@ -2,43 +2,63 @@
 #include <Wire.h>
 #include <Adafruit_PWMServoDriver.h>
 
+#define FIRMWARE_VERSION "1.0.0"
+
 Adafruit_PWMServoDriver pwm = Adafruit_PWMServoDriver();
 
-// PWM channel layout (PCA9685):
-//   ch0-3   = LEDs (1-indexed: LED 1 = ch0 ... LED 4 = ch3)
-//   ch4-6   = Module 1 (bottom, paddle, pusher)
-//   ch7-9   = Module 2
-//   ch10-12 = Module 3
-//   ch13    = Feeder (360° continuous rotation servo)
-#define NUM_MODULES 3
-#define MODULE_CHANNEL_OFFSET 4
-#define FEEDER_CHANNEL 13
+// PWM channel layout (PCA9685, 16 channels total, valid channels 0-15):
+//   Each module uses 3 consecutive channels (bottom, paddle, pusher),
+//   starting at moduleChannelOffset. The feeder (360° continuous rotation
+//   servo) takes the next channel after the last addressable module.
+//   e.g. offset=0: module1=ch0-2 ... module5=ch12-14, feeder=ch15.
+//        offset=4: module1=ch4-6 ... module3=ch10-12, feeder=ch13.
+//
+// moduleChannelOffset is runtime-configurable (via {"setChannelOffset": N}),
+// not a compile-time constant - the app sends it based on each org's
+// "channel layout" setting:
+//   0 ("standard") - current build docs/BOM, module 1 starts at channel 0.
+//   4 ("legacy") - reserves channels 0-3 for the status LEDs driven by
+//     firmware built before module expansion existed, so orgs with hardware
+//     already wired that way don't need to rewire. Caps out at 3 modules
+//     instead of 5 since the offset eats into the 16-channel budget.
+// MAX_MODULES (below) only sizes compile-time arrays - it is NOT how many
+// modules are actually addressable at any given offset; maxModuleForOffset()
+// is. The app already knows each org's real module count and only ever
+// sends {"route": ...} commands naming modules that exist, so channels
+// beyond what's addressable for the current offset just sit idle.
+#define MAX_MODULES 5
+int moduleChannelOffset = 0;
 
-// IR sensor pins — one per module (active LOW: pin reads LOW when card is present)
-#define IR_PIN_MODULE1 2
-#define IR_PIN_MODULE2 3
-#define IR_PIN_MODULE3 4
+// IR sensor pins — one per module (active LOW: pin reads LOW when card is present).
+// Pins for modules beyond what's addressable at the current offset are simply never read.
+const int IR_PINS[MAX_MODULES] = {2, 3, 4, 6, 7};
 #define IR_TIMEOUT_MS  3000  // max ms to wait for a card before aborting
 
 // Module 1 is where every card lands right after feeding, before any routing
 // decision is made — if it sits there this long with no routing command in
-// progress (e.g. the app never sent a bin command), something's stuck.
+// progress (e.g. the app never sent a route command), something's stuck.
 #define MODULE1_JAM_TIMEOUT_MS 20000
 
 // Hopper IR sensor — active LOW: pin reads LOW while cards remain in the feeder stack
 #define IR_PIN_HOPPER 5
 
-// Declared here (before any function) because the Arduino builder hoists
-// auto-generated function prototypes to the top of the file, above any type
-// defined later — if FeedResult were declared next to runFeeder() instead,
-// the hoisted `FeedResult runFeeder();` prototype would precede it and fail
-// to compile ("FeedResult does not name a type").
+// Declared here (before any function - including maxModuleForOffset() right
+// below) because the Arduino builder hoists auto-generated function
+// prototypes to the top of the file, above any type defined later — if
+// FeedResult were declared after the first function instead, the hoisted
+// `FeedResult runFeeder();` prototype would precede it and fail to compile
+// ("FeedResult does not name a type").
 enum FeedResult { FEED_DETECTED, FEED_TIMEOUT, FEED_EMPTY };
 
+// Largest module number whose 3 channels, plus one feeder channel right
+// after the last addressable module, still fit in channels [offset, 15].
+int maxModuleForOffset() {
+  int n = (15 - moduleChannelOffset) / 3;
+  return n < 0 ? 0 : n;
+}
+
 int irPin(int module) {
-  if (module == 1) return IR_PIN_MODULE1;
-  if (module == 2) return IR_PIN_MODULE2;
-  return IR_PIN_MODULE3;
+  return IR_PINS[module - 1];
 }
 
 bool hopperHasCards() {
@@ -61,11 +81,7 @@ struct ModuleConfig {
   int pusherLeft, pusherNeutral, pusherRight;
 };
 
-ModuleConfig moduleConfig[NUM_MODULES] = {
-  {300, 310, 300, 310, 295, 300, 305},
-  {300, 310, 300, 310, 295, 300, 305},
-  {300, 310, 300, 310, 295, 300, 305},
-};
+ModuleConfig moduleConfig[MAX_MODULES];
 
 struct FeederConfig {
   int speed;          // PWM pulse for forward motion
@@ -94,7 +110,11 @@ unsigned long module1PresentSince = 0;
 bool module1JamAlerted = false;
 
 int getChannel(int module, int servoOffset) {
-  return MODULE_CHANNEL_OFFSET + (module - 1) * 3 + servoOffset;
+  return moduleChannelOffset + (module - 1) * 3 + servoOffset;
+}
+
+int getFeederChannel() {
+  return moduleChannelOffset + maxModuleForOffset() * 3;
 }
 
 void setServoPosition(int channel, int pulse) {
@@ -109,7 +129,7 @@ void setModuleNeutral(int module) {
 }
 
 void stopFeeder() {
-  pwm.setPin(FEEDER_CHANNEL, 0);  // cut PWM signal entirely to stop 360° servo
+  pwm.setPin(getFeederChannel(), 0);  // cut PWM signal entirely to stop 360° servo
 }
 
 // Stops the feeder once the IR sees the card. Cards still behind it in the
@@ -148,7 +168,7 @@ FeedResult runFeeder() {
   if (!hopperHasCards()) return FEED_EMPTY;
 
   if (feederConfig.pulseDuration <= 0) {
-    setServoPosition(FEEDER_CHANNEL, feederConfig.speed);
+    setServoPosition(getFeederChannel(), feederConfig.speed);
     while (millis() - start < (unsigned long)feederConfig.duration) {
       if (digitalRead(irPin(1)) == LOW) {
         settleAndStopFeeder();
@@ -164,7 +184,7 @@ FeedResult runFeeder() {
     // Check before starting the motor — catches cards that arrived during the pause
     if (digitalRead(irPin(1)) == LOW) return FEED_DETECTED;
 
-    setServoPosition(FEEDER_CHANNEL, feederConfig.speed);
+    setServoPosition(getFeederChannel(), feederConfig.speed);
 
     // Poll IR mid-pulse so we catch the moment the card trips the sensor
     unsigned long pulseStart = millis();
@@ -181,7 +201,7 @@ FeedResult runFeeder() {
       // Card arrived during the pause window — motor's already off. Only the
       // last card (hopper now empty) needs an extra push to fully seat it.
       if (!hopperHasCards()) {
-        setServoPosition(FEEDER_CHANNEL, feederConfig.speed);
+        setServoPosition(getFeederChannel(), feederConfig.speed);
         delay(feederConfig.settleDuration);
         stopFeeder();
       }
@@ -195,11 +215,11 @@ FeedResult runFeeder() {
 // Watches module 1's IR sensor while idle (only runs between commands, since
 // routeCard()/runFeeder() block loop() for their duration). If a card has
 // been sitting there continuously longer than MODULE1_JAM_TIMEOUT_MS — e.g.
-// the app never followed up with a bin command — report it once so it isn't
+// the app never followed up with a route command — report it once so it isn't
 // silently left for the operator to discover. Clears itself (and re-arms)
 // as soon as the sensor sees the card leave.
 void checkModule1Jam() {
-  bool present = digitalRead(IR_PIN_MODULE1) == LOW;
+  bool present = digitalRead(irPin(1)) == LOW;
   if (!present) {
     module1PresentSince = 0;
     module1JamAlerted = false;
@@ -216,7 +236,7 @@ void checkModule1Jam() {
 }
 
 void setAllNeutral() {
-  for (int m = 1; m <= NUM_MODULES; m++) setModuleNeutral(m);
+  for (int m = 1; m <= maxModuleForOffset(); m++) setModuleNeutral(m);
   stopFeeder();
   delay(200);
 }
@@ -246,108 +266,88 @@ int getServoOffset(const char* servo) {
   return -1;
 }
 
-// Route a card to the given bin number (1–7).
-//   Bin 1: wait for card at module 1, open paddle, push left
-//   Bin 2: wait for card at module 1, open paddle, push right
-//   Bin 3: wait for card at module 1, open bottom → wait for module 2, push left
-//   Bin 4: wait for card at module 1, open bottom → wait for module 2, push right
-//   Bin 5: wait for m1, open bottom → wait for m2, open bottom → wait for m3, push left
-//   Bin 6: wait for m1, open bottom → wait for m2, open bottom → wait for m3, push right
-//   Bin 7: wait for card at module 1, open all bottoms (catch-all)
-void routeCard(int bin) {
-  if (bin < 1 || bin > 7) {
-    Serial.println(F("{\"error\":\"bin must be 1-7\"}"));
-    return;
-  }
+void printModuleRangeError() {
+  Serial.print(F("{\"error\":\"module must be 1 to "));
+  Serial.print(maxModuleForOffset());
+  Serial.println(F("\"}"));
+}
 
-  // Run feeder until module 1 IR detects the card (or timeout/empty hopper)
+// Feeds the next card to module 1. On success returns true. On failure
+// (empty hopper or feed timeout) reports the error over Serial, resets all
+// servos to neutral, and returns false.
+bool feedNextCard() {
   FeedResult feedResult = runFeeder();
-  if (feedResult != FEED_DETECTED) {
-    Serial.print(F("{\"error\":\""));
-    Serial.print(feedResult == FEED_EMPTY
-      ? F("empty: feeder hopper is out of cards")
-      : F("timeout: feeder did not deliver card to module 1"));
-    Serial.print(F("\",\"empty\":"));
-    Serial.print(feedResult == FEED_EMPTY ? F("true") : F("false"));
-    Serial.println(F("}"));
-    setAllNeutral();
+  if (feedResult == FEED_DETECTED) return true;
+
+  Serial.print(F("{\"error\":\""));
+  Serial.print(feedResult == FEED_EMPTY
+    ? F("empty: feeder hopper is out of cards")
+    : F("timeout: feeder did not deliver card to module 1"));
+  Serial.print(F("\",\"empty\":"));
+  Serial.print(feedResult == FEED_EMPTY ? F("true") : F("false"));
+  Serial.println(F("}"));
+  setAllNeutral();
+  return false;
+}
+
+// Routes the next fed card according to `direction`:
+//   "left"/"right": every module before targetModule has its bottom opened
+//     so the card passes through to the next module; targetModule then
+//     engages its paddle and pusher to push the card out to that side.
+//   "bottom": opens every addressable module's bottom trapdoor at once so
+//     the card drops straight through and out the bottom of the whole
+//     mechanism, regardless of which module `targetModule` names — a bin
+//     can attach "bottom" to any module (there's no separate catch-all
+//     bin type).
+void routeCard(int targetModule, const char* direction) {
+  if (targetModule < 1 || targetModule > maxModuleForOffset()) {
+    printModuleRangeError();
     return;
   }
 
-  if (bin == 7) {
-    // Open all bottoms so card passes through to the catch-all position
-    for (int m = 1; m <= NUM_MODULES; m++) {
+  if (!feedNextCard()) return;
+
+  if (strcmp(direction, "bottom") == 0) {
+    for (int m = 1; m <= maxModuleForOffset(); m++) {
       setServoPosition(getChannel(m, 0), moduleConfig[m - 1].bottomOpen);
     }
     delay(DELAY_PUSH);
     setAllNeutral();
     delay(200);
 
-  } else if (bin <= 2) {
-    // Module 1: open paddle, then push
-    ModuleConfig& c = moduleConfig[0];
-    setServoPosition(getChannel(1, 1), c.paddleOpen);
-    delay(DELAY_PADDLE);
-    setServoPosition(getChannel(1, 2), bin == 1 ? c.pusherLeft : c.pusherRight);
-    delay(DELAY_PUSH);
-    setModuleNeutral(1);
-    delay(200);
-
-  } else if (bin <= 4) {
-    // Open module 1 bottom and wait for card to arrive at module 2
-    bool pushLeft = (bin == 3);
-    setServoPosition(getChannel(1, 0), moduleConfig[0].bottomOpen);
-
-    if (!waitForCard(2)) {
-      Serial.println(F("{\"error\":\"timeout: no card detected at module 2\"}"));
-      setAllNeutral();
-      return;
-    }
-    delay(DELAY_CARD_ENTER);
-
-    ModuleConfig& c2 = moduleConfig[1];
-    setServoPosition(getChannel(2, 1), c2.paddleOpen);
-    delay(DELAY_PADDLE);
-    setServoPosition(getChannel(2, 2), pushLeft ? c2.pusherLeft : c2.pusherRight);
-    delay(DELAY_PUSH);
-    setModuleNeutral(1);
-    setModuleNeutral(2);
-    delay(200);
-
-  } else {
-    // Open module 1 bottom and wait for card at module 2, then open module 2 bottom
-    // and wait for card at module 3
-    bool pushLeft = (bin == 5);
-    setServoPosition(getChannel(1, 0), moduleConfig[0].bottomOpen);
-
-    if (!waitForCard(2)) {
-      Serial.println(F("{\"error\":\"timeout: no card detected at module 2\"}"));
-      setAllNeutral();
-      return;
-    }
-    setServoPosition(getChannel(2, 0), moduleConfig[1].bottomOpen);
-
-    if (!waitForCard(3)) {
-      Serial.println(F("{\"error\":\"timeout: no card detected at module 3\"}"));
-      setAllNeutral();
-      return;
-    }
-    delay(DELAY_CARD_ENTER);
-
-    ModuleConfig& c3 = moduleConfig[2];
-    setServoPosition(getChannel(3, 1), c3.paddleOpen);
-    delay(DELAY_PADDLE);
-    setServoPosition(getChannel(3, 2), pushLeft ? c3.pusherLeft : c3.pusherRight);
-    delay(DELAY_PUSH);
-    setModuleNeutral(1);
-    setModuleNeutral(2);
-    setModuleNeutral(3);
-    delay(200);
+    Serial.print(F("{\"status\":\"routed\",\"module\":"));
+    Serial.print(targetModule);
+    Serial.println(F(",\"direction\":\"bottom\"}"));
+    return;
   }
 
-  Serial.print(F("{\"status\":\"routed\",\"bin\":"));
-  Serial.print(bin);
-  Serial.println(F("}"));
+  bool pushLeft = strcmp(direction, "left") == 0;
+
+  for (int m = 1; m < targetModule; m++) {
+    setServoPosition(getChannel(m, 0), moduleConfig[m - 1].bottomOpen);
+    if (!waitForCard(m + 1)) {
+      Serial.print(F("{\"error\":\"timeout: no card detected at module "));
+      Serial.print(m + 1);
+      Serial.println(F("\"}"));
+      setAllNeutral();
+      return;
+    }
+  }
+  if (targetModule > 1) delay(DELAY_CARD_ENTER);
+
+  ModuleConfig& c = moduleConfig[targetModule - 1];
+  setServoPosition(getChannel(targetModule, 1), c.paddleOpen);
+  delay(DELAY_PADDLE);
+  setServoPosition(getChannel(targetModule, 2), pushLeft ? c.pusherLeft : c.pusherRight);
+  delay(DELAY_PUSH);
+  for (int m = 1; m <= targetModule; m++) setModuleNeutral(m);
+  delay(200);
+
+  Serial.print(F("{\"status\":\"routed\",\"module\":"));
+  Serial.print(targetModule);
+  Serial.print(F(",\"direction\":\""));
+  Serial.print(pushLeft ? F("left") : F("right"));
+  Serial.println(F("\"}"));
 }
 
 void printJsonEscaped(const char* s) {
@@ -380,23 +380,35 @@ void handleCommand(char* json) {
     return;
   }
 
+  // {"setChannelOffset": N} — sets the PCA9685 channel offset before module
+  // 1's servos (0 = standard layout starting at channel 0; 4 = legacy
+  // layout that reserves channels 0-3 for status LEDs, matching hardware
+  // built before module expansion supported more than 3 modules). Sent by
+  // the app once per connection, before any other setup/routing command.
+  if (doc["setChannelOffset"].is<int>()) {
+    moduleChannelOffset = doc["setChannelOffset"].as<int>();
+    setAllNeutral();
+    Serial.println(F("{\"status\":\"ok\"}"));
+    return;
+  }
+
   // {"test": true} — run a full mechanical test sequence then confirm connection
   if (doc["test"].is<bool>() && doc["test"].as<bool>()) {
     // Open all bottoms and paddles
-    for (int m = 1; m <= NUM_MODULES; m++) {
+    for (int m = 1; m <= maxModuleForOffset(); m++) {
       setServoPosition(getChannel(m, 0), moduleConfig[m - 1].bottomOpen);
       setServoPosition(getChannel(m, 1), moduleConfig[m - 1].paddleOpen);
     }
     delay(DELAY_PUSH);
 
     // Move all pushers left
-    for (int m = 1; m <= NUM_MODULES; m++) {
+    for (int m = 1; m <= maxModuleForOffset(); m++) {
       setServoPosition(getChannel(m, 2), moduleConfig[m - 1].pusherLeft);
     }
     delay(DELAY_PUSH);
 
     // Move all pushers right
-    for (int m = 1; m <= NUM_MODULES; m++) {
+    for (int m = 1; m <= maxModuleForOffset(); m++) {
       setServoPosition(getChannel(m, 2), moduleConfig[m - 1].pusherRight);
     }
     delay(DELAY_PUSH);
@@ -406,18 +418,10 @@ void handleCommand(char* json) {
     delay(200);
 
     // Test feeder: spin briefly to verify motor movement (no card expected)
-    setServoPosition(FEEDER_CHANNEL, feederConfig.speed);
+    setServoPosition(getFeederChannel(), feederConfig.speed);
     delay(500);
     stopFeeder();
     delay(200);
-
-    // Cycle through LEDs
-    for (int led = 1; led <= 4; led++) {
-      pwm.setPin(led - 1, 4095);
-      delay(150);
-      pwm.setPin(led - 1, 0);
-      delay(100);
-    }
 
     Serial.println(F("{\"status\":\"test_complete\"}"));
     return;
@@ -432,11 +436,11 @@ void handleCommand(char* json) {
 
   // {"clearDevice": true} — opens every module's bottom trapdoor at once so
   // any card resting in the mechanism drops through to the catch-all area,
-  // then returns everything to neutral. Unlike bin 7 routing, this doesn't
+  // then returns everything to neutral. Unlike catch-all routing, this doesn't
   // call runFeeder() first - it's meant to flush out whatever's physically
   // stuck regardless of feeder/hopper state.
   if (doc["clearDevice"].is<bool>() && doc["clearDevice"].as<bool>()) {
-    for (int m = 1; m <= NUM_MODULES; m++) {
+    for (int m = 1; m <= maxModuleForOffset(); m++) {
       setServoPosition(getChannel(m, 0), moduleConfig[m - 1].bottomOpen);
     }
     delay(DELAY_PUSH);
@@ -446,31 +450,13 @@ void handleCommand(char* json) {
     return;
   }
 
-  // {"led": 1, "on": true} — control LED by position (1 or 2)
-  if (doc["led"].is<int>()) {
-    int led = doc["led"].as<int>();
-    if (led < 1 || led > 4) {
-      Serial.println(F("{\"error\":\"led must be 1 to 4\"}"));
-      return;
-    }
-    bool on = doc["on"] | false;
-    pwm.setPin(led - 1, on ? 4095 : 0);
-
-    Serial.print(F("{\"status\":\"ok\",\"led\":"));
-    Serial.print(led);
-    Serial.print(F(",\"on\":"));
-    Serial.print(on ? F("true") : F("false"));
-    Serial.println(F("}"));
-    return;
-  }
-
   // {"servo": "paddle", "module": 1, "position": "left"}
   // {"servo": "bottom", "module": 1, "value": 220}  — raw PWM for calibration
   if (!doc["servo"].isNull()) {
     const char* servo = doc["servo"];
     int module = doc["module"] | 0;
-    if (module < 1 || module > NUM_MODULES) {
-      Serial.println(F("{\"error\":\"module must be 1-3\"}"));
+    if (module < 1 || module > maxModuleForOffset()) {
+      printModuleRangeError();
       return;
     }
     int offset = getServoOffset(servo);
@@ -503,8 +489,8 @@ void handleCommand(char* json) {
   if (!doc["setConfig"].isNull()) {
     JsonObject cfg = doc["setConfig"];
     int module = cfg["module"] | 0;
-    if (module < 1 || module > NUM_MODULES) {
-      Serial.println(F("{\"error\":\"module must be 1-3\"}"));
+    if (module < 1 || module > maxModuleForOffset()) {
+      printModuleRangeError();
       return;
     }
     ModuleConfig& c = moduleConfig[module - 1];
@@ -535,7 +521,7 @@ void handleCommand(char* json) {
 
   // {"feederValue": N} — set raw PWM (for calibration preview, does not auto-stop)
   if (doc["feederValue"].is<int>()) {
-    setServoPosition(FEEDER_CHANNEL, doc["feederValue"].as<int>());
+    setServoPosition(getFeederChannel(), doc["feederValue"].as<int>());
     Serial.println(F("{\"status\":\"ok\"}"));
     return;
   }
@@ -563,7 +549,7 @@ void handleCommand(char* json) {
   // {"readIR": true} — read current IR sensor state for all modules + hopper
   if (doc["readIR"].is<bool>() && doc["readIR"].as<bool>()) {
     Serial.print(F("{\"status\":\"ok\",\"ir\":["));
-    for (int m = 1; m <= NUM_MODULES; m++) {
+    for (int m = 1; m <= maxModuleForOffset(); m++) {
       if (m > 1) Serial.print(',');
       Serial.print(digitalRead(irPin(m)) == LOW ? F("true") : F("false"));  // true = card present
     }
@@ -573,9 +559,23 @@ void handleCommand(char* json) {
     return;
   }
 
-  // {"bin": N} — route the next card to bin N (1–7)
-  if (doc["bin"].is<int>()) {
-    routeCard(doc["bin"].as<int>());
+  // {"route": {"module": N, "direction": "left"|"right"|"bottom"}} — route
+  // the next card to module N, pushed left/right, or dropped through the
+  // bottom (any bin can be assigned a "bottom" route, not just a fixed one).
+  if (!doc["route"].isNull()) {
+    JsonObject route = doc["route"];
+    int module = route["module"] | 0;
+    const char* direction = route["direction"] | "";
+    if (module < 1 || module > maxModuleForOffset()) {
+      printModuleRangeError();
+      return;
+    }
+    if (strcmp(direction, "left") != 0 && strcmp(direction, "right") != 0 &&
+        strcmp(direction, "bottom") != 0) {
+      Serial.println(F("{\"error\":\"direction must be left, right, or bottom\"}"));
+      return;
+    }
+    routeCard(module, direction);
     return;
   }
 
@@ -586,17 +586,23 @@ void setup() {
   Serial.begin(9600);
   while (!Serial);
 
-  // IR sensors: active LOW (internal pull-up, sensor pulls LOW when card present)
-  pinMode(IR_PIN_MODULE1, INPUT_PULLUP);
-  pinMode(IR_PIN_MODULE2, INPUT_PULLUP);
-  pinMode(IR_PIN_MODULE3, INPUT_PULLUP);
+  for (int m = 0; m < MAX_MODULES; m++) {
+    moduleConfig[m] = {300, 310, 300, 310, 295, 300, 305};
+  }
+
+  // IR sensors: active LOW (internal pull-up, sensor pulls LOW when card present).
+  // All MAX_MODULES pins are set up regardless of the eventual channel
+  // offset/module count - harmless, and the app hasn't told us the offset yet.
+  for (int m = 0; m < MAX_MODULES; m++) pinMode(IR_PINS[m], INPUT_PULLUP);
   pinMode(IR_PIN_HOPPER, INPUT_PULLUP);
 
   pwm.begin();
   pwm.setPWMFreq(50);
   delay(10);
   setAllNeutral();
-  Serial.println(F("{\"status\":\"ready\"}"));
+  Serial.print(F("{\"status\":\"ready\",\"version\":\""));
+  Serial.print(FIRMWARE_VERSION);
+  Serial.println(F("\"}"));
 }
 
 void loop() {
