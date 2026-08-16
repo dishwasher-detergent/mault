@@ -211,19 +211,11 @@ export function ModuleCalibrationGrid({
 }: ModuleCalibrationGridProps) {
   const { t } = useTranslation("calibration");
   return (
-    <div
-      className="grid rounded-lg border"
-      style={{
-        gridTemplateColumns: `repeat(${modules.length}, minmax(0, 1fr))`,
-      }}
-    >
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-px rounded-lg border bg-border">
       {modules.map((module) => {
         const cal = configs.find((c) => c.moduleNumber === module)?.calibration;
         return (
-          <div
-            key={module}
-            className="p-2 flex flex-col gap-5 border-b md:border-b-0 md:border-r last:border-0 bg-sidebar"
-          >
+          <div key={module} className="p-2 flex flex-col gap-5 bg-sidebar">
             <h2 className="text-sm font-bold font-heading">
               {t("moduleCalibrationGrid.moduleHeading", { module })}
             </h2>
