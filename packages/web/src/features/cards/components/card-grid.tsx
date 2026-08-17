@@ -38,8 +38,7 @@ const PAGE_SIZE = 96;
 
 export function CardGrid() {
   const { t } = useTranslation("cards");
-  const { activeCollection, isLoading: collectionsLoading } =
-    useCollections();
+  const { activeCollection, isLoading: collectionsLoading } = useCollections();
   const {
     cards,
     removeCard,
@@ -137,7 +136,7 @@ export function CardGrid() {
   if (isLoading) {
     return (
       <>
-        <div className="sticky top-0 z-10 bg-background/80 backdrop-blur-2xl p-2 border-b">
+        <div className="sticky top-0 z-50 bg-background/80 backdrop-blur-2xl p-2 border-b">
           <div className="flex flex-row gap-2 items-center w-full">
             <Skeleton className="h-9 flex-1 rounded-md" />
             <Skeleton className="h-9 w-full sm:w-64 rounded-md shrink-0" />
@@ -197,7 +196,7 @@ export function CardGrid() {
           description={t("cardGrid.scanToGetStarted")}
         />
         {scanner?.isCameraActive && (
-          <div className="sticky bottom-0 z-30 bg-background/80 backdrop-blur-2xl p-2 border-t">
+          <div className="sticky bottom-0 z-50 bg-background/80 backdrop-blur-2xl p-2 border-t">
             <div className="flex flex-row gap-2 items-center w-full">
               <ScannerControls
                 status={scanner.status}
@@ -301,7 +300,7 @@ export function CardGrid() {
 
   return (
     <>
-      <div className="sticky top-0 z-30 bg-background/80 backdrop-blur-2xl p-2 border-b">
+      <div className="sticky top-0 z-50 bg-background/80 backdrop-blur-2xl p-2 border-b">
         <CardToolbar
           searchQuery={searchQuery}
           onSearchChange={setSearchQuery}
@@ -374,7 +373,7 @@ export function CardGrid() {
       </div>
 
       {(scanner?.isCameraActive || selectedIds.size > 0) && (
-        <div className="sticky bottom-0 z-30 bg-background/80 backdrop-blur-2xl p-2 border-t">
+        <div className="sticky bottom-0 z-50 bg-background/80 backdrop-blur-2xl p-2 border-t">
           <div className="flex flex-row gap-2 items-center w-full">
             {scanner?.isCameraActive && (
               <>
