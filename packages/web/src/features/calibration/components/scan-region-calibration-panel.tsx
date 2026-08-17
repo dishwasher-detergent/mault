@@ -388,7 +388,7 @@ export function ScanRegionCalibrationPanel() {
           </p>
           <ButtonGroup className="w-full">
             <Button
-              variant="secondary"
+              variant="outline"
               disabled={captureSettleDelayMsValue <= 0}
               onClick={() =>
                 setCaptureSettleDraft(
@@ -400,7 +400,7 @@ export function ScanRegionCalibrationPanel() {
               -100
             </Button>
             <Button
-              variant="secondary"
+              variant="outline"
               disabled={captureSettleDelayMsValue <= 0}
               onClick={() =>
                 setCaptureSettleDraft(
@@ -419,7 +419,7 @@ export function ScanRegionCalibrationPanel() {
               </p>
             </div>
             <Button
-              variant="secondary"
+              variant="outline"
               onClick={() =>
                 setCaptureSettleDraft(captureSettleDelayMsValue + 10)
               }
@@ -428,7 +428,7 @@ export function ScanRegionCalibrationPanel() {
               +10
             </Button>
             <Button
-              variant="secondary"
+              variant="outline"
               onClick={() =>
                 setCaptureSettleDraft(captureSettleDelayMsValue + 100)
               }

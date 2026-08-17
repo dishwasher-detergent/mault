@@ -79,7 +79,7 @@ function ServoControl({
         {servo.controlPositions.map((position) => (
           <Button
             key={position}
-            variant={activePosition === position ? "default" : "secondary"}
+            variant={activePosition === position ? "default" : "outline"}
             disabled={!isConnected}
             onClick={() => onControl(module, servo.name, position)}
             className="flex-1"
@@ -91,7 +91,7 @@ function ServoControl({
 
       <ButtonGroup className="w-full">
         <Button
-          variant="secondary"
+          variant="outline"
           disabled={!isConnected || sliderValue <= 120}
           onClick={() =>
             onSliderChange(module, servo.name, Math.max(120, sliderValue - 10))
@@ -101,7 +101,7 @@ function ServoControl({
           -10
         </Button>
         <Button
-          variant="secondary"
+          variant="outline"
           disabled={!isConnected || sliderValue <= 120}
           onClick={() => onSliderChange(module, servo.name, sliderValue - 1)}
           className="px-2"
@@ -123,7 +123,7 @@ function ServoControl({
           </TooltipContent>
         </Tooltip>
         <Button
-          variant="secondary"
+          variant="outline"
           disabled={!isConnected || sliderValue >= 490}
           onClick={() => onSliderChange(module, servo.name, sliderValue + 1)}
           className="px-2"
@@ -131,7 +131,7 @@ function ServoControl({
           +
         </Button>
         <Button
-          variant="secondary"
+          variant="outline"
           disabled={!isConnected || sliderValue >= 490}
           onClick={() =>
             onSliderChange(module, servo.name, Math.min(490, sliderValue + 10))
@@ -146,7 +146,7 @@ function ServoControl({
         {servo.calibrationPositions.map((pos) => (
           <Button
             key={pos.key}
-            variant="secondary"
+            variant="outline"
             disabled={!isConnected}
             onClick={() => onSetPosition(module, pos.key, sliderValue)}
             className="flex-1"

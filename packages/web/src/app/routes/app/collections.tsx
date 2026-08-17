@@ -18,8 +18,8 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { collectionsQueryOptions } from "@/features/collections/api/collections";
-import { CreateCollectionDialog } from "@/features/collections/components/create-collection-dialog";
 import { useCollections } from "@/features/collections/api/use-collections";
+import { CreateCollectionDialog } from "@/features/collections/components/create-collection-dialog";
 import { useOrg } from "@/features/companies/api/use-organization";
 import { cn } from "@/lib/utils";
 import {
@@ -128,9 +128,7 @@ export default function CollectionsPage() {
           <h1 className="text-lg font-semibold font-heading">
             {t("page.title")}
           </h1>
-          <p className="text-xs text-muted-foreground">
-            {t("page.subtitle")}
-          </p>
+          <p className="text-xs text-muted-foreground">{t("page.subtitle")}</p>
         </div>
         <CreateCollectionDialog
           trigger={({ disabled }) => (
@@ -142,7 +140,7 @@ export default function CollectionsPage() {
         />
       </div>
 
-      <div className="rounded-lg border divide-y overflow-hidden">
+      <div className="flex flex-col gap-2">
         {isLoading &&
           Array.from({ length: 3 }).map((_, i) => (
             <div key={i} className="flex items-center gap-3 px-4 py-3">
@@ -168,9 +166,8 @@ export default function CollectionsPage() {
             <div
               key={collection.guid}
               className={cn(
-                "flex items-center gap-3 px-4 py-3",
-                isActive &&
-                  "rounded-lg border border-primary bg-primary/5 dark:bg-primary/15",
+                "flex items-center gap-3 px-4 py-3 border rounded-lg",
+                isActive && "border-primary bg-primary/5 dark:bg-primary/15",
               )}
             >
               <div className="flex-1 min-w-0">
@@ -190,7 +187,7 @@ export default function CollectionsPage() {
                     <TooltipTrigger
                       render={
                         <Button
-                          variant="ghost"
+                          variant="outline"
                           size="icon"
                           disabled={isActivating}
                           onClick={() => activateCollection(collection.guid)}
@@ -208,7 +205,7 @@ export default function CollectionsPage() {
                   <TooltipTrigger
                     render={
                       <Button
-                        variant="ghost"
+                        variant="outline"
                         size="icon"
                         render={
                           <Link to={`/app/collections/${collection.guid}/bins`}>
@@ -224,7 +221,7 @@ export default function CollectionsPage() {
                   <TooltipTrigger
                     render={
                       <Button
-                        variant="ghost"
+                        variant="outline"
                         size="icon"
                         disabled={isMutating}
                         onClick={() => {
@@ -245,7 +242,7 @@ export default function CollectionsPage() {
                   <DropdownMenuTrigger
                     render={
                       <Button
-                        variant="destructive"
+                        variant="outline-destructive"
                         size="icon"
                         disabled={isMutating}
                       >
