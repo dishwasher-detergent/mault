@@ -11,6 +11,7 @@ import SettingsPage from "@/app/routes/app/settings";
 import VerifyEmailPage from "@/app/routes/app/verify-email";
 import AuthPage from "@/app/routes/auth";
 import BuildGuidePage from "@/app/routes/build";
+import { AppLoadingScreen } from "@/app/app-loading-gate";
 import LandingPage from "@/app/routes/index";
 import NotFoundPage from "@/app/routes/not-found";
 import { useIsMobile } from "@/hooks/use-is-mobile";
@@ -50,6 +51,10 @@ export const router = createBrowserRouter([
   {
     path: "/build",
     element: <BuildGuidePage />,
+  },
+  {
+    path: "/preview-loading",
+    element: <AppLoadingScreen />,
   },
   {
     path: "/auth/:path",

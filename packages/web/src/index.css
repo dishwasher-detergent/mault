@@ -164,6 +164,40 @@ code {
   --font-heading: "JetBrains Mono Variable", monospace;
 }
 
+@keyframes card-scan-pass {
+  0% {
+    transform: translateY(-135%) rotate(-2deg);
+    opacity: 0;
+  }
+  12% {
+    opacity: 1;
+  }
+  50% {
+    transform: translateY(0) rotate(0deg);
+  }
+  88% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(135%) rotate(2deg);
+    opacity: 0;
+  }
+}
+
+@keyframes card-scan-flash {
+  0%,
+  38%,
+  62%,
+  100% {
+    opacity: 0.2;
+    transform: scaleX(0.7);
+  }
+  50% {
+    opacity: 1;
+    transform: scaleX(1);
+  }
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;
