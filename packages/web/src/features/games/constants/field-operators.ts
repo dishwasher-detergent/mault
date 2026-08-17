@@ -11,11 +11,14 @@ export const DEFAULT_OPERATORS_BY_TYPE: Record<
   string: [
     { value: "contains", label: "contains" },
     { value: "not_contains", label: "does not contain" },
+    { value: "starts_with", label: "starts with" },
+    { value: "ends_with", label: "ends with" },
     { value: "equals", label: "equals" },
     { value: "not_equals", label: "does not equal" },
   ],
   numeric: [
     { value: "equals", label: "equals" },
+    { value: "not_equals", label: "does not equal" },
     { value: "gt", label: "greater than" },
     { value: "gte", label: "greater than or equal" },
     { value: "lt", label: "less than" },
@@ -32,5 +35,6 @@ export const DEFAULT_OPERATORS_BY_TYPE: Record<
     { value: "contains_all", label: "contains all of" },
     { value: "contains_none", label: "contains none of" },
     { value: "equals", label: "is exactly" },
+    { value: "not_equals", label: "is not exactly" },
   ],
 };
