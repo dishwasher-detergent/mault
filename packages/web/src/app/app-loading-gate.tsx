@@ -46,7 +46,7 @@ export function AppLoadingScreen({
           <IconPigFilled className="size-4.5" />
         </span>
         <ScanningCard />
-        <span className="text-xs text-muted-foreground">
+        <span className="text-xs text-muted-foreground font-bold">
           {t("loadingGate.loadingVault")}
         </span>
       </div>
