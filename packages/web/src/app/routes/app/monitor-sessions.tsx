@@ -136,10 +136,13 @@ export default function MonitorSessionsPage() {
         </p>
       </div>
 
-      <div className="rounded-lg border divide-y overflow-hidden">
+      <div className="flex flex-col gap-2">
         {isLoading &&
           Array.from({ length: 3 }).map((_, i) => (
-            <div key={i} className="flex items-center gap-3 px-4 py-3">
+            <div
+              key={i}
+              className="flex items-center gap-3 px-4 py-3 border rounded-lg"
+            >
               <Skeleton className="size-8 rounded-md shrink-0" />
               <div className="flex-1 space-y-1.5">
                 <Skeleton className="h-3 w-32" />
@@ -167,7 +170,7 @@ export default function MonitorSessionsPage() {
           return (
             <div
               key={collection.guid}
-              className={`flex items-center gap-3 px-4 py-3 ${isOwn ? "bg-amber-500/5" : ""}`}
+              className={`flex items-center gap-3 px-4 py-3 border rounded-lg ${isOwn ? "border-amber-300 bg-amber-300/5 dark:bg-amber/15" : ""}`}
             >
               <button
                 type="button"
