@@ -7,6 +7,8 @@ export type ConditionOperator =
   | "not_equals"
   | "contains"
   | "not_contains"
+  | "starts_with"
+  | "ends_with"
   | "gt"
   | "gte"
   | "lt"

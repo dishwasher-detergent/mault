@@ -88,6 +88,16 @@ function evaluateCondition(
         .toLowerCase()
         .includes(String(value).toLowerCase());
 
+    case "starts_with":
+      return String(cardValue)
+        .toLowerCase()
+        .startsWith(String(value).toLowerCase());
+
+    case "ends_with":
+      return String(cardValue)
+        .toLowerCase()
+        .endsWith(String(value).toLowerCase());
+
     case "gt":
       return Number(cardValue) > Number(value);
 

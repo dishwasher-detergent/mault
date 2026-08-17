@@ -56,6 +56,8 @@ export const FIELD_DEFINITIONS: FieldMeta[] = [
     operators: [
       { value: "contains", label: "contains" },
       { value: "not_contains", label: "does not contain" },
+      { value: "starts_with", label: "starts with" },
+      { value: "ends_with", label: "ends with" },
       { value: "equals", label: "equals" },
       { value: "not_equals", label: "does not equal" },
     ],
@@ -106,6 +108,8 @@ export const FIELD_DEFINITIONS: FieldMeta[] = [
     operators: [
       { value: "contains", label: "contains" },
       { value: "not_contains", label: "does not contain" },
+      { value: "starts_with", label: "starts with" },
+      { value: "ends_with", label: "ends with" },
       { value: "equals", label: "equals" },
       { value: "not_equals", label: "does not equal" },
     ],
@@ -118,6 +122,8 @@ export const FIELD_DEFINITIONS: FieldMeta[] = [
     operators: [
       { value: "contains", label: "contains" },
       { value: "not_contains", label: "does not contain" },
+      { value: "starts_with", label: "starts with" },
+      { value: "ends_with", label: "ends with" },
       { value: "equals", label: "equals" },
       { value: "not_equals", label: "does not equal" },
     ],
