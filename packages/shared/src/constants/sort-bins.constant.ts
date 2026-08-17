@@ -39,6 +39,7 @@ export const FIELD_DEFINITIONS: FieldMeta[] = [
       { value: "contains_all", label: "contains all of" },
       { value: "contains_none", label: "contains none of" },
       { value: "equals", label: "is exactly" },
+      { value: "not_equals", label: "is not exactly" },
     ],
     options: [
       { value: "W", label: "White" },
@@ -85,6 +86,7 @@ export const FIELD_DEFINITIONS: FieldMeta[] = [
       { value: "lt", label: "less than" },
       { value: "lte", label: "less than or equal" },
       { value: "equals", label: "equals" },
+      { value: "not_equals", label: "does not equal" },
     ],
   },
   {
@@ -94,6 +96,7 @@ export const FIELD_DEFINITIONS: FieldMeta[] = [
     path: "cmc",
     operators: [
       { value: "equals", label: "equals" },
+      { value: "not_equals", label: "does not equal" },
       { value: "gt", label: "greater than" },
       { value: "gte", label: "greater than or equal" },
       { value: "lt", label: "less than" },
