@@ -72,7 +72,7 @@ export function FeederCalibrationPanel({
           </Tooltip>
           <ButtonGroup className="w-full">
             <Button
-              variant="secondary"
+              variant="outline"
               disabled={!isConnected || speedValue <= 120}
               onClick={() => onSpeedChange(Math.max(120, speedValue - 10))}
               className="px-2 text-xs"
@@ -80,7 +80,7 @@ export function FeederCalibrationPanel({
               -10
             </Button>
             <Button
-              variant="secondary"
+              variant="outline"
               disabled={!isConnected || speedValue <= 120}
               onClick={() => onSpeedChange(speedValue - 1)}
               className="px-2"
@@ -93,7 +93,7 @@ export function FeederCalibrationPanel({
               <p className="text-xs text-muted-foreground">490</p>
             </div>
             <Button
-              variant="secondary"
+              variant="outline"
               disabled={!isConnected || speedValue >= 490}
               onClick={() => onSpeedChange(speedValue + 1)}
               className="px-2"
@@ -101,7 +101,7 @@ export function FeederCalibrationPanel({
               +
             </Button>
             <Button
-              variant="secondary"
+              variant="outline"
               disabled={!isConnected || speedValue >= 490}
               onClick={() => onSpeedChange(Math.min(490, speedValue + 10))}
               className="px-2 text-xs"
@@ -111,7 +111,7 @@ export function FeederCalibrationPanel({
           </ButtonGroup>
           <ButtonGroup className="w-full">
             <Button
-              variant="secondary"
+              variant="outline"
               disabled={!isConnected}
               onClick={onSetSpeed}
               className="flex-1"
@@ -133,7 +133,7 @@ export function FeederCalibrationPanel({
           </p>
           <ButtonGroup className="w-full">
             <Button
-              variant="secondary"
+              variant="outline"
               disabled={!isConnected || durationValue <= 10}
               onClick={() =>
                 onDurationChange(Math.max(10, durationValue - 100))
@@ -143,7 +143,7 @@ export function FeederCalibrationPanel({
               -100
             </Button>
             <Button
-              variant="secondary"
+              variant="outline"
               disabled={!isConnected || durationValue <= 10}
               onClick={() => onDurationChange(Math.max(10, durationValue - 10))}
               className="px-2 text-xs"
@@ -156,7 +156,7 @@ export function FeederCalibrationPanel({
               </p>
             </div>
             <Button
-              variant="secondary"
+              variant="outline"
               disabled={!isConnected}
               onClick={() => onDurationChange(durationValue + 10)}
               className="px-2 text-xs"
@@ -164,7 +164,7 @@ export function FeederCalibrationPanel({
               +10
             </Button>
             <Button
-              variant="secondary"
+              variant="outline"
               disabled={!isConnected}
               onClick={() => onDurationChange(durationValue + 100)}
               className="px-2 text-xs"
@@ -174,7 +174,7 @@ export function FeederCalibrationPanel({
           </ButtonGroup>
           <ButtonGroup className="w-full">
             <Button
-              variant="secondary"
+              variant="outline"
               disabled={!isConnected}
               onClick={onSetDuration}
               className="flex-1"
@@ -186,7 +186,9 @@ export function FeederCalibrationPanel({
             <Skeleton className="h-3 w-16 rounded" />
           ) : calibration ? (
             <p className="text-xs text-muted-foreground text-center">
-              {t("feederCalibrationPanel.msValue", { value: calibration.duration })}
+              {t("feederCalibrationPanel.msValue", {
+                value: calibration.duration,
+              })}
             </p>
           ) : null}
         </div>
@@ -203,17 +205,21 @@ export function FeederCalibrationPanel({
           </div>
           <ButtonGroup className="w-full">
             <Button
-              variant="secondary"
+              variant="outline"
               disabled={!isConnected || pulseDurationValue <= 0}
-              onClick={() => onPulseDurationChange(Math.max(0, pulseDurationValue - 10))}
+              onClick={() =>
+                onPulseDurationChange(Math.max(0, pulseDurationValue - 10))
+              }
               className="px-2 text-xs"
             >
               -10
             </Button>
             <Button
-              variant="secondary"
+              variant="outline"
               disabled={!isConnected || pulseDurationValue <= 0}
-              onClick={() => onPulseDurationChange(Math.max(0, pulseDurationValue - 1))}
+              onClick={() =>
+                onPulseDurationChange(Math.max(0, pulseDurationValue - 1))
+              }
               className="px-2"
             >
               -
@@ -222,11 +228,13 @@ export function FeederCalibrationPanel({
               <p className="font-bold text-sm">
                 {pulseDurationValue <= 0
                   ? t("feederCalibrationPanel.continuous")
-                  : t("feederCalibrationPanel.msValue", { value: pulseDurationValue })}
+                  : t("feederCalibrationPanel.msValue", {
+                      value: pulseDurationValue,
+                    })}
               </p>
             </div>
             <Button
-              variant="secondary"
+              variant="outline"
               disabled={!isConnected}
               onClick={() => onPulseDurationChange(pulseDurationValue + 1)}
               className="px-2"
@@ -234,7 +242,7 @@ export function FeederCalibrationPanel({
               +
             </Button>
             <Button
-              variant="secondary"
+              variant="outline"
               disabled={!isConnected}
               onClick={() => onPulseDurationChange(pulseDurationValue + 10)}
               className="px-2 text-xs"
@@ -244,7 +252,7 @@ export function FeederCalibrationPanel({
           </ButtonGroup>
           <ButtonGroup className="w-full">
             <Button
-              variant="secondary"
+              variant="outline"
               disabled={!isConnected || pulseDurationValue > 0}
               onClick={() => onPulseDurationChange(0)}
               className="flex-1"
@@ -252,7 +260,7 @@ export function FeederCalibrationPanel({
               {t("feederCalibrationPanel.continuousFeedButton")}
             </Button>
             <Button
-              variant="secondary"
+              variant="outline"
               disabled={!isConnected}
               onClick={onSetPulseDuration}
               className="flex-1"
@@ -278,28 +286,34 @@ export function FeederCalibrationPanel({
           </p>
           <ButtonGroup className="w-full">
             <Button
-              variant="secondary"
+              variant="outline"
               disabled={!isConnected || pauseDurationValue <= 0}
-              onClick={() => onPauseDurationChange(Math.max(0, pauseDurationValue - 10))}
+              onClick={() =>
+                onPauseDurationChange(Math.max(0, pauseDurationValue - 10))
+              }
               className="px-2 text-xs"
             >
               -10
             </Button>
             <Button
-              variant="secondary"
+              variant="outline"
               disabled={!isConnected || pauseDurationValue <= 0}
-              onClick={() => onPauseDurationChange(Math.max(0, pauseDurationValue - 1))}
+              onClick={() =>
+                onPauseDurationChange(Math.max(0, pauseDurationValue - 1))
+              }
               className="px-2"
             >
               -
             </Button>
             <div className="flex flex-row flex-1 bg-background border-y justify-center px-2 items-center">
               <p className="font-bold text-sm">
-                {t("feederCalibrationPanel.msValue", { value: pauseDurationValue })}
+                {t("feederCalibrationPanel.msValue", {
+                  value: pauseDurationValue,
+                })}
               </p>
             </div>
             <Button
-              variant="secondary"
+              variant="outline"
               disabled={!isConnected}
               onClick={() => onPauseDurationChange(pauseDurationValue + 1)}
               className="px-2"
@@ -307,7 +321,7 @@ export function FeederCalibrationPanel({
               +
             </Button>
             <Button
-              variant="secondary"
+              variant="outline"
               disabled={!isConnected}
               onClick={() => onPauseDurationChange(pauseDurationValue + 10)}
               className="px-2 text-xs"
@@ -317,7 +331,7 @@ export function FeederCalibrationPanel({
           </ButtonGroup>
           <ButtonGroup className="w-full">
             <Button
-              variant="secondary"
+              variant="outline"
               disabled={!isConnected}
               onClick={onSetPauseDuration}
               className="flex-1"
@@ -329,7 +343,9 @@ export function FeederCalibrationPanel({
             <Skeleton className="h-3 w-16 rounded" />
           ) : calibration ? (
             <p className="text-xs text-muted-foreground text-center">
-              {t("feederCalibrationPanel.msValue", { value: calibration.pauseDuration })}
+              {t("feederCalibrationPanel.msValue", {
+                value: calibration.pauseDuration,
+              })}
             </p>
           ) : null}
         </div>
@@ -342,28 +358,34 @@ export function FeederCalibrationPanel({
           </p>
           <ButtonGroup className="w-full">
             <Button
-              variant="secondary"
+              variant="outline"
               disabled={!isConnected || settleDurationValue <= 0}
-              onClick={() => onSettleDurationChange(Math.max(0, settleDurationValue - 10))}
+              onClick={() =>
+                onSettleDurationChange(Math.max(0, settleDurationValue - 10))
+              }
               className="px-2 text-xs"
             >
               -10
             </Button>
             <Button
-              variant="secondary"
+              variant="outline"
               disabled={!isConnected || settleDurationValue <= 0}
-              onClick={() => onSettleDurationChange(Math.max(0, settleDurationValue - 1))}
+              onClick={() =>
+                onSettleDurationChange(Math.max(0, settleDurationValue - 1))
+              }
               className="px-2"
             >
               -
             </Button>
             <div className="flex flex-row flex-1 bg-background border-y justify-center px-2 items-center">
               <p className="font-bold text-sm">
-                {t("feederCalibrationPanel.msValue", { value: settleDurationValue })}
+                {t("feederCalibrationPanel.msValue", {
+                  value: settleDurationValue,
+                })}
               </p>
             </div>
             <Button
-              variant="secondary"
+              variant="outline"
               disabled={!isConnected}
               onClick={() => onSettleDurationChange(settleDurationValue + 1)}
               className="px-2"
@@ -371,7 +393,7 @@ export function FeederCalibrationPanel({
               +
             </Button>
             <Button
-              variant="secondary"
+              variant="outline"
               disabled={!isConnected}
               onClick={() => onSettleDurationChange(settleDurationValue + 10)}
               className="px-2 text-xs"
@@ -381,7 +403,7 @@ export function FeederCalibrationPanel({
           </ButtonGroup>
           <ButtonGroup className="w-full">
             <Button
-              variant="secondary"
+              variant="outline"
               disabled={!isConnected}
               onClick={onSetSettleDuration}
               className="flex-1"
@@ -393,7 +415,9 @@ export function FeederCalibrationPanel({
             <Skeleton className="h-3 w-16 rounded" />
           ) : calibration ? (
             <p className="text-xs text-muted-foreground text-center">
-              {t("feederCalibrationPanel.msValue", { value: calibration.settleDuration })}
+              {t("feederCalibrationPanel.msValue", {
+                value: calibration.settleDuration,
+              })}
             </p>
           ) : null}
         </div>

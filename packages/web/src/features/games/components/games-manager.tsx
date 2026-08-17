@@ -144,7 +144,7 @@ export function GamesManager() {
             <ButtonGroup>
               <Button
                 size="icon"
-                variant="ghost"
+                variant="outline"
                 onClick={() => setFormGame(game)}
                 title={t("gamesManager.editTitle")}
               >
@@ -152,7 +152,7 @@ export function GamesManager() {
               </Button>
               <Button
                 size="icon"
-                variant="ghost"
+                variant="outline-destructive"
                 onClick={() => setDeleteTarget(game)}
                 title={t("gamesManager.deleteTitle")}
               >

@@ -1,9 +1,29 @@
 import { useCollections } from "@/features/collections/api/use-collections";
 import { useOrg } from "@/features/companies/api/use-organization";
 import { cn } from "@/lib/utils";
-import { IconLoader2, IconPigFilled } from "@tabler/icons-react";
+import { IconPigFilled } from "@tabler/icons-react";
 import { useEffect, useState, type ReactNode } from "react";
 import { useTranslation } from "react-i18next";
+
+function ScanningCard() {
+  return (
+    <div className="relative flex h-36 w-28 items-center justify-center">
+      <div
+        aria-hidden
+        className="pointer-events-none absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 size-32 rounded-full bg-foreground/6 blur-2xl"
+      />
+      <div className="absolute inset-x-1 top-1/2 h-9 -translate-y-1/2 rounded-md border border-border bg-foreground/2" />
+      <div className="absolute inset-x-3 top-1/2 h-px -translate-y-1/2 bg-border" />
+      <div className="absolute inset-x-3 top-1/2 h-0.75 -translate-y-1/2 rounded-full bg-foreground/60 animate-[card-scan-flash_2.4s_ease-in-out_infinite]" />
+      <div className="absolute flex flex-col gap-0.5 p-1 h-20 w-14 rounded-md border border-foreground/25 bg-card shadow-sm animate-[card-scan-pass_2.4s_ease-in-out_infinite]">
+        <div className="w-full bg-foreground/10 h-1/2 rounded-sm top-1.5" />
+        <div className="w-full h-1.5 rounded-sm bg-foreground/10" />
+        <div className="w-1/3 h-1.5 rounded-sm bg-foreground/10" />
+        <div className="w-2/3 h-1.5 rounded-sm bg-foreground/10" />
+      </div>
+    </div>
+  );
+}
 
 function AppLoadingScreen({
   className,
@@ -21,29 +41,19 @@ function AppLoadingScreen({
       )}
       onTransitionEnd={onTransitionEnd}
     >
-      <div
-        aria-hidden
-        className="pointer-events-none absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 size-60 rounded-full bg-primary/50 blur-[60px]"
-      />
-      <div className="flex flex-col items-center gap-3 relative">
-        <span className="bg-primary grid size-10 shrink-0 place-items-center rounded-lg text-primary-foreground">
-          <IconPigFilled className="size-5" />
+      <div className="flex flex-col items-center gap-2 relative">
+        <span className="mb-1 grid size-9 shrink-0 place-items-center rounded-lg border border-border bg-foreground/4 text-foreground">
+          <IconPigFilled className="size-4.5" />
         </span>
-        <div className="flex items-center gap-2 text-muted-foreground">
-          <IconLoader2 size={14} className="animate-spin" />
-          <span className="text-xs">{t("loadingGate.loadingVault")}</span>
-        </div>
+        <ScanningCard />
+        <span className="text-xs text-muted-foreground font-bold">
+          {t("loadingGate.loadingVault")}
+        </span>
       </div>
     </div>
   );
 }
 
-/**
- * Shows a full-screen splash only for the app's very first data load
- * (org + collections). Once that resolves, it fades out over the app
- * content and unmounts for good - background refetches, org switches,
- * and navigation should use inline/skeleton loading instead.
- */
 export function AppLoadingGate({ children }: { children: ReactNode }) {
   const { isLoading: orgLoading, activeOrg } = useOrg();
   const { isLoading: collectionsLoading } = useCollections();
@@ -55,9 +65,9 @@ export function AppLoadingGate({ children }: { children: ReactNode }) {
   const [overlayVisible, setOverlayVisible] = useState(true);
 
   useEffect(() => {
-    if (!isInitialLoading && phase === "loading") {
-      setPhase("exiting");
-    }
+    if (isInitialLoading || phase !== "loading") return;
+    const id = setTimeout(() => setPhase("exiting"), 500);
+    return () => clearTimeout(id);
   }, [isInitialLoading, phase]);
 
   useEffect(() => {

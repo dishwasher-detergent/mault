@@ -174,7 +174,8 @@ export function CardDetailPanel({
     candidates.find((c) => c.id === selectedId) ?? currentCard;
   const hasMultipleCandidates = candidates.length > 1;
 
-  const cardName = selectedCard?.name ?? t("cardDetailPanel.cardDetailsFallback");
+  const cardName =
+    selectedCard?.name ?? t("cardDetailPanel.cardDetailsFallback");
   const typeLine = selectedCard?.typeLine ?? "";
 
   return (
@@ -192,7 +193,7 @@ export function CardDetailPanel({
         <ButtonGroup orientation="vertical">
           <Button
             size="icon"
-            variant="ghost"
+            variant="outline"
             onClick={onPrev}
             disabled={!hasPrev}
             aria-label={t("cardDetailPanel.previousCard")}
@@ -201,7 +202,7 @@ export function CardDetailPanel({
           </Button>
           <Button
             size="icon"
-            variant="ghost"
+            variant="outline"
             onClick={onNext}
             disabled={!hasNext}
             aria-label={t("cardDetailPanel.nextCard")}
@@ -375,7 +376,9 @@ export function CardDetailPanel({
                     )}
                     {selectedCard.artist && (
                       <p className="text-xs text-muted-foreground">
-                        {t("cardDetailPanel.artBy", { artist: selectedCard.artist })}
+                        {t("cardDetailPanel.artBy", {
+                          artist: selectedCard.artist,
+                        })}
                       </p>
                     )}
                     {selectedCard.sourceUrl && (
@@ -462,7 +465,9 @@ export function CardDetailPanel({
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="all">
-                        {t("cardDetailPanel.allSetsCount", { count: results.length })}
+                        {t("cardDetailPanel.allSetsCount", {
+                          count: results.length,
+                        })}
                       </SelectItem>
                       {sets.map((s) => (
                         <SelectItem key={s.code} value={s.code}>
