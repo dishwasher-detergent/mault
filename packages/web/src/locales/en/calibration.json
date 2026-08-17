@@ -21,7 +21,12 @@
     "label": "Sorting modules",
     "value": "{{count}} module",
     "value_other": "{{count}} modules",
-    "description": "How many physical sorting modules are wired up. Changes the number of bins available and the sections below."
+    "description": "How many physical sorting modules are wired up. Changes the number of bins available and the sections below.",
+    "reduceConfirm": {
+      "title": "Reduce module count?",
+      "description": "Dropping to {{count}} modules will permanently delete the sorting rules and calibration data for modules and bins beyond that count, across every bin preset. This can't be undone.",
+      "confirm": "Change Module Count"
+    }
   },
   "channelLayoutToggle": {
     "label": "Servo Channel layout",

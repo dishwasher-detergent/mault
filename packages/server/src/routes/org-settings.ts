@@ -1,14 +1,15 @@
 import {
+  computeBinCount,
   DEFAULT_CAPTURE_SETTLE_DELAY_MS,
   DEFAULT_CHANNEL_LAYOUT,
   DEFAULT_MODULE_COUNT,
   maxModulesForLayout,
   type ChannelLayout,
 } from "@magic-vault/shared";
-import { eq } from "drizzle-orm";
+import { and, eq, gt } from "drizzle-orm";
 import { Hono } from "hono";
 import { authQuery, type Transaction } from "../db";
-import { orgSettings } from "../db/schema";
+import { binRoutes, bins, moduleConfigs, orgSettings } from "../db/schema";
 import { requireAuth, requireOrg, type AppEnv } from "../middleware/auth";
 
 const router = new Hono<AppEnv>();
@@ -181,6 +182,31 @@ router.put("/", requireAuth, requireOrg, async (c) => {
           target: [orgSettings.orgId],
           set: { ...merged, updatedAt: new Date() },
         });
+
+      const previousModuleCount = existing?.moduleCount ?? DEFAULT_MODULE_COUNT;
+      if (merged.moduleCount < previousModuleCount) {
+        const newBinCount = computeBinCount(merged.moduleCount);
+        await tx
+          .delete(bins)
+          .where(and(eq(bins.orgId, orgId), gt(bins.binNumber, newBinCount)));
+        await tx
+          .delete(binRoutes)
+          .where(
+            and(
+              eq(binRoutes.orgId, orgId),
+              gt(binRoutes.binNumber, newBinCount),
+            ),
+          );
+        await tx
+          .delete(moduleConfigs)
+          .where(
+            and(
+              eq(moduleConfigs.orgId, orgId),
+              gt(moduleConfigs.moduleNumber, merged.moduleCount),
+            ),
+          );
+      }
+
       return {
         success: true,
         message: "Saved.",
