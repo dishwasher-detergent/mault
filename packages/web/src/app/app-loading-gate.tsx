@@ -25,7 +25,7 @@ function ScanningCard() {
   );
 }
 
-export function AppLoadingScreen({
+function AppLoadingScreen({
   className,
   onTransitionEnd,
 }: {
@@ -65,9 +65,9 @@ export function AppLoadingGate({ children }: { children: ReactNode }) {
   const [overlayVisible, setOverlayVisible] = useState(true);
 
   useEffect(() => {
-    if (!isInitialLoading && phase === "loading") {
-      setPhase("exiting");
-    }
+    if (isInitialLoading || phase !== "loading") return;
+    const id = setTimeout(() => setPhase("exiting"), 500);
+    return () => clearTimeout(id);
   }, [isInitialLoading, phase]);
 
   useEffect(() => {
