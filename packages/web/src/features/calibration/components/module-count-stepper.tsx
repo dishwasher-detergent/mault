@@ -5,6 +5,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { DeleteDialog } from "@/components/delete-dialog";
+import { binRoutesQueryOptions } from "@/features/calibration/api/bin-routes";
 import {
   orgSettingsQueryOptions,
   saveOrgSettings,
@@ -18,10 +20,12 @@ import {
   maxModulesForLayout,
 } from "@magic-vault/shared";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
 export function ModuleCountStepper() {
   const { t } = useTranslation("calibration");
+  const [pendingCount, setPendingCount] = useState<number | null>(null);
   const { activeOrg } = useOrg();
   const queryClient = useQueryClient();
   const queryOpts = orgSettingsQueryOptions(activeOrg?.id);
@@ -60,6 +64,8 @@ export function ModuleCountStepper() {
       if (result.success && result.data)
         queryClient.setQueryData(queryOpts.queryKey, result.data);
       queryClient.invalidateQueries({ queryKey: ["modules"] });
+      queryClient.invalidateQueries({ queryKey: binRoutesQueryOptions.queryKey });
+      queryClient.invalidateQueries({ queryKey: ["bins"] });
     },
   });
 
@@ -67,7 +73,14 @@ export function ModuleCountStepper() {
     <div className="flex flex-col gap-1.5">
       <Select
         value={String(current)}
-        onValueChange={(value) => mutation.mutate(Number(value))}
+        onValueChange={(value) => {
+          const next = Number(value);
+          if (next < current) {
+            setPendingCount(next);
+          } else {
+            mutation.mutate(next);
+          }
+        }}
       >
         <SelectTrigger className="w-40">
           <SelectValue>
@@ -85,6 +98,22 @@ export function ModuleCountStepper() {
       <p className="text-[10px] leading-tight text-muted-foreground">
         {t("moduleCountStepper.description")}
       </p>
+
+      <DeleteDialog
+        open={pendingCount != null}
+        onOpenChange={(open) => {
+          if (!open) setPendingCount(null);
+        }}
+        title={t("moduleCountStepper.reduceConfirm.title")}
+        description={t("moduleCountStepper.reduceConfirm.description", {
+          count: pendingCount ?? 0,
+        })}
+        confirmLabel={t("moduleCountStepper.reduceConfirm.confirm")}
+        onConfirm={() => {
+          if (pendingCount != null) mutation.mutate(pendingCount);
+          setPendingCount(null);
+        }}
+      />
     </div>
   );
 }

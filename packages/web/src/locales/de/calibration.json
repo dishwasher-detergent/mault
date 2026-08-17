@@ -21,7 +21,12 @@
     "label": "Sortiermodule",
     "value": "{{count}} Modul",
     "value_other": "{{count}} Module",
-    "description": "Wie viele physische Sortiermodule verbaut sind. Ändert die Anzahl der verfügbaren Fächer sowie die Abschnitte unten."
+    "description": "Wie viele physische Sortiermodule verbaut sind. Ändert die Anzahl der verfügbaren Fächer sowie die Abschnitte unten.",
+    "reduceConfirm": {
+      "title": "Modulanzahl verringern?",
+      "description": "Eine Reduzierung auf {{count}} Module löscht dauerhaft die Sortierregeln und Kalibrierungsdaten für Module und Fächer über dieser Anzahl, in allen Fach-Voreinstellungen. Dies kann nicht rückgängig gemacht werden.",
+      "confirm": "Modulanzahl ändern"
+    }
   },
   "channelLayoutToggle": {
     "label": "PCA9685-Kanalbelegung",
