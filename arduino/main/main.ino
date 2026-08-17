@@ -2,7 +2,7 @@
 #include <Wire.h>
 #include <Adafruit_PWMServoDriver.h>
 
-#define FIRMWARE_VERSION "1.0.1"
+#define FIRMWARE_VERSION "1.0.2"
 
 Adafruit_PWMServoDriver pwm = Adafruit_PWMServoDriver();
 
@@ -165,7 +165,13 @@ FeedResult runFeeder() {
 
   if (digitalRead(irPin(1)) == LOW) return FEED_DETECTED;
 
-  if (!hopperHasCards()) return FEED_EMPTY;
+  if (!hopperHasCards()) {
+    setServoPosition(getFeederChannel(), feederConfig.speed);
+    delay(feederConfig.pulseDuration > 0 ? feederConfig.pulseDuration : 200);
+    stopFeeder();
+    if (digitalRead(irPin(1)) == LOW) return FEED_DETECTED;
+    if (!hopperHasCards()) return FEED_EMPTY;
+  }
 
   if (feederConfig.pulseDuration <= 0) {
     setServoPosition(getFeederChannel(), feederConfig.speed);
