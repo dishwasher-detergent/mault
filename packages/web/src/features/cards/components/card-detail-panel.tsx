@@ -15,6 +15,7 @@ import { BinLocationDiagram } from "@/features/bins/components/bin-location-diag
 import { searchCards } from "@/features/cards/api/card-search";
 import { useCollections } from "@/features/collections/api/use-collections";
 import { useScannedCards } from "@/features/scanner/api/use-scanned-cards";
+import { formatUsd } from "@/features/scanner/components/scan-stats";
 import { cn } from "@/lib/utils";
 import {
   QUERY_MIN_LENGTH,
@@ -369,10 +370,24 @@ export function CardDetailPanel({
                         </div>
                       </div>
                     )}
-                    {selectedCard.price != null && (
-                      <p className="text-xs text-muted-foreground">
-                        ${selectedCard.price.toFixed(2)}
-                      </p>
+                    {(selectedCard.price != null ||
+                      selectedCard.priceFoil != null) && (
+                      <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                        {selectedCard.price != null && (
+                          <span>
+                            {t("cardDetailPanel.regularPrice", {
+                              price: formatUsd(selectedCard.price),
+                            })}
+                          </span>
+                        )}
+                        {selectedCard.priceFoil != null && (
+                          <span>
+                            {t("cardDetailPanel.foilPrice", {
+                              price: formatUsd(selectedCard.priceFoil),
+                            })}
+                          </span>
+                        )}
+                      </div>
                     )}
                     {selectedCard.artist && (
                       <p className="text-xs text-muted-foreground">

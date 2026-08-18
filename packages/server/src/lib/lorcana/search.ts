@@ -80,6 +80,8 @@ export function normalizeLorcanaCard(raw: LorcastCard): PlayingCard {
     colorIdentity: raw.ink ? [raw.ink] : [],
     artist: raw.illustrators?.length ? raw.illustrators.join(", ") : undefined,
     price: raw.prices?.usd != null ? Number(raw.prices.usd) : null,
+    priceFoil:
+      raw.prices?.usd_foil != null ? Number(raw.prices.usd_foil) : null,
     cmc: raw.cost,
     raw,
   };

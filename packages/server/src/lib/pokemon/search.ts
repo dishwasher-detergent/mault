@@ -30,10 +30,10 @@ interface PokemonAbility {
 }
 
 interface PokemonPricing {
-  cardmarket?: { avg?: number };
   tcgplayer?: {
     normal?: { marketPrice?: number };
-    reverse?: { marketPrice?: number };
+    holofoil?: { marketPrice?: number };
+    "reverse-holofoil"?: { marketPrice?: number };
   };
 }
 
@@ -68,13 +68,19 @@ function assetUrl(image: string, quality: "low" | "high"): string {
   return `/api/cards/image-proxy?url=${encodeURIComponent(`${image}/${quality}.webp`)}`;
 }
 
+// TCGdex reports pricing in multiple currencies (cardmarket is EUR); only
+// tcgplayer is USD, so that's the sole source for price/priceFoil - we never
+// want to label a EUR figure as USD.
 function resolvePrice(pricing: PokemonPricing | undefined): number | null {
-  if (!pricing) return null;
-  const usd =
-    pricing.tcgplayer?.normal?.marketPrice ??
-    pricing.tcgplayer?.reverse?.marketPrice;
-  if (usd != null) return usd;
-  return pricing.cardmarket?.avg ?? null;
+  return pricing?.tcgplayer?.normal?.marketPrice ?? null;
+}
+
+function resolveFoilPrice(pricing: PokemonPricing | undefined): number | null {
+  return (
+    pricing?.tcgplayer?.holofoil?.marketPrice ??
+    pricing?.tcgplayer?.["reverse-holofoil"]?.marketPrice ??
+    null
+  );
 }
 
 function normalizePokemonCard(raw: PokemonCardDetail): PlayingCard {
@@ -115,6 +121,7 @@ function normalizePokemonCard(raw: PokemonCardDetail): PlayingCard {
     colorIdentity: raw.types ?? [],
     artist: raw.illustrator ?? undefined,
     price: resolvePrice(raw.pricing),
+    priceFoil: resolveFoilPrice(raw.pricing),
     sourceUrl: `https://tcgdex.dev/cards/${raw.id}`,
     cmc: raw.retreat,
     raw,

@@ -171,7 +171,8 @@ export function StatusFooter() {
   const { cards } = useScannedCards();
 
   const totalValue = cards.reduce(
-    (sum, { card }) => sum + (card.price ?? 0),
+    (sum, { card, isFoil }) =>
+      sum + ((isFoil ? card.priceFoil : card.price) ?? card.price ?? 0),
     0,
   );
 

@@ -48,7 +48,7 @@ interface ScryfallApiCard {
   rarity: string;
   artist?: string;
   scryfall_uri: string;
-  prices: { usd: string | null };
+  prices: { usd: string | null; usd_foil: string | null };
 }
 
 function normalizeScryfallCard(raw: ScryfallApiCard): PlayingCard {
@@ -77,6 +77,10 @@ function normalizeScryfallCard(raw: ScryfallApiCard): PlayingCard {
     colorIdentity: raw.color_identity,
     artist: raw.artist ?? face?.artist,
     price: raw.prices.usd != null ? Number.parseFloat(raw.prices.usd) : null,
+    priceFoil:
+      raw.prices.usd_foil != null
+        ? Number.parseFloat(raw.prices.usd_foil)
+        : null,
     sourceUrl: raw.scryfall_uri,
     cmc: raw.cmc,
     raw,

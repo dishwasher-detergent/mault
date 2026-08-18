@@ -41,9 +41,14 @@ export function buildCardScannedEmbed(
 ): DiscordEmbed {
   const { isFoil, collectionName, gameName, collectionGuid } = options;
 
-  const lines = [
-    `**Price:** ${card.price != null ? `$${card.price.toFixed(2)}` : "N/A"}`,
-  ];
+  const lines = [];
+  if (card.price != null) {
+    lines.push(`**Price:** $${card.price.toFixed(2)} USD`);
+  }
+  if (card.priceFoil != null) {
+    lines.push(`**Foil Price:** $${card.priceFoil.toFixed(2)} USD`);
+  }
+  if (lines.length === 0) lines.push("**Price:** N/A");
   if (isFoil) lines.push("**Foil**");
   if (collectionName) lines.push(`**Collection:** ${collectionName}`);
   if (gameName) lines.push(`**Game:** ${gameName}`);

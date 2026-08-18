@@ -7,6 +7,7 @@ import {
 } from "@/components/ui/tooltip";
 import { BinLocationDiagram } from "@/features/bins/components/bin-location-diagram";
 import type { ScannedCardItemProps } from "@/features/cards/types";
+import { formatUsd } from "@/features/scanner/components/scan-stats";
 import { cn } from "@/lib/utils";
 import {
   IconCheck,
@@ -28,6 +29,7 @@ export const ScannedCardItem = memo(function ScannedCardItem({
   isDownloaded = false,
 }: ScannedCardItemProps) {
   const { t } = useTranslation("cards");
+  const displayPrice = (isFoil ? card.priceFoil : card.price) ?? card.price;
   return (
     <div
       className={cn(
@@ -125,9 +127,9 @@ export const ScannedCardItem = memo(function ScannedCardItem({
             </span>
           )}
         </div>
-        {card.price != null && (
+        {displayPrice != null && (
           <p className="text-xs font-medium text-muted-foreground">
-            ${card.price.toFixed(2)}
+            {formatUsd(displayPrice)}
           </p>
         )}
       </div>

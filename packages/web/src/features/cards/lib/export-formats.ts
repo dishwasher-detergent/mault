@@ -58,9 +58,14 @@ function downloadCsv(csv: string, filename: string) {
 
 const dateSuffix = () => new Date().toISOString().slice(0, 10);
 
+function purchasePrice(card: PlayingCardWithDistance, isFoil: boolean) {
+  const price = (isFoil ? card.priceFoil : card.price) ?? card.price;
+  return price != null ? price.toFixed(2) : "";
+}
+
 export function exportToManabox(cards: ScannedCard[], collection: string) {
   if (cards.length === 0) return;
-  const grouped = groupByCardId(cards);
+  const grouped = groupByCardIdAndFoil(cards);
   const headers = [
     "Name",
     "Set code",
@@ -71,27 +76,29 @@ export function exportToManabox(cards: ScannedCard[], collection: string) {
     "Scryfall ID",
     "Condition",
     "Language",
-    "Purchase price",
+    "Purchase price (USD)",
   ];
-  const rows = Array.from(grouped.values()).map(({ card, quantity }) => [
-    csvEscape(card.name),
-    card.set.toUpperCase(),
-    csvEscape(card.setName),
-    card.collectorNumber,
-    "",
-    String(quantity),
-    card.id,
-    "Near Mint",
-    "en",
-    card.price != null ? card.price.toFixed(2) : "",
-  ]);
+  const rows = Array.from(grouped.values()).map(
+    ({ card, quantity, isFoil }) => [
+      csvEscape(card.name),
+      card.set.toUpperCase(),
+      csvEscape(card.setName),
+      card.collectorNumber,
+      isFoil ? "foil" : "",
+      String(quantity),
+      card.id,
+      "Near Mint",
+      "en",
+      purchasePrice(card, isFoil),
+    ],
+  );
   const csv = [headers.join(","), ...rows.map((r) => r.join(","))].join("\n");
   downloadCsv(csv, `magic-vault-manabox-${dateSuffix()}-${collection}.csv`);
 }
 
 export function exportToMoxfield(cards: ScannedCard[], collection: string) {
   if (cards.length === 0) return;
-  const grouped = groupByCardId(cards);
+  const grouped = groupByCardIdAndFoil(cards);
   const headers = [
     "Count",
     "Name",
@@ -102,20 +109,22 @@ export function exportToMoxfield(cards: ScannedCard[], collection: string) {
     "Collector Number",
     "Alter",
     "Proxy",
-    "Purchase Price",
+    "Purchase Price (USD)",
   ];
-  const rows = Array.from(grouped.values()).map(({ card, quantity }) => [
-    String(quantity),
-    csvEscape(card.name),
-    card.set.toUpperCase(),
-    "Near Mint",
-    "EN",
-    "",
-    card.collectorNumber,
-    "False",
-    "False",
-    card.price != null ? card.price.toFixed(2) : "",
-  ]);
+  const rows = Array.from(grouped.values()).map(
+    ({ card, quantity, isFoil }) => [
+      String(quantity),
+      csvEscape(card.name),
+      card.set.toUpperCase(),
+      "Near Mint",
+      "EN",
+      isFoil ? "foil" : "",
+      card.collectorNumber,
+      "False",
+      "False",
+      purchasePrice(card, isFoil),
+    ],
+  );
   const csv = [headers.join(","), ...rows.map((r) => r.join(","))].join("\n");
   downloadCsv(csv, `magic-vault-moxfield-${dateSuffix()}-${collection}.csv`);
 }

@@ -43,6 +43,7 @@ const LIGHTNING_BOLT_M11: PlayingCardWithDistance = {
   rarity: "common",
   artist: "Christopher Moeller",
   price: 1.2,
+  priceFoil: 4.5,
   sourceUrl: "https://scryfall.com/card/m11/149/lightning-bolt",
   distance: 0.03,
 };
@@ -97,6 +98,7 @@ const RISING_FREEDOM_GUNDAM: PlayingCardWithDistance = {
   collectorNumber: "039",
   rarity: "c",
   price: null,
+  priceFoil: null,
   sourceUrl:
     "https://www.gundam-gcg.com/en/cards/detail.php?detailSearch=EB01-039",
   distance: 0.03,
@@ -162,6 +164,7 @@ const PIKACHU_BASE1: PlayingCardWithDistance = {
   rarity: "common",
   artist: "Mitsuhiro Arita",
   price: null,
+  priceFoil: null,
   sourceUrl: "https://tcgdex.dev/cards/base1-58",
   distance: 0.03,
 };
@@ -201,6 +204,7 @@ const ARIEL_ON_HUMAN_LEGS: PlayingCardWithDistance = {
   rarity: "uncommon",
   artist: "Matthew Robert Davies",
   price: 0.1,
+  priceFoil: 0.5,
   sourceUrl: undefined,
   distance: 0.03,
 };

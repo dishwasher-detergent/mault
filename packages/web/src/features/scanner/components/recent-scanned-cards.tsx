@@ -1,10 +1,12 @@
 import type { ScannedCard } from "@magic-vault/shared";
 import { IconSparkles } from "@tabler/icons-react";
 import { useTranslation } from "react-i18next";
+import { formatUsd } from "./scan-stats";
 
 const RECENT_COUNT = 5;
 
 function RecentCardRow({ card, binNumber, isFoil }: ScannedCard) {
+  const displayPrice = (isFoil ? card.priceFoil : card.price) ?? card.price;
   return (
     <div className="flex items-center gap-2">
       <div className="relative shrink-0 rounded-md overflow-hidden border bg-muted w-9 aspect-[2.5/3.5]">
@@ -26,9 +28,9 @@ function RecentCardRow({ card, binNumber, isFoil }: ScannedCard) {
       </div>
       <div className="flex flex-col min-w-0">
         <p className="text-xs font-medium truncate">{card.name}</p>
-        {card.price != null && (
+        {displayPrice != null && (
           <p className="text-xs text-muted-foreground">
-            ${card.price.toFixed(2)}
+            {formatUsd(displayPrice)}
           </p>
         )}
       </div>

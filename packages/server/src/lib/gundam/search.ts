@@ -54,6 +54,7 @@ function normalizeGundamCard(raw: GundamCard): PlayingCard {
     colorIdentity: raw.color ? [raw.color] : [],
     artist: undefined,
     price: null,
+    priceFoil: null,
     sourceUrl: raw.detail_url ?? undefined,
     cmc: typeof raw.cost === "number" ? raw.cost : undefined,
     raw,
