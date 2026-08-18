@@ -1,5 +1,5 @@
 import type { SyncState, SyncStatus } from "@magic-vault/shared";
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import { db } from "../db";
 import { cardImageVectors } from "../db/schema";
 import { resolveGameDataSourceUrl } from "./card-search/resolve";
@@ -152,7 +152,12 @@ async function runSync(source: SyncSource, lang: string): Promise<void> {
   const existing = await db
     .select({ id: cardImageVectors.scryfallId })
     .from(cardImageVectors)
-    .where(eq(cardImageVectors.gameKey, source.gameKey));
+    .where(
+      and(
+        eq(cardImageVectors.gameKey, source.gameKey),
+        eq(cardImageVectors.lang, lang),
+      ),
+    );
   const existingSet = new Set(existing.map((r) => r.id));
 
   addLog(
