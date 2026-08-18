@@ -1,0 +1,1 @@
+ALTER TABLE "games" DROP COLUMN "data_source_url";

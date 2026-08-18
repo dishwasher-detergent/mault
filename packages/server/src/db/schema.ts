@@ -78,7 +78,6 @@ export const games = pgTable(
     guid: uuid("guid").defaultRandom(),
     key: text("key").notNull(),
     name: text("name").notNull(),
-    dataSourceUrl: text("data_source_url").notNull(),
     fieldDefinitions: jsonb("field_definitions").notNull(),
     isActive: boolean("is_active").notNull().default(true),
     createdAt: timestamp("created_at").defaultNow().notNull(),
