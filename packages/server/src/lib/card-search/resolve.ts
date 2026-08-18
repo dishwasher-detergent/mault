@@ -1,6 +1,7 @@
 import { authQuery, db } from "../../db";
 import { gundamAdapter } from "../gundam/search";
 import { lorcanaAdapter } from "../lorcana/search";
+import { onePieceAdapter } from "../onepiece/search";
 import { pokemonAdapter } from "../pokemon/search";
 import { scryfallAdapter } from "../scryfall/search";
 import { withCache } from "./cache";
@@ -11,6 +12,7 @@ const ADAPTERS_BY_GAME_KEY: Record<string, CardSearchAdapter> = {
   gundam: withCache(gundamAdapter),
   pokemon: withCache(pokemonAdapter),
   lorcana: withCache(lorcanaAdapter),
+  onepiece: withCache(onePieceAdapter),
 };
 
 async function findCollectionGame(jwtClaims: string, collectionGuid: string) {
