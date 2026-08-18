@@ -295,7 +295,8 @@ export function PresetSelector({ readOnly }: PresetSelectorProps) {
                     {t("presetSelector.cancel")}
                   </Button>
                   <Button
-                    onClick={renameForm.handleSubmit(handleRename)}
+                    type="submit"
+                    form="rename-set-form"
                     disabled={!renameForm.formState.isValid || isPresetMutating}
                   >
                     {isPresetMutating && (
@@ -307,7 +308,10 @@ export function PresetSelector({ readOnly }: PresetSelectorProps) {
               }
               footerClassName="flex-col-reverse md:flex-row"
             >
-              <form onSubmit={renameForm.handleSubmit(handleRename)}>
+              <form
+                id="rename-set-form"
+                onSubmit={renameForm.handleSubmit(handleRename)}
+              >
                 <Controller
                   name="name"
                   control={renameForm.control}
@@ -354,7 +358,8 @@ export function PresetSelector({ readOnly }: PresetSelectorProps) {
                     {t("presetSelector.cancel")}
                   </Button>
                   <Button
-                    onClick={createForm.handleSubmit(handleCreate)}
+                    type="submit"
+                    form="create-set-form"
                     disabled={!createForm.formState.isValid || isPresetMutating}
                   >
                     {isPresetMutating && (
@@ -366,7 +371,10 @@ export function PresetSelector({ readOnly }: PresetSelectorProps) {
               }
               footerClassName="flex-col-reverse md:flex-row"
             >
-              <form onSubmit={createForm.handleSubmit(handleCreate)}>
+              <form
+                id="create-set-form"
+                onSubmit={createForm.handleSubmit(handleCreate)}
+              >
                 <Controller
                   name="name"
                   control={createForm.control}

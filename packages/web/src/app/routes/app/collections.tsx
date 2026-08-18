@@ -298,7 +298,8 @@ export default function CollectionsPage() {
               {t("createDialog.cancel")}
             </Button>
             <Button
-              onClick={renameForm.handleSubmit(handleRename)}
+              type="submit"
+              form="rename-collection-form"
               disabled={!renameForm.formState.isValid || isMutating}
             >
               {isMutating && <IconLoader2 className="size-4 animate-spin" />}
@@ -308,7 +309,10 @@ export default function CollectionsPage() {
         }
         footerClassName="flex-col-reverse md:flex-row"
       >
-        <form onSubmit={renameForm.handleSubmit(handleRename)}>
+        <form
+          id="rename-collection-form"
+          onSubmit={renameForm.handleSubmit(handleRename)}
+        >
           <Controller
             name="name"
             control={renameForm.control}

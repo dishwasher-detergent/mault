@@ -62,7 +62,7 @@ export function CollectionsProvider({
   const queryClient = useQueryClient();
   const { activeOrg } = useOrg();
   const moduleCount = useModuleCount();
-  const { data: collections = [], isLoading } = useQuery({
+  const { data: collections = [], isPending: isLoading } = useQuery({
     ...collectionsQueryOptions,
     enabled: !!activeOrg,
   });
