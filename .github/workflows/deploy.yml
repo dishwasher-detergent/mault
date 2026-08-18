@@ -85,6 +85,27 @@ jobs:
           cache-from: type=gha,scope=server
           cache-to: type=gha,mode=max,scope=server
 
+      - name: Set up pnpm
+        if: steps.changes.outputs.server == 'true'
+        uses: pnpm/action-setup@v4
+
+      - name: Set up Node
+        if: steps.changes.outputs.server == 'true'
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - name: Install server dependencies
+        if: steps.changes.outputs.server == 'true'
+        run: pnpm install --frozen-lockfile --filter @magic-vault/server...
+
+      - name: Run database migrations
+        if: steps.changes.outputs.server == 'true'
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+        run: pnpm --filter @magic-vault/server db:migrate
+
       - name: Trigger Coolify deployment (server)
         if: steps.changes.outputs.server == 'true'
         run: |
