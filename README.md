@@ -56,6 +56,23 @@ pnpm install
 pnpm dev        # Vite on :5173, Hono on :3001
 ```
 
+### Setting up Neon
+
+The app needs a Postgres database with pgvector (for card-embedding search) and Neon Auth (for JWT-based login + row-level security). Both are provided by a [Neon](https://neon.com) project — this is required even if you're self-hosting the app itself (see [Deployment](#deployment)), since Neon isn't something this project runs for you. Neon's free tier is enough for a personal/single-org deployment.
+
+1. Create a Neon project at [console.neon.tech](https://console.neon.tech) (any recent Postgres version works; pgvector ships as a bundled extension).
+2. Open the SQL editor on your project's default branch/database and enable pgvector:
+   ```sql
+   CREATE EXTENSION IF NOT EXISTS vector;
+   ```
+3. Copy the pooled connection string (Dashboard → Connect) into `DATABASE_URL`.
+4. Enable **Neon Auth** for the project (Dashboard → Auth). This provisions the `auth` schema, the `authenticated` Postgres role, and `auth.user_id()` — the row-level-security policies in `drizzle/*.sql` reference these directly, so Auth must be enabled _before_ you run migrations or `db:push` (step below), or they'll fail with an undefined function/role error.
+5. From the Auth page, grab:
+   - `NEON_AUTH_URL` — the base Auth URL (the server derives the JWKS endpoint and JWT issuer from it: `${NEON_AUTH_URL}/.well-known/jwks.json`)
+   - `VITE_NEON_AUTH_URL` — same Auth base URL, used client-side by the Better Auth React client
+   - `VITE_NEON_DATA_API_URL` — the project's Data API URL, also from the Auth page
+6. Run `pnpm --filter @magic-vault/server db:push` (or `db:generate` + `db:migrate`, see [Database](#database)) to create the schema and RLS policies against your new database.
+
 ### Environment variables
 
 Everything lives in a single root `.env` (Vite is configured to read up from `packages/web`, so there's no separate `packages/web/.env`). Copy `.env.example` to `.env` and fill it in:
@@ -66,16 +83,16 @@ cp .env.example .env
 
 ```
 # Server
-DATABASE_URL=                 # Neon Postgres connection string
-NEON_AUTH_URL=                # Neon Auth JWKS/auth endpoint
+DATABASE_URL=                 # Neon Postgres connection string (pooled), from step 3 above
+NEON_AUTH_URL=                # Neon Auth base URL, from step 5 above
 PORT=                         # optional, defaults to 3001
 WEB_URL=                      # optional, used for CORS and to build absolute links (Discord monitor-page links) - must be publicly reachable for those links/images to work outside your own machine
 
 # Public variables for the React app (baked into the client bundle at build time)
 VITE_API_URL=                 # base URL of the Hono API, e.g. http://localhost:3001
 VITE_APP_ENV=                 # local/developement/QA/production
-VITE_NEON_AUTH_URL=
-VITE_NEON_DATA_API_URL=
+VITE_NEON_AUTH_URL=           # from step 5 above
+VITE_NEON_DATA_API_URL=       # from step 5 above
 VITE_LATEST_ARDUINO_VERSION=  # keep in sync with FIRMWARE_VERSION in arduino/main/main.ino - shows an outdated-firmware banner when a connected device reports an older version
 ```
 
@@ -91,6 +108,24 @@ pnpm --filter @magic-vault/server db:studio    # open Drizzle Studio
 ## Deployment
 
 `Dockerfile.server` builds the Hono API (and pre-downloads the SigLIP model at build time). `Dockerfile.web` builds the Vite SPA and serves it with nginx (`nginx.conf`); `VITE_API_URL` must be supplied as a build arg since it's baked into the client bundle.
+
+Self-hosting only replaces where the _app_ runs — the database and auth still need a [Neon project](#setting-up-neon) set up first, and its connection details passed to the server container as env vars (`DATABASE_URL`, `NEON_AUTH_URL`, `WEB_URL`) and to the web build as build args (`VITE_API_URL`, `VITE_NEON_AUTH_URL`, `VITE_NEON_DATA_API_URL`, `VITE_APP_ENV`, `VITE_LATEST_ARDUINO_VERSION`). A minimal setup:
+
+```bash
+docker build -f Dockerfile.server -t magic-vault-server .
+docker run -p 3001:3001 --env-file .env magic-vault-server
+
+docker build -f Dockerfile.web \
+  --build-arg VITE_API_URL=https://your-api-host \
+  --build-arg VITE_NEON_AUTH_URL=$VITE_NEON_AUTH_URL \
+  --build-arg VITE_NEON_DATA_API_URL=$VITE_NEON_DATA_API_URL \
+  --build-arg VITE_APP_ENV=production \
+  --build-arg VITE_LATEST_ARDUINO_VERSION=1.0.2 \
+  -t magic-vault-web .
+docker run -p 8080:80 magic-vault-web
+```
+
+Point `WEB_URL` (server env) at the public URL of the web container so CORS and Discord monitor-page links resolve correctly, and re-run `db:push`/`db:migrate` against the Neon database as part of your deploy if the schema changed.
 
 ## Hardware
 
