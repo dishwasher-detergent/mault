@@ -29,10 +29,6 @@ function createGameFormSchema(t: TFunction<"games">) {
       .min(1, t("gameFormDialog.validation.required"))
       .regex(/^[a-z0-9-]+$/, t("gameFormDialog.validation.keyFormat")),
     name: z.string().min(1, t("gameFormDialog.validation.required")),
-    dataSourceUrl: z
-      .string()
-      .min(1, t("gameFormDialog.validation.required"))
-      .url(t("gameFormDialog.validation.invalidUrl")),
     isActive: z.boolean(),
     fieldDefinitions: z
       .array(fieldMetaFormSchema)
@@ -47,7 +43,6 @@ function toFormValues(game?: Game | null): GameFormValues {
     return {
       key: "",
       name: "",
-      dataSourceUrl: "",
       isActive: true,
       fieldDefinitions: [],
     };
@@ -55,7 +50,6 @@ function toFormValues(game?: Game | null): GameFormValues {
   return {
     key: game.key,
     name: game.name,
-    dataSourceUrl: game.dataSourceUrl,
     isActive: game.isActive,
     fieldDefinitions: game.fieldDefinitions.map((f) => ({
       field: f.field,
@@ -182,15 +176,6 @@ export function GameFormDialog({
               <FieldError errors={[errors.name]} />
             </Field>
           </div>
-
-          <Field data-invalid={!!errors.dataSourceUrl}>
-            <FieldLabel>{t("gameFormDialog.dataSourceUrlLabel")}</FieldLabel>
-            <Input
-              placeholder={t("gameFormDialog.dataSourceUrlPlaceholder")}
-              {...register("dataSourceUrl")}
-            />
-            <FieldError errors={[errors.dataSourceUrl]} />
-          </Field>
 
           <Field orientation="horizontal">
             <FieldLabel>{t("gameFormDialog.activeLabel")}</FieldLabel>

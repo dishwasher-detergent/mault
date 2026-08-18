@@ -1,5 +1,6 @@
+import { CARD_API_HEADERS } from "../card-search/constants";
 import type { SyncSource, SyncSourceCard } from "../card-search/sync-types";
-import { GUNDAM_DEFAULT_URL, GUNDAM_HEADERS } from "./search";
+import { GUNDAM_DEFAULT_URL } from "./search";
 
 interface GundamListCard {
   product_id: string;
@@ -31,7 +32,7 @@ async function fetchCards(
   let offset = 0;
   for (;;) {
     const url = `${baseUrl}?limit=${PAGE_LIMIT}&offset=${offset}`;
-    const res = await fetch(url, { headers: GUNDAM_HEADERS, signal });
+    const res = await fetch(url, { headers: CARD_API_HEADERS, signal });
     if (!res.ok) throw new Error(`Gundam card list fetch failed: ${res.status}`);
 
     const rows = extractRows(await res.json());
@@ -51,7 +52,7 @@ async function fetchCards(
 }
 
 async function fetchOne(id: string, baseUrl: string) {
-  const res = await fetch(`${baseUrl}/${id}`, { headers: GUNDAM_HEADERS });
+  const res = await fetch(`${baseUrl}/${id}`, { headers: CARD_API_HEADERS });
   if (!res.ok) return null;
 
   const json = await res.json();
@@ -68,7 +69,7 @@ export const gundamSyncSource: SyncSource = {
   gameKey: "gundam",
   label: "Gundam Card Game",
   defaultUrl: GUNDAM_DEFAULT_URL,
-  fetchHeaders: GUNDAM_HEADERS,
+  fetchHeaders: CARD_API_HEADERS,
   languages: ["en"],
   fetchCards,
   fetchOne,

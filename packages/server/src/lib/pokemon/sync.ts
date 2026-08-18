@@ -1,5 +1,6 @@
+import { CARD_API_HEADERS } from "../card-search/constants";
 import type { SyncSource, SyncSourceCard } from "../card-search/sync-types";
-import { POKEMON_DEFAULT_URL, POKEMON_HEADERS } from "./search";
+import { POKEMON_DEFAULT_URL } from "./search";
 
 interface PokemonListCard {
   id: string;
@@ -32,7 +33,7 @@ async function fetchCards(
   let page = 1;
   for (;;) {
     const url = `${baseUrl}?pagination:page=${page}&pagination:itemsPerPage=${PAGE_LIMIT}`;
-    const res = await fetch(url, { headers: POKEMON_HEADERS, signal });
+    const res = await fetch(url, { headers: CARD_API_HEADERS, signal });
     if (!res.ok)
       throw new Error(`Pokémon card list fetch failed: ${res.status}`);
 
@@ -53,7 +54,7 @@ async function fetchCards(
 }
 
 async function fetchOne(id: string, baseUrl: string) {
-  const res = await fetch(`${baseUrl}/${id}`, { headers: POKEMON_HEADERS });
+  const res = await fetch(`${baseUrl}/${id}`, { headers: CARD_API_HEADERS });
   if (!res.ok) return null;
 
   const raw = (await res.json()) as PokemonDetailCard;
@@ -70,7 +71,7 @@ export const pokemonSyncSource: SyncSource = {
   gameKey: "pokemon",
   label: "Pokémon (TCGdex)",
   defaultUrl: POKEMON_DEFAULT_URL,
-  fetchHeaders: POKEMON_HEADERS,
+  fetchHeaders: CARD_API_HEADERS,
   languages: [
     "en",
     "fr",

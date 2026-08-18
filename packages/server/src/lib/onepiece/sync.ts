@@ -1,9 +1,9 @@
+import { CARD_API_HEADERS } from "../card-search/constants";
 import type { SyncSource, SyncSourceCard } from "../card-search/sync-types";
 import {
   dedupeOnePieceRows,
   findCardVersion,
   ONE_PIECE_DEFAULT_URL,
-  ONE_PIECE_HEADERS,
   onePieceSetCode,
   type OptcgCard,
 } from "./search";
@@ -38,7 +38,7 @@ async function fetchCards(
   for (const catalog of CATALOGS) {
     addLog(`Fetching One Piece ${catalog.label}...`);
     const res = await fetch(`${baseUrl}/${catalog.path}/`, {
-      headers: ONE_PIECE_HEADERS,
+      headers: CARD_API_HEADERS,
       signal,
     });
     if (!res.ok) {
@@ -71,7 +71,7 @@ export const onePieceSyncSource: SyncSource = {
   gameKey: "onepiece",
   label: "One Piece Card Game (OPTCG API)",
   defaultUrl: ONE_PIECE_DEFAULT_URL,
-  fetchHeaders: ONE_PIECE_HEADERS,
+  fetchHeaders: CARD_API_HEADERS,
   languages: ["en"],
   fetchCards,
   fetchOne,

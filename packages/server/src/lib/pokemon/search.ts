@@ -1,13 +1,9 @@
 import type { PlayingCard, Result } from "@magic-vault/shared";
-import { QUERY_MIN_LENGTH } from "@magic-vault/shared";
+import { CARD_API_HEADERS } from "../card-search/constants";
 import type { CardSearchAdapter } from "../card-search/types";
+import { validateQuery } from "../card-search/validate";
 
 export const POKEMON_DEFAULT_URL = "https://api.tcgdex.net/v2/en/cards";
-
-export const POKEMON_HEADERS: Record<string, string> = {
-  "User-Agent": "MagicVault/1.0",
-  Accept: "application/json",
-};
 
 interface PokemonCardBrief {
   id: string;
@@ -133,7 +129,7 @@ async function fetchDetail(
   baseUrl: string,
 ): Promise<PokemonCardDetail | null> {
   const response = await fetch(`${baseUrl}/${id}`, {
-    headers: POKEMON_HEADERS,
+    headers: CARD_API_HEADERS,
   });
   if (!response.ok) return null;
   return (await response.json()) as PokemonCardDetail;
@@ -149,15 +145,11 @@ export async function Search(
   query: string,
   baseUrl: string = POKEMON_DEFAULT_URL,
 ): Promise<Result<PlayingCard[]>> {
-  if (!query || query.trim().length < QUERY_MIN_LENGTH) {
-    return {
-      message: `Your query must be greater than ${QUERY_MIN_LENGTH}`,
-      success: false,
-    };
-  }
+  const invalid = validateQuery(query);
+  if (invalid) return invalid;
 
   const url = `${baseUrl}?name=${encodeURIComponent(query)}&pagination:itemsPerPage=${MAX_ENRICHED_RESULTS}`;
-  const response = await fetch(url, { headers: POKEMON_HEADERS });
+  const response = await fetch(url, { headers: CARD_API_HEADERS });
 
   if (!response.ok) {
     return {

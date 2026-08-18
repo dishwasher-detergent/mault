@@ -1,13 +1,9 @@
 import type { PlayingCard, Result } from "@magic-vault/shared";
-import { QUERY_MIN_LENGTH } from "@magic-vault/shared";
+import { CARD_API_HEADERS } from "../card-search/constants";
 import type { CardSearchAdapter } from "../card-search/types";
+import { validateQuery } from "../card-search/validate";
 
 export const ONE_PIECE_DEFAULT_URL = "https://optcgapi.com/api";
-
-export const ONE_PIECE_HEADERS: Record<string, string> = {
-  "User-Agent": "MagicVault/1.0",
-  Accept: "application/json",
-};
 
 export interface OptcgCard {
   card_set_id: string;
@@ -213,7 +209,7 @@ export async function findCardVersion(
     for (const endpoint of endpoints) {
       const response = await fetch(
         `${baseUrl}/${endpoint}/${encodeURIComponent(key)}/`,
-        { headers: ONE_PIECE_HEADERS },
+        { headers: CARD_API_HEADERS },
       );
       if (!response.ok) {
         if (response.status !== 404) errorStatus ??= response.status;
@@ -242,18 +238,14 @@ export async function Search(
   query: string,
   baseUrl: string = ONE_PIECE_DEFAULT_URL,
 ): Promise<Result<PlayingCard[]>> {
-  if (!query || query.trim().length < QUERY_MIN_LENGTH) {
-    return {
-      message: `Your query must be greater than ${QUERY_MIN_LENGTH}`,
-      success: false,
-    };
-  }
+  const invalid = validateQuery(query);
+  if (invalid) return invalid;
 
   const name = encodeURIComponent(query.trim());
   const responses = await Promise.all(
     FILTERED_ENDPOINTS.map((endpoint) =>
       fetch(`${baseUrl}/${endpoint}/?card_name=${name}`, {
-        headers: ONE_PIECE_HEADERS,
+        headers: CARD_API_HEADERS,
       }),
     ),
   );

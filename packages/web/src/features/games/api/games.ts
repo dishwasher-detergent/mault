@@ -10,7 +10,6 @@ import { queryOptions } from "@tanstack/react-query";
 export interface GameInput {
   key: string;
   name: string;
-  dataSourceUrl: string;
   fieldDefinitions: FieldMeta[];
   isActive: boolean;
 }

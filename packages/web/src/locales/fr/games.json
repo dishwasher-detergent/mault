@@ -27,13 +27,11 @@
   "gameFormDialog": {
     "addTitle": "Ajouter un jeu",
     "editTitle": "Modifier {{name}}",
-    "description": "Définis comment les cartes de ce jeu sont récupérées et quels champs les règles des bacs peuvent filtrer.",
+    "description": "Définis quels champs les règles des bacs peuvent filtrer pour ce jeu.",
     "keyLabel": "Clé",
     "keyPlaceholder": "pokemon",
     "nameLabel": "Nom",
     "namePlaceholder": "Pokémon",
-    "dataSourceUrlLabel": "URL de la source de données",
-    "dataSourceUrlPlaceholder": "https://api.pokemontcg.io/v2/cards",
     "activeLabel": "Actif",
     "cancel": "Annuler",
     "saving": "Enregistrement…",
@@ -42,7 +40,6 @@
     "validation": {
       "required": "Obligatoire",
       "keyFormat": "Lettres minuscules, chiffres et tirets uniquement",
-      "invalidUrl": "Doit être une URL valide",
       "minFields": "Ajoute au moins un champ"
     }
   },
@@ -63,8 +60,7 @@
   },
   "gameCoverage": {
     "heading": "Couverture des cartes",
-    "description": "Quels jeux de cartes à collectionner sont pris en charge, combien de cartes se trouvent dans la base de données pour chacun, et d'où proviennent ces données.",
-    "source": "Source",
+    "description": "Quels jeux de cartes à collectionner sont pris en charge et combien de cartes se trouvent dans la base de données pour chacun.",
     "cardCount_one": "{{count}} carte",
     "cardCount_other": "{{count}} cartes",
     "inactive": "Inactif",

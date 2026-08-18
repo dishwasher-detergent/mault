@@ -1,4 +1,4 @@
-import { authQuery, db } from "../../db";
+import { authQuery } from "../../db";
 import { gundamAdapter } from "../gundam/search";
 import { lorcanaAdapter } from "../lorcana/search";
 import { onePieceAdapter } from "../onepiece/search";
@@ -48,17 +48,6 @@ export async function resolveGameKeyAndLang(
   });
 }
 
-export async function resolveGameDataSourceUrl(
-  gameKey: string,
-  fallback: string,
-): Promise<string> {
-  const game = await db.query.games.findFirst({
-    where: (t, { eq }) => eq(t.key, gameKey),
-    columns: { dataSourceUrl: true },
-  });
-  return game?.dataSourceUrl || fallback;
-}
-
 export async function resolveCardSearch(
   jwtClaims: string,
   collectionGuid: string | undefined,
@@ -70,9 +59,5 @@ export async function resolveCardSearch(
   const adapter = ADAPTERS_BY_GAME_KEY[game.key];
   if (!adapter) return null;
 
-  const baseUrl =
-    game.dataSourceUrl ||
-    (await resolveGameDataSourceUrl(game.key, adapter.defaultUrl));
-
-  return { adapter, baseUrl };
+  return { adapter, baseUrl: adapter.defaultUrl };
 }

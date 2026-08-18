@@ -4,7 +4,6 @@ export interface Game {
   guid: string;
   key: string;
   name: string;
-  dataSourceUrl: string;
   isActive: boolean;
   fieldDefinitions: FieldMeta[];
   createdAt: Date;
@@ -20,7 +19,6 @@ export interface GameCoverage {
   guid: string;
   key: string;
   name: string;
-  dataSourceUrl: string;
   isActive: boolean;
   cardCount: number;
   languages: string[];

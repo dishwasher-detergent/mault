@@ -27,13 +27,11 @@
   "gameFormDialog": {
     "addTitle": "Spiel hinzufügen",
     "editTitle": "{{name}} bearbeiten",
-    "description": "Lege fest, wie Karten für dieses Spiel abgerufen werden und welche Felder Fach-Regeln filtern können.",
+    "description": "Lege fest, welche Felder Fach-Regeln für dieses Spiel filtern können.",
     "keyLabel": "Schlüssel",
     "keyPlaceholder": "pokemon",
     "nameLabel": "Name",
     "namePlaceholder": "Pokémon",
-    "dataSourceUrlLabel": "Datenquellen-URL",
-    "dataSourceUrlPlaceholder": "https://api.pokemontcg.io/v2/cards",
     "activeLabel": "Aktiv",
     "cancel": "Abbrechen",
     "saving": "Wird gespeichert…",
@@ -42,7 +40,6 @@
     "validation": {
       "required": "Erforderlich",
       "keyFormat": "Nur Kleinbuchstaben, Zahlen und Bindestriche",
-      "invalidUrl": "Muss eine gültige URL sein",
       "minFields": "Mindestens ein Feld hinzufügen"
     }
   },
@@ -63,8 +60,7 @@
   },
   "gameCoverage": {
     "heading": "Kartenabdeckung",
-    "description": "Welche Sammelkartenspiele unterstützt werden, wie viele Karten für jedes in der Datenbank vorhanden sind und woher diese Daten stammen.",
-    "source": "Quelle",
+    "description": "Welche Sammelkartenspiele unterstützt werden und wie viele Karten für jedes in der Datenbank vorhanden sind.",
     "cardCount_one": "{{count}} Karte",
     "cardCount_other": "{{count}} Karten",
     "inactive": "Inaktiv",

@@ -27,13 +27,11 @@
   "gameFormDialog": {
     "addTitle": "Add game",
     "editTitle": "Edit {{name}}",
-    "description": "Define how cards for this game are fetched and which fields bin rules can filter on.",
+    "description": "Define which fields bin rules can filter on for this game.",
     "keyLabel": "Key",
     "keyPlaceholder": "pokemon",
     "nameLabel": "Name",
     "namePlaceholder": "Pokémon",
-    "dataSourceUrlLabel": "Data source URL",
-    "dataSourceUrlPlaceholder": "https://api.pokemontcg.io/v2/cards",
     "activeLabel": "Active",
     "cancel": "Cancel",
     "saving": "Saving…",
@@ -42,7 +40,6 @@
     "validation": {
       "required": "Required",
       "keyFormat": "Lowercase letters, numbers, and hyphens only",
-      "invalidUrl": "Must be a valid URL",
       "minFields": "Add at least one field"
     }
   },
@@ -63,8 +60,7 @@
   },
   "gameCoverage": {
     "heading": "Card Coverage",
-    "description": "Which trading card games are supported, how many cards are in the database for each, and where that data comes from.",
-    "source": "Source",
+    "description": "Which trading card games are supported and how many cards are in the database for each.",
     "cardCount_one": "{{count}} card",
     "cardCount_other": "{{count}} cards",
     "inactive": "Inactive",

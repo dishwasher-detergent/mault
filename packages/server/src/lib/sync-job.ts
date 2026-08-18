@@ -2,7 +2,6 @@ import type { SyncState, SyncStatus } from "@magic-vault/shared";
 import { and, eq } from "drizzle-orm";
 import { db } from "../db";
 import { cardImageVectors } from "../db/schema";
-import { resolveGameDataSourceUrl } from "./card-search/resolve";
 import type { SyncSource, SyncSourceCard } from "./card-search/sync-types";
 import { sendDiscordNotification } from "./discord";
 import { gundamSyncSource } from "./gundam/sync";
@@ -118,10 +117,7 @@ const INSERT_BATCH_SIZE = parseInt(
 );
 
 async function runSync(source: SyncSource, lang: string): Promise<void> {
-  const baseUrl = await resolveGameDataSourceUrl(
-    source.gameKey,
-    source.defaultUrl,
-  );
+  const baseUrl = source.defaultUrl;
   addLog(`Using data source: ${baseUrl}`);
 
   let cards: Awaited<ReturnType<SyncSource["fetchCards"]>>;

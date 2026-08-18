@@ -37,7 +37,6 @@ export function GamesManager() {
       createGame({
         key: values.key,
         name: values.name,
-        dataSourceUrl: values.dataSourceUrl,
         isActive: values.isActive,
         fieldDefinitions: toFieldDefinitions(values.fieldDefinitions),
       }),
@@ -59,7 +58,6 @@ export function GamesManager() {
       updateGame(guid, {
         key: values.key,
         name: values.name,
-        dataSourceUrl: values.dataSourceUrl,
         isActive: values.isActive,
         fieldDefinitions: toFieldDefinitions(values.fieldDefinitions),
       }),
@@ -137,8 +135,7 @@ export function GamesManager() {
                 {game.key} ·{" "}
                 {t("gamesManager.fieldCount", {
                   count: game.fieldDefinitions.length,
-                })}{" "}
-                · {game.dataSourceUrl}
+                })}
               </p>
             </div>
             <ButtonGroup>

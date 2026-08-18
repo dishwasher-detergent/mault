@@ -51,7 +51,6 @@ function toBinSet(row: {
     guid: string | null;
     key: string;
     name: string;
-    dataSourceUrl: string;
     isActive: boolean;
     fieldDefinitions: unknown;
     createdAt: Date;
@@ -73,7 +72,6 @@ function toBinSet(row: {
           guid: row.game.guid!,
           key: row.game.key,
           name: row.game.name,
-          dataSourceUrl: row.game.dataSourceUrl,
           isActive: row.game.isActive,
           fieldDefinitions: row.game.fieldDefinitions as FieldMeta[],
           createdAt: row.game.createdAt,

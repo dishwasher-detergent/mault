@@ -3,7 +3,6 @@ import { Hono } from "hono";
 import { streamSSE } from "hono/streaming";
 import { db } from "../db";
 import { cardImageVectors } from "../db/schema";
-import { resolveGameDataSourceUrl } from "../lib/card-search/resolve";
 import {
   cancelSync,
   getStatus,
@@ -146,7 +145,7 @@ async function syncOneCard(
       status: 400,
     };
   }
-  const baseUrl = await resolveGameDataSourceUrl(gameKey, source.defaultUrl);
+  const baseUrl = source.defaultUrl;
 
   const card = await source.fetchOne(scryfallId, baseUrl);
   if (!card) {
