@@ -60,3 +60,17 @@ export async function updateGame(
 export async function deleteGame(guid: string): Promise<Result<null>> {
   return apiDelete<Result<null>>(`/api/games/${guid}`);
 }
+
+export interface SampleCard {
+  name: string;
+  raw: unknown;
+}
+
+export async function getSampleCard(
+  key: string,
+  query: string,
+): Promise<Result<SampleCard>> {
+  return apiGet<Result<SampleCard>>(
+    `/api/games/sample-card?key=${encodeURIComponent(key)}&query=${encodeURIComponent(query)}`,
+  );
+}

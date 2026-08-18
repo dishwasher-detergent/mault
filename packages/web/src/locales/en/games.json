@@ -43,6 +43,15 @@
       "minFields": "Add at least one field"
     }
   },
+  "fieldMapping": {
+    "heading": "Field mapping",
+    "description": "Search for a real card and click a value below to add it as a field.",
+    "queryPlaceholder": "Search for a card (e.g. Pikachu)",
+    "search": "Search",
+    "loading": "Searching…",
+    "loadError": "Couldn't find a sample card for that search.",
+    "sampleName": "Sample: {{name}}"
+  },
   "fieldDefinitionsEditor": {
     "heading": "Field definitions",
     "addField": "Add field",

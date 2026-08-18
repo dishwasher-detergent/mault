@@ -2,7 +2,6 @@ import { Button } from "@/components/ui/button";
 import { Field, FieldError, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { DynamicDialog } from "@/components/ui/responsive-dialog";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { Switch } from "@/components/ui/switch";
 import { zodResolver } from "@hookform/resolvers/zod";
 import type { FieldMeta, Game } from "@magic-vault/shared";
@@ -125,7 +124,7 @@ export function GameFormDialog({
     <DynamicDialog
       open={open}
       onOpenChange={onOpenChange}
-      className="sm:max-w-2xl"
+      className="sm:max-w-5xl"
       title={
         game
           ? t("gameFormDialog.editTitle", { name: game.name })
@@ -191,9 +190,7 @@ export function GameFormDialog({
             />
           </Field>
 
-          <ScrollArea className="max-h-[40vh]">
-            <GameFieldDefinitionsEditor />
-          </ScrollArea>
+          <GameFieldDefinitionsEditor />
         </form>
       </FormProvider>
     </DynamicDialog>

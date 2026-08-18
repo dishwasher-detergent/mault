@@ -43,6 +43,15 @@
       "minFields": "Ajoute au moins un champ"
     }
   },
+  "fieldMapping": {
+    "heading": "Association des champs",
+    "description": "Recherche une vraie carte et clique sur une valeur ci-dessous pour l'ajouter comme champ.",
+    "queryPlaceholder": "Rechercher une carte (ex. Pikachu)",
+    "search": "Rechercher",
+    "loading": "Recherche…",
+    "loadError": "Aucune carte d'exemple trouvée pour cette recherche.",
+    "sampleName": "Exemple : {{name}}"
+  },
   "fieldDefinitionsEditor": {
     "heading": "Définitions des champs",
     "addField": "Ajouter un champ",
