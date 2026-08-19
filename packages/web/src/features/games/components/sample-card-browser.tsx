@@ -1,6 +1,5 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { getSampleCard } from "@/features/games/api/games";
 import {
   humanizeKey,
@@ -137,15 +136,15 @@ export function SampleCardBrowser({ gameKey, onPick }: SampleCardBrowserProps) {
   }
 
   return (
-    <div className="rounded-lg border p-3 flex flex-col gap-2 min-w-0">
-      <div>
+    <div className="flex flex-col gap-2 overflow-hidden">
+      <div className="flex-none">
         <p className="text-sm font-medium">{t("fieldMapping.heading")}</p>
         <p className="text-xs text-muted-foreground">
           {t("fieldMapping.description")}
         </p>
       </div>
 
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-2 flex-none">
         <Input
           value={query}
           onChange={(e) => setQuery(e.target.value)}
@@ -156,12 +155,10 @@ export function SampleCardBrowser({ gameKey, onPick }: SampleCardBrowserProps) {
             }
           }}
           placeholder={t("fieldMapping.queryPlaceholder")}
-          className="h-8"
         />
         <Button
           type="button"
           variant="outline"
-          size="sm"
           onClick={search}
           disabled={!canSearch}
         >
@@ -178,13 +175,19 @@ export function SampleCardBrowser({ gameKey, onPick }: SampleCardBrowserProps) {
               {t("fieldMapping.sampleName", { name: sampleName })}
             </p>
           )}
-          <ScrollArea className="max-h-[32vh] lg:max-h-[50vh] rounded border p-2 min-w-0">
-            <div className="flex flex-col min-w-0">
+          <div className="flex-1 overflow-y-auto">
+            <div className="flex flex-col">
               {Object.entries(raw).map(([k, v]) => (
-                <JsonNode key={k} path={k} keyName={k} value={v} onPick={onPick} />
+                <JsonNode
+                  key={k}
+                  path={k}
+                  keyName={k}
+                  value={v}
+                  onPick={onPick}
+                />
               ))}
             </div>
-          </ScrollArea>
+          </div>
         </>
       )}
     </div>

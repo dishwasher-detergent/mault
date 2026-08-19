@@ -124,7 +124,7 @@ export function GameFormDialog({
     <DynamicDialog
       open={open}
       onOpenChange={onOpenChange}
-      className="sm:max-w-5xl"
+      className="sm:max-w-5xl max-h-[60vh] overflow-hidden"
       title={
         game
           ? t("gameFormDialog.editTitle", { name: game.name })
@@ -154,7 +154,7 @@ export function GameFormDialog({
         <form
           id="game-form"
           onSubmit={handleSubmit(handleFormSubmit)}
-          className="flex flex-col gap-4"
+          className="flex flex-col gap-4 flex-1 overflow-hidden"
         >
           <div className="grid grid-cols-2 gap-3">
             <Field data-invalid={!!errors.key}>
@@ -189,7 +189,6 @@ export function GameFormDialog({
               )}
             />
           </Field>
-
           <GameFieldDefinitionsEditor />
         </form>
       </FormProvider>

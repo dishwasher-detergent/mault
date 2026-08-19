@@ -53,12 +53,10 @@ export function GameFieldDefinitionsEditor() {
   }
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 items-start">
-      <div className="max-h-96 overflow-y-auto">
-        <SampleCardBrowser gameKey={gameKey ?? ""} onPick={handlePick} />
-      </div>
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 flex-1 overflow-hidden">
+      <SampleCardBrowser gameKey={gameKey ?? ""} onPick={handlePick} />
 
-      <div className="flex flex-col gap-3 min-w-0">
+      <div className="flex flex-col gap-3 overflow-hidden">
         <div className="flex items-center justify-between">
           <p className="text-sm font-medium">
             {t("fieldDefinitionsEditor.heading")}
@@ -88,7 +86,7 @@ export function GameFieldDefinitionsEditor() {
           </p>
         )}
 
-        <div className="max-h-96 overflow-y-scroll">
+        <div className="overflow-y-auto">
           <div className="flex flex-col gap-3 pr-3">
             {fields.map((row, index) => (
               <div
