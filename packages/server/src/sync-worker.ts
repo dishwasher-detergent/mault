@@ -43,6 +43,17 @@ const INSERT_BATCH_SIZE = parseInt(
   process.env.SYNC_INSERT_BATCH_SIZE ?? "50",
   10,
 );
+const FETCH_TIMEOUT_MS = parseInt(
+  process.env.SYNC_FETCH_TIMEOUT_MS ?? "20000",
+  10,
+);
+
+function fetchSignal(): AbortSignal {
+  return AbortSignal.any([
+    abortController.signal,
+    AbortSignal.timeout(FETCH_TIMEOUT_MS),
+  ]);
+}
 
 async function main(): Promise<void> {
   if (!source) {
@@ -141,23 +152,12 @@ async function main(): Promise<void> {
     }
   }
 
-  // Only cards whose insert actually lands here count as processed. Before
-  // this, every card in a batch marked itself processed as soon as it was
-  // queued — including the ~49 that didn't trigger the real db.insert()
-  // call — so a single failed batch insert silently dropped up to
-  // INSERT_BATCH_SIZE - 1 cards without being counted as an error.
   async function flushInserts(force = false): Promise<void> {
     if (pendingInserts.length === 0) return;
     if (!force && pendingInserts.length < INSERT_BATCH_SIZE) return;
     const batch = pendingInserts;
     pendingInserts = [];
 
-    // Concurrent workers can both grab the same card before either has
-    // marked it seen in existingSet — two new rows in the same INSERT that
-    // collide with each other (not with an existing row) makes Postgres
-    // throw "ON CONFLICT DO NOTHING command cannot affect row a second
-    // time" instead of silently dropping the duplicate. De-dupe up front so
-    // that never turns into a real failure.
     const seen = new Set<string>();
     const deduped: PendingInsert[] = [];
     for (const item of batch) {
@@ -168,7 +168,9 @@ async function main(): Promise<void> {
     if (deduped.length < batch.length) {
       const dupeCount = batch.length - deduped.length;
       skipped += dupeCount;
-      addLog(`Skipped ${dupeCount} duplicate card(s) queued in the same batch.`);
+      addLog(
+        `Skipped ${dupeCount} duplicate card(s) queued in the same batch.`,
+      );
     }
 
     await insertBatch(deduped);
@@ -185,7 +187,7 @@ async function main(): Promise<void> {
     try {
       const imageRes = await fetch(card.imageUrl, {
         headers: activeSource.fetchHeaders,
-        signal: abortController.signal,
+        signal: fetchSignal(),
       });
       if (!imageRes.ok)
         throw new Error(`Image fetch failed: ${imageRes.status}`);
