@@ -6,6 +6,7 @@ import {
 } from "@huggingface/transformers";
 
 const MODEL_NAME = "Xenova/siglip-base-patch16-512";
+const VECTORIZE_THREADS = parseInt(process.env.VECTORIZE_THREADS ?? "1", 10);
 
 let modelPromise: Promise<SiglipVisionModel> | null = null;
 let processorPromise: Promise<Processor> | null = null;
@@ -15,6 +16,10 @@ async function getModel(): Promise<SiglipVisionModel> {
     console.log("[vectorize] Loading SigLIP model...");
     modelPromise = SiglipVisionModel.from_pretrained(MODEL_NAME, {
       dtype: "q8",
+      session_options: {
+        intraOpNumThreads: VECTORIZE_THREADS,
+        interOpNumThreads: 1,
+      },
     });
     await modelPromise;
     console.log(
