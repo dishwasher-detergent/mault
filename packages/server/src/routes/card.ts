@@ -2,6 +2,7 @@ import type { SearchCardMatch } from "@magic-vault/shared";
 import { sql } from "drizzle-orm";
 import { Hono } from "hono";
 import { authQuery } from "../db";
+import { CARD_API_USER_AGENT } from "../lib/card-search/constants";
 import {
   resolveCardSearch,
   resolveGameKeyAndLang,
@@ -161,7 +162,7 @@ router.get("/image-proxy", async (c) => {
   }
 
   const upstream = await fetch(parsed.toString(), {
-    headers: { "User-Agent": "MagicVault/1.0", Accept: "image/*" },
+    headers: { "User-Agent": CARD_API_USER_AGENT, Accept: "image/*" },
   });
   const contentType = upstream.headers.get("content-type") ?? "";
   if (!upstream.ok || !contentType.startsWith("image/")) {

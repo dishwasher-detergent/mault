@@ -1,12 +1,12 @@
 import type { SyncState, SyncStatus } from "@magic-vault/shared";
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import { db } from "../db";
 import { cardImageVectors } from "../db/schema";
-import { resolveGameDataSourceUrl } from "./card-search/resolve";
 import type { SyncSource, SyncSourceCard } from "./card-search/sync-types";
 import { sendDiscordNotification } from "./discord";
 import { gundamSyncSource } from "./gundam/sync";
 import { lorcanaSyncSource } from "./lorcana/sync";
+import { onePieceSyncSource } from "./onepiece/sync";
 import { pokemonSyncSource } from "./pokemon/sync";
 import { scryfallSyncSource } from "./scryfall/sync";
 import { vectorizeImageFromBuffer } from "./vectorize";
@@ -16,6 +16,7 @@ export const SYNC_SOURCES: Record<string, SyncSource> = {
   gundam: gundamSyncSource,
   pokemon: pokemonSyncSource,
   lorcana: lorcanaSyncSource,
+  onepiece: onePieceSyncSource,
 };
 
 type SseWriter = (event: string, data: unknown) => void;
@@ -116,10 +117,7 @@ const INSERT_BATCH_SIZE = parseInt(
 );
 
 async function runSync(source: SyncSource, lang: string): Promise<void> {
-  const baseUrl = await resolveGameDataSourceUrl(
-    source.gameKey,
-    source.defaultUrl,
-  );
+  const baseUrl = source.defaultUrl;
   addLog(`Using data source: ${baseUrl}`);
 
   let cards: Awaited<ReturnType<SyncSource["fetchCards"]>>;
@@ -152,7 +150,12 @@ async function runSync(source: SyncSource, lang: string): Promise<void> {
   const existing = await db
     .select({ id: cardImageVectors.scryfallId })
     .from(cardImageVectors)
-    .where(eq(cardImageVectors.gameKey, source.gameKey));
+    .where(
+      and(
+        eq(cardImageVectors.gameKey, source.gameKey),
+        eq(cardImageVectors.lang, lang),
+      ),
+    );
   const existingSet = new Set(existing.map((r) => r.id));
 
   addLog(

@@ -7,7 +7,7 @@ import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 export function formatUsd(value: number): string {
-  return `$${value.toFixed(2)}`;
+  return `$${value.toFixed(2)} USD`;
 }
 
 export function formatElapsed(ms: number): string {

@@ -55,7 +55,7 @@ export function computeStats(cards: ScannedCard[]): ScanStats | null {
 
   for (const entry of cards) {
     const c = entry.card;
-    const price = c.price ?? 0;
+    const price = (entry.isFoil ? c.priceFoil : c.price) ?? c.price ?? 0;
 
     uniqueCards.add(c.id);
 

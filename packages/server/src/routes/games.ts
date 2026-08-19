@@ -3,6 +3,7 @@ import { count, eq, max } from "drizzle-orm";
 import { Hono } from "hono";
 import { db } from "../db";
 import { cardImageVectors, games } from "../db/schema";
+import { ADAPTERS_BY_GAME_KEY } from "../lib/card-search/resolve";
 import { requireAuth, requireRole, type AppEnv } from "../middleware/auth";
 
 const router = new Hono<AppEnv>();
@@ -12,7 +13,6 @@ function toGame(row: typeof games.$inferSelect): Game {
     guid: row.guid!,
     key: row.key,
     name: row.name,
-    dataSourceUrl: row.dataSourceUrl,
     isActive: row.isActive,
     fieldDefinitions: row.fieldDefinitions as FieldMeta[],
     createdAt: row.createdAt,
@@ -23,7 +23,6 @@ function toGame(row: typeof games.$inferSelect): Game {
 interface GameInput {
   key: string;
   name: string;
-  dataSourceUrl: string;
   fieldDefinitions: FieldMeta[];
   isActive?: boolean;
 }
@@ -74,7 +73,6 @@ router.get("/coverage", requireAuth, async (c) => {
       guid: row.guid!,
       key: row.key,
       name: row.name,
-      dataSourceUrl: row.dataSourceUrl,
       isActive: row.isActive,
       cardCount: countByKey.get(row.key) ?? 0,
       languages: (langsByKey.get(row.key) ?? []).sort(),
@@ -85,6 +83,51 @@ router.get("/coverage", requireAuth, async (c) => {
   } catch (err) {
     console.error(err);
     return c.json({ success: false, message: "Database error." }, 500);
+  }
+});
+
+// GET /games/sample-card?key=pokemon&query=pikachu — searches the game's
+// adapter for a real card so the field-mapping UI can offer real paths
+// instead of asking admins to type them blind. Keyed by `key`, not `guid`,
+// so it works while creating a new game too (before it has a row/guid).
+router.get("/sample-card", requireAuth, requireRole("admin"), async (c) => {
+  const key = c.req.query("key");
+  const query = c.req.query("query");
+  if (!key) {
+    return c.json({ success: false, message: "key is required." }, 400);
+  }
+  if (!query?.trim()) {
+    return c.json({ success: false, message: "query is required." }, 400);
+  }
+
+  const adapter = ADAPTERS_BY_GAME_KEY[key];
+  if (!adapter) {
+    return c.json(
+      { success: false, message: `No card source for game key: ${key}` },
+      400,
+    );
+  }
+
+  try {
+    const result = await adapter.search(query, adapter.defaultUrl);
+    if (!result.success || !result.data?.length) {
+      return c.json(
+        { success: false, message: result.message || "No cards found." },
+        404,
+      );
+    }
+
+    const card = result.data[0];
+    return c.json({
+      success: true,
+      data: { name: card.name, raw: card.raw },
+    });
+  } catch (err) {
+    console.error(err);
+    return c.json(
+      { success: false, message: "Failed to fetch sample card." },
+      502,
+    );
   }
 });
 
@@ -113,12 +156,12 @@ router.get("/:guid/languages", requireAuth, async (c) => {
 });
 
 router.post("/", requireAuth, requireRole("admin"), async (c) => {
-  const { key, name, dataSourceUrl, fieldDefinitions, isActive } =
+  const { key, name, fieldDefinitions, isActive } =
     await c.req.json<GameInput>();
 
-  if (!key?.trim() || !name?.trim() || !dataSourceUrl?.trim()) {
+  if (!key?.trim() || !name?.trim()) {
     return c.json(
-      { success: false, message: "key, name, and dataSourceUrl are required." },
+      { success: false, message: "key and name are required." },
       400,
     );
   }
@@ -129,7 +172,6 @@ router.post("/", requireAuth, requireRole("admin"), async (c) => {
       .values({
         key: key.trim(),
         name: name.trim(),
-        dataSourceUrl: dataSourceUrl.trim(),
         fieldDefinitions,
         isActive: isActive ?? true,
       })
@@ -149,7 +191,7 @@ router.post("/", requireAuth, requireRole("admin"), async (c) => {
 
 router.put("/:guid", requireAuth, requireRole("admin"), async (c) => {
   const guid = c.req.param("guid");
-  const { key, name, dataSourceUrl, fieldDefinitions, isActive } =
+  const { key, name, fieldDefinitions, isActive } =
     await c.req.json<Partial<GameInput>>();
 
   try {
@@ -165,8 +207,6 @@ router.put("/:guid", requireAuth, requireRole("admin"), async (c) => {
     };
     if (key !== undefined) updates.key = key.trim();
     if (name !== undefined) updates.name = name.trim();
-    if (dataSourceUrl !== undefined)
-      updates.dataSourceUrl = dataSourceUrl.trim();
     if (fieldDefinitions !== undefined)
       updates.fieldDefinitions = fieldDefinitions;
     if (isActive !== undefined) updates.isActive = isActive;

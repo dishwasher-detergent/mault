@@ -19,6 +19,7 @@ export interface PlayingCard {
   colorIdentity: string[];
   artist?: string;
   price: number | null;
+  priceFoil: number | null;
   sourceUrl?: string;
   cmc?: number;
   raw?: unknown;

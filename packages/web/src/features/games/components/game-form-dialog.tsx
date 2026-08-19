@@ -2,10 +2,18 @@ import { Button } from "@/components/ui/button";
 import { Field, FieldError, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { DynamicDialog } from "@/components/ui/responsive-dialog";
-import { ScrollArea } from "@/components/ui/scroll-area";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
+import { listSyncSources } from "@/lib/api/admin";
 import { zodResolver } from "@hookform/resolvers/zod";
 import type { FieldMeta, Game } from "@magic-vault/shared";
+import { useQuery } from "@tanstack/react-query";
 import { TFunction } from "i18next";
 import { useEffect } from "react";
 import { Controller, FormProvider, useForm } from "react-hook-form";
@@ -29,10 +37,6 @@ function createGameFormSchema(t: TFunction<"games">) {
       .min(1, t("gameFormDialog.validation.required"))
       .regex(/^[a-z0-9-]+$/, t("gameFormDialog.validation.keyFormat")),
     name: z.string().min(1, t("gameFormDialog.validation.required")),
-    dataSourceUrl: z
-      .string()
-      .min(1, t("gameFormDialog.validation.required"))
-      .url(t("gameFormDialog.validation.invalidUrl")),
     isActive: z.boolean(),
     fieldDefinitions: z
       .array(fieldMetaFormSchema)
@@ -47,7 +51,6 @@ function toFormValues(game?: Game | null): GameFormValues {
     return {
       key: "",
       name: "",
-      dataSourceUrl: "",
       isActive: true,
       fieldDefinitions: [],
     };
@@ -55,7 +58,6 @@ function toFormValues(game?: Game | null): GameFormValues {
   return {
     key: game.key,
     name: game.name,
-    dataSourceUrl: game.dataSourceUrl,
     isActive: game.isActive,
     fieldDefinitions: game.fieldDefinitions.map((f) => ({
       field: f.field,
@@ -118,6 +120,12 @@ export function GameFormDialog({
     formState: { errors, isSubmitting },
   } = form;
 
+  const { data: sources = [] } = useQuery({
+    queryKey: ["admin", "syncSources"],
+    queryFn: () => listSyncSources().then((r) => r.data ?? []),
+    staleTime: Infinity,
+  });
+
   useEffect(() => {
     if (open) reset(toFormValues(game));
   }, [open, game, reset]);
@@ -131,7 +139,7 @@ export function GameFormDialog({
     <DynamicDialog
       open={open}
       onOpenChange={onOpenChange}
-      className="sm:max-w-2xl"
+      className="sm:max-w-5xl max-h-[60vh] overflow-hidden"
       title={
         game
           ? t("gameFormDialog.editTitle", { name: game.name })
@@ -161,15 +169,37 @@ export function GameFormDialog({
         <form
           id="game-form"
           onSubmit={handleSubmit(handleFormSubmit)}
-          className="flex flex-col gap-4"
+          className="flex flex-col gap-4 flex-1 overflow-hidden"
         >
           <div className="grid grid-cols-2 gap-3">
             <Field data-invalid={!!errors.key}>
               <FieldLabel>{t("gameFormDialog.keyLabel")}</FieldLabel>
-              <Input
-                placeholder={t("gameFormDialog.keyPlaceholder")}
-                {...register("key")}
-                disabled={!!game}
+              <Controller
+                control={control}
+                name="key"
+                render={({ field }) => (
+                  <Select
+                    value={field.value}
+                    onValueChange={field.onChange}
+                    disabled={!!game}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder={t("gameFormDialog.keyPlaceholder")}>
+                        {field.value
+                          ? (sources.find((s) => s.gameKey === field.value)
+                              ?.label ?? field.value)
+                          : undefined}
+                      </SelectValue>
+                    </SelectTrigger>
+                    <SelectContent>
+                      {sources.map((s) => (
+                        <SelectItem key={s.gameKey} value={s.gameKey}>
+                          {s.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                )}
               />
               <FieldError errors={[errors.key]} />
             </Field>
@@ -182,15 +212,6 @@ export function GameFormDialog({
               <FieldError errors={[errors.name]} />
             </Field>
           </div>
-
-          <Field data-invalid={!!errors.dataSourceUrl}>
-            <FieldLabel>{t("gameFormDialog.dataSourceUrlLabel")}</FieldLabel>
-            <Input
-              placeholder={t("gameFormDialog.dataSourceUrlPlaceholder")}
-              {...register("dataSourceUrl")}
-            />
-            <FieldError errors={[errors.dataSourceUrl]} />
-          </Field>
 
           <Field orientation="horizontal">
             <FieldLabel>{t("gameFormDialog.activeLabel")}</FieldLabel>
@@ -205,10 +226,7 @@ export function GameFormDialog({
               )}
             />
           </Field>
-
-          <ScrollArea className="max-h-[40vh]">
-            <GameFieldDefinitionsEditor />
-          </ScrollArea>
+          <GameFieldDefinitionsEditor />
         </form>
       </FormProvider>
     </DynamicDialog>

@@ -13,6 +13,7 @@ import { searchCards } from "@/features/cards/api/card-search";
 import type { CardSelectDialogProps } from "@/features/cards/types";
 import { useCollections } from "@/features/collections/api/use-collections";
 import { useScannedCards } from "@/features/scanner/api/use-scanned-cards";
+import { formatUsd } from "@/features/scanner/components/scan-stats";
 import { cn } from "@/lib/utils";
 import {
   QUERY_MIN_LENGTH,
@@ -348,10 +349,24 @@ export function CardSelectDialog({
                       {selectedCard.setName} #{selectedCard.collectorNumber}
                     </span>
                   </div>
-                  {selectedCard.price != null && (
-                    <p className="text-muted-foreground">
-                      ${selectedCard.price.toFixed(2)}
-                    </p>
+                  {(selectedCard.price != null ||
+                    selectedCard.priceFoil != null) && (
+                    <div className="flex items-center gap-2 text-muted-foreground">
+                      {selectedCard.price != null && (
+                        <span>
+                          {t("cardSelectDialog.regularPrice", {
+                            price: formatUsd(selectedCard.price),
+                          })}
+                        </span>
+                      )}
+                      {selectedCard.priceFoil != null && (
+                        <span>
+                          {t("cardSelectDialog.foilPrice", {
+                            price: formatUsd(selectedCard.priceFoil),
+                          })}
+                        </span>
+                      )}
+                    </div>
                   )}
                   {selectedCard.artist && (
                     <p className="text-muted-foreground">

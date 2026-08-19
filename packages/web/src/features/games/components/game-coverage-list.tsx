@@ -7,14 +7,6 @@ import { IconCards } from "@tabler/icons-react";
 import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 
-function sourceHost(url: string): string {
-  try {
-    return new URL(url).hostname;
-  } catch {
-    return url;
-  }
-}
-
 export function GameCoverageList() {
   const { t } = useTranslation("games");
   const { data: coverage = [], isLoading } = useQuery(gameCoverageQueryOptions);
@@ -48,21 +40,13 @@ export function GameCoverageList() {
                 <Badge variant="outline">{t("gameCoverage.inactive")}</Badge>
               )}
             </div>
-            <p className="text-xs text-muted-foreground truncate">
-              {t("gameCoverage.source")}{": "}
-              <a
-                href={game.dataSourceUrl}
-                target="_blank"
-                rel="noreferrer"
-                className="underline underline-offset-2 hover:text-foreground"
-              >
-                {sourceHost(game.dataSourceUrl)}
-              </a>
-              {game.languages.length > 0 &&
-                ` · ${game.languages
+            {game.languages.length > 0 && (
+              <p className="text-xs text-muted-foreground truncate">
+                {game.languages
                   .map((lang) => LANGUAGE_LABELS[lang] ?? lang)
-                  .join(", ")}`}
-            </p>
+                  .join(", ")}
+              </p>
+            )}
           </div>
           <div className="text-right shrink-0">
             <p className="text-sm font-semibold tabular-nums">

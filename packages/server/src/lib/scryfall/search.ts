@@ -1,13 +1,9 @@
 import type { PlayingCard, Result } from "@magic-vault/shared";
-import { QUERY_MIN_LENGTH } from "@magic-vault/shared";
+import { CARD_API_HEADERS } from "../card-search/constants";
 import type { CardSearchAdapter } from "../card-search/types";
+import { validateQuery } from "../card-search/validate";
 
 export const SCRYFALL_DEFAULT_URL = "https://api.scryfall.com/cards";
-
-export const SCRYFALL_HEADERS = {
-  "User-Agent": "MagicVault/1.0",
-  Accept: "application/json",
-};
 
 interface ScryfallImageUris {
   small: string;
@@ -48,7 +44,7 @@ interface ScryfallApiCard {
   rarity: string;
   artist?: string;
   scryfall_uri: string;
-  prices: { usd: string | null };
+  prices: { usd: string | null; usd_foil: string | null };
 }
 
 function normalizeScryfallCard(raw: ScryfallApiCard): PlayingCard {
@@ -77,6 +73,10 @@ function normalizeScryfallCard(raw: ScryfallApiCard): PlayingCard {
     colorIdentity: raw.color_identity,
     artist: raw.artist ?? face?.artist,
     price: raw.prices.usd != null ? Number.parseFloat(raw.prices.usd) : null,
+    priceFoil:
+      raw.prices.usd_foil != null
+        ? Number.parseFloat(raw.prices.usd_foil)
+        : null,
     sourceUrl: raw.scryfall_uri,
     cmc: raw.cmc,
     raw,
@@ -87,17 +87,13 @@ export async function Search(
   query: string,
   baseUrl: string = SCRYFALL_DEFAULT_URL,
 ): Promise<Result<PlayingCard[]>> {
-  if (!query || query.trim().length < QUERY_MIN_LENGTH) {
-    return {
-      message: `Your query must be greater than ${QUERY_MIN_LENGTH}`,
-      success: false,
-    };
-  }
+  const invalid = validateQuery(query);
+  if (invalid) return invalid;
 
   const scryfallUrl = `${baseUrl}/search?q=${encodeURIComponent(query)}&unique=prints&order=released&dir=desc`;
 
   const response = await fetch(scryfallUrl, {
-    headers: SCRYFALL_HEADERS,
+    headers: CARD_API_HEADERS,
   });
 
   if (response.status === 404) {
@@ -128,7 +124,7 @@ export async function SearchById(
   baseUrl: string = SCRYFALL_DEFAULT_URL,
 ): Promise<Result<PlayingCard>> {
   const response = await fetch(`${baseUrl}/${id}`, {
-    headers: SCRYFALL_HEADERS,
+    headers: CARD_API_HEADERS,
   });
 
   if (!response.ok) {

@@ -1,7 +1,7 @@
+import { CARD_API_HEADERS } from "../card-search/constants";
 import type { SyncSource, SyncSourceCard } from "../card-search/sync-types";
 import {
   LORCANA_DEFAULT_URL,
-  LORCANA_HEADERS,
   type LorcastCard,
   lorcanaCardId,
   lorcanaCardName,
@@ -42,7 +42,7 @@ async function fetchCards(
 
   addLog("Fetching Lorcast set list...");
   const setsRes = await fetch(`${root}/sets`, {
-    headers: LORCANA_HEADERS,
+    headers: CARD_API_HEADERS,
     signal,
   });
   if (!setsRes.ok)
@@ -54,7 +54,7 @@ async function fetchCards(
     if (signal?.aborted) break;
 
     const res = await fetch(`${root}/sets/${set.code}/cards`, {
-      headers: LORCANA_HEADERS,
+      headers: CARD_API_HEADERS,
       signal,
     });
     if (!res.ok) {
@@ -79,7 +79,7 @@ async function fetchOne(id: string, baseUrl: string) {
   if (!parsed) return null;
 
   const res = await fetch(`${baseUrl}/${parsed.setCode}/${parsed.number}`, {
-    headers: LORCANA_HEADERS,
+    headers: CARD_API_HEADERS,
   });
   if (!res.ok) return null;
 
@@ -91,7 +91,7 @@ export const lorcanaSyncSource: SyncSource = {
   gameKey: "lorcana",
   label: "Disney Lorcana (Lorcast)",
   defaultUrl: LORCANA_DEFAULT_URL,
-  fetchHeaders: LORCANA_HEADERS,
+  fetchHeaders: CARD_API_HEADERS,
   languages: ["en"],
   fetchCards,
   fetchOne,

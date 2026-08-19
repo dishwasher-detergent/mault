@@ -80,7 +80,10 @@ export function BinConfigPanel() {
   const isCatchAll = form.watch("isCatchAll");
 
   return (
-    <div className="flex flex-col">
+    <form
+      onSubmit={form.handleSubmit(handleSave)}
+      className="flex flex-col"
+    >
       <div className="flex items-center gap-4 mb-4">
         <h2 className="text-sm font-semibold font-heading">
           {t("binConfigPanel.binHeading", { number: config.binNumber })}
@@ -139,15 +142,11 @@ export function BinConfigPanel() {
         >
           {t("binConfigPanel.clear")}
         </Button>
-        <Button
-          type="button"
-          onClick={form.handleSubmit(handleSave)}
-          disabled={isPending}
-        >
+        <Button type="submit" disabled={isPending}>
           {isPending && <IconLoader2 className="size-4 animate-spin" />}
           {t("binConfigPanel.save")}
         </Button>
       </div>
-    </div>
+    </form>
   );
 }

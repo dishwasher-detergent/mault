@@ -43,6 +43,7 @@ const LIGHTNING_BOLT_M11: PlayingCardWithDistance = {
   rarity: "common",
   artist: "Christopher Moeller",
   price: 1.2,
+  priceFoil: 4.5,
   sourceUrl: "https://scryfall.com/card/m11/149/lightning-bolt",
   distance: 0.03,
 };
@@ -97,6 +98,7 @@ const RISING_FREEDOM_GUNDAM: PlayingCardWithDistance = {
   collectorNumber: "039",
   rarity: "c",
   price: null,
+  priceFoil: null,
   sourceUrl:
     "https://www.gundam-gcg.com/en/cards/detail.php?detailSearch=EB01-039",
   distance: 0.03,
@@ -162,6 +164,7 @@ const PIKACHU_BASE1: PlayingCardWithDistance = {
   rarity: "common",
   artist: "Mitsuhiro Arita",
   price: null,
+  priceFoil: null,
   sourceUrl: "https://tcgdex.dev/cards/base1-58",
   distance: 0.03,
 };
@@ -201,6 +204,7 @@ const ARIEL_ON_HUMAN_LEGS: PlayingCardWithDistance = {
   rarity: "uncommon",
   artist: "Matthew Robert Davies",
   price: 0.1,
+  priceFoil: 0.5,
   sourceUrl: undefined,
   distance: 0.03,
 };
@@ -221,6 +225,53 @@ const ARIEL_ON_HUMAN_LEGS_ENCHANTED: PlayingCardWithDistance = {
 
 const LORCANA_MOCK_CARDS: PlayingCardWithDistance[] = [ARIEL_ON_HUMAN_LEGS];
 
+// OPTCG API images aren't proxied — plain statics with no hotlink protection,
+// same as the Lorcast mock cards above. The three versions mirror real data:
+// one printed ID (OP01-016) whose printings range from $3.65 to $2,057.
+const NAMI_IMG = "https://optcgapi.com/media/static/Card_Images/OP01-016.jpg";
+
+const NAMI_OP01: PlayingCardWithDistance = {
+  id: "OP01-016",
+  name: "Nami",
+  image: { small: NAMI_IMG, normal: NAMI_IMG },
+  cmc: 1,
+  typeLine: "Character — Straw Hat Crew",
+  text: '[On Play] Look at 5 cards from the top of your deck; reveal up to 1 "Straw Hat Crew" type Character card other than [Nami] and add it to your hand. Then, place the rest at the bottom of your deck in any order.',
+  power: "2000",
+  colorIdentity: ["Red"],
+  set: "OP01",
+  setName: "Romance Dawn",
+  collectorNumber: "OP01-016",
+  rarity: "R",
+  price: 3.65,
+  priceFoil: null,
+  sourceUrl: undefined,
+  distance: 0.03,
+};
+
+const NAMI_PARALLEL_IMG =
+  "https://optcgapi.com/media/static/Card_Images/OP01-016_p1.jpg";
+
+const NAMI_OP01_PARALLEL: PlayingCardWithDistance = {
+  ...NAMI_OP01,
+  id: "OP01-016_p1",
+  name: "Nami (Parallel)",
+  image: { small: NAMI_PARALLEL_IMG, normal: NAMI_PARALLEL_IMG },
+  price: 412.29,
+  distance: 0.05,
+};
+
+const NAMI_OP01_MANGA: PlayingCardWithDistance = {
+  ...NAMI_OP01,
+  id: "OP01-016_p8",
+  name: "Nami (OP01-016) (Manga)",
+  setName: "Premium Booster -The Best-",
+  price: 2057.76,
+  distance: 0.06,
+};
+
+const ONE_PIECE_MOCK_CARDS: PlayingCardWithDistance[] = [NAMI_OP01];
+
 let mockCardIndex = 0;
 
 export function ScannerDebug() {
@@ -234,6 +285,7 @@ export function ScannerDebug() {
   const isGundam = activeCollection?.game?.key === "gundam";
   const isPokemon = activeCollection?.game?.key === "pokemon";
   const isLorcana = activeCollection?.game?.key === "lorcana";
+  const isOnePiece = activeCollection?.game?.key === "onepiece";
 
   const handleSimulateScan = () => {
     const cards = isGundam
@@ -242,7 +294,9 @@ export function ScannerDebug() {
         ? POKEMON_MOCK_CARDS
         : isLorcana
           ? LORCANA_MOCK_CARDS
-          : MOCK_CARDS;
+          : isOnePiece
+            ? ONE_PIECE_MOCK_CARDS
+            : MOCK_CARDS;
     const card = cards[mockCardIndex % cards.length];
     mockCardIndex++;
     addCard(card);
@@ -268,6 +322,10 @@ export function ScannerDebug() {
         ARIEL_ON_HUMAN_LEGS_FOIL,
         ARIEL_ON_HUMAN_LEGS_ENCHANTED,
       ]);
+      return;
+    }
+    if (isOnePiece) {
+      addCard(NAMI_OP01, NAMI_IMG, [NAMI_OP01_PARALLEL, NAMI_OP01_MANGA]);
       return;
     }
     addCard(LIGHTNING_BOLT_M11, FAKE_SCAN_URL, [

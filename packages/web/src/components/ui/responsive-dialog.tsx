@@ -110,16 +110,23 @@ export function DynamicDialog({
     <DialogCloseContext value={close}>
       <Dialog open={open} onOpenChange={handleOpenChange}>
         {trigger && <DialogTrigger render={trigger}></DialogTrigger>}
-        <DialogContent className={className} showCloseButton={dismissible}>
-          <DialogHeader>
+        <DialogContent
+          className={cn("flex flex-col", className)}
+          showCloseButton={dismissible}
+        >
+          <DialogHeader className="flex-none">
             <DialogTitle>{title}</DialogTitle>
             {description && (
               <DialogDescription>{description}</DialogDescription>
             )}
           </DialogHeader>
-          <div className="flex flex-col gap-2">{children}</div>
+          <div className="flex flex-col gap-2 flex-1 overflow-hidden">
+            {children}
+          </div>
           {footer && (
-            <DialogFooter className={footerClassName}>{footer}</DialogFooter>
+            <DialogFooter className={cn("flex-none", footerClassName)}>
+              {footer}
+            </DialogFooter>
           )}
         </DialogContent>
       </Dialog>

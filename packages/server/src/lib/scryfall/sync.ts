@@ -2,8 +2,9 @@ import { createInterface } from "node:readline";
 import { Readable } from "node:stream";
 import type { ReadableStream as NodeWebReadableStream } from "node:stream/web";
 import { createGunzip } from "node:zlib";
+import { CARD_API_HEADERS } from "../card-search/constants";
 import type { SyncSource, SyncSourceCard } from "../card-search/sync-types";
-import { SCRYFALL_DEFAULT_URL, SCRYFALL_HEADERS } from "./search";
+import { SCRYFALL_DEFAULT_URL } from "./search";
 
 type ScryfallBulkCard = {
   id: string;
@@ -32,7 +33,7 @@ async function downloadBulkData(
   addLog("Fetching Scryfall bulk data catalog...");
 
   const catalogRes = await fetch(`${apiRoot(baseUrl)}/bulk-data`, {
-    headers: SCRYFALL_HEADERS,
+    headers: CARD_API_HEADERS,
     signal,
   });
   if (!catalogRes.ok) {
@@ -48,7 +49,7 @@ async function downloadBulkData(
   addLog(`Downloading bulk "${bulkType}" data...`);
 
   const bulkRes = await fetch(entry.jsonl_download_uri, {
-    headers: SCRYFALL_HEADERS,
+    headers: CARD_API_HEADERS,
     signal,
   });
   if (!bulkRes.ok || !bulkRes.body)
@@ -93,7 +94,7 @@ async function fetchCards(
 }
 
 async function fetchOne(id: string, baseUrl: string) {
-  const res = await fetch(`${baseUrl}/${id}`, { headers: SCRYFALL_HEADERS });
+  const res = await fetch(`${baseUrl}/${id}`, { headers: CARD_API_HEADERS });
   if (!res.ok) return null;
   const card = (await res.json()) as {
     name: string;
@@ -111,7 +112,7 @@ export const scryfallSyncSource: SyncSource = {
   gameKey: "mtg",
   label: "Magic: The Gathering (Scryfall)",
   defaultUrl: SCRYFALL_DEFAULT_URL,
-  fetchHeaders: SCRYFALL_HEADERS,
+  fetchHeaders: CARD_API_HEADERS,
   languages: [
     "en",
     "es",

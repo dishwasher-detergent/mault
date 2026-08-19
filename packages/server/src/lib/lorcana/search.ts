@@ -1,13 +1,9 @@
 import type { PlayingCard, Result } from "@magic-vault/shared";
-import { QUERY_MIN_LENGTH } from "@magic-vault/shared";
+import { CARD_API_HEADERS } from "../card-search/constants";
 import type { CardSearchAdapter } from "../card-search/types";
+import { validateQuery } from "../card-search/validate";
 
 export const LORCANA_DEFAULT_URL = "https://api.lorcast.com/v0/cards";
-
-export const LORCANA_HEADERS: Record<string, string> = {
-  "User-Agent": "MagicVault/1.0",
-  Accept: "application/json",
-};
 
 interface LorcastImageUris {
   small: string;
@@ -80,6 +76,8 @@ export function normalizeLorcanaCard(raw: LorcastCard): PlayingCard {
     colorIdentity: raw.ink ? [raw.ink] : [],
     artist: raw.illustrators?.length ? raw.illustrators.join(", ") : undefined,
     price: raw.prices?.usd != null ? Number(raw.prices.usd) : null,
+    priceFoil:
+      raw.prices?.usd_foil != null ? Number(raw.prices.usd_foil) : null,
     cmc: raw.cost,
     raw,
   };
@@ -89,15 +87,11 @@ export async function Search(
   query: string,
   baseUrl: string = LORCANA_DEFAULT_URL,
 ): Promise<Result<PlayingCard[]>> {
-  if (!query || query.trim().length < QUERY_MIN_LENGTH) {
-    return {
-      message: `Your query must be greater than ${QUERY_MIN_LENGTH}`,
-      success: false,
-    };
-  }
+  const invalid = validateQuery(query);
+  if (invalid) return invalid;
 
   const url = `${baseUrl}/search?q=${encodeURIComponent(query)}&unique=prints`;
-  const response = await fetch(url, { headers: LORCANA_HEADERS });
+  const response = await fetch(url, { headers: CARD_API_HEADERS });
 
   if (response.status === 404) {
     return {
@@ -134,7 +128,7 @@ export async function SearchById(
   const response = await fetch(
     `${baseUrl}/${parsed.setCode}/${parsed.number}`,
     {
-      headers: LORCANA_HEADERS,
+      headers: CARD_API_HEADERS,
     },
   );
 

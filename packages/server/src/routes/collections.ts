@@ -46,7 +46,6 @@ function toCollection(row: {
   gameGuid: string | null;
   gameKey: string | null;
   gameName: string | null;
-  gameDataSourceUrl: string | null;
   gameIsActive: boolean | null;
   gameFieldDefinitions: unknown;
   gameCreatedAt: Date | null;
@@ -63,7 +62,6 @@ function toCollection(row: {
           guid: row.gameGuid,
           key: row.gameKey!,
           name: row.gameName!,
-          dataSourceUrl: row.gameDataSourceUrl!,
           isActive: row.gameIsActive!,
           fieldDefinitions: row.gameFieldDefinitions as FieldMeta[],
           createdAt: row.gameCreatedAt!,
@@ -115,7 +113,6 @@ async function _loadCollections(
       gameGuid: games.guid,
       gameKey: games.key,
       gameName: games.name,
-      gameDataSourceUrl: games.dataSourceUrl,
       gameIsActive: games.isActive,
       gameFieldDefinitions: games.fieldDefinitions,
       gameCreatedAt: games.createdAt,
@@ -854,7 +851,6 @@ router.get("/:guid/stream", async (c) => {
                   guid: game.guid!,
                   key: game.key,
                   name: game.name,
-                  dataSourceUrl: game.dataSourceUrl,
                   isActive: game.isActive,
                   fieldDefinitions: game.fieldDefinitions as FieldMeta[],
                   createdAt: game.createdAt,

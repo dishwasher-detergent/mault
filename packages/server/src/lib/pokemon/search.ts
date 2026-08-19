@@ -1,13 +1,9 @@
 import type { PlayingCard, Result } from "@magic-vault/shared";
-import { QUERY_MIN_LENGTH } from "@magic-vault/shared";
+import { CARD_API_HEADERS } from "../card-search/constants";
 import type { CardSearchAdapter } from "../card-search/types";
+import { validateQuery } from "../card-search/validate";
 
 export const POKEMON_DEFAULT_URL = "https://api.tcgdex.net/v2/en/cards";
-
-export const POKEMON_HEADERS: Record<string, string> = {
-  "User-Agent": "MagicVault/1.0",
-  Accept: "application/json",
-};
 
 interface PokemonCardBrief {
   id: string;
@@ -30,10 +26,10 @@ interface PokemonAbility {
 }
 
 interface PokemonPricing {
-  cardmarket?: { avg?: number };
   tcgplayer?: {
     normal?: { marketPrice?: number };
-    reverse?: { marketPrice?: number };
+    holofoil?: { marketPrice?: number };
+    "reverse-holofoil"?: { marketPrice?: number };
   };
 }
 
@@ -68,13 +64,19 @@ function assetUrl(image: string, quality: "low" | "high"): string {
   return `/api/cards/image-proxy?url=${encodeURIComponent(`${image}/${quality}.webp`)}`;
 }
 
+// TCGdex reports pricing in multiple currencies (cardmarket is EUR); only
+// tcgplayer is USD, so that's the sole source for price/priceFoil - we never
+// want to label a EUR figure as USD.
 function resolvePrice(pricing: PokemonPricing | undefined): number | null {
-  if (!pricing) return null;
-  const usd =
-    pricing.tcgplayer?.normal?.marketPrice ??
-    pricing.tcgplayer?.reverse?.marketPrice;
-  if (usd != null) return usd;
-  return pricing.cardmarket?.avg ?? null;
+  return pricing?.tcgplayer?.normal?.marketPrice ?? null;
+}
+
+function resolveFoilPrice(pricing: PokemonPricing | undefined): number | null {
+  return (
+    pricing?.tcgplayer?.holofoil?.marketPrice ??
+    pricing?.tcgplayer?.["reverse-holofoil"]?.marketPrice ??
+    null
+  );
 }
 
 function normalizePokemonCard(raw: PokemonCardDetail): PlayingCard {
@@ -115,6 +117,7 @@ function normalizePokemonCard(raw: PokemonCardDetail): PlayingCard {
     colorIdentity: raw.types ?? [],
     artist: raw.illustrator ?? undefined,
     price: resolvePrice(raw.pricing),
+    priceFoil: resolveFoilPrice(raw.pricing),
     sourceUrl: `https://tcgdex.dev/cards/${raw.id}`,
     cmc: raw.retreat,
     raw,
@@ -126,7 +129,7 @@ async function fetchDetail(
   baseUrl: string,
 ): Promise<PokemonCardDetail | null> {
   const response = await fetch(`${baseUrl}/${id}`, {
-    headers: POKEMON_HEADERS,
+    headers: CARD_API_HEADERS,
   });
   if (!response.ok) return null;
   return (await response.json()) as PokemonCardDetail;
@@ -142,15 +145,11 @@ export async function Search(
   query: string,
   baseUrl: string = POKEMON_DEFAULT_URL,
 ): Promise<Result<PlayingCard[]>> {
-  if (!query || query.trim().length < QUERY_MIN_LENGTH) {
-    return {
-      message: `Your query must be greater than ${QUERY_MIN_LENGTH}`,
-      success: false,
-    };
-  }
+  const invalid = validateQuery(query);
+  if (invalid) return invalid;
 
   const url = `${baseUrl}?name=${encodeURIComponent(query)}&pagination:itemsPerPage=${MAX_ENRICHED_RESULTS}`;
-  const response = await fetch(url, { headers: POKEMON_HEADERS });
+  const response = await fetch(url, { headers: CARD_API_HEADERS });
 
   if (!response.ok) {
     return {

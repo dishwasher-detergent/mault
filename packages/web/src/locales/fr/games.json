@@ -27,13 +27,11 @@
   "gameFormDialog": {
     "addTitle": "Ajouter un jeu",
     "editTitle": "Modifier {{name}}",
-    "description": "Définis comment les cartes de ce jeu sont récupérées et quels champs les règles des bacs peuvent filtrer.",
+    "description": "Définis quels champs les règles des bacs peuvent filtrer pour ce jeu.",
     "keyLabel": "Clé",
-    "keyPlaceholder": "pokemon",
+    "keyPlaceholder": "Sélectionner un jeu",
     "nameLabel": "Nom",
     "namePlaceholder": "Pokémon",
-    "dataSourceUrlLabel": "URL de la source de données",
-    "dataSourceUrlPlaceholder": "https://api.pokemontcg.io/v2/cards",
     "activeLabel": "Actif",
     "cancel": "Annuler",
     "saving": "Enregistrement…",
@@ -42,9 +40,17 @@
     "validation": {
       "required": "Obligatoire",
       "keyFormat": "Lettres minuscules, chiffres et tirets uniquement",
-      "invalidUrl": "Doit être une URL valide",
       "minFields": "Ajoute au moins un champ"
     }
+  },
+  "fieldMapping": {
+    "heading": "Association des champs",
+    "description": "Recherche une vraie carte et clique sur une valeur ci-dessous pour l'ajouter comme champ.",
+    "queryPlaceholder": "Rechercher une carte (ex. Pikachu)",
+    "search": "Rechercher",
+    "loading": "Recherche…",
+    "loadError": "Aucune carte d'exemple trouvée pour cette recherche.",
+    "sampleName": "Exemple : {{name}}"
   },
   "fieldDefinitionsEditor": {
     "heading": "Définitions des champs",
@@ -63,8 +69,7 @@
   },
   "gameCoverage": {
     "heading": "Couverture des cartes",
-    "description": "Quels jeux de cartes à collectionner sont pris en charge, combien de cartes se trouvent dans la base de données pour chacun, et d'où proviennent ces données.",
-    "source": "Source",
+    "description": "Quels jeux de cartes à collectionner sont pris en charge et combien de cartes se trouvent dans la base de données pour chacun.",
     "cardCount_one": "{{count}} carte",
     "cardCount_other": "{{count}} cartes",
     "inactive": "Inactif",

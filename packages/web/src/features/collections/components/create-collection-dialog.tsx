@@ -45,6 +45,8 @@ export function CreateCollectionDialog({ trigger }: CreateCollectionDialogProps)
     mode: "onChange",
   });
 
+  const [nameEdited, setNameEdited] = useState(false);
+
   const selectedGameGuid = form.watch("gameGuid");
   const { data: rawGameLanguages = EMPTY_LANGUAGES } = useQuery(
     gameLanguagesQueryOptions(selectedGameGuid || undefined),
@@ -64,11 +66,13 @@ export function CreateCollectionDialog({ trigger }: CreateCollectionDialogProps)
     (isOpen: boolean) => {
       setOpen(isOpen);
       if (isOpen) {
+        const firstGame = activeGames[0];
         form.reset({
-          name: "",
-          gameGuid: activeGames[0]?.guid ?? "",
+          name: firstGame?.name ?? "",
+          gameGuid: firstGame?.guid ?? "",
           lang: "",
         });
+        setNameEdited(false);
       } else {
         form.reset();
       }
@@ -111,7 +115,8 @@ export function CreateCollectionDialog({ trigger }: CreateCollectionDialogProps)
             {t("createDialog.cancel")}
           </Button>
           <Button
-            onClick={form.handleSubmit(handleCreate)}
+            type="submit"
+            form="create-collection-form"
             disabled={!form.formState.isValid || isMutating}
           >
             {isMutating && <IconLoader2 className="size-4 animate-spin" />}
@@ -122,28 +127,10 @@ export function CreateCollectionDialog({ trigger }: CreateCollectionDialogProps)
       footerClassName="flex-col-reverse md:flex-row"
     >
       <form
+        id="create-collection-form"
         onSubmit={form.handleSubmit(handleCreate)}
         className="flex flex-col gap-4"
       >
-        <Controller
-          name="name"
-          control={form.control}
-          render={({ field, fieldState }) => (
-            <Field data-invalid={fieldState.invalid || undefined}>
-              <FieldLabel htmlFor="collection-name">
-                {t("createDialog.nameLabel")}
-              </FieldLabel>
-              <Input
-                {...field}
-                id="collection-name"
-                placeholder={t("createDialog.namePlaceholder")}
-                aria-invalid={fieldState.invalid}
-                autoFocus
-              />
-              {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
-            </Field>
-          )}
-        />
         <Controller
           name="gameGuid"
           control={form.control}
@@ -157,9 +144,15 @@ export function CreateCollectionDialog({ trigger }: CreateCollectionDialogProps)
                 onValueChange={(guid) => {
                   field.onChange(guid);
                   form.setValue("lang", "", { shouldValidate: true });
+                  if (!nameEdited) {
+                    const game = activeGames.find((g) => g.guid === guid);
+                    form.setValue("name", game?.name ?? "", {
+                      shouldValidate: true,
+                    });
+                  }
                 }}
               >
-                <SelectTrigger id="collection-game">
+                <SelectTrigger id="collection-game" autoFocus>
                   <SelectValue placeholder={t("createDialog.gamePlaceholder")}>
                     {activeGames.find((g) => g.guid === field.value)?.name}
                   </SelectValue>
@@ -172,6 +165,28 @@ export function CreateCollectionDialog({ trigger }: CreateCollectionDialogProps)
                   ))}
                 </SelectContent>
               </Select>
+              {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+            </Field>
+          )}
+        />
+        <Controller
+          name="name"
+          control={form.control}
+          render={({ field, fieldState }) => (
+            <Field data-invalid={fieldState.invalid || undefined}>
+              <FieldLabel htmlFor="collection-name">
+                {t("createDialog.nameLabel")}
+              </FieldLabel>
+              <Input
+                {...field}
+                id="collection-name"
+                placeholder={t("createDialog.namePlaceholder")}
+                aria-invalid={fieldState.invalid}
+                onChange={(e) => {
+                  field.onChange(e);
+                  setNameEdited(true);
+                }}
+              />
               {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
             </Field>
           )}

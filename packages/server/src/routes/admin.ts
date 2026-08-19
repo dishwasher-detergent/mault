@@ -3,7 +3,6 @@ import { Hono } from "hono";
 import { streamSSE } from "hono/streaming";
 import { db } from "../db";
 import { cardImageVectors } from "../db/schema";
-import { resolveGameDataSourceUrl } from "../lib/card-search/resolve";
 import {
   cancelSync,
   getStatus,
@@ -146,7 +145,7 @@ async function syncOneCard(
       status: 400,
     };
   }
-  const baseUrl = await resolveGameDataSourceUrl(gameKey, source.defaultUrl);
+  const baseUrl = source.defaultUrl;
 
   const card = await source.fetchOne(scryfallId, baseUrl);
   if (!card) {
@@ -186,8 +185,12 @@ async function syncOneCard(
       embedding,
     })
     .onConflictDoUpdate({
-      target: cardImageVectors.scryfallId,
-      set: { gameKey, lang, name: card.name, setCode: card.setCode, embedding, updatedAt: new Date() },
+      target: [
+        cardImageVectors.gameKey,
+        cardImageVectors.lang,
+        cardImageVectors.scryfallId,
+      ],
+      set: { name: card.name, setCode: card.setCode, embedding, updatedAt: new Date() },
     });
 
   return { success: true, message: `Synced: ${card.name}` };
@@ -229,11 +232,13 @@ router.post(
   async (c) => {
     const scryfallId = c.req.param("scryfallId");
 
-    const existing = await db.query.cardImageVectors.findFirst({
+    // The same card id can exist in multiple games and languages, so
+    // re-vectorize every copy.
+    const existing = await db.query.cardImageVectors.findMany({
       where: (t, { eq }) => eq(t.scryfallId, scryfallId),
       columns: { gameKey: true, lang: true },
     });
-    if (!existing) {
+    if (existing.length === 0) {
       return c.json(
         {
           success: false,
@@ -243,14 +248,15 @@ router.post(
       );
     }
 
-    const result = await syncOneCard(existing.gameKey, scryfallId, existing.lang);
-    if (!result.success) {
-      return c.json({ success: false, message: result.message }, result.status);
+    let message = "";
+    for (const row of existing) {
+      const result = await syncOneCard(row.gameKey, scryfallId, row.lang);
+      if (!result.success) {
+        return c.json({ success: false, message: result.message }, result.status);
+      }
+      message = result.message.replace("Synced:", "Re-vectorized:");
     }
-    return c.json({
-      success: true,
-      message: result.message.replace("Synced:", "Re-vectorized:"),
-    });
+    return c.json({ success: true, message });
   },
 );
 
