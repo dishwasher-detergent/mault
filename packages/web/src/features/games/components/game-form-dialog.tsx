@@ -2,9 +2,18 @@ import { Button } from "@/components/ui/button";
 import { Field, FieldError, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { DynamicDialog } from "@/components/ui/responsive-dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
+import { listSyncSources } from "@/lib/api/admin";
 import { zodResolver } from "@hookform/resolvers/zod";
 import type { FieldMeta, Game } from "@magic-vault/shared";
+import { useQuery } from "@tanstack/react-query";
 import { TFunction } from "i18next";
 import { useEffect } from "react";
 import { Controller, FormProvider, useForm } from "react-hook-form";
@@ -111,6 +120,12 @@ export function GameFormDialog({
     formState: { errors, isSubmitting },
   } = form;
 
+  const { data: sources = [] } = useQuery({
+    queryKey: ["admin", "syncSources"],
+    queryFn: () => listSyncSources().then((r) => r.data ?? []),
+    staleTime: Infinity,
+  });
+
   useEffect(() => {
     if (open) reset(toFormValues(game));
   }, [open, game, reset]);
@@ -159,10 +174,32 @@ export function GameFormDialog({
           <div className="grid grid-cols-2 gap-3">
             <Field data-invalid={!!errors.key}>
               <FieldLabel>{t("gameFormDialog.keyLabel")}</FieldLabel>
-              <Input
-                placeholder={t("gameFormDialog.keyPlaceholder")}
-                {...register("key")}
-                disabled={!!game}
+              <Controller
+                control={control}
+                name="key"
+                render={({ field }) => (
+                  <Select
+                    value={field.value}
+                    onValueChange={field.onChange}
+                    disabled={!!game}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder={t("gameFormDialog.keyPlaceholder")}>
+                        {field.value
+                          ? (sources.find((s) => s.gameKey === field.value)
+                              ?.label ?? field.value)
+                          : undefined}
+                      </SelectValue>
+                    </SelectTrigger>
+                    <SelectContent>
+                      {sources.map((s) => (
+                        <SelectItem key={s.gameKey} value={s.gameKey}>
+                          {s.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                )}
               />
               <FieldError errors={[errors.key]} />
             </Field>

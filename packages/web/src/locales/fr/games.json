@@ -29,7 +29,7 @@
     "editTitle": "Modifier {{name}}",
     "description": "Définis quels champs les règles des bacs peuvent filtrer pour ce jeu.",
     "keyLabel": "Clé",
-    "keyPlaceholder": "pokemon",
+    "keyPlaceholder": "Sélectionner un jeu",
     "nameLabel": "Nom",
     "namePlaceholder": "Pokémon",
     "activeLabel": "Actif",

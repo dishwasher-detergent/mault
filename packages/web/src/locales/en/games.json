@@ -29,7 +29,7 @@
     "editTitle": "Edit {{name}}",
     "description": "Define which fields bin rules can filter on for this game.",
     "keyLabel": "Key",
-    "keyPlaceholder": "pokemon",
+    "keyPlaceholder": "Select a game",
     "nameLabel": "Name",
     "namePlaceholder": "Pokémon",
     "activeLabel": "Active",

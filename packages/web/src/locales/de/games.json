@@ -29,7 +29,7 @@
     "editTitle": "{{name}} bearbeiten",
     "description": "Lege fest, welche Felder Fach-Regeln für dieses Spiel filtern können.",
     "keyLabel": "Schlüssel",
-    "keyPlaceholder": "pokemon",
+    "keyPlaceholder": "Spiel auswählen",
     "nameLabel": "Name",
     "namePlaceholder": "Pokémon",
     "activeLabel": "Aktiv",

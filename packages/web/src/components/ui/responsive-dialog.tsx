@@ -120,7 +120,9 @@ export function DynamicDialog({
               <DialogDescription>{description}</DialogDescription>
             )}
           </DialogHeader>
-          <div className="flex flex-col gap-2 flex-1">{children}</div>
+          <div className="flex flex-col gap-2 flex-1 overflow-hidden">
+            {children}
+          </div>
           {footer && (
             <DialogFooter className={cn("flex-none", footerClassName)}>
               {footer}
