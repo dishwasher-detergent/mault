@@ -238,13 +238,13 @@ export function drawDetectionOverlay(
   const color = primaryRaw ? `${primaryRaw}` : "#6d28d9";
 
   // Proportional to canvas resolution, not a fixed pixel count: the canvas
-  // is always sized to the source video's native resolution (see
-  // use-card-scanner.ts), which varies a lot by source - a local webcam is
-  // typically ~1920x1080, but a phone streamed over WebRTC is often
-  // encoded much smaller (bandwidth/CPU-adaptive, frequently 640x480 or
-  // less). A fixed line width tuned for 1080p looks proportionally huge
-  // once that smaller canvas gets CSS-scaled up to fill the same display
-  // box, so scale it off the canvas's actual short side instead.
+  // is always sized to the source's native resolution (see
+  // use-card-scanner.ts / use-video-canvas-preview.ts), which varies a lot
+  // by source - a local webcam is typically ~1920x1080, but a phone's
+  // camera may capture at a very different resolution. A fixed line width
+  // tuned for 1080p looks proportionally huge once a smaller canvas gets
+  // CSS-scaled up to fill the same display box, so scale it off the
+  // canvas's actual short side instead.
   const shortSide = Math.min(ctx.canvas.width, ctx.canvas.height);
   const lineWidth = Math.max(3, Math.round(shortSide * 0.011));
   const radius = Math.max(4, Math.round(shortSide * 0.0148));

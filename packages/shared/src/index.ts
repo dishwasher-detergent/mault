@@ -8,8 +8,8 @@ export * from "./interfaces/module-configs.interface";
 export * from "./interfaces/notification-settings.interface";
 export * from "./interfaces/result.interface";
 export * from "./interfaces/scanner.interface";
+export * from "./interfaces/phone-camera.interface";
 export * from "./interfaces/sort-bins.interface";
-export * from "./interfaces/webrtc-signal.interface";
 
 export * from "./constants/arduino.constant";
 export * from "./constants/rarity.constant";

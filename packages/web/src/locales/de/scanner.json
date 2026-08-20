@@ -6,7 +6,8 @@
   "scanEngine": {
     "searchFailed": "Kartensuche fehlgeschlagen",
     "videoStartFailed": "Video konnte nicht gestartet werden",
-    "cameraReinitFailed": "Kamera konnte nicht neu initialisiert werden"
+    "cameraReinitFailed": "Kamera konnte nicht neu initialisiert werden",
+    "phoneCaptureFailed": "Telefon hat nicht rechtzeitig mit einem Foto geantwortet."
   },
   "serial": {
     "connectionFailed": {
@@ -164,20 +165,18 @@
   },
   "phoneCamera": {
     "dialogTitle": "Telefon als Kamera verwenden",
-    "scanDescription": "Scanne diesen QR-Code mit deinem Telefon oder öffne den Link, um dessen Kamera als Kamera des Sortierers zu verwenden.",
-    "connectedDescription": "Dein Telefon überträgt jetzt an diesen Scanner.",
+    "scanDescription": "Scanne diesen QR-Code mit deinem Telefon oder öffne den Link, damit es als Kamera dieses Scanners verwendet werden kann.",
+    "connectedDescription": "Dein Telefon ist bereit — es macht ein Foto, sobald dieser Scanner eines braucht.",
     "qrAlt": "QR-Code zum Koppeln einer Telefonkamera",
     "statusWaiting": "Warte auf Telefon…",
-    "statusConnecting": "Verbinde…",
     "statusConnected": "Verbunden",
-    "statusError": "Verbindung fehlgeschlagen. Stelle sicher, dass Telefon und Computer im selben WLAN sind, und versuche es erneut.",
+    "statusError": "Telefon nicht erreichbar. Stelle sicher, dass diese Seite auf dem Telefon noch geöffnet ist, und versuche es erneut.",
     "disconnect": "Telefon trennen",
     "tryAgain": "Erneut versuchen",
     "requestingCamera": "Kamerazugriff wird angefordert…",
     "cameraError": "Kamera konnte nicht aufgerufen werden. Bitte überprüfe dein Gerät.",
-    "waitingForDesktop": "Warte auf Desktop…",
-    "streamingConnected": "Verbunden — Übertragung an Sortierer läuft",
-    "streamingTo": "Übertragung an {{name}}",
+    "ready": "Kamera bereit",
+    "streamingTo": "Bereit für {{name}}",
     "disconnected": "Vom Sortierer getrennt.",
     "reconnect": "Erneut verbinden",
     "disconnectButton": "Trennen"

@@ -1,18 +1,18 @@
-import { postWebrtcSignal } from "@/features/collections/api/webrtc-signal";
+import { postPhoneCameraSignal } from "@/features/collections/api/phone-camera-signal";
 import { createSessionEventSource } from "@/lib/api/session";
-import type { WebrtcSignalKind, WebrtcSignalMessage, WebrtcSignalRole } from "@magic-vault/shared";
+import type { PhoneCameraMessage } from "@magic-vault/shared";
 import { useCallback, useEffect, useRef, useState } from "react";
 
-// Thin transport shared by the desktop pairing hook and the phone camera
-// page: relays WebRTC offer/answer/ICE messages over the collection's
+// Thin transport shared by the desktop capture hook and the phone
+// responder: relays presence/capture messages over the collection's
 // existing session SSE stream (see server routes/collections.ts's
-// /:guid/webrtc-signal + /:guid/stream). `ownRole` filters out a client's
-// own broadcasts - this also makes it a no-op if the same user has two
-// desktop tabs open, since both would carry role "desktop".
+// /:guid/phone-camera-signal + /:guid/stream). No sender/role filtering
+// needed - each side only ever sends message kinds the other side doesn't,
+// so a listener naturally ignores its own broadcasts echoed back to it by
+// just not having a case for them.
 export function useCameraSignalChannel(
   collectionGuid: string | undefined,
-  ownRole: WebrtcSignalRole,
-  onMessage: (message: WebrtcSignalMessage) => void,
+  onMessage: (message: PhoneCameraMessage) => void,
 ) {
   const [connected, setConnected] = useState(false);
   const onMessageRef = useRef(onMessage);
@@ -32,9 +32,8 @@ export function useCameraSignalChannel(
       }
       esRef.current = es;
 
-      es.addEventListener("webrtc_signal", (e) => {
-        const message = JSON.parse((e as MessageEvent).data) as WebrtcSignalMessage;
-        if (message.role === ownRole) return;
+      es.addEventListener("phone_camera_message", (e) => {
+        const message = JSON.parse((e as MessageEvent).data) as PhoneCameraMessage;
         onMessageRef.current(message);
       });
 
@@ -48,14 +47,14 @@ export function useCameraSignalChannel(
       esRef.current = null;
       setConnected(false);
     };
-  }, [collectionGuid, ownRole]);
+  }, [collectionGuid]);
 
   const send = useCallback(
-    (kind: WebrtcSignalKind, payload: unknown) => {
+    (message: PhoneCameraMessage) => {
       if (!collectionGuid) return;
-      postWebrtcSignal(collectionGuid, { role: ownRole, kind, payload }).catch(() => {});
+      postPhoneCameraSignal(collectionGuid, message).catch(() => {});
     },
-    [collectionGuid, ownRole],
+    [collectionGuid],
   );
 
   return { send, connected };

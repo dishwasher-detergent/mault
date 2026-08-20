@@ -1,4 +1,4 @@
-import type { PhoneCameraPairingStatus } from "@/features/scanner/api/use-phone-camera-pairing";
+import type { PhoneCameraCaptureStatus } from "@/features/scanner/api/use-phone-camera-capture";
 import type {
   BinRoute,
   PlayingCard,
@@ -29,10 +29,11 @@ export interface CameraContextValue {
   retryCamera: () => Promise<void>;
   stopCamera: () => void;
   cameraSource: CameraSource;
-  phonePairingStatus: PhoneCameraPairingStatus;
+  phonePairingStatus: PhoneCameraCaptureStatus;
   phonePairingUrl: string | null;
   startPhonePairing: () => void;
   stopPhonePairing: () => void;
+  requestPhoneCapture: () => Promise<string | null>;
 }
 
 export interface ScannedCardsContextValue {

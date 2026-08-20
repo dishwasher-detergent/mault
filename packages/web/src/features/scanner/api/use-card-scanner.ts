@@ -124,6 +124,7 @@ export function useCardScanner({
     phonePairingUrl,
     startPhonePairing,
     stopPhonePairing,
+    requestPhoneCapture,
   } = useCameraContext();
   const { activeCollection } = useCollections();
   const { activeOrg } = useOrg();
@@ -195,6 +196,7 @@ export function useCardScanner({
   }, [handleError]);
 
   useEffect(() => {
+    if (cameraSource === "phone") return; // handled by the phone-status effect below
     if (cameraStatus === "requesting") {
       updateStatus("requesting-camera");
     } else if (cameraStatus === "error") {
@@ -204,7 +206,18 @@ export function useCardScanner({
       updateStatus("initializing");
     }
     // 'ready' is handled by the stream attachment effect below
-  }, [cameraStatus, cameraError, updateStatus]);
+  }, [cameraStatus, cameraError, cameraSource, updateStatus]);
+
+  // Phone mode has no continuous stream to drive readiness off of - map the
+  // phone's presence/heartbeat status onto the same scanner status machine
+  // instead. Errors intentionally also fall back to "initializing" rather
+  // than the generic error overlay below: that overlay's retry button calls
+  // retryCamera(), which would silently fall back to the local webcam -
+  // the phone pairing dialog already owns retrying the phone connection.
+  useEffect(() => {
+    if (cameraSource !== "phone") return;
+    updateStatus(phonePairingStatus === "connected" ? "paused" : "initializing");
+  }, [cameraSource, phonePairingStatus, updateStatus]);
 
   const performCapture = useCallback(
     async (checkDuplicate: boolean, contour?: CardContour | null) => {
@@ -388,6 +401,57 @@ export function useCardScanner({
     }
   }, [duplicateCard, updateStatus]);
 
+  // Phone mode has no continuously-updated frame to read - draw the single
+  // photo the phone just sent onto the same display canvas everything else
+  // already expects, sized to whatever resolution the phone captured at.
+  const drawImageToCanvas = useCallback(
+    (dataUrl: string): Promise<CardContour | null> => {
+      return new Promise((resolve) => {
+        const canvas = displayCanvasRef.current;
+        if (!canvas) {
+          resolve(null);
+          return;
+        }
+        const img = new Image();
+        img.onload = () => {
+          canvas.width = img.naturalWidth;
+          canvas.height = img.naturalHeight;
+          const ctx = canvas.getContext("2d");
+          if (!ctx) {
+            resolve(null);
+            return;
+          }
+          ctx.drawImage(img, 0, 0);
+          resolve(
+            getDefaultCardContour(
+              canvas.width,
+              canvas.height,
+              scanRegionRef.current,
+            ),
+          );
+        };
+        img.onerror = () => resolve(null);
+        img.src = dataUrl;
+      });
+    },
+    [],
+  );
+
+  const capturePhonePhotoThenSearch = useCallback(
+    (checkDuplicate: boolean) => {
+      requestPhoneCapture().then(async (dataUrl) => {
+        if (!dataUrl) {
+          isCapturingRef.current = false;
+          handleErrorRef.current(t("scanEngine.phoneCaptureFailed"));
+          return;
+        }
+        const contour = await drawImageToCanvas(dataUrl);
+        performCapture(checkDuplicate, contour);
+      });
+    },
+    [requestPhoneCapture, drawImageToCanvas, performCapture, t],
+  );
+
   const handleForceScan = useCallback(() => {
     if (
       isCapturingRef.current ||
@@ -395,17 +459,22 @@ export function useCardScanner({
     )
       return;
 
-    const canvas = displayCanvasRef.current;
-    if (!canvas) return;
-
     isCapturingRef.current = true;
     updateStatus("searching");
     setDuplicateCard(null);
+
+    if (cameraSource === "phone") {
+      capturePhonePhotoThenSearch(false);
+      return;
+    }
+
+    const canvas = displayCanvasRef.current;
+    if (!canvas) return;
     performCapture(
       false,
       getDefaultCardContour(canvas.width, canvas.height, scanRegionRef.current),
     );
-  }, [updateStatus, performCapture]);
+  }, [updateStatus, performCapture, cameraSource, capturePhonePhotoThenSearch]);
 
   const captureCard = useCallback(() => {
     if (
@@ -414,11 +483,16 @@ export function useCardScanner({
     )
       return;
 
-    const canvas = displayCanvasRef.current;
-    if (!canvas) return;
-
     isCapturingRef.current = true;
     updateStatus("searching");
+
+    if (cameraSource === "phone") {
+      capturePhonePhotoThenSearch(true);
+      return;
+    }
+
+    const canvas = displayCanvasRef.current;
+    if (!canvas) return;
     const contour = getDefaultCardContour(
       canvas.width,
       canvas.height,
@@ -428,7 +502,7 @@ export function useCardScanner({
       settleTimeoutRef.current = null;
       performCapture(true, contour);
     }, captureSettleDelayMsRef.current);
-  }, [updateStatus, performCapture]);
+  }, [updateStatus, performCapture, cameraSource, capturePhonePhotoThenSearch]);
 
   const handleSkipDuplicate = useCallback(() => {
     setDuplicateCard(null);
@@ -446,12 +520,20 @@ export function useCardScanner({
 
   const handleRetryError = useCallback(async () => {
     setErrorMessage("");
+    if (cameraSource === "phone") {
+      // Don't fall back to the local webcam here - just clear the error and
+      // let the phone-status effect above re-evaluate current presence.
+      updateStatus(
+        phonePairingStatus === "connected" ? "paused" : "initializing",
+      );
+      return;
+    }
     try {
       await retryCamera();
     } catch {
       handleErrorRef.current(t("scanEngine.cameraReinitFailed"));
     }
-  }, [retryCamera, t]);
+  }, [retryCamera, t, cameraSource, phonePairingStatus, updateStatus]);
 
   return {
     status,
@@ -469,7 +551,10 @@ export function useCardScanner({
     handleResume,
     handleRetryError,
     handleStopCamera: stopCamera,
-    isCameraActive: cameraStatus === "ready",
+    isCameraActive:
+      cameraSource === "phone"
+        ? phonePairingStatus === "connected"
+        : cameraStatus === "ready",
     zoom,
     zoomRange,
     cameras,

@@ -6,7 +6,8 @@
   "scanEngine": {
     "searchFailed": "Failed to search card",
     "videoStartFailed": "Failed to start video",
-    "cameraReinitFailed": "Failed to reinitialize camera"
+    "cameraReinitFailed": "Failed to reinitialize camera",
+    "phoneCaptureFailed": "Phone didn't respond with a photo in time."
   },
   "serial": {
     "connectionFailed": {
@@ -164,20 +165,18 @@
   },
   "phoneCamera": {
     "dialogTitle": "Use Phone as Camera",
-    "scanDescription": "Scan this QR code on your phone, or open the link, to use its camera as the sorter's camera.",
-    "connectedDescription": "Your phone is now streaming to this scanner.",
+    "scanDescription": "Scan this QR code on your phone, or open the link, so it can be used as this scanner's camera.",
+    "connectedDescription": "Your phone is ready - it'll take a photo whenever this scanner needs one.",
     "qrAlt": "QR code to pair a phone camera",
     "statusWaiting": "Waiting for phone…",
-    "statusConnecting": "Connecting…",
     "statusConnected": "Connected",
-    "statusError": "Couldn't connect. Make sure your phone and computer are on the same Wi-Fi network, then try again.",
+    "statusError": "Couldn't reach the phone. Make sure it's still open on this page, then try again.",
     "disconnect": "Disconnect Phone",
     "tryAgain": "Try Again",
     "requestingCamera": "Requesting camera access…",
     "cameraError": "Could not access camera. Please check your device.",
-    "waitingForDesktop": "Waiting for desktop…",
-    "streamingConnected": "Connected — streaming to sorter",
-    "streamingTo": "Streaming to {{name}}",
+    "ready": "Camera ready",
+    "streamingTo": "Ready for {{name}}",
     "disconnected": "Disconnected from the sorter.",
     "reconnect": "Reconnect",
     "disconnectButton": "Disconnect"

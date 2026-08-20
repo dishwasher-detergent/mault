@@ -6,7 +6,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import type { PhoneCameraPairingStatus } from "@/features/scanner/api/use-phone-camera-pairing";
+import type { PhoneCameraCaptureStatus } from "@/features/scanner/api/use-phone-camera-capture";
 import { IconDeviceMobile, IconLoader2 } from "@tabler/icons-react";
 import QRCode from "qrcode";
 import { useEffect, useState } from "react";
@@ -15,7 +15,7 @@ import { useTranslation } from "react-i18next";
 interface PhoneCameraPairingDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  status: PhoneCameraPairingStatus;
+  status: PhoneCameraCaptureStatus;
   pairingUrl: string | null;
   onRetry: () => void;
   onDisconnect: () => void;
@@ -83,7 +83,7 @@ export function PhoneCameraPairingDialog({
         )}
 
         <div className="flex items-center justify-center gap-2 py-1 text-xs text-muted-foreground">
-          {(status === "waiting" || status === "connecting" || status === "idle") && (
+          {(status === "waiting" || status === "idle") && (
             <IconLoader2 className="size-3.5 animate-spin" />
           )}
           {status === "connected" && (
@@ -92,7 +92,6 @@ export function PhoneCameraPairingDialog({
           <span>
             {(status === "waiting" || status === "idle") &&
               t("phoneCamera.statusWaiting")}
-            {status === "connecting" && t("phoneCamera.statusConnecting")}
             {status === "connected" && t("phoneCamera.statusConnected")}
             {status === "error" && t("phoneCamera.statusError")}
           </span>

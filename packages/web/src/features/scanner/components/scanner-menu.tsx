@@ -10,7 +10,7 @@ import {
   DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import type { PhoneCameraPairingStatus } from "@/features/scanner/api/use-phone-camera-pairing";
+import type { PhoneCameraCaptureStatus } from "@/features/scanner/api/use-phone-camera-capture";
 import { PhoneCameraPairingDialog } from "@/features/scanner/components/phone-camera-pairing-dialog";
 import type { ZoomRange } from "@/features/scanner/types";
 import {
@@ -32,7 +32,7 @@ interface ScannerMenuProps {
   zoomRange: ZoomRange | null;
   cameras: MediaDeviceInfo[];
   selectedCameraId: string | null;
-  phonePairingStatus: PhoneCameraPairingStatus;
+  phonePairingStatus: PhoneCameraCaptureStatus;
   phonePairingUrl: string | null;
   onCameraConnect: () => void;
   onCameraDisconnect: () => void;
