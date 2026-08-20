@@ -6,29 +6,12 @@ import {
   type ScanRegion,
 } from "@magic-vault/shared";
 
-/**
- * Returns a fixed card-sized region within the frame, used in place of
- * per-frame edge detection. Cards are a known, constant physical size and
- * the camera is mounted in a fixed position over the sorter's module 1
- * platform, so a hardcoded region avoids the lighting/contrast failures of
- * contour detection (e.g. light-bordered cards against a light surface).
- *
- * Raw camera frames are landscape; the desktop scanning UI rotates the
- * canvas 90° via CSS for portrait viewing (see card-scanner.tsx), so the
- * card sits in the *raw* frame rotated - same assumption extractCardImage's
- * isLandscape branch below already relies on.
- *
- * `region` (coverage + offsetX/offsetY, all fractions of the frame) is
- * calibrated per-org in the app's calibration screen to match a given
- * camera's field of view and mounting - see
- * features/calibration/components/scan-region-calibration-panel.tsx.
- */
 export function getDefaultCardContour(
   width: number,
   height: number,
   region: ScanRegion = DEFAULT_SCAN_REGION,
 ): CardContour {
-  const cardAspect = 1 / MTG_ASPECT_RATIO;
+  const cardAspect = width >= height ? 1 / MTG_ASPECT_RATIO : MTG_ASPECT_RATIO;
   let boxH = height * region.coverage;
   let boxW = boxH * cardAspect;
   if (boxW > width * region.coverage) {
@@ -46,14 +29,6 @@ export function getDefaultCardContour(
   };
 }
 
-/**
- * Extract the card region from a canvas, straightened to a fixed-size
- * portrait output. `contour` always comes from getDefaultCardContour above,
- * which only ever produces an axis-aligned rectangle (no skew) - so this is
- * a plain crop, not a general four-point perspective warp. If a contour
- * source that can return a skewed quadrilateral is ever reintroduced (e.g.
- * per-frame edge detection), this needs a real homography again.
- */
 export function extractCardImage(
   sourceCanvas: HTMLCanvasElement,
   contour: CardContour,
@@ -66,10 +41,6 @@ export function extractCardImage(
   const boxW = contour.topRight.x - contour.topLeft.x;
   const boxH = contour.bottomLeft.y - contour.topLeft.y;
 
-  // If the card bounding box is wider than tall, it's landscape in the frame.
-  // Crop into a landscape canvas matching that ratio, then rotate 90° CW to
-  // portrait so extractArtRegion receives a correctly-oriented image and
-  // nothing gets squished.
   const isLandscape = boxW > boxH;
   const cropW = isLandscape ? outputHeight : outputWidth;
   const cropH = isLandscape ? outputWidth : outputHeight;
@@ -83,7 +54,6 @@ export function extractCardImage(
 
   if (!isLandscape) return cropCanvas;
 
-  // Rotate the landscape crop 90° CW to produce a portrait canvas.
   const outputCanvas = document.createElement("canvas");
   outputCanvas.width = outputWidth;
   outputCanvas.height = outputHeight;
@@ -95,11 +65,6 @@ export function extractCardImage(
   return outputCanvas;
 }
 
-/**
- * Scan row-wise vertical gradients to find the y-position of a strong
- * horizontal edge within a vertical band [yMinFrac, yMaxFrac].
- * Returns the row index and its gradient score.
- */
 function findEdgeRow(
   data: Uint8ClampedArray,
   width: number,
@@ -137,13 +102,6 @@ function findEdgeRow(
   return { row: bestRow, score: bestScore };
 }
 
-/**
- * Detect the art region within a warped card canvas.
- *
- * Regular cards have a strong horizontal edge at the type-line separator
- * (~45–65% of card height). Full-art cards lack this edge, so we fall back
- * to treating almost the entire card face as art.
- */
 function detectArtBounds(canvas: HTMLCanvasElement): {
   top: number;
   left: number;
@@ -219,10 +177,6 @@ export function canvasToBlob(
   });
 }
 
-/**
- * Draw the detection overlay (rounded quadrilateral border) on a canvas context.
- * Uses the CSS --primary color from the page.
- */
 export function drawDetectionOverlay(
   ctx: CanvasRenderingContext2D,
   result: DetectionResult,

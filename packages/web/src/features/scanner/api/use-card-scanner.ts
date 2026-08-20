@@ -205,18 +205,13 @@ export function useCardScanner({
     } else if (cameraStatus === "idle") {
       updateStatus("initializing");
     }
-    // 'ready' is handled by the stream attachment effect below
   }, [cameraStatus, cameraError, cameraSource, updateStatus]);
 
-  // Phone mode has no continuous stream to drive readiness off of - map the
-  // phone's presence/heartbeat status onto the same scanner status machine
-  // instead. Errors intentionally also fall back to "initializing" rather
-  // than the generic error overlay below: that overlay's retry button calls
-  // retryCamera(), which would silently fall back to the local webcam -
-  // the phone pairing dialog already owns retrying the phone connection.
   useEffect(() => {
     if (cameraSource !== "phone") return;
-    updateStatus(phonePairingStatus === "connected" ? "paused" : "initializing");
+    updateStatus(
+      phonePairingStatus === "connected" ? "paused" : "initializing",
+    );
   }, [cameraSource, phonePairingStatus, updateStatus]);
 
   const performCapture = useCallback(
@@ -270,10 +265,6 @@ export function useCardScanner({
     [updateStatus, allowDuplicates, t],
   );
 
-  // Draws the live camera feed to the display canvas every frame. Capture is
-  // no longer triggered from here - see `captureCard`, which fires off the
-  // module 1 IR sensor confirming a card has arrived (via the feeder command
-  // round trip), not from continuously polling the frame for a card shape.
   const detectionLoop = useCallback(() => {
     const video = videoRef.current;
     const displayCanvas = displayCanvasRef.current;
@@ -357,7 +348,9 @@ export function useCardScanner({
       } catch (err) {
         if (!cancelled) {
           handleErrorRef.current(
-            err instanceof Error ? err.message : t("scanEngine.videoStartFailed"),
+            err instanceof Error
+              ? err.message
+              : t("scanEngine.videoStartFailed"),
           );
         }
       }
@@ -401,9 +394,6 @@ export function useCardScanner({
     }
   }, [duplicateCard, updateStatus]);
 
-  // Phone mode has no continuously-updated frame to read - draw the single
-  // photo the phone just sent onto the same display canvas everything else
-  // already expects, sized to whatever resolution the phone captured at.
   const drawImageToCanvas = useCallback(
     (dataUrl: string): Promise<CardContour | null> => {
       return new Promise((resolve) => {
@@ -422,6 +412,20 @@ export function useCardScanner({
             return;
           }
           ctx.drawImage(img, 0, 0);
+
+          const container = canvas.parentElement;
+          if (container) {
+            const cw = container.clientWidth;
+            const ch = container.clientHeight;
+            const scale = Math.max(cw / canvas.width, ch / canvas.height);
+            const cssW = Math.round(canvas.width * scale);
+            const cssH = Math.round(canvas.height * scale);
+            canvas.style.width = `${cssW}px`;
+            canvas.style.height = `${cssH}px`;
+            canvas.style.left = `${(cw - cssW) / 2}px`;
+            canvas.style.top = `${(ch - cssH) / 2}px`;
+          }
+
           resolve(
             getDefaultCardContour(
               canvas.width,
