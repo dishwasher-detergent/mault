@@ -1,1 +1,0 @@
-ALTER TABLE "sort_bins" ADD COLUMN "is_catch_all" boolean DEFAULT false NOT NULL;

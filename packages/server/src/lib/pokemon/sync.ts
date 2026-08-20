@@ -15,24 +15,28 @@ interface PokemonDetailCard extends PokemonListCard {
 
 const PAGE_LIMIT = 1000;
 
-// TCGdex image fields are a base URL with no extension - append the
-// quality/format suffix to get an actual fetchable asset.
 function highResUrl(image: string | undefined): string | undefined {
   return image ? `${image}/high.webp` : undefined;
+}
+
+function localizedUrl(baseUrl: string, lang?: string): string {
+  if (!lang) return baseUrl;
+  return baseUrl.replace(/\/v2\/[^/]+\//, `/v2/${lang}/`);
 }
 
 async function fetchCards(
   baseUrl: string,
   addLog: (msg: string) => void,
-  _lang?: string,
+  lang?: string,
   signal?: AbortSignal,
 ): Promise<SyncSourceCard[]> {
   addLog("Fetching Pokémon TCG catalog...");
 
+  const listUrl = localizedUrl(baseUrl, lang);
   const all: PokemonListCard[] = [];
   let page = 1;
   for (;;) {
-    const url = `${baseUrl}?pagination:page=${page}&pagination:itemsPerPage=${PAGE_LIMIT}`;
+    const url = `${listUrl}?pagination:page=${page}&pagination:itemsPerPage=${PAGE_LIMIT}`;
     const res = await fetch(url, { headers: CARD_API_HEADERS, signal });
     if (!res.ok)
       throw new Error(`Pokémon card list fetch failed: ${res.status}`);

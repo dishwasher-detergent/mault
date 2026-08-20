@@ -158,10 +158,10 @@ export default function AdminPage() {
     }, 300);
   }
 
-  async function handleRevectorize(scryfallId: string, name: string) {
-    setRevectorizingIds((prev) => new Set(prev).add(scryfallId));
+  async function handleRevectorize(cardId: string, name: string) {
+    setRevectorizingIds((prev) => new Set(prev).add(cardId));
     try {
-      const result = await revectorizeCard(scryfallId);
+      const result = await revectorizeCard(cardId);
       toast.success(result.message);
       cardsQuery.refetch();
     } catch {
@@ -169,7 +169,7 @@ export default function AdminPage() {
     } finally {
       setRevectorizingIds((prev) => {
         const next = new Set(prev);
-        next.delete(scryfallId);
+        next.delete(cardId);
         return next;
       });
     }
@@ -394,7 +394,7 @@ export default function AdminPage() {
             </div>
             <div
               ref={logRef}
-              className="max-h-full overflow-y-auto p-3 font-mono text-xs leading-relaxed space-y-0.5"
+              className="max-h-96 overflow-y-auto p-3 font-mono text-xs leading-relaxed space-y-0.5"
             >
               {syncState.logs.length > 0 ? (
                 syncState.logs.map((line, i) => (
@@ -449,7 +449,7 @@ export default function AdminPage() {
             )}
             {cardsQuery.data?.cards.map((card) => (
               <div
-                key={card.scryfallId}
+                key={card.cardId}
                 className="flex items-center gap-3 px-4 py-2"
               >
                 <p className="text-xs font-medium flex-1 min-w-0 truncate">
@@ -465,15 +465,13 @@ export default function AdminPage() {
                 <Button
                   size="icon"
                   variant="ghost"
-                  disabled={revectorizingIds.has(card.scryfallId)}
-                  onClick={() => handleRevectorize(card.scryfallId, card.name)}
+                  disabled={revectorizingIds.has(card.cardId)}
+                  onClick={() => handleRevectorize(card.cardId, card.name)}
                   title={t("cardDatabase.revectorizeTitle")}
                 >
                   <IconRefresh
                     className={
-                      revectorizingIds.has(card.scryfallId)
-                        ? "animate-spin"
-                        : ""
+                      revectorizingIds.has(card.cardId) ? "animate-spin" : ""
                     }
                   />
                 </Button>

@@ -1,1 +1,0 @@
-ALTER TABLE "bins" ALTER COLUMN "user_id" SET DEFAULT auth.user_id();

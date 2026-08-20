@@ -4,6 +4,7 @@ import { db } from "../db";
 import { cardImageVectors } from "../db/schema";
 import type { SyncSource, SyncSourceCard } from "./card-search/sync-types";
 import { sendDiscordNotification } from "./discord";
+import { fabSyncSource } from "./fab/sync";
 import { gundamSyncSource } from "./gundam/sync";
 import { lorcanaSyncSource } from "./lorcana/sync";
 import { onePieceSyncSource } from "./onepiece/sync";
@@ -17,6 +18,7 @@ export const SYNC_SOURCES: Record<string, SyncSource> = {
   pokemon: pokemonSyncSource,
   lorcana: lorcanaSyncSource,
   onepiece: onePieceSyncSource,
+  fab: fabSyncSource,
 };
 
 type SseWriter = (event: string, data: unknown) => void;
@@ -145,10 +147,17 @@ async function runSync(source: SyncSource, lang: string): Promise<void> {
   state = { ...state, total: cards.length };
   emit("status", getStatus());
 
+  const noImageCount = cards.filter((c) => !c.imageUrl).length;
+  if (noImageCount > 0) {
+    addLog(
+      `${noImageCount} of ${cards.length} ${source.label} cards have no image available and will be skipped.`,
+    );
+  }
+
   addLog(`Loading existing ${source.label} cards from DB...`);
 
   const existing = await db
-    .select({ id: cardImageVectors.scryfallId })
+    .select({ id: cardImageVectors.cardId })
     .from(cardImageVectors)
     .where(
       and(
@@ -163,13 +172,41 @@ async function runSync(source: SyncSource, lang: string): Promise<void> {
   );
 
   let pendingInserts: (typeof cardImageVectors.$inferInsert)[] = [];
+  let pendingCards: SyncSourceCard[] = [];
 
+  // `processed`/`errors` must only advance once a batch's INSERT has been
+  // confirmed - incrementing them as soon as a card was *queued* let a
+  // failed batch INSERT silently lose every other card queued alongside the
+  // one worker that happened to await it, while the UI still reported them
+  // all as processed.
   async function flushInserts(force = false): Promise<void> {
     if (pendingInserts.length === 0) return;
     if (!force && pendingInserts.length < INSERT_BATCH_SIZE) return;
-    const batch = pendingInserts;
+    const batchRows = pendingInserts;
+    const batchCards = pendingCards;
     pendingInserts = [];
-    await db.insert(cardImageVectors).values(batch).onConflictDoNothing();
+    pendingCards = [];
+
+    try {
+      await db.insert(cardImageVectors).values(batchRows).onConflictDoNothing();
+      for (const c of batchCards) existingSet.add(c.id);
+      state = { ...state, processed: state.processed + batchCards.length };
+      addLog(
+        `[${state.processed + state.skipped}/${state.total}] inserted batch of ${batchCards.length} cards`,
+      );
+    } catch (err) {
+      state = { ...state, errors: state.errors + batchCards.length };
+      const msg = err instanceof Error ? err.message : String(err);
+      addLog(
+        `Error inserting batch of ${batchCards.length} cards: ${msg}`,
+      );
+    }
+
+    emit("progress", {
+      processed: state.processed,
+      skipped: state.skipped,
+      errors: state.errors,
+    });
   }
 
   async function processCard(card: SyncSourceCard): Promise<void> {
@@ -195,32 +232,33 @@ async function runSync(source: SyncSource, lang: string): Promise<void> {
       const embedding = await vectorizeImageFromBuffer(buffer);
 
       pendingInserts.push({
-        scryfallId: card.id,
+        cardId: card.id,
         gameKey: source.gameKey,
         lang,
         name: card.name,
         setCode: card.setCode,
         embedding,
       });
+      pendingCards.push(card);
       await flushInserts();
 
-      existingSet.add(card.id);
-      state = { ...state, processed: state.processed + 1 };
-      addLog(
-        `[${state.processed + state.skipped}/${state.total}] ${card.name} (${card.setCode})`,
-      );
+      emit("progress", {
+        processed: state.processed,
+        skipped: state.skipped,
+        errors: state.errors,
+        currentCard: card.name,
+      });
     } catch (err) {
       state = { ...state, errors: state.errors + 1 };
       const msg = err instanceof Error ? err.message : String(err);
       addLog(`Error: ${card.name}: ${msg}`);
+      emit("progress", {
+        processed: state.processed,
+        skipped: state.skipped,
+        errors: state.errors,
+        currentCard: card.name,
+      });
     }
-
-    emit("progress", {
-      processed: state.processed,
-      skipped: state.skipped,
-      errors: state.errors,
-      currentCard: card.name,
-    });
   }
 
   let nextIndex = 0;

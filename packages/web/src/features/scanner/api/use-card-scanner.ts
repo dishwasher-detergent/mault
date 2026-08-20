@@ -82,7 +82,7 @@ async function searchCardImage(
   );
   const resolved = await Promise.all(
     closeMatches.map((m) =>
-      getCardById(m.scryfallId, collectionGuid).then((r) =>
+      getCardById(m.cardId, collectionGuid).then((r) =>
         r.data ? { ...r.data, distance: m.distance } : null,
       ),
     ),
