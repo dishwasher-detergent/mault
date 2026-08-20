@@ -158,7 +158,25 @@
     "autoFeed": "Auto-feed",
     "allowDuplicates": "Allow duplicates",
     "calibrate": "Calibrate",
-    "retryConnection": "Retry Connection"
+    "retryConnection": "Retry Connection",
+    "usePhoneAsCamera": "Use Phone as Camera",
+    "phoneCameraConnected": "Phone Camera Connected"
+  },
+  "phoneCamera": {
+    "dialogTitle": "Use Phone as Camera",
+    "scanDescription": "Scan this QR code on your phone, or open the link, to use its camera as the sorter's camera.",
+    "connectedDescription": "Your phone is now streaming to this scanner.",
+    "qrAlt": "QR code to pair a phone camera",
+    "statusWaiting": "Waiting for phone…",
+    "statusConnecting": "Connecting…",
+    "statusConnected": "Connected",
+    "statusError": "Connection failed. Try again.",
+    "disconnect": "Disconnect Phone",
+    "requestingCamera": "Requesting camera access…",
+    "cameraError": "Could not access camera. Please check your device.",
+    "waitingForDesktop": "Waiting for desktop…",
+    "streamingConnected": "Connected — streaming to sorter",
+    "streamingTo": "Streaming to {{name}}"
   },
   "scannerOverlay": {
     "connectCamera": "Connect a camera to start scanning.",

@@ -1,3 +1,4 @@
+import type { PhoneCameraPairingStatus } from "@/features/scanner/api/use-phone-camera-pairing";
 import type {
   BinRoute,
   PlayingCard,
@@ -7,6 +8,7 @@ import type {
 } from "@magic-vault/shared";
 
 export type CameraStatus = "idle" | "requesting" | "ready" | "error";
+export type CameraSource = "local" | "phone";
 
 export interface ZoomRange {
   min: number;
@@ -26,6 +28,11 @@ export interface CameraContextValue {
   selectCamera: (deviceId: string) => void;
   retryCamera: () => Promise<void>;
   stopCamera: () => void;
+  cameraSource: CameraSource;
+  phonePairingStatus: PhoneCameraPairingStatus;
+  phonePairingUrl: string | null;
+  startPhonePairing: () => void;
+  stopPhonePairing: () => void;
 }
 
 export interface ScannedCardsContextValue {

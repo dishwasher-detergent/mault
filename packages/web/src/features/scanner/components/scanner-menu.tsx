@@ -10,13 +10,17 @@ import {
   DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import type { PhoneCameraPairingStatus } from "@/features/scanner/api/use-phone-camera-pairing";
+import { PhoneCameraPairingDialog } from "@/features/scanner/components/phone-camera-pairing-dialog";
 import type { ZoomRange } from "@/features/scanner/types";
 import {
   IconAdjustments,
   IconCameraSpark,
+  IconDeviceMobile,
   IconDeviceUsb,
   IconDeviceUsbFilled,
 } from "@tabler/icons-react";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
 interface ScannerMenuProps {
@@ -28,10 +32,14 @@ interface ScannerMenuProps {
   zoomRange: ZoomRange | null;
   cameras: MediaDeviceInfo[];
   selectedCameraId: string | null;
+  phonePairingStatus: PhoneCameraPairingStatus;
+  phonePairingUrl: string | null;
   onCameraConnect: () => void;
   onCameraDisconnect: () => void;
   onCameraSelect: (deviceId: string) => void;
   onZoomChange: (value: number) => void;
+  onStartPhonePairing: () => void;
+  onStopPhonePairing: () => void;
   onScannerConnect: () => void;
   onScannerDisconnect: () => void;
   onScannerRetry: () => void;
@@ -49,10 +57,14 @@ export function ScannerMenu({
   zoomRange,
   cameras,
   selectedCameraId,
+  phonePairingStatus,
+  phonePairingUrl,
   onCameraConnect,
   onCameraDisconnect,
   onCameraSelect,
   onZoomChange,
+  onStartPhonePairing,
+  onStopPhonePairing,
   onScannerConnect,
   onScannerDisconnect,
   onScannerRetry,
@@ -61,8 +73,30 @@ export function ScannerMenu({
   onAllowDuplicatesChange,
 }: ScannerMenuProps) {
   const { t } = useTranslation("scanner");
+  const [phoneDialogOpen, setPhoneDialogOpen] = useState(false);
+
+  const handleOpenPhonePairing = () => {
+    setPhoneDialogOpen(true);
+    if (phonePairingStatus === "idle") onStartPhonePairing();
+  };
+
+  const handlePhoneDialogOpenChange = (open: boolean) => {
+    setPhoneDialogOpen(open);
+    if (!open && phonePairingStatus !== "connected") onStopPhonePairing();
+  };
+
   return (
     <div className="absolute top-2 right-2 z-40">
+      <PhoneCameraPairingDialog
+        open={phoneDialogOpen}
+        onOpenChange={handlePhoneDialogOpenChange}
+        status={phonePairingStatus}
+        pairingUrl={phonePairingUrl}
+        onDisconnect={() => {
+          onStopPhonePairing();
+          setPhoneDialogOpen(false);
+        }}
+      />
       <DropdownMenu>
         <DropdownMenuTrigger
           render={<Button size="icon" variant="secondary" />}
@@ -143,6 +177,13 @@ export function ScannerMenu({
                   {t("scannerMenu.connect")}
                 </DropdownMenuItem>
               )}
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={handleOpenPhonePairing}>
+                <IconDeviceMobile />
+                {phonePairingStatus === "connected"
+                  ? t("scannerMenu.phoneCameraConnected")
+                  : t("scannerMenu.usePhoneAsCamera")}
+              </DropdownMenuItem>
             </DropdownMenuSubContent>
           </DropdownMenuSub>
           <DropdownMenuSeparator />

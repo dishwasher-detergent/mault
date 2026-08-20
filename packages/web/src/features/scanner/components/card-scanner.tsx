@@ -73,6 +73,10 @@ export function CardScanner({ className, compact }: CardScannerProps) {
     selectCamera,
     allowDuplicates,
     setAllowDuplicates,
+    phonePairingStatus,
+    phonePairingUrl,
+    startPhonePairing,
+    stopPhonePairing,
   } = useCardScanner({
     onSearchResults: (cards, capturedImageUrl) => {
       if (cards.length > 0) {
@@ -338,10 +342,14 @@ export function CardScanner({ className, compact }: CardScannerProps) {
           zoomRange={zoomRange}
           cameras={cameras}
           selectedCameraId={selectedCameraId}
+          phonePairingStatus={phonePairingStatus}
+          phonePairingUrl={phonePairingUrl}
           onCameraConnect={handleRetryError}
           onCameraDisconnect={handleStopCamera}
           onCameraSelect={selectCamera}
           onZoomChange={setZoom}
+          onStartPhonePairing={startPhonePairing}
+          onStopPhonePairing={stopPhonePairing}
           onScannerConnect={connect}
           onScannerDisconnect={disconnect}
           onScannerRetry={sendTest}

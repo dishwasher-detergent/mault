@@ -3,6 +3,7 @@ import type {
   FieldMeta,
   PlayingCardWithDistance,
   ScannedCard,
+  WebrtcSignalMessage,
 } from "@magic-vault/shared";
 import { and, count, desc, eq, sql } from "drizzle-orm";
 import { Hono } from "hono";
@@ -760,6 +761,17 @@ router.post("/:guid/debug/error", requireAuth, requireOrg, async (c) => {
     message: "Debug: forced error triggered.",
     timestamp: Date.now(),
   });
+  return c.json({ success: true, data: null });
+});
+
+// POST /collections/:guid/webrtc-signal — relays SDP/ICE signaling between a
+// desktop scanner session and a phone pairing as its camera. Both sides are
+// already subscribed to this collection's /stream SSE below; this just
+// fans a signaling message out to them, filtered client-side by `role`.
+router.post("/:guid/webrtc-signal", requireAuth, requireOrg, async (c) => {
+  const guid = c.req.param("guid");
+  const message = await c.req.json<WebrtcSignalMessage>();
+  emitToSession(guid, "webrtc_signal", message);
   return c.json({ success: true, data: null });
 });
 

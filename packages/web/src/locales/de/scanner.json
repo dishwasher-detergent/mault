@@ -158,7 +158,25 @@
     "autoFeed": "Automatische Zufuhr",
     "allowDuplicates": "Duplikate zulassen",
     "calibrate": "Kalibrieren",
-    "retryConnection": "Verbindung erneut versuchen"
+    "retryConnection": "Verbindung erneut versuchen",
+    "usePhoneAsCamera": "Telefon als Kamera verwenden",
+    "phoneCameraConnected": "Telefonkamera verbunden"
+  },
+  "phoneCamera": {
+    "dialogTitle": "Telefon als Kamera verwenden",
+    "scanDescription": "Scanne diesen QR-Code mit deinem Telefon oder öffne den Link, um dessen Kamera als Kamera des Sortierers zu verwenden.",
+    "connectedDescription": "Dein Telefon überträgt jetzt an diesen Scanner.",
+    "qrAlt": "QR-Code zum Koppeln einer Telefonkamera",
+    "statusWaiting": "Warte auf Telefon…",
+    "statusConnecting": "Verbinde…",
+    "statusConnected": "Verbunden",
+    "statusError": "Verbindung fehlgeschlagen. Versuche es erneut.",
+    "disconnect": "Telefon trennen",
+    "requestingCamera": "Kamerazugriff wird angefordert…",
+    "cameraError": "Kamera konnte nicht aufgerufen werden. Bitte überprüfe dein Gerät.",
+    "waitingForDesktop": "Warte auf Desktop…",
+    "streamingConnected": "Verbunden — Übertragung an Sortierer läuft",
+    "streamingTo": "Übertragung an {{name}}"
   },
   "scannerOverlay": {
     "connectCamera": "Verbinde eine Kamera, um mit dem Scannen zu beginnen.",

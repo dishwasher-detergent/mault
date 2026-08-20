@@ -1,5 +1,8 @@
+import { useCollections } from "@/features/collections/api/use-collections";
+import { usePhoneCameraPairing } from "@/features/scanner/api/use-phone-camera-pairing";
 import type {
   CameraContextValue,
+  CameraSource,
   CameraStatus,
   ZoomRange,
 } from "@/features/scanner/types";
@@ -59,7 +62,9 @@ export function CameraProvider({ children }: { children: React.ReactNode }) {
   const [zoomRange, setZoomRange] = useState<ZoomRange | null>(null);
   const [cameras, setCameras] = useState<MediaDeviceInfo[]>([]);
   const [selectedCameraId, setSelectedCameraId] = useState<string | null>(null);
+  const [cameraSource, setCameraSource] = useState<CameraSource>("local");
   const streamRef = useRef<MediaStream | null>(null);
+  const { activeCollection } = useCollections();
 
   const startCamera = useCallback(async (deviceId?: string) => {
     setStatus("requesting");
@@ -106,20 +111,82 @@ export function CameraProvider({ children }: { children: React.ReactNode }) {
     setZoomState(value);
   }, []);
 
+  const handlePhoneStream = useCallback((remoteStream: MediaStream) => {
+    if (streamRef.current && streamRef.current !== remoteStream) {
+      for (const track of streamRef.current.getTracks()) track.stop();
+    }
+    streamRef.current = remoteStream;
+    setStream(remoteStream);
+    setStatus("ready");
+    setCameraSource("phone");
+    // A remote track never exposes local capabilities like zoom.
+    setZoomRange(null);
+  }, []);
+
+  const handlePhoneDisconnect = useCallback(() => {
+    // Called by the pairing hook itself after it has already torn down the
+    // peer connection (remote hangup, ICE failure) - just reset our state,
+    // don't call back into stopPhonePairing.
+    if (streamRef.current) {
+      for (const track of streamRef.current.getTracks()) track.stop();
+      streamRef.current = null;
+    }
+    setStream(null);
+    setStatus("idle");
+    setCameraSource("local");
+  }, []);
+
+  const {
+    status: phonePairingStatus,
+    start: startPhonePairingInternal,
+    stop: stopPhonePairingInternal,
+  } = usePhoneCameraPairing(activeCollection?.guid, handlePhoneStream, handlePhoneDisconnect);
+
+  const phonePairingUrl = activeCollection
+    ? `${window.location.origin}/app/monitor/${activeCollection.guid}/camera`
+    : null;
+
   const stopCamera = useCallback(() => {
+    if (cameraSource === "phone") {
+      stopPhonePairingInternal();
+    }
     if (streamRef.current) {
       for (const track of streamRef.current.getTracks()) track.stop();
       streamRef.current = null;
       setStream(null);
     }
+    setCameraSource("local");
     setStatus("idle");
     setErrorMessage("");
-  }, []);
+  }, [cameraSource, stopPhonePairingInternal]);
 
   const retryCamera = useCallback(async () => {
     stopCamera();
     await startCamera(selectedCameraId ?? undefined);
   }, [startCamera, stopCamera, selectedCameraId]);
+
+  const startPhonePairing = useCallback(() => {
+    if (streamRef.current) {
+      for (const track of streamRef.current.getTracks()) track.stop();
+      streamRef.current = null;
+      setStream(null);
+    }
+    setErrorMessage("");
+    startPhonePairingInternal();
+  }, [startPhonePairingInternal]);
+
+  const stopPhonePairing = useCallback(() => {
+    stopPhonePairingInternal();
+    if (cameraSource === "phone") {
+      if (streamRef.current) {
+        for (const track of streamRef.current.getTracks()) track.stop();
+        streamRef.current = null;
+      }
+      setStream(null);
+      setStatus("idle");
+      setCameraSource("local");
+    }
+  }, [stopPhonePairingInternal, cameraSource]);
 
   const selectCamera = useCallback(async (deviceId: string) => {
     stopCamera();
@@ -142,7 +209,26 @@ export function CameraProvider({ children }: { children: React.ReactNode }) {
   }, [startCamera, isMobile]);
 
   return (
-    <CameraContext value={{ stream, status, errorMessage, zoom, zoomRange, cameras, selectedCameraId, setZoom, selectCamera, retryCamera, stopCamera }}>
+    <CameraContext
+      value={{
+        stream,
+        status,
+        errorMessage,
+        zoom,
+        zoomRange,
+        cameras,
+        selectedCameraId,
+        setZoom,
+        selectCamera,
+        retryCamera,
+        stopCamera,
+        cameraSource,
+        phonePairingStatus,
+        phonePairingUrl,
+        startPhonePairing,
+        stopPhonePairing,
+      }}
+    >
       {children}
     </CameraContext>
   );

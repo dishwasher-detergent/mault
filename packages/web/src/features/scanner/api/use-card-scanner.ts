@@ -119,6 +119,11 @@ export function useCardScanner({
     selectCamera,
     retryCamera,
     stopCamera,
+    cameraSource,
+    phonePairingStatus,
+    phonePairingUrl,
+    startPhonePairing,
+    stopPhonePairing,
   } = useCameraContext();
   const { activeCollection } = useCollections();
   const { activeOrg } = useOrg();
@@ -473,5 +478,10 @@ export function useCardScanner({
     selectCamera,
     allowDuplicates,
     setAllowDuplicates,
+    cameraSource,
+    phonePairingStatus,
+    phonePairingUrl,
+    startPhonePairing,
+    stopPhonePairing,
   };
 }
