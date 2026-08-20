@@ -170,7 +170,7 @@
     "statusWaiting": "Waiting for phone…",
     "statusConnecting": "Connecting…",
     "statusConnected": "Connected",
-    "statusError": "Connection failed. Try again.",
+    "statusError": "Couldn't connect. Make sure your phone and computer are on the same Wi-Fi network, then try again.",
     "disconnect": "Disconnect Phone",
     "requestingCamera": "Requesting camera access…",
     "cameraError": "Could not access camera. Please check your device.",

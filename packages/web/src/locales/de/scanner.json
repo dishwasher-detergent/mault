@@ -170,7 +170,7 @@
     "statusWaiting": "Warte auf Telefon…",
     "statusConnecting": "Verbinde…",
     "statusConnected": "Verbunden",
-    "statusError": "Verbindung fehlgeschlagen. Versuche es erneut.",
+    "statusError": "Verbindung fehlgeschlagen. Stelle sicher, dass Telefon und Computer im selben WLAN sind, und versuche es erneut.",
     "disconnect": "Telefon trennen",
     "requestingCamera": "Kamerazugriff wird angefordert…",
     "cameraError": "Kamera konnte nicht aufgerufen werden. Bitte überprüfe dein Gerät.",

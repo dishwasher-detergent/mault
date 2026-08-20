@@ -170,7 +170,7 @@
     "statusWaiting": "En attente du téléphone…",
     "statusConnecting": "Connexion…",
     "statusConnected": "Connecté",
-    "statusError": "Échec de la connexion. Réessaie.",
+    "statusError": "Échec de la connexion. Vérifie que le téléphone et l'ordinateur sont sur le même Wi-Fi, puis réessaie.",
     "disconnect": "Déconnecter le téléphone",
     "requestingCamera": "Demande d'accès à la caméra…",
     "cameraError": "Impossible d'accéder à la caméra. Vérifie ton appareil.",
