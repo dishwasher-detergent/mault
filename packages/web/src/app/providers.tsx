@@ -59,9 +59,9 @@ export function AppProviders({ children }: { children: React.ReactNode }) {
     <QueryClientProvider client={queryClient}>
       <OrgThemeApplier />
       <ScannerIslandProvider>
-        <CameraProvider>
-          <SerialProvider>
-            <CollectionsProvider>
+        <CollectionsProvider>
+          <CameraProvider>
+            <SerialProvider>
               <BinRoutesProvider>
                 <BinConfigsProvider>
                   <CollectionLocksProvider>
@@ -81,9 +81,9 @@ export function AppProviders({ children }: { children: React.ReactNode }) {
                   </CollectionLocksProvider>
                 </BinConfigsProvider>
               </BinRoutesProvider>
-            </CollectionsProvider>
-          </SerialProvider>
-        </CameraProvider>
+            </SerialProvider>
+          </CameraProvider>
+        </CollectionsProvider>
       </ScannerIslandProvider>
     </QueryClientProvider>
   );

@@ -42,8 +42,8 @@
     "syncCompleted": "Kartenbild-Vektor-Sync abgeschlossen",
     "syncFailed": "Kartenbild-Vektor-Sync fehlgeschlagen",
     "sync": "Kartenbild-Vektor-Sync",
-    "cardTotal_one": "{{count}} Karte · ${{value}} USD",
-    "cardTotal_other": "{{count}} Karten · ${{value}} USD"
+    "cardTotal_one": "{{count}} Karte · ${{value}} USD",
+    "cardTotal_other": "{{count}} Karten · ${{value}} USD"
   },
   "theme": {
     "toggle": "Design umschalten",
