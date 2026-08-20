@@ -26,13 +26,6 @@ const vector = customType<{ data: number[]; driverData: string }>({
   },
 });
 
-// org_id is a text column referencing neon_auth.organization.id (managed by Neon Auth).
-// Checks the org_id claim injected into request.jwt.claims by the app (see
-// requireOrg in middleware/auth.ts) against auth_is_org_member(), a
-// SECURITY DEFINER SQL function created directly in Postgres (not modeled
-// here) that re-verifies membership via neon_auth.member - so a forged/stale
-// org_id claim alone can't grant access.
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const orgRls = (orgId: any) =>
   sql`(${orgId} = (current_setting('request.jwt.claims', true)::json ->> 'org_id')) AND auth_is_org_member(${orgId})`;
 
@@ -43,7 +36,7 @@ export const cardImageVectors = pgTable(
   {
     id: serial().primaryKey(),
     guid: uuid("guid").defaultRandom(),
-    scryfallId: text("scryfall_id").notNull(),
+    cardId: text("card_id").notNull(),
     gameKey: text("game_key").notNull().default("mtg"),
     lang: text("lang").notNull().default("en"),
     name: text("name").notNull(),
@@ -53,15 +46,10 @@ export const cardImageVectors = pgTable(
     updatedAt: timestamp("updated_at").defaultNow().notNull(),
   },
   (table) => [
-    // Card ids are only unique within a game+language: Gundam and One Piece
-    // both print EB01-xxx/STxx-xxx card numbers, and TCGdex Pokemon ids are
-    // identical across languages. A global unique on scryfall_id makes the
-    // second sync silently skip every colliding card (inserts are
-    // onConflictDoNothing), so scope uniqueness to (game_key, lang).
     unique("cards_game_lang_card_idx").on(
       table.gameKey,
       table.lang,
-      table.scryfallId,
+      table.cardId,
     ),
     crudPolicy({
       role: authenticatedRole,
@@ -245,7 +233,7 @@ export const collectionCards = pgTable(
     collectionId: integer("collection_id")
       .notNull()
       .references(() => collections.id, { onDelete: "cascade" }),
-    scryfallId: text("scryfall_id").notNull(),
+    cardId: text("card_id").notNull(),
     card: jsonb("card").notNull(),
     scannedAt: timestamp("scanned_at").notNull(),
     binNumber: integer("bin_number"),

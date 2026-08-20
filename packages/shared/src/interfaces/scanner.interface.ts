@@ -57,7 +57,7 @@ export interface CardScannerProps {
 
 export interface CardMatch {
   id: number;
-  scryfallId: string;
+  cardId: string;
   distance: number;
 }
 

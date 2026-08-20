@@ -155,7 +155,7 @@ async function main() {
         .update(collectionCards)
         .set({
           card: newCard,
-          scryfallId: newCard.id,
+          cardId: newCard.id,
           alternativeMatches: newAlts.length ? newAlts : null,
         })
         .where(eq(collectionCards.id, row.id));

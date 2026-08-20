@@ -15,6 +15,13 @@
       "when": 1787083334697,
       "tag": "0001_drop_games_data_source_url",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1787191136148,
+      "tag": "0002_overjoyed_nemesis",
+      "breakpoints": true
     }
   ]
 }

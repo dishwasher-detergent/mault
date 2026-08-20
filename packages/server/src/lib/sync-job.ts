@@ -157,7 +157,7 @@ async function runSync(source: SyncSource, lang: string): Promise<void> {
   addLog(`Loading existing ${source.label} cards from DB...`);
 
   const existing = await db
-    .select({ id: cardImageVectors.scryfallId })
+    .select({ id: cardImageVectors.cardId })
     .from(cardImageVectors)
     .where(
       and(
@@ -232,7 +232,7 @@ async function runSync(source: SyncSource, lang: string): Promise<void> {
       const embedding = await vectorizeImageFromBuffer(buffer);
 
       pendingInserts.push({
-        scryfallId: card.id,
+        cardId: card.id,
         gameKey: source.gameKey,
         lang,
         name: card.name,

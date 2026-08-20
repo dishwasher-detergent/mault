@@ -2,7 +2,7 @@ import type { PlayingCard } from "./card.interface";
 
 export interface SearchCardMatch {
   id: string;
-  scryfallId: string;
+  cardId: string;
   distance: number;
 }
 

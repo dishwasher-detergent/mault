@@ -62,7 +62,7 @@ router.post("/", requireAuth, async (c) => {
     const result = await authQuery(c.get("jwtClaims"), async (tx) => {
       const matches = await tx.execute(sql`
         SELECT
-          scryfall_id,
+          card_id,
           embedding <=> ${embeddingStr}::vector(768) AS distance
         FROM cards
         WHERE game_key = ${gameKey} AND lang = ${lang} AND (embedding <=> ${embeddingStr}::vector(768)) < 0.3
@@ -71,8 +71,8 @@ router.post("/", requireAuth, async (c) => {
       `);
 
       const matchList: SearchCardMatch[] = matches.rows.map((row) => ({
-        id: row.scryfall_id as string,
-        scryfallId: row.scryfall_id as string,
+        id: row.card_id as string,
+        cardId: row.card_id as string,
         distance: row.distance as number,
       }));
 
