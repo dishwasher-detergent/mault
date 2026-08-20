@@ -394,7 +394,7 @@ export default function AdminPage() {
             </div>
             <div
               ref={logRef}
-              className="max-h-full overflow-y-auto p-3 font-mono text-xs leading-relaxed space-y-0.5"
+              className="max-h-96 overflow-y-auto p-3 font-mono text-xs leading-relaxed space-y-0.5"
             >
               {syncState.logs.length > 0 ? (
                 syncState.logs.map((line, i) => (
