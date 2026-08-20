@@ -17,6 +17,7 @@ interface PhoneCameraPairingDialogProps {
   onOpenChange: (open: boolean) => void;
   status: PhoneCameraPairingStatus;
   pairingUrl: string | null;
+  onRetry: () => void;
   onDisconnect: () => void;
 }
 
@@ -25,6 +26,7 @@ export function PhoneCameraPairingDialog({
   onOpenChange,
   status,
   pairingUrl,
+  onRetry,
   onDisconnect,
 }: PhoneCameraPairingDialogProps) {
   const { t } = useTranslation("scanner");
@@ -99,6 +101,11 @@ export function PhoneCameraPairingDialog({
         {status === "connected" && (
           <Button variant="outline-destructive" onClick={onDisconnect}>
             {t("phoneCamera.disconnect")}
+          </Button>
+        )}
+        {status === "error" && (
+          <Button variant="outline" onClick={onRetry}>
+            {t("phoneCamera.tryAgain")}
           </Button>
         )}
       </DialogContent>

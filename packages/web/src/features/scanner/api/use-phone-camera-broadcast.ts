@@ -9,7 +9,8 @@ export type PhoneCameraBroadcastStatus =
   | "camera-error"
   | "waiting"
   | "connecting"
-  | "connected";
+  | "connected"
+  | "disconnected";
 
 // Phone side of "use a phone as a webcam": grabs the back camera and just
 // sits there responding to the desktop's "ready" pings with a WebRTC offer -
@@ -44,7 +45,14 @@ export function usePhoneCameraBroadcast(collectionGuid: string | undefined) {
     pc.onicecandidate = (e) => {
       if (e.candidate) sendRef.current("ice-candidate", e.candidate.toJSON());
     };
+    pc.onicecandidateerror = (e) => {
+      const err = e as RTCPeerConnectionIceErrorEvent;
+      console.warn(
+        `[phone-camera] ICE candidate error (${err.errorCode}): ${err.errorText}`,
+      );
+    };
     pc.onconnectionstatechange = () => {
+      console.info("[phone-camera] phone connectionState:", pc.connectionState);
       if (pc.connectionState === "connected") setStatus("connected");
       if (["disconnected", "failed", "closed"].includes(pc.connectionState)) {
         cleanupPeerConnection();
@@ -92,33 +100,59 @@ export function usePhoneCameraBroadcast(collectionGuid: string | undefined) {
   const { send } = useCameraSignalChannel(collectionGuid, "phone", handleMessage);
   sendRef.current = send;
 
-  useEffect(() => {
-    let cancelled = false;
-    navigator.mediaDevices
-      .getUserMedia({
+  const cancelledRef = useRef(false);
+
+  const requestCamera = useCallback(async () => {
+    setErrorMessage("");
+    setStatus("requesting-camera");
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({
         video: {
           facingMode: "environment",
           width: { ideal: 1920 },
           height: { ideal: 1080 },
         },
-      })
-      .then((stream) => {
-        if (cancelled) {
-          for (const track of stream.getTracks()) track.stop();
-          return;
-        }
-        localStreamRef.current = stream;
-        setLocalStream(stream);
-        setStatus("waiting");
-      })
-      .catch((err) => {
-        if (cancelled) return;
-        setErrorMessage(err instanceof Error ? err.message : String(err));
-        setStatus("camera-error");
       });
+      if (cancelledRef.current) {
+        for (const track of stream.getTracks()) track.stop();
+        return;
+      }
+      localStreamRef.current = stream;
+      setLocalStream(stream);
+      setStatus("waiting");
+    } catch (err) {
+      if (cancelledRef.current) return;
+      setErrorMessage(err instanceof Error ? err.message : String(err));
+      setStatus("camera-error");
+    }
+  }, []);
+
+  // User tapped "Disconnect": tell the desktop so it resets cleanly instead
+  // of waiting out an ICE timeout, then actually release the camera (so it
+  // stops draining battery) rather than just idling in "waiting".
+  const disconnect = useCallback(() => {
+    send("leave", null);
+    pairedRef.current = false;
+    cleanupPeerConnection();
+    if (localStreamRef.current) {
+      for (const track of localStreamRef.current.getTracks()) track.stop();
+      localStreamRef.current = null;
+    }
+    setLocalStream(null);
+    setStatus("disconnected");
+  }, [send, cleanupPeerConnection]);
+
+  const reconnect = useCallback(() => {
+    pairedRef.current = false;
+    void requestCamera();
+  }, [requestCamera]);
+
+  useEffect(() => {
+    cancelledRef.current = false;
+    void requestCamera();
 
     return () => {
-      cancelled = true;
+      cancelledRef.current = true;
       cleanupPeerConnection();
       if (localStreamRef.current) {
         for (const track of localStreamRef.current.getTracks()) track.stop();
@@ -128,5 +162,5 @@ export function usePhoneCameraBroadcast(collectionGuid: string | undefined) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  return { status, localStream, errorMessage };
+  return { status, localStream, errorMessage, disconnect, reconnect };
 }

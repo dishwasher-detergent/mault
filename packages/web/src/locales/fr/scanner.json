@@ -172,11 +172,15 @@
     "statusConnected": "Connecté",
     "statusError": "Échec de la connexion. Vérifie que le téléphone et l'ordinateur sont sur le même Wi-Fi, puis réessaie.",
     "disconnect": "Déconnecter le téléphone",
+    "tryAgain": "Réessayer",
     "requestingCamera": "Demande d'accès à la caméra…",
     "cameraError": "Impossible d'accéder à la caméra. Vérifie ton appareil.",
     "waitingForDesktop": "En attente de l'ordinateur…",
     "streamingConnected": "Connecté — diffusion vers la trieuse",
-    "streamingTo": "Diffusion vers {{name}}"
+    "streamingTo": "Diffusion vers {{name}}",
+    "disconnected": "Déconnecté de la trieuse.",
+    "reconnect": "Reconnecter",
+    "disconnectButton": "Déconnecter"
   },
   "scannerOverlay": {
     "connectCamera": "Connecte une caméra pour commencer à scanner.",

@@ -77,7 +77,8 @@ export function ScannerMenu({
 
   const handleOpenPhonePairing = () => {
     setPhoneDialogOpen(true);
-    if (phonePairingStatus === "idle") onStartPhonePairing();
+    if (phonePairingStatus === "idle" || phonePairingStatus === "error")
+      onStartPhonePairing();
   };
 
   const handlePhoneDialogOpenChange = (open: boolean) => {
@@ -92,6 +93,7 @@ export function ScannerMenu({
         onOpenChange={handlePhoneDialogOpenChange}
         status={phonePairingStatus}
         pairingUrl={phonePairingUrl}
+        onRetry={onStartPhonePairing}
         onDisconnect={() => {
           onStopPhonePairing();
           setPhoneDialogOpen(false);

@@ -172,11 +172,15 @@
     "statusConnected": "Verbunden",
     "statusError": "Verbindung fehlgeschlagen. Stelle sicher, dass Telefon und Computer im selben WLAN sind, und versuche es erneut.",
     "disconnect": "Telefon trennen",
+    "tryAgain": "Erneut versuchen",
     "requestingCamera": "Kamerazugriff wird angefordert…",
     "cameraError": "Kamera konnte nicht aufgerufen werden. Bitte überprüfe dein Gerät.",
     "waitingForDesktop": "Warte auf Desktop…",
     "streamingConnected": "Verbunden — Übertragung an Sortierer läuft",
-    "streamingTo": "Übertragung an {{name}}"
+    "streamingTo": "Übertragung an {{name}}",
+    "disconnected": "Vom Sortierer getrennt.",
+    "reconnect": "Erneut verbinden",
+    "disconnectButton": "Trennen"
   },
   "scannerOverlay": {
     "connectCamera": "Verbinde eine Kamera, um mit dem Scannen zu beginnen.",

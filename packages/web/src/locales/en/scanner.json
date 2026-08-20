@@ -172,11 +172,15 @@
     "statusConnected": "Connected",
     "statusError": "Couldn't connect. Make sure your phone and computer are on the same Wi-Fi network, then try again.",
     "disconnect": "Disconnect Phone",
+    "tryAgain": "Try Again",
     "requestingCamera": "Requesting camera access…",
     "cameraError": "Could not access camera. Please check your device.",
     "waitingForDesktop": "Waiting for desktop…",
     "streamingConnected": "Connected — streaming to sorter",
-    "streamingTo": "Streaming to {{name}}"
+    "streamingTo": "Streaming to {{name}}",
+    "disconnected": "Disconnected from the sorter.",
+    "reconnect": "Reconnect",
+    "disconnectButton": "Disconnect"
   },
   "scannerOverlay": {
     "connectCamera": "Connect a camera to start scanning.",
