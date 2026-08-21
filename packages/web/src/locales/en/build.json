@@ -285,19 +285,19 @@
             "note": "Don't screw down any horns yet - centering happens next, with the servos powered and commanded to their rest position."
           },
           "centerServos": {
-            "text": "Wire this module's servos into their PCA9685 channels, plus the I²C bus and external servo power (see Wiring below), then send {\"test\": true} over serial. It leaves every servo at its default rest position - don't attach any horn or linkage until it finishes.",
-            "note": "Safe to re-run any time you need to re-center a servo before fitting or repositioning a horn."
+            "text": "Wire all {{count}} module servos into their PCA9685 channels, plus the I²C bus and external servo power (see Wiring below). Then open /app/calibrate and click Connect - the app pushes each module's calibration and centers every servo automatically. Don't attach any horn or linkage until it finishes.",
+            "note": "Not calibrated yet? It centers using sensible defaults instead. Safe to reconnect any time you need to re-center a servo before fitting or repositioning a horn."
           },
           "mountBottomFlapper": {
-            "text": "With the bottom servo at its rest position from the test command, attach the bottom flapper to its horn with M2×4 screws so the flapper sits evenly across the card path.",
+            "text": "With the bottom servo at its rest position from connecting to the app, attach the bottom flapper to its horn with M2×4 screws so the flapper sits evenly across the card path.",
             "note": "This is the trapdoor a card falls through to reach the next module, or the current one on a match."
           },
           "mountSideFlappers": {
-            "text": "With the paddle servo at its rest position from the test command, attach the left and right flapper to the shared linkage with M2×4 screws (one pair per module) so both sit evenly.",
+            "text": "With the paddle servo at its rest position from connecting to the app, attach the left and right flapper to the shared linkage with M2×4 screws (one pair per module) so both sit evenly.",
             "note": "One paddle servo drives both flappers together - they open and close as a pair, not independently. The exact open/closed pulses get fine-tuned later from the Module Calibration Grid."
           },
           "mountPusherArm": {
-            "text": "With the pusher servo resting at its neutral position from the test command, attach the card pusher arm to the horn with M2×4 screws so it sits centered between the left and right bins.",
+            "text": "With the pusher servo at its neutral position from connecting to the app, attach the card pusher arm to the horn with M2×4 screws so it sits centered between the left and right bins.",
             "note": "Fitting the arm off-center biases the push distance to one side - the exact left/right pulses get fine-tuned later from the Module Calibration Grid."
           },
           "fitFeederOrings": {
