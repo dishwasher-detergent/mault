@@ -285,19 +285,19 @@
             "note": "Schraube noch keine Hörner fest – die Zentrierung erfolgt im nächsten Schritt, wenn die Servos unter Strom stehen und in ihre Ruheposition gefahren werden."
           },
           "centerServos": {
-            "text": "Verkabele die Servos dieses Moduls mit ihren PCA9685-Kanälen sowie dem I²C-Bus und der externen Servoversorgung (siehe Verkabelung unten), und sende dann {\"test\": true} über die serielle Schnittstelle. Dabei fährt jeder Servo in seine Standard-Ruheposition – montiere kein Horn und kein Gestänge, bevor das abgeschlossen ist.",
-            "note": "Kann jederzeit erneut ausgeführt werden, wenn ein Servo vor der Montage oder Neupositionierung eines Horns neu zentriert werden muss."
+            "text": "Verkabele alle {{count}} Modul-Servos mit ihren PCA9685-Kanälen sowie dem I²C-Bus und der externen Servoversorgung (siehe Verkabelung unten). Öffne dann /app/calibrate und klicke auf Verbinden – die App überträgt die Kalibrierung jedes Moduls und zentriert dabei automatisch jeden Servo. Montiere kein Horn und kein Gestänge, bevor das abgeschlossen ist.",
+            "note": "Noch nicht kalibriert? Dann wird mit sinnvollen Standardwerten zentriert. Kann jederzeit durch erneutes Verbinden wiederholt werden, wenn ein Servo vor der Montage oder Neupositionierung eines Horns neu zentriert werden muss."
           },
           "mountBottomFlapper": {
-            "text": "Bei der Ruheposition des Bodenservos aus dem Testbefehl befestige die Bodenklappe mit M2×4-Schrauben am Horn, damit die Klappe gleichmäßig über dem Kartenweg sitzt.",
+            "text": "Bei der Ruheposition des Bodenservos nach dem Verbinden mit der App befestige die Bodenklappe mit M2×4-Schrauben am Horn, damit die Klappe gleichmäßig über dem Kartenweg sitzt.",
             "note": "Dies ist die Falltür, durch die eine Karte fällt, um das nächste Modul zu erreichen, oder das aktuelle bei einem Treffer."
           },
           "mountSideFlappers": {
-            "text": "Bei der Ruheposition des Paddelservos aus dem Testbefehl befestige die linke und rechte Klappe mit M2×4-Schrauben (ein Paar pro Modul) am gemeinsamen Gestänge, sodass beide gleichmäßig sitzen.",
+            "text": "Bei der Ruheposition des Paddelservos nach dem Verbinden mit der App befestige die linke und rechte Klappe mit M2×4-Schrauben (ein Paar pro Modul) am gemeinsamen Gestänge, sodass beide gleichmäßig sitzen.",
             "note": "Ein Paddelservo treibt beide Klappen gemeinsam an – sie öffnen und schließen als Paar, nicht unabhängig voneinander. Die genauen Öffnungs-/Schließimpulse werden später im Modul-Kalibrierungsraster feinjustiert."
           },
           "mountPusherArm": {
-            "text": "Bei neutraler Ruheposition des Schieberservos aus dem Testbefehl befestige den Kartenschieberarm mit M2×4-Schrauben am Horn, sodass er zentriert zwischen dem linken und rechten Fach sitzt.",
+            "text": "Bei neutraler Ruheposition des Schieberservos nach dem Verbinden mit der App befestige den Kartenschieberarm mit M2×4-Schrauben am Horn, sodass er zentriert zwischen dem linken und rechten Fach sitzt.",
             "note": "Wird der Arm außermittig montiert, verschiebt sich die Schubdistanz zu einer Seite – die genauen Links-/Rechts-Impulse werden später im Modul-Kalibrierungsraster feinjustiert."
           },
           "fitFeederOrings": {

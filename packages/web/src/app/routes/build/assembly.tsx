@@ -156,7 +156,9 @@ function buildPhases(t: TFunction<"build">, moduleCount: number): Phase[] {
         },
         {
           key: "center-servos",
-          text: t("assembly.phases.servos.steps.centerServos.text"),
+          text: t("assembly.phases.servos.steps.centerServos.text", {
+            count: moduleCount * 3,
+          }),
           note: t("assembly.phases.servos.steps.centerServos.note"),
         },
         {

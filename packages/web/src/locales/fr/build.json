@@ -285,19 +285,19 @@
             "note": "Ne visse pas encore de palonnier - le centrage se fait à l'étape suivante, une fois les servos alimentés et commandés vers leur position de repos."
           },
           "centerServos": {
-            "text": "Câble les servos de ce module dans leurs canaux PCA9685, ainsi que le bus I²C et l'alimentation externe des servos (voir la section Câblage ci-dessous), puis envoie {\"test\": true} en série. Chaque servo se retrouve alors à sa position de repos par défaut - ne fixe aucun palonnier ni liaison avant que ce soit terminé.",
-            "note": "Peut être relancé à tout moment pour recentrer un servo avant de fixer ou repositionner un palonnier."
+            "text": "Câble les {{count}} servos de module dans leurs canaux PCA9685, ainsi que le bus I²C et l'alimentation externe des servos (voir la section Câblage ci-dessous). Ouvre ensuite /app/calibrate et clique sur Connecter - l'application transmet la calibration de chaque module et centre automatiquement chaque servo. Ne fixe aucun palonnier ni liaison avant que ce soit terminé.",
+            "note": "Pas encore calibré ? Le centrage se fait alors avec des valeurs par défaut adaptées. Peut être relancé à tout moment en te reconnectant, pour recentrer un servo avant de fixer ou repositionner un palonnier."
           },
           "mountBottomFlapper": {
-            "text": "Le servo inférieur étant à sa position de repos issue de la commande de test, fixe la trappe inférieure au palonnier avec des vis M2×4 pour qu'elle soit alignée uniformément sur le trajet de la carte.",
+            "text": "Le servo inférieur étant à sa position de repos après la connexion à l'application, fixe la trappe inférieure au palonnier avec des vis M2×4 pour qu'elle soit alignée uniformément sur le trajet de la carte.",
             "note": "C'est la trappe par laquelle une carte tombe pour atteindre le module suivant, ou le module actuel en cas de correspondance."
           },
           "mountSideFlappers": {
-            "text": "Le servo de palette étant à sa position de repos issue de la commande de test, fixe la trappe gauche et droite à la liaison commune avec des vis M2×4 (une paire par module) pour qu'elles soient toutes deux bien alignées.",
+            "text": "Le servo de palette étant à sa position de repos après la connexion à l'application, fixe la trappe gauche et droite à la liaison commune avec des vis M2×4 (une paire par module) pour qu'elles soient toutes deux bien alignées.",
             "note": "Un seul servo de palette entraîne les deux trappes ensemble - elles s'ouvrent et se ferment en paire, pas indépendamment. Les impulsions exactes d'ouverture/fermeture seront affinées plus tard depuis la grille de calibration des modules."
           },
           "mountPusherArm": {
-            "text": "Le servo du poussoir étant à sa position de repos neutre issue de la commande de test, fixe le bras poussoir de carte au palonnier avec des vis M2×4 pour qu'il soit centré entre les bacs gauche et droit.",
+            "text": "Le servo du poussoir étant à sa position de repos neutre après la connexion à l'application, fixe le bras poussoir de carte au palonnier avec des vis M2×4 pour qu'il soit centré entre les bacs gauche et droit.",
             "note": "Fixer le bras de manière décentrée biaise la distance de poussée d'un côté - les impulsions exactes gauche/droite seront affinées plus tard depuis la grille de calibration des modules."
           },
           "fitFeederOrings": {
