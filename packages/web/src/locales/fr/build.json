@@ -282,18 +282,22 @@
         "steps": {
           "mountModuleServos": {
             "text": "Installe le servo inférieur, le servo de palette et le poussoir dans chacun des 3 logements de module (9 servos au total).",
-            "note": "Centre chaque servo à son impulsion neutre avant de visser le palonnier, afin que la course mécanique corresponde à la course ouvert/fermé du firmware."
+            "note": "Ne visse pas encore de palonnier - le centrage se fait à l'étape suivante, une fois les servos alimentés et commandés vers leur position de repos."
+          },
+          "centerServos": {
+            "text": "Câble les servos de ce module dans leurs canaux PCA9685, ainsi que le bus I²C et l'alimentation externe des servos (voir la section Câblage ci-dessous), puis envoie {\"test\": true} en série. Chaque servo se retrouve alors à sa position de repos par défaut - ne fixe aucun palonnier ni liaison avant que ce soit terminé.",
+            "note": "Peut être relancé à tout moment pour recentrer un servo avant de fixer ou repositionner un palonnier."
           },
           "mountBottomFlapper": {
-            "text": "Fixe la trappe inférieure au palonnier du servo inférieur avec des vis M2×4, le servo maintenu à son impulsion de fermeture pour que la trappe s'aligne à fleur sur le trajet de la carte.",
+            "text": "Le servo inférieur étant à sa position de repos issue de la commande de test, fixe la trappe inférieure au palonnier avec des vis M2×4 pour qu'elle soit alignée uniformément sur le trajet de la carte.",
             "note": "C'est la trappe par laquelle une carte tombe pour atteindre le module suivant, ou le module actuel en cas de correspondance."
           },
           "mountSideFlappers": {
-            "text": "Avant de fixer quoi que ce soit, commande chaque servo de palette sur toute sa course pour confirmer que la liaison peut atteindre l'ouverture complète sans se coincer. Ensuite, le servo maintenu en position fermée, fixe la trappe gauche et droite à la liaison commune avec des vis M2×4 (une paire par module) pour qu'elles soient toutes deux bien alignées.",
-            "note": "Un seul servo de palette entraîne les deux trappes ensemble - elles s'ouvrent et se ferment en paire, pas indépendamment. Fixe d'abord les trappes fermées ; l'impulsion exacte de la position ouverte sera affinée plus tard depuis la grille de calibration des modules."
+            "text": "Le servo de palette étant à sa position de repos issue de la commande de test, fixe la trappe gauche et droite à la liaison commune avec des vis M2×4 (une paire par module) pour qu'elles soient toutes deux bien alignées.",
+            "note": "Un seul servo de palette entraîne les deux trappes ensemble - elles s'ouvrent et se ferment en paire, pas indépendamment. Les impulsions exactes d'ouverture/fermeture seront affinées plus tard depuis la grille de calibration des modules."
           },
           "mountPusherArm": {
-            "text": "Avant de fixer le bras, balaie le servo du poussoir sur toute sa course de gauche à droite et trouve son vrai centre mécanique. Le servo maintenu à cette position centrale, fixe le bras poussoir de carte au palonnier avec des vis M2×4 pour qu'il soit centré entre les bacs gauche et droit.",
+            "text": "Le servo du poussoir étant à sa position de repos neutre issue de la commande de test, fixe le bras poussoir de carte au palonnier avec des vis M2×4 pour qu'il soit centré entre les bacs gauche et droit.",
             "note": "Fixer le bras de manière décentrée biaise la distance de poussée d'un côté - les impulsions exactes gauche/droite seront affinées plus tard depuis la grille de calibration des modules."
           },
           "fitFeederOrings": {
@@ -332,7 +336,7 @@
             "note": "Voir la section Câblage ci-dessus."
           },
           "wireServos": {
-            "text": "Câble les 10 servos dans les canaux 0 à 8 et 15 du PCA9685 selon la carte des canaux - le chargeur prend toujours le dernier canal.",
+            "text": "Câble les {{count}} servos dans les canaux 0 à {{lastChannel}} et 15 du PCA9685 selon la carte des canaux - le chargeur prend toujours le dernier canal.",
             "note": "Des passages de câbles, avec des colliers de serrage, sont prévus sur le côté de la base pour garder tout bien rangé."
           },
           "wireSensors": {

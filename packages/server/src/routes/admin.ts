@@ -126,9 +126,6 @@ router.get("/cards", requireAuth, requireRole("admin"), async (c) => {
   return c.json({ success: true, data: { cards: rows, total, page, limit } });
 });
 
-// Fetches a single card by id from its source, vectorizes its image, and
-// upserts it into the card database — used to both add a missing card and
-// to re-vectorize an existing one.
 async function syncOneCard(
   gameKey: string,
   cardId: string,
@@ -147,7 +144,7 @@ async function syncOneCard(
   }
   const baseUrl = source.defaultUrl;
 
-  const card = await source.fetchOne(cardId, baseUrl);
+  const card = await source.fetchOne(cardId, baseUrl, lang);
   if (!card) {
     return {
       success: false,
@@ -190,7 +187,12 @@ async function syncOneCard(
         cardImageVectors.lang,
         cardImageVectors.cardId,
       ],
-      set: { name: card.name, setCode: card.setCode, embedding, updatedAt: new Date() },
+      set: {
+        name: card.name,
+        setCode: card.setCode,
+        embedding,
+        updatedAt: new Date(),
+      },
     });
 
   return { success: true, message: `Synced: ${card.name}` };
@@ -252,7 +254,10 @@ router.post(
     for (const row of existing) {
       const result = await syncOneCard(row.gameKey, cardId, row.lang);
       if (!result.success) {
-        return c.json({ success: false, message: result.message }, result.status);
+        return c.json(
+          { success: false, message: result.message },
+          result.status,
+        );
       }
       message = result.message.replace("Synced:", "Re-vectorized:");
     }

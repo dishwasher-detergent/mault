@@ -17,19 +17,6 @@ export const ADAPTERS_BY_GAME_KEY: Record<string, CardSearchAdapter> = {
   fab: withCache(fabAdapter),
 };
 
-async function findCollectionGame(jwtClaims: string, collectionGuid: string) {
-  return authQuery(jwtClaims, async (tx) => {
-    const collection = await tx.query.collections.findFirst({
-      where: (t, { eq }) => eq(t.guid, collectionGuid),
-      columns: { gameId: true },
-    });
-    if (!collection?.gameId) return null;
-    return tx.query.games.findFirst({
-      where: (t, { eq }) => eq(t.id, collection.gameId!),
-    });
-  });
-}
-
 export async function resolveGameKeyAndLang(
   jwtClaims: string,
   collectionGuid: string | undefined,
@@ -54,12 +41,12 @@ export async function resolveCardSearch(
   jwtClaims: string,
   collectionGuid: string | undefined,
 ): Promise<{ adapter: CardSearchAdapter; baseUrl: string } | null> {
-  if (!collectionGuid) return null;
-  const game = await findCollectionGame(jwtClaims, collectionGuid);
-  if (!game) return null;
+  const resolved = await resolveGameKeyAndLang(jwtClaims, collectionGuid);
+  if (!resolved) return null;
 
-  const adapter = ADAPTERS_BY_GAME_KEY[game.key];
+  const adapter = ADAPTERS_BY_GAME_KEY[resolved.gameKey];
   if (!adapter) return null;
 
-  return { adapter, baseUrl: adapter.defaultUrl };
+  const baseUrl = adapter.urlForLang?.(resolved.lang) ?? adapter.defaultUrl;
+  return { adapter, baseUrl };
 }
