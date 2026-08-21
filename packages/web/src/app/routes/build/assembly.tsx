@@ -226,7 +226,10 @@ function buildPhases(t: TFunction<"build">, moduleCount: number): Phase[] {
         },
         {
           key: "wire-servos",
-          text: t("assembly.phases.wiring.steps.wireServos.text"),
+          text: t("assembly.phases.wiring.steps.wireServos.text", {
+            count: moduleCount * 3 + 1,
+            lastChannel: moduleCount * 3 - 1,
+          }),
           note: t("assembly.phases.wiring.steps.wireServos.note"),
         },
         {

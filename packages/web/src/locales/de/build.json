@@ -332,7 +332,7 @@
             "note": "Siehe den Abschnitt Verkabelung oben."
           },
           "wireServos": {
-            "text": "Verkabele alle 10 Servos gemäß der Kanalbelegung mit den PCA9685-Kanälen 0–8 und 15 - die Zuführung belegt immer den letzten Kanal.",
+            "text": "Verkabele alle {{count}} Servos gemäß der Kanalbelegung mit den PCA9685-Kanälen 0–{{lastChannel}} und 15 - die Zuführung belegt immer den letzten Kanal.",
             "note": "An der Seite der Basis gibt es Kabelkanäle mit Kabelbindern, die alles ordentlich halten."
           },
           "wireSensors": {

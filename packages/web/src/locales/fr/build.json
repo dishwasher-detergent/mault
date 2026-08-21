@@ -332,7 +332,7 @@
             "note": "Voir la section Câblage ci-dessus."
           },
           "wireServos": {
-            "text": "Câble les 10 servos dans les canaux 0 à 8 et 15 du PCA9685 selon la carte des canaux - le chargeur prend toujours le dernier canal.",
+            "text": "Câble les {{count}} servos dans les canaux 0 à {{lastChannel}} et 15 du PCA9685 selon la carte des canaux - le chargeur prend toujours le dernier canal.",
             "note": "Des passages de câbles, avec des colliers de serrage, sont prévus sur le côté de la base pour garder tout bien rangé."
           },
           "wireSensors": {

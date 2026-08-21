@@ -332,7 +332,7 @@
             "note": "See the Wiring section above."
           },
           "wireServos": {
-            "text": "Wire all 10 servos into PCA9685 channels 0–8 and 15 per the channel map - the feeder always takes the last channel.",
+            "text": "Wire all {{count}} servos into PCA9685 channels 0–{{lastChannel}} and 15 per the channel map - the feeder always takes the last channel.",
             "note": "There are wire channels, that use zip ties, in the side of the base to help keep everything neat."
           },
           "wireSensors": {
