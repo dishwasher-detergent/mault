@@ -23,5 +23,9 @@ export interface SyncSource {
     lang?: string,
     signal?: AbortSignal,
   ): Promise<SyncSourceCard[]>;
-  fetchOne(id: string, baseUrl: string): Promise<SyncSourceCardDetail | null>;
+  fetchOne(
+    id: string,
+    baseUrl: string,
+    lang?: string,
+  ): Promise<SyncSourceCardDetail | null>;
 }
