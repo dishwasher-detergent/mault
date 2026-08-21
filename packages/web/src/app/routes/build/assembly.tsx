@@ -3,7 +3,6 @@ import { DISCORD_URL } from "@/lib/links";
 import { cn } from "@/lib/utils";
 import {
   IconAdjustmentsHorizontal,
-  IconBolt,
   IconCpu,
   IconCube,
   IconPlayerPlay,
@@ -84,6 +83,10 @@ function buildPhases(t: TFunction<"build">, moduleCount: number): Phase[] {
             modules: moduleCount,
             count: plateBase,
           }),
+          images: [
+            "/instructions/base_module.jpg",
+            "/instructions/base_module_assembled.jpg",
+          ],
         },
         {
           key: "print-plate-base-bottom",
@@ -151,54 +154,65 @@ function buildPhases(t: TFunction<"build">, moduleCount: number): Phase[] {
         {
           key: "mount-module-servos",
           text: t("assembly.phases.servos.steps.mountModuleServos.text"),
-          note: t("assembly.phases.servos.steps.mountModuleServos.note"),
-          images: ["/instructions/top_down_view_module.jpg"],
-        },
-        {
-          key: "center-servos",
-          text: t("assembly.phases.servos.steps.centerServos.text", {
-            count: moduleCount * 3,
-          }),
-          note: t("assembly.phases.servos.steps.centerServos.note"),
         },
         {
           key: "mount-bottom-flapper",
           text: t("assembly.phases.servos.steps.mountBottomFlapper.text"),
           note: t("assembly.phases.servos.steps.mountBottomFlapper.note"),
-          images: ["/instructions/bottom_paddle.jpg"],
+          images: [
+            "/instructions/bottom_paddle_disassembled.jpg",
+            "/instructions/bottom_paddle_assembled.jpg",
+            "/instructions/bottom_paddle_attached.jpg",
+          ],
         },
         {
           key: "mount-side-flappers",
           text: t("assembly.phases.servos.steps.mountSideFlappers.text"),
           note: t("assembly.phases.servos.steps.mountSideFlappers.note"),
-          images: ["/instructions/side_paddles.jpg"],
+          images: [
+            "/instructions/side_paddles_disassembled.jpg",
+            "/instructions/side_paddles_assembled.jpg",
+            "/instructions/side_paddles_attached.jpg",
+          ],
         },
         {
           key: "mount-pusher-arm",
           text: t("assembly.phases.servos.steps.mountPusherArm.text"),
           note: t("assembly.phases.servos.steps.mountPusherArm.note"),
-          images: ["/instructions/pusher_arms.jpg"],
+          images: [
+            "/instructions/pusher_disassembled.jpg",
+            "/instructions/pusher_assembled.jpg",
+            "/instructions/pusher_attached.jpg",
+          ],
         },
         {
           key: "fit-feeder-orings",
           text: t("assembly.phases.servos.steps.fitFeederOrings.text"),
           note: t("assembly.phases.servos.steps.fitFeederOrings.note"),
+          images: ["/instructions/roller_o_rings_mounted.jpg"],
         },
         {
           key: "mount-feeder-roller",
           text: t("assembly.phases.servos.steps.mountFeederRoller.text"),
-          images: ["/instructions/feeder_roller.jpg"],
+          images: [
+            "/instructions/assembling_feeder.jpg",
+            "/instructions/roller_mounted.jpg",
+          ],
         },
         {
           key: "mount-feeder-servo",
           text: t("assembly.phases.servos.steps.mountFeederServo.text"),
-          images: ["/instructions/feeder_servo.jpg"],
+          images: ["/instructions/feeder_servo_mounted.jpg"],
         },
         {
           key: "mount-feeder-wall",
           text: t("assembly.phases.servos.steps.mountFeederWall.text"),
           note: t("assembly.phases.servos.steps.mountFeederWall.note"),
-          images: ["/instructions/feeder_tube_wall.jpg"],
+          images: [
+            "/instructions/rube_disassembled.jpg",
+            "/instructions/tube_assembled.jpg",
+            "/instructions/feeder_tube_wall.jpg",
+          ],
         },
       ],
     },
@@ -212,12 +226,13 @@ function buildPhases(t: TFunction<"build">, moduleCount: number): Phase[] {
           text: t("assembly.phases.irSensors.steps.mountModuleIr.text", {
             modules: moduleCount,
           }),
-          images: ["/instructions/ir_sensor.jpg"],
+          images: ["/instructions/sorter_ir_sensor_mounted.jpg"],
         },
         {
           key: "mount-hopper-ir",
           text: t("assembly.phases.irSensors.steps.mountHopperIr.text"),
           note: t("assembly.phases.irSensors.steps.mountHopperIr.note"),
+          images: ["/instructions/feeder_ir_sensor_mounted.jpg"],
         },
       ],
     },
@@ -256,23 +271,6 @@ function buildPhases(t: TFunction<"build">, moduleCount: number): Phase[] {
       ],
     },
     {
-      key: "power-on-test",
-      title: t("assembly.phases.powerOnTest.title"),
-      icon: IconBolt,
-      steps: [
-        {
-          key: "run-test-command",
-          text: t("assembly.phases.powerOnTest.steps.runTestCommand.text"),
-          note: t("assembly.phases.powerOnTest.steps.runTestCommand.note"),
-        },
-        {
-          key: "watch-modules",
-          text: t("assembly.phases.powerOnTest.steps.watchModules.text"),
-          note: t("assembly.phases.powerOnTest.steps.watchModules.note"),
-        },
-      ],
-    },
-    {
       key: "calibrate",
       title: t("assembly.phases.calibrate.title"),
       icon: IconSettings2,
@@ -284,6 +282,13 @@ function buildPhases(t: TFunction<"build">, moduleCount: number): Phase[] {
         {
           key: "calibrate-modules",
           text: t("assembly.phases.calibrate.steps.calibrateModules.text"),
+        },
+        {
+          key: "install-horns",
+          text: t("assembly.phases.calibrate.steps.installHorns.text", {
+            count: moduleCount * 3,
+          }),
+          note: t("assembly.phases.calibrate.steps.installHorns.note"),
         },
         {
           key: "calibrate-feeder",
@@ -349,10 +354,7 @@ export function BuildAssembly() {
   const { checked, toggle } = useChecklist();
   const { moduleCount } = useModuleCount();
 
-  const PHASES = useMemo(
-    () => buildPhases(t, moduleCount),
-    [t, moduleCount],
-  );
+  const PHASES = useMemo(() => buildPhases(t, moduleCount), [t, moduleCount]);
 
   const allSteps = useMemo(() => PHASES.flatMap((p) => p.steps), [PHASES]);
   const doneCount = allSteps.filter((s) => checked[s.key]).length;

@@ -282,23 +282,23 @@
         "steps": {
           "mountModuleServos": {
             "text": "Install the bottom, paddle, and pusher servo into each of the 3 module housings (9 servos total).",
-            "note": "Don't screw down any horns yet - centering happens next, with the servos powered and commanded to their rest position."
+            "note": "Don't install the horns onto the servo shafts yet - fit the flappers/pusher arm to their horns below, but leave the horn itself off the servo until each module is calibrated from the app."
           },
           "centerServos": {
-            "text": "Wire all {{count}} module servos into their PCA9685 channels, plus the I²C bus and external servo power (see Wiring below). Then open /app/calibrate and click Connect - the app pushes each module's calibration and centers every servo automatically. Don't attach any horn or linkage until it finishes.",
+            "text": "Wire all {{count}} module servos into their PCA9685 channels, plus the I²C bus and external servo power (see Wiring below). Then open /app/calibrate and click Connect - the app pushes each module's calibration and centers every servo automatically. Don't install any horn onto a servo shaft until it finishes.",
             "note": "Not calibrated yet? It centers using sensible defaults instead. Safe to reconnect any time you need to re-center a servo before fitting or repositioning a horn."
           },
           "mountBottomFlapper": {
-            "text": "With the bottom servo at its rest position from connecting to the app, attach the bottom flapper to its horn with M2×4 screws so the flapper sits evenly across the card path.",
-            "note": "This is the trapdoor a card falls through to reach the next module, or the current one on a match."
+            "text": "Assemble the bottom paddle by screwing the paddle to the linkage, then the linkage to the horn. Remember not to install the horn to the servo yet.",
+            "note": "This is the trapdoor a card falls through to reach the next module, or the current one on a match. The horn gets seated onto the servo once the module is calibrated from the app - see Calibrate from the app below."
           },
           "mountSideFlappers": {
-            "text": "With the paddle servo at its rest position from connecting to the app, attach the left and right flapper to the shared linkage with M2×4 screws (one pair per module) so both sit evenly.",
-            "note": "One paddle servo drives both flappers together - they open and close as a pair, not independently. The exact open/closed pulses get fine-tuned later from the Module Calibration Grid."
+            "text": "Assemble the side paddles by screwing the left and right flapper to the shared linkage, then the linkage to the horn (one pair per module). Remember not to install the horn to the servo yet.",
+            "note": "One paddle servo drives both flappers together - they open and close as a pair, not independently. The horn gets seated onto the servo once the module is calibrated from the app - see Calibrate from the app below."
           },
           "mountPusherArm": {
-            "text": "With the pusher servo at its neutral position from connecting to the app, attach the card pusher arm to the horn with M2×4 screws so it sits centered between the left and right bins.",
-            "note": "Fitting the arm off-center biases the push distance to one side - the exact left/right pulses get fine-tuned later from the Module Calibration Grid."
+            "text": "Assemble the pusher by screwing the pusher arm to the linkage, then the linkage to the horn. Remember not to install the horn to the servo yet.",
+            "note": "The horn gets seated onto the servo once the module is calibrated from the app - see Calibrate from the app below."
           },
           "fitFeederOrings": {
             "text": "Fit 6 G20 o-rings onto the feeder roller.",
@@ -370,6 +370,10 @@
           },
           "calibrateModules": {
             "text": "Module Calibration Grid - set the open/closed pulse for each bottom and paddle, and left/neutral/right for each pusher, module by module."
+          },
+          "installHorns": {
+            "text": "Using the calibration grid above, put each paddle in its open position and each pusher in its neutral position, then press the horn (with its flapper or pusher arm already fitted) onto the servo shaft and secure it with the horn screw - bottom flapper, paddle flappers, and pusher arm, for all {{count}} module servos.",
+            "note": "Fitting a horn off-center biases the whole linkage - the exact open/closed and left/right pulses get fine-tuned afterward from the Module Calibration Grid above."
           },
           "calibrateFeeder": {
             "text": "Feeder Calibration Panel - tune feed speed, pulse/pause timing, and settle duration against your actual hopper."
