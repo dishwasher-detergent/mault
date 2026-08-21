@@ -6,7 +6,8 @@
   "scanEngine": {
     "searchFailed": "Failed to search card",
     "videoStartFailed": "Failed to start video",
-    "cameraReinitFailed": "Failed to reinitialize camera"
+    "cameraReinitFailed": "Failed to reinitialize camera",
+    "phoneCaptureFailed": "Phone didn't respond with a photo in time."
   },
   "serial": {
     "connectionFailed": {
@@ -158,7 +159,27 @@
     "autoFeed": "Auto-feed",
     "allowDuplicates": "Allow duplicates",
     "calibrate": "Calibrate",
-    "retryConnection": "Retry Connection"
+    "retryConnection": "Retry Connection",
+    "usePhoneAsCamera": "Use Phone as Camera",
+    "phoneCameraConnected": "Phone Camera Connected"
+  },
+  "phoneCamera": {
+    "dialogTitle": "Use Phone as Camera",
+    "scanDescription": "Scan this QR code on your phone, or open the link, so it can be used as this scanner's camera.",
+    "connectedDescription": "Your phone is ready - it'll take a photo whenever this scanner needs one.",
+    "qrAlt": "QR code to pair a phone camera",
+    "statusWaiting": "Waiting for phone…",
+    "statusConnected": "Connected",
+    "statusError": "Couldn't reach the phone. Make sure it's still open on this page, then try again.",
+    "disconnect": "Disconnect Phone",
+    "tryAgain": "Try Again",
+    "requestingCamera": "Requesting camera access…",
+    "cameraError": "Could not access camera. Please check your device.",
+    "ready": "Camera ready",
+    "streamingTo": "Ready for {{name}}",
+    "disconnected": "Disconnected from the sorter.",
+    "reconnect": "Reconnect",
+    "disconnectButton": "Disconnect"
   },
   "scannerOverlay": {
     "connectCamera": "Connect a camera to start scanning.",

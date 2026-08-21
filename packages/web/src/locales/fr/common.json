@@ -42,8 +42,8 @@
     "syncCompleted": "Synchronisation des vecteurs d'image terminée",
     "syncFailed": "Échec de la synchronisation des vecteurs d'image",
     "sync": "Synchronisation des vecteurs d'image des cartes",
-    "cardTotal_one": "{{count}} carte · ${{value}} USD",
-    "cardTotal_other": "{{count}} cartes · ${{value}} USD"
+    "cardTotal_one": "{{count}} carte · ${{value}} USD",
+    "cardTotal_other": "{{count}} cartes · ${{value}} USD"
   },
   "theme": {
     "toggle": "Changer de thème",

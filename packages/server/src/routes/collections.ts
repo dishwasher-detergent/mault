@@ -1,6 +1,7 @@
 import type {
   Collection,
   FieldMeta,
+  PhoneCameraMessage,
   PlayingCardWithDistance,
   ScannedCard,
 } from "@magic-vault/shared";
@@ -760,6 +761,19 @@ router.post("/:guid/debug/error", requireAuth, requireOrg, async (c) => {
     message: "Debug: forced error triggered.",
     timestamp: Date.now(),
   });
+  return c.json({ success: true, data: null });
+});
+
+// POST /collections/:guid/phone-camera-signal — relays presence/capture
+// messages between a desktop scanner session and a phone paired as its
+// camera. Both sides are already subscribed to this collection's /stream
+// SSE below; this just fans a message out to them. No WebRTC - the "photo"
+// case carries the actual captured image as a data URL, same as how
+// scanned cards already store capturedImageDataUrl.
+router.post("/:guid/phone-camera-signal", requireAuth, requireOrg, async (c) => {
+  const guid = c.req.param("guid");
+  const message = await c.req.json<PhoneCameraMessage>();
+  emitToSession(guid, "phone_camera_message", message);
   return c.json({ success: true, data: null });
 });
 

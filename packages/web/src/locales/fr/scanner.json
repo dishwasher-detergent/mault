@@ -6,7 +6,8 @@
   "scanEngine": {
     "searchFailed": "Échec de la recherche de la carte",
     "videoStartFailed": "Échec du démarrage de la vidéo",
-    "cameraReinitFailed": "Échec de la réinitialisation de la caméra"
+    "cameraReinitFailed": "Échec de la réinitialisation de la caméra",
+    "phoneCaptureFailed": "Le téléphone n'a pas envoyé de photo à temps."
   },
   "serial": {
     "connectionFailed": {
@@ -158,7 +159,27 @@
     "autoFeed": "Alimentation auto",
     "allowDuplicates": "Autoriser les doublons",
     "calibrate": "Calibrer",
-    "retryConnection": "Réessayer la connexion"
+    "retryConnection": "Réessayer la connexion",
+    "usePhoneAsCamera": "Utiliser le téléphone comme caméra",
+    "phoneCameraConnected": "Caméra du téléphone connectée"
+  },
+  "phoneCamera": {
+    "dialogTitle": "Utiliser le téléphone comme caméra",
+    "scanDescription": "Scanne ce code QR avec ton téléphone, ou ouvre le lien, pour qu'il puisse être utilisé comme caméra de ce scanner.",
+    "connectedDescription": "Ton téléphone est prêt — il prendra une photo dès que ce scanner en aura besoin.",
+    "qrAlt": "Code QR pour associer une caméra de téléphone",
+    "statusWaiting": "En attente du téléphone…",
+    "statusConnected": "Connecté",
+    "statusError": "Impossible de joindre le téléphone. Vérifie que cette page est toujours ouverte dessus, puis réessaie.",
+    "disconnect": "Déconnecter le téléphone",
+    "tryAgain": "Réessayer",
+    "requestingCamera": "Demande d'accès à la caméra…",
+    "cameraError": "Impossible d'accéder à la caméra. Vérifie ton appareil.",
+    "ready": "Caméra prête",
+    "streamingTo": "Prêt pour {{name}}",
+    "disconnected": "Déconnecté de la trieuse.",
+    "reconnect": "Reconnecter",
+    "disconnectButton": "Déconnecter"
   },
   "scannerOverlay": {
     "connectCamera": "Connecte une caméra pour commencer à scanner.",

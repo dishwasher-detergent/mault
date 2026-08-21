@@ -1,5 +1,8 @@
+import { useCollections } from "@/features/collections/api/use-collections";
+import { usePhoneCameraCapture } from "@/features/scanner/api/use-phone-camera-capture";
 import type {
   CameraContextValue,
+  CameraSource,
   CameraStatus,
   ZoomRange,
 } from "@/features/scanner/types";
@@ -59,7 +62,9 @@ export function CameraProvider({ children }: { children: React.ReactNode }) {
   const [zoomRange, setZoomRange] = useState<ZoomRange | null>(null);
   const [cameras, setCameras] = useState<MediaDeviceInfo[]>([]);
   const [selectedCameraId, setSelectedCameraId] = useState<string | null>(null);
+  const [cameraSource, setCameraSource] = useState<CameraSource>("local");
   const streamRef = useRef<MediaStream | null>(null);
+  const { activeCollection } = useCollections();
 
   const startCamera = useCallback(async (deviceId?: string) => {
     setStatus("requesting");
@@ -106,20 +111,56 @@ export function CameraProvider({ children }: { children: React.ReactNode }) {
     setZoomState(value);
   }, []);
 
+  const {
+    status: phonePairingStatus,
+    start: startPhonePairingInternal,
+    stop: stopPhonePairingInternal,
+    requestCapture: requestPhoneCapture,
+  } = usePhoneCameraCapture(activeCollection?.guid);
+
+  const phonePairingUrl = activeCollection
+    ? `${window.location.origin}/app/monitor/${activeCollection.guid}/camera`
+    : null;
+
   const stopCamera = useCallback(() => {
+    if (cameraSource === "phone") {
+      stopPhonePairingInternal();
+    }
     if (streamRef.current) {
       for (const track of streamRef.current.getTracks()) track.stop();
       streamRef.current = null;
       setStream(null);
     }
+    setCameraSource("local");
     setStatus("idle");
     setErrorMessage("");
-  }, []);
+  }, [cameraSource, stopPhonePairingInternal]);
 
   const retryCamera = useCallback(async () => {
     stopCamera();
     await startCamera(selectedCameraId ?? undefined);
   }, [startCamera, stopCamera, selectedCameraId]);
+
+  // There's no stream to hand off any more - the phone only ever sends one
+  // photo at a time, on request (see use-phone-camera-capture.ts). Flipping
+  // cameraSource here is purely a declaration of intent; useCardScanner
+  // reacts to phonePairingStatus separately to know when it's actually safe
+  // to scan.
+  const startPhonePairing = useCallback(() => {
+    if (streamRef.current) {
+      for (const track of streamRef.current.getTracks()) track.stop();
+      streamRef.current = null;
+      setStream(null);
+    }
+    setErrorMessage("");
+    setCameraSource("phone");
+    startPhonePairingInternal();
+  }, [startPhonePairingInternal]);
+
+  const stopPhonePairing = useCallback(() => {
+    stopPhonePairingInternal();
+    setCameraSource((prev) => (prev === "phone" ? "local" : prev));
+  }, [stopPhonePairingInternal]);
 
   const selectCamera = useCallback(async (deviceId: string) => {
     stopCamera();
@@ -142,7 +183,27 @@ export function CameraProvider({ children }: { children: React.ReactNode }) {
   }, [startCamera, isMobile]);
 
   return (
-    <CameraContext value={{ stream, status, errorMessage, zoom, zoomRange, cameras, selectedCameraId, setZoom, selectCamera, retryCamera, stopCamera }}>
+    <CameraContext
+      value={{
+        stream,
+        status,
+        errorMessage,
+        zoom,
+        zoomRange,
+        cameras,
+        selectedCameraId,
+        setZoom,
+        selectCamera,
+        retryCamera,
+        stopCamera,
+        cameraSource,
+        phonePairingStatus,
+        phonePairingUrl,
+        startPhonePairing,
+        stopPhonePairing,
+        requestPhoneCapture,
+      }}
+    >
       {children}
     </CameraContext>
   );

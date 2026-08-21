@@ -7,6 +7,7 @@ import ScannerPage from "@/app/routes/app/index";
 import AppLayout from "@/app/routes/app/layout";
 import MonitorPage from "@/app/routes/app/monitor";
 import MonitorSessionsPage from "@/app/routes/app/monitor-sessions";
+import PhoneCameraPage from "@/app/routes/app/phone-camera";
 import SettingsPage from "@/app/routes/app/settings";
 import VerifyEmailPage from "@/app/routes/app/verify-email";
 import AuthPage from "@/app/routes/auth";
@@ -102,6 +103,10 @@ export const router = createBrowserRouter([
           {
             path: "/app/monitor/:collectionGuid",
             element: <MonitorPage />,
+          },
+          {
+            path: "/app/monitor/:collectionGuid/camera",
+            element: <PhoneCameraPage />,
           },
           {
             path: "/app/settings",

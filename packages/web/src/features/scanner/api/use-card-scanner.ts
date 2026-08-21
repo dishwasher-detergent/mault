@@ -119,6 +119,12 @@ export function useCardScanner({
     selectCamera,
     retryCamera,
     stopCamera,
+    cameraSource,
+    phonePairingStatus,
+    phonePairingUrl,
+    startPhonePairing,
+    stopPhonePairing,
+    requestPhoneCapture,
   } = useCameraContext();
   const { activeCollection } = useCollections();
   const { activeOrg } = useOrg();
@@ -190,6 +196,7 @@ export function useCardScanner({
   }, [handleError]);
 
   useEffect(() => {
+    if (cameraSource === "phone") return; // handled by the phone-status effect below
     if (cameraStatus === "requesting") {
       updateStatus("requesting-camera");
     } else if (cameraStatus === "error") {
@@ -198,8 +205,14 @@ export function useCardScanner({
     } else if (cameraStatus === "idle") {
       updateStatus("initializing");
     }
-    // 'ready' is handled by the stream attachment effect below
-  }, [cameraStatus, cameraError, updateStatus]);
+  }, [cameraStatus, cameraError, cameraSource, updateStatus]);
+
+  useEffect(() => {
+    if (cameraSource !== "phone") return;
+    updateStatus(
+      phonePairingStatus === "connected" ? "paused" : "initializing",
+    );
+  }, [cameraSource, phonePairingStatus, updateStatus]);
 
   const performCapture = useCallback(
     async (checkDuplicate: boolean, contour?: CardContour | null) => {
@@ -252,10 +265,6 @@ export function useCardScanner({
     [updateStatus, allowDuplicates, t],
   );
 
-  // Draws the live camera feed to the display canvas every frame. Capture is
-  // no longer triggered from here - see `captureCard`, which fires off the
-  // module 1 IR sensor confirming a card has arrived (via the feeder command
-  // round trip), not from continuously polling the frame for a card shape.
   const detectionLoop = useCallback(() => {
     const video = videoRef.current;
     const displayCanvas = displayCanvasRef.current;
@@ -339,7 +348,9 @@ export function useCardScanner({
       } catch (err) {
         if (!cancelled) {
           handleErrorRef.current(
-            err instanceof Error ? err.message : t("scanEngine.videoStartFailed"),
+            err instanceof Error
+              ? err.message
+              : t("scanEngine.videoStartFailed"),
           );
         }
       }
@@ -383,6 +394,68 @@ export function useCardScanner({
     }
   }, [duplicateCard, updateStatus]);
 
+  const drawImageToCanvas = useCallback(
+    (dataUrl: string): Promise<CardContour | null> => {
+      return new Promise((resolve) => {
+        const canvas = displayCanvasRef.current;
+        if (!canvas) {
+          resolve(null);
+          return;
+        }
+        const img = new Image();
+        img.onload = () => {
+          canvas.width = img.naturalWidth;
+          canvas.height = img.naturalHeight;
+          const ctx = canvas.getContext("2d");
+          if (!ctx) {
+            resolve(null);
+            return;
+          }
+          ctx.drawImage(img, 0, 0);
+
+          const container = canvas.parentElement;
+          if (container) {
+            const cw = container.clientWidth;
+            const ch = container.clientHeight;
+            const scale = Math.max(cw / canvas.width, ch / canvas.height);
+            const cssW = Math.round(canvas.width * scale);
+            const cssH = Math.round(canvas.height * scale);
+            canvas.style.width = `${cssW}px`;
+            canvas.style.height = `${cssH}px`;
+            canvas.style.left = `${(cw - cssW) / 2}px`;
+            canvas.style.top = `${(ch - cssH) / 2}px`;
+          }
+
+          resolve(
+            getDefaultCardContour(
+              canvas.width,
+              canvas.height,
+              scanRegionRef.current,
+            ),
+          );
+        };
+        img.onerror = () => resolve(null);
+        img.src = dataUrl;
+      });
+    },
+    [],
+  );
+
+  const capturePhonePhotoThenSearch = useCallback(
+    (checkDuplicate: boolean) => {
+      requestPhoneCapture().then(async (dataUrl) => {
+        if (!dataUrl) {
+          isCapturingRef.current = false;
+          handleErrorRef.current(t("scanEngine.phoneCaptureFailed"));
+          return;
+        }
+        const contour = await drawImageToCanvas(dataUrl);
+        performCapture(checkDuplicate, contour);
+      });
+    },
+    [requestPhoneCapture, drawImageToCanvas, performCapture, t],
+  );
+
   const handleForceScan = useCallback(() => {
     if (
       isCapturingRef.current ||
@@ -390,17 +463,22 @@ export function useCardScanner({
     )
       return;
 
-    const canvas = displayCanvasRef.current;
-    if (!canvas) return;
-
     isCapturingRef.current = true;
     updateStatus("searching");
     setDuplicateCard(null);
+
+    if (cameraSource === "phone") {
+      capturePhonePhotoThenSearch(false);
+      return;
+    }
+
+    const canvas = displayCanvasRef.current;
+    if (!canvas) return;
     performCapture(
       false,
       getDefaultCardContour(canvas.width, canvas.height, scanRegionRef.current),
     );
-  }, [updateStatus, performCapture]);
+  }, [updateStatus, performCapture, cameraSource, capturePhonePhotoThenSearch]);
 
   const captureCard = useCallback(() => {
     if (
@@ -409,11 +487,16 @@ export function useCardScanner({
     )
       return;
 
-    const canvas = displayCanvasRef.current;
-    if (!canvas) return;
-
     isCapturingRef.current = true;
     updateStatus("searching");
+
+    if (cameraSource === "phone") {
+      capturePhonePhotoThenSearch(true);
+      return;
+    }
+
+    const canvas = displayCanvasRef.current;
+    if (!canvas) return;
     const contour = getDefaultCardContour(
       canvas.width,
       canvas.height,
@@ -423,7 +506,7 @@ export function useCardScanner({
       settleTimeoutRef.current = null;
       performCapture(true, contour);
     }, captureSettleDelayMsRef.current);
-  }, [updateStatus, performCapture]);
+  }, [updateStatus, performCapture, cameraSource, capturePhonePhotoThenSearch]);
 
   const handleSkipDuplicate = useCallback(() => {
     setDuplicateCard(null);
@@ -441,12 +524,20 @@ export function useCardScanner({
 
   const handleRetryError = useCallback(async () => {
     setErrorMessage("");
+    if (cameraSource === "phone") {
+      // Don't fall back to the local webcam here - just clear the error and
+      // let the phone-status effect above re-evaluate current presence.
+      updateStatus(
+        phonePairingStatus === "connected" ? "paused" : "initializing",
+      );
+      return;
+    }
     try {
       await retryCamera();
     } catch {
       handleErrorRef.current(t("scanEngine.cameraReinitFailed"));
     }
-  }, [retryCamera, t]);
+  }, [retryCamera, t, cameraSource, phonePairingStatus, updateStatus]);
 
   return {
     status,
@@ -464,7 +555,10 @@ export function useCardScanner({
     handleResume,
     handleRetryError,
     handleStopCamera: stopCamera,
-    isCameraActive: cameraStatus === "ready",
+    isCameraActive:
+      cameraSource === "phone"
+        ? phonePairingStatus === "connected"
+        : cameraStatus === "ready",
     zoom,
     zoomRange,
     cameras,
@@ -473,5 +567,10 @@ export function useCardScanner({
     selectCamera,
     allowDuplicates,
     setAllowDuplicates,
+    cameraSource,
+    phonePairingStatus,
+    phonePairingUrl,
+    startPhonePairing,
+    stopPhonePairing,
   };
 }
