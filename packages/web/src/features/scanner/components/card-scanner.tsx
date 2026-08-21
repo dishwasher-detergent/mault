@@ -73,6 +73,7 @@ export function CardScanner({ className, compact }: CardScannerProps) {
     selectCamera,
     allowDuplicates,
     setAllowDuplicates,
+    cameraSource,
     phonePairingStatus,
     phonePairingUrl,
     startPhonePairing,
@@ -295,13 +296,16 @@ export function CardScanner({ className, compact }: CardScannerProps) {
         <video ref={videoRef} className="hidden" playsInline muted />
         <canvas
           ref={displayCanvasRef}
-          className={cn("absolute", !isMobile && "rotate-90")}
+          className={cn(
+            "absolute",
+            !isMobile && cameraSource === "local" && "rotate-90",
+          )}
         />
         <canvas
           ref={overlayCanvasRef}
           className={cn(
             "absolute z-20 pointer-events-none",
-            !isMobile && "rotate-90",
+            !isMobile && cameraSource === "local" && "rotate-90",
           )}
         />
         {isAdmin && debugImageUrl && (
