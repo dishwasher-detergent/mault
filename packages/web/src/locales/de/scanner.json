@@ -183,6 +183,8 @@
   },
   "scannerOverlay": {
     "connectCamera": "Verbinde eine Kamera, um mit dem Scannen zu beginnen.",
+    "waitingForPhone": "Warte auf ein Telefon, das als Kamera gekoppelt wird - zeige den QR-Code über das Kameramenü an.",
+    "phoneReadyNoPhoto": "Telefonkamera bereit. Sie macht ein Foto, sobald eine Karte ankommt.",
     "scannerNotConnected": "Kartensortierer nicht verbunden.",
     "connectScannerButton": "Verbinden",
     "testingScanner": "Verbindung zum Kartensortierer wird getestet…",

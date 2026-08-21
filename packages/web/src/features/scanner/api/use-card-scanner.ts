@@ -168,6 +168,11 @@ export function useCardScanner({
   const [debugImageUrl, setDebugImageUrl] = useState<string | null>(null);
   const debugImageUrlRef = useRef<string | null>(null);
   const [allowDuplicates, setAllowDuplicates] = useState(true);
+  const [hasPhonePhoto, setHasPhonePhoto] = useState(false);
+
+  useEffect(() => {
+    if (cameraSource !== "phone") setHasPhonePhoto(false);
+  }, [cameraSource]);
 
   const updateStatus = useCallback((newStatus: ScannerStatus) => {
     statusRef.current = newStatus;
@@ -404,14 +409,43 @@ export function useCardScanner({
         }
         const img = new Image();
         img.onload = () => {
+          const overlayCanvas = overlayCanvasRef.current;
+
           canvas.width = img.naturalWidth;
           canvas.height = img.naturalHeight;
+          if (overlayCanvas) {
+            overlayCanvas.width = img.naturalWidth;
+            overlayCanvas.height = img.naturalHeight;
+          }
+
           const ctx = canvas.getContext("2d");
           if (!ctx) {
             resolve(null);
             return;
           }
           ctx.drawImage(img, 0, 0);
+          setHasPhonePhoto(true);
+
+          const contour = getDefaultCardContour(
+            canvas.width,
+            canvas.height,
+            scanRegionRef.current,
+          );
+
+          const overlayCtx = overlayCanvas?.getContext("2d");
+          if (overlayCanvas && overlayCtx) {
+            overlayCtx.clearRect(
+              0,
+              0,
+              overlayCanvas.width,
+              overlayCanvas.height,
+            );
+            drawDetectionOverlay(overlayCtx, {
+              detected: true,
+              contour,
+              confidence: 1,
+            });
+          }
 
           const container = canvas.parentElement;
           if (container) {
@@ -420,19 +454,16 @@ export function useCardScanner({
             const scale = Math.max(cw / canvas.width, ch / canvas.height);
             const cssW = Math.round(canvas.width * scale);
             const cssH = Math.round(canvas.height * scale);
-            canvas.style.width = `${cssW}px`;
-            canvas.style.height = `${cssH}px`;
-            canvas.style.left = `${(cw - cssW) / 2}px`;
-            canvas.style.top = `${(ch - cssH) / 2}px`;
+            for (const el of [canvas, overlayCanvas]) {
+              if (!el) continue;
+              el.style.width = `${cssW}px`;
+              el.style.height = `${cssH}px`;
+              el.style.left = `${(cw - cssW) / 2}px`;
+              el.style.top = `${(ch - cssH) / 2}px`;
+            }
           }
 
-          resolve(
-            getDefaultCardContour(
-              canvas.width,
-              canvas.height,
-              scanRegionRef.current,
-            ),
-          );
+          resolve(contour);
         };
         img.onerror = () => resolve(null);
         img.src = dataUrl;
@@ -572,5 +603,6 @@ export function useCardScanner({
     phonePairingUrl,
     startPhonePairing,
     stopPhonePairing,
+    hasPhonePhoto,
   };
 }

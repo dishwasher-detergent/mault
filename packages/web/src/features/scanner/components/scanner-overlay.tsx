@@ -4,6 +4,7 @@ import { cn } from "@/lib/utils";
 import {
   IconAlertTriangle,
   IconCameraSpark,
+  IconDeviceMobile,
   IconDeviceUsb,
   IconHandStop,
   IconLoader2,
@@ -48,17 +49,40 @@ export function ScannerOverlay({
   firmwareVersion,
   hasCatchAll,
   autoFeed,
+  cameraSource,
+  phonePairingStatus,
+  hasPhonePhoto,
   onRetryError,
   onConnectScanner,
 }: ScannerOverlayProps) {
   const { t } = useTranslation("scanner");
+  const isPhoneMode = cameraSource === "phone";
 
   if (!isCameraActive) {
     return (
       <div className="absolute inset-0 z-30 flex items-center justify-center bg-background/80 backdrop-blur-sm rounded-lg p-4">
         <div className="text-center text-xs text-muted-foreground">
-          <IconCameraSpark className="mx-auto mb-2 size-5" />
-          <p>{t("scannerOverlay.connectCamera")}</p>
+          {isPhoneMode ? (
+            <IconDeviceMobile className="mx-auto mb-2 size-5" />
+          ) : (
+            <IconCameraSpark className="mx-auto mb-2 size-5" />
+          )}
+          <p>
+            {isPhoneMode
+              ? t("scannerOverlay.waitingForPhone")
+              : t("scannerOverlay.connectCamera")}
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  if (isPhoneMode && phonePairingStatus === "connected" && !hasPhonePhoto) {
+    return (
+      <div className="absolute inset-0 z-30 flex items-center justify-center bg-background/80 backdrop-blur-sm rounded-lg p-4">
+        <div className="text-center text-xs text-muted-foreground">
+          <IconDeviceMobile className="mx-auto mb-2 size-5" />
+          <p>{t("scannerOverlay.phoneReadyNoPhoto")}</p>
         </div>
       </div>
     );
