@@ -155,6 +155,11 @@ function buildPhases(t: TFunction<"build">, moduleCount: number): Phase[] {
           images: ["/instructions/top_down_view_module.jpg"],
         },
         {
+          key: "center-servos",
+          text: t("assembly.phases.servos.steps.centerServos.text"),
+          note: t("assembly.phases.servos.steps.centerServos.note"),
+        },
+        {
           key: "mount-bottom-flapper",
           text: t("assembly.phases.servos.steps.mountBottomFlapper.text"),
           note: t("assembly.phases.servos.steps.mountBottomFlapper.note"),
