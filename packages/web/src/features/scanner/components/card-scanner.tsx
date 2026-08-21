@@ -78,6 +78,7 @@ export function CardScanner({ className, compact }: CardScannerProps) {
     phonePairingUrl,
     startPhonePairing,
     stopPhonePairing,
+    hasPhonePhoto,
   } = useCardScanner({
     onSearchResults: (cards, capturedImageUrl) => {
       if (cards.length > 0) {
@@ -334,6 +335,9 @@ export function CardScanner({ className, compact }: CardScannerProps) {
           firmwareVersion={firmwareVersion}
           hasCatchAll={hasCatchAll}
           autoFeed={autoFeed}
+          cameraSource={cameraSource}
+          phonePairingStatus={phonePairingStatus}
+          hasPhonePhoto={hasPhonePhoto}
           onRetryError={handleRetryError}
           onConnectScanner={connect}
         />

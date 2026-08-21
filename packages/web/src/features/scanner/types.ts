@@ -94,6 +94,9 @@ export interface ScannerOverlayProps {
   firmwareVersion: string | null;
   hasCatchAll: boolean;
   autoFeed: boolean;
+  cameraSource: CameraSource;
+  phonePairingStatus: PhoneCameraCaptureStatus;
+  hasPhonePhoto: boolean;
   onRetryError: () => void;
   onConnectScanner: () => void;
 }

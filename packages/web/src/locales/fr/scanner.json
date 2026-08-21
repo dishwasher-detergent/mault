@@ -183,6 +183,8 @@
   },
   "scannerOverlay": {
     "connectCamera": "Connecte une caméra pour commencer à scanner.",
+    "waitingForPhone": "En attente d'un téléphone à associer comme caméra - affiche le code QR depuis le menu caméra.",
+    "phoneReadyNoPhoto": "Caméra du téléphone prête. Elle prendra une photo dès qu'une carte arrivera.",
     "scannerNotConnected": "Trieuse non connectée.",
     "connectScannerButton": "Connecter",
     "testingScanner": "Test de la connexion à la trieuse…",

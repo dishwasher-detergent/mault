@@ -183,6 +183,8 @@
   },
   "scannerOverlay": {
     "connectCamera": "Connect a camera to start scanning.",
+    "waitingForPhone": "Waiting for a phone to pair as the camera - use the camera menu to show the QR code.",
+    "phoneReadyNoPhoto": "Phone camera ready. It'll take a photo as soon as a card arrives.",
     "scannerNotConnected": "Card sorter not connected.",
     "connectScannerButton": "Connect",
     "testingScanner": "Testing card sorter connection…",
