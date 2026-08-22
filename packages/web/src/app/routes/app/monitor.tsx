@@ -14,7 +14,7 @@ import { useSessionMonitor } from "@/features/scanner/api/use-session-monitor";
 import { RecentScannedCards } from "@/features/scanner/components/recent-scanned-cards";
 import { SessionErrorsPanel } from "@/features/scanner/components/session-errors-panel";
 import { SessionStatsPanel } from "@/features/scanner/components/session-stats-panel";
-import { computeStats } from "@/features/scanner/lib/compute-stats";
+import { computeDisplayStats } from "@/features/scanner/lib/compute-stats";
 import { useIsMobile } from "@/hooks/use-is-mobile";
 import { cn } from "@/lib/utils";
 import { FIELD_DEFINITIONS } from "@magic-vault/shared";
@@ -148,7 +148,6 @@ export default function MonitorPage() {
   const otherViewers = viewers.filter(
     (v) => v.userId !== scannerUserId && v.userId !== currentUserId,
   );
-  const stats = useMemo(() => computeStats(cards), [cards]);
   const fieldDefinitions =
     collection?.game?.fieldDefinitions ?? FIELD_DEFINITIONS;
   const {
@@ -162,6 +161,10 @@ export default function MonitorPage() {
     setFilters,
     activeFilterCount,
   } = useCardFilterSort(cards, fieldDefinitions);
+  const stats = useMemo(
+    () => computeDisplayStats(cards, filteredAndSorted),
+    [cards, filteredAndSorted],
+  );
 
   const viewerAvatars = (
     <>
@@ -193,7 +196,7 @@ export default function MonitorPage() {
         )}
 
         <div className="flex-1 overflow-y-auto p-3 flex flex-col gap-3">
-          <SessionStatsPanel stats={stats} totalCards={cards.length} />
+          <SessionStatsPanel stats={stats} totalCards={filteredAndSorted.length} />
           <RecentScannedCards cards={cards} />
           <SessionErrorsPanel errors={errors} />
         </div>
@@ -248,7 +251,7 @@ export default function MonitorPage() {
             {viewerAvatars}
           </div>
         )}
-        <SessionStatsPanel stats={stats} totalCards={cards.length} />
+        <SessionStatsPanel stats={stats} totalCards={filteredAndSorted.length} />
         <SessionErrorsPanel errors={errors} />
       </aside>
 

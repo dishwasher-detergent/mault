@@ -1,7 +1,8 @@
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { applyCardFilters } from "@/features/cards/api/use-card-filter-sort";
 import { useCardFilters } from "@/features/cards/api/use-card-filters";
 import { useScannedCards } from "@/features/scanner/api/use-scanned-cards";
-import { computeStats } from "@/features/scanner/lib/compute-stats";
+import { computeDisplayStats } from "@/features/scanner/lib/compute-stats";
 import { cn } from "@/lib/utils";
 import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -28,7 +29,14 @@ export function ScanStats() {
   const { cards, elapsedMs, isTimerActive } = useScannedCards();
   const { filters, toggleRarity, toggleColor, toggleSet } = useCardFilters();
 
-  const stats = useMemo(() => computeStats(cards), [cards]);
+  const visibleCards = useMemo(
+    () => applyCardFilters(cards, filters),
+    [cards, filters],
+  );
+  const stats = useMemo(
+    () => computeDisplayStats(cards, visibleCards),
+    [cards, visibleCards],
+  );
 
   if (!stats) {
     return (

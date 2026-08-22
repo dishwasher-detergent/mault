@@ -55,8 +55,34 @@ export async function vectorizeImageFromUrl(url: string): Promise<number[]> {
   return vectorizeBuffer(imageBuffer);
 }
 
+const SCAN_VECTORIZE_CONCURRENCY = parseInt(
+  process.env.SCAN_VECTORIZE_CONCURRENCY ?? "2",
+);
+
+let activeScanVectorizations = 0;
+const scanVectorizeQueue: (() => void)[] = [];
+
+async function acquireScanVectorizeSlot(): Promise<void> {
+  if (activeScanVectorizations < SCAN_VECTORIZE_CONCURRENCY) {
+    activeScanVectorizations++;
+    return;
+  }
+  await new Promise<void>((resolve) => scanVectorizeQueue.push(resolve));
+  activeScanVectorizations++;
+}
+
+function releaseScanVectorizeSlot(): void {
+  activeScanVectorizations--;
+  scanVectorizeQueue.shift()?.();
+}
+
 export async function vectorizeImageFromBuffer(
   buffer: Buffer,
 ): Promise<number[]> {
-  return vectorizeBuffer(buffer);
+  await acquireScanVectorizeSlot();
+  try {
+    return await vectorizeBuffer(buffer);
+  } finally {
+    releaseScanVectorizeSlot();
+  }
 }
