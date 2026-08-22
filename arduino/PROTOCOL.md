@@ -2,13 +2,20 @@
 
 This documents the serial wire protocol implemented by the sorting
 machine's firmware (`main/main.ino`), running on an Arduino Uno R4
-Minima. Any client that can open a serial connection to the device can
-drive it by following this spec — it does not assume any particular
-host language or application.
+Minima (the current build docs/BOM target) or an ESP32 (see the
+`ARDUINO_ARCH_ESP32` pin block in `main.ino`). Any client that can open
+a serial connection to the device can drive it by following this spec
+— it does not assume any particular host language or application.
 
 ## Transport
 
-- **9600 baud**, native USB CDC serial.
+- **9600 baud**. Uno R4 Minima uses native USB CDC serial; most ESP32
+  boards instead go through a UART-to-USB bridge chip, which looks
+  identical to a client opening the port but does **not** share the
+  Uno's reconnect-without-reset behavior described below — a host
+  closing and reopening the port on one of those boards does reset the
+  sketch (same as a classic Uno), so `{"getStatus": true}` still works
+  either way but isn't the only source of a fresh ready/version line.
 - **Framing:** one JSON object per line, terminated by `\n` (`\r` is
   also accepted as a line terminator). Every request produces exactly
   **one** JSON-line response, in the order it was sent — there is no
@@ -51,9 +58,13 @@ host language or application.
 
 1. Open the serial port at 9600 baud.
 2. Send `{"getStatus": true}` and read the response to confirm the
-   device is alive and check its firmware `version`. (Also useful after
-   reopening a port without a physical power cycle, since the device
-   won't print a fresh boot message in that case.)
+   device is alive and check its firmware `version`. Also useful after
+   reopening a port without a physical power cycle: on native-USB boards
+   (Uno R4 Minima) the sketch doesn't reset and won't print a fresh boot
+   message on its own, so this is the only way to get one; on
+   UART-bridge boards (most ESP32s) reopening does reset the sketch and
+   print one unprompted, but sending this is still harmless and confirms
+   the version either way.
 3. Send `{"setChannelOffset": 0}` or `{"setChannelOffset": 4}` depending
    on which physical layout the machine uses.
 4. Optionally push any calibration you want to (re)apply via `setConfig`

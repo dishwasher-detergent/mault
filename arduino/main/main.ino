@@ -31,16 +31,34 @@ int moduleChannelOffset = 0;
 
 // IR sensor pins — one per module (active LOW: pin reads LOW when card is present).
 // Pins for modules beyond what's addressable at the current offset are simply never read.
+//
+// Two pin sets so the same sketch builds for either board (select via the
+// Arduino IDE's Board menu - no #define needed, the core sets
+// ARDUINO_ARCH_ESP32 automatically):
+//   - Arduino Uno R4 Minima (default/current hardware, build docs/BOM): 2-7,
+//     all INPUT_PULLUP-capable.
+//   - ESP32 (classic WROOM/WROVER): 18, 19, 23, 25, 26, 27 - chosen to avoid
+//     the strapping pins (0, 2, 5, 12, 15), the SPI-flash pins (6-11), the
+//     PSRAM pins on WROVER modules (16, 17), and the input-only pins
+//     (34-39, which have no internal pull-up and would silently break the
+//     active-LOW + INPUT_PULLUP wiring used here). Renumber freely if your
+//     board's wiring needs different pins, as long as you avoid those same
+//     categories - and double check against your specific module's
+//     datasheet if it's an S2/S3/C3 variant, which strap different pins.
+#if defined(ARDUINO_ARCH_ESP32)
+const int IR_PINS[MAX_MODULES] = {18, 19, 23, 25, 26};
+#define IR_PIN_HOPPER 27
+#else
 const int IR_PINS[MAX_MODULES] = {2, 3, 4, 6, 7};
+#define IR_PIN_HOPPER 5
+#endif
+
 #define IR_TIMEOUT_MS  3000  // max ms to wait for a card before aborting
 
 // Module 1 is where every card lands right after feeding, before any routing
 // decision is made — if it sits there this long with no routing command in
 // progress (e.g. the app never sent a route command), something's stuck.
 #define MODULE1_JAM_TIMEOUT_MS 20000
-
-// Hopper IR sensor — active LOW: pin reads LOW while cards remain in the feeder stack
-#define IR_PIN_HOPPER 5
 
 // Declared here (before any function - including maxModuleForOffset() right
 // below) because the Arduino builder hoists auto-generated function

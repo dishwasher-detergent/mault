@@ -54,8 +54,13 @@ export function SerialProvider({ children }: { children: React.ReactNode }) {
             const lines = bufferRef.current.split("\n");
             bufferRef.current = lines.pop() || "";
             for (const line of lines) {
-              const trimmed = line.trim();
-              if (!trimmed) continue;
+              const rawTrimmed = line.trim();
+              if (!rawTrimmed) continue;
+
+              const jsonStart = rawTrimmed.search(/[{[]/);
+              const trimmed =
+                jsonStart > 0 ? rawTrimmed.slice(jsonStart) : rawTrimmed;
+
               console.log("[Serial] ←", trimmed); // eslint-disable-line no-console -- hardware debug trace
 
               try {
