@@ -1,4 +1,4 @@
-export function isArduinoVersionOutdated(
+export function isFirmwareVersionOutdated(
   version: string | null | undefined,
   latestVersion: string,
 ): boolean {

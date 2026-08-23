@@ -49,7 +49,7 @@ pnpm workspace + Turborepo, three packages: `shared` (framework-agnostic types/c
 
 ### Scanning & hardware routing
 
-- The physical sorter's serial protocol is documented standalone in `arduino/PROTOCOL.md` — read that rather than re-deriving it from the web client.
+- The physical sorter's serial protocol is documented standalone in `firmware/PROTOCOL.md` — read that rather than re-deriving it from the web client.
 - Scanning is desktop-only; `DesktopOnlyGuard` in `app/router.tsx` redirects mobile clients to `/app/monitor` for live remote viewing of an in-progress session over SSE (`lib/session-stream.ts`).
 - `lib/scan-lock.ts` prevents two concurrent scan sessions against the same collection.
 - The firmware has no concept of a "bin" — the web app owns the bin→(module, direction) mapping (`shared/interfaces/bin-routes.interface.ts`) and resolves it before ever sending a serial `route` command.

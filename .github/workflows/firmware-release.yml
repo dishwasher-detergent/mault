@@ -4,7 +4,7 @@ on:
   push:
     branches: [master]
     paths:
-      - "arduino/**"
+      - "firmware/**"
   workflow_dispatch: {}
 
 permissions:
@@ -16,12 +16,12 @@ concurrency:
 
 env:
   FQBN: esp32:esp32:esp32
-  BUILD_DIR: arduino/main/build/esp32.esp32.esp32
+  BUILD_DIR: firmware/main/build/esp32.esp32.esp32
   FIRMWARE_DEST: packages/web/public/firmware/esp32-latest.bin
   UNO_FQBN: arduino:renesas_uno:minima
-  UNO_BUILD_DIR: arduino/main/build/arduino.renesas_uno.minima
+  UNO_BUILD_DIR: firmware/main/build/arduino.renesas_uno.minima
   UNO_WIFI_FQBN: arduino:renesas_uno:unor4wifi
-  UNO_WIFI_BUILD_DIR: arduino/main/build/arduino.renesas_uno.unor4wifi
+  UNO_WIFI_BUILD_DIR: firmware/main/build/arduino.renesas_uno.unor4wifi
 
 jobs:
   build-and-release:
@@ -38,9 +38,9 @@ jobs:
       - name: Compute firmware version
         id: version
         run: |
-          CURRENT=$(grep -oP '#define FIRMWARE_VERSION "\K[^"]+' arduino/main/main.ino)
+          CURRENT=$(grep -oP '#define FIRMWARE_VERSION "\K[^"]+' firmware/main/main.ino)
           if [ -z "$CURRENT" ]; then
-            echo "::error::Could not read FIRMWARE_VERSION from arduino/main/main.ino"
+            echo "::error::Could not read FIRMWARE_VERSION from firmware/main/main.ino"
             exit 1
           fi
           MAJOR_MINOR=$(echo "$CURRENT" | grep -oP '^\d+\.\d+')
@@ -52,7 +52,7 @@ jobs:
             PATCH=$((LAST + 1))
           fi
           VERSION="${MAJOR_MINOR}.${PATCH}"
-          sed -i "s/#define FIRMWARE_VERSION \"[^\"]*\"/#define FIRMWARE_VERSION \"$VERSION\"/" arduino/main/main.ino
+          sed -i "s/#define FIRMWARE_VERSION \"[^\"]*\"/#define FIRMWARE_VERSION \"$VERSION\"/" firmware/main/main.ino
           echo "version=$VERSION" >> "$GITHUB_OUTPUT"
 
       - name: Set up arduino-cli
@@ -77,13 +77,13 @@ jobs:
           arduino-cli lib install "Adafruit PWM Servo Driver Library"
 
       - name: Compile (ESP32)
-        run: arduino-cli compile --fqbn "$FQBN" --export-binaries arduino/main
+        run: arduino-cli compile --fqbn "$FQBN" --export-binaries firmware/main
 
       - name: Compile (Uno R4 Minima)
-        run: arduino-cli compile --fqbn "$UNO_FQBN" --export-binaries arduino/main
+        run: arduino-cli compile --fqbn "$UNO_FQBN" --export-binaries firmware/main
 
       - name: Compile (Uno R4 WiFi)
-        run: arduino-cli compile --fqbn "$UNO_WIFI_FQBN" --export-binaries arduino/main
+        run: arduino-cli compile --fqbn "$UNO_WIFI_FQBN" --export-binaries firmware/main
 
       - name: Prepare Uno R4 release assets
         run: |
@@ -129,7 +129,7 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add arduino/main/main.ino "$FIRMWARE_DEST"
+          git add firmware/main/main.ino "$FIRMWARE_DEST"
           if git diff --cached --quiet; then
             echo "changed=false" >> "$GITHUB_OUTPUT"
           else
@@ -157,7 +157,7 @@ jobs:
           TAG="firmware-v${{ steps.version.outputs.version }}"
           UNO_ASSET="dist/arduino-uno-r4-minima-v${{ steps.version.outputs.version }}.bin"
           UNO_WIFI_ASSET="dist/arduino-uno-r4-wifi-v${{ steps.version.outputs.version }}.bin"
-          NOTES="Built from arduino/main/main.ino at ${{ github.sha }}.
+          NOTES="Built from firmware/main/main.ino at ${{ github.sha }}.
 
           - **esp32-latest.bin** - same binary the app fetches for browser flashing (see /build). Merged image, flash at offset 0.
           - **arduino-uno-r4-minima-v${{ steps.version.outputs.version }}.bin** / **arduino-uno-r4-wifi-v${{ steps.version.outputs.version }}.bin** - not browser-flashable (Renesas bootloader), flash manually: \`arduino-cli upload -i <file> --fqbn arduino:renesas_uno:minima -p <port>\` (swap unor4_wifi for the WiFi board), or open main.ino in the Arduino IDE directly."

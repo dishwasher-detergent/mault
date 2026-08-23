@@ -22,7 +22,7 @@ export function BuildHero() {
       </h1>
       <p className="mt-4 max-w-2xl text-sm/relaxed text-muted-foreground md:text-base/relaxed">
         {t("hero.description", {
-          arduino: board.displayName,
+          board: board.displayName,
           modules: moduleCount,
           bins: catchAllBin,
         })}
@@ -32,7 +32,7 @@ export function BuildHero() {
         <span>
           {t("hero.firmwareLabel")}{" "}
           <code className="rounded border border-border bg-muted px-1.5 py-0.5 text-foreground">
-            arduino/main/main.ino
+            firmware/main/main.ino
           </code>
         </span>
         <span>
@@ -61,18 +61,9 @@ export function BuildHero() {
               t={t}
               i18nKey="hero.modulesIntro"
               components={[
-                <strong
-                  key="0"
-                  className="font-medium text-foreground"
-                />,
-                <strong
-                  key="1"
-                  className="font-medium text-foreground"
-                />,
-                <strong
-                  key="2"
-                  className="font-medium text-foreground"
-                />,
+                <strong key="0" className="font-medium text-foreground" />,
+                <strong key="1" className="font-medium text-foreground" />,
+                <strong key="2" className="font-medium text-foreground" />,
               ]}
             />
           </p>

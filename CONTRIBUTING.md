@@ -30,7 +30,7 @@ packages/
 ├── shared/   @magic-vault/shared - types, constants, evaluate-bin rule engine
 ├── server/   @magic-vault/server - Hono API, Drizzle schema/db, auth middleware
 └── web/      @magic-vault/web    - React SPA (scanner, bins, collections, admin, build guide)
-arduino/      Arduino sketch + wire protocol (arduino/PROTOCOL.md)
+firmware/      Firmware sketch + wire protocol (firmware/PROTOCOL.md)
 drizzle/      Generated SQL migrations (see Database changes below)
 ```
 
@@ -132,7 +132,7 @@ you want to poke at the database directly while iterating.
 
 - Keep PRs scoped to one change — a schema migration that also
   refactors unrelated code makes the migration harder to review.
-- Call out in the PR description if a change touches the Arduino
-  protocol (`arduino/PROTOCOL.md` / `arduino/main/main.ino`) — firmware
+- Call out in the PR description if a change touches the firmware
+  protocol (`firmware/PROTOCOL.md` / `firmware/main/main.ino`) — firmware
   and the app's serial layer need to stay in sync, and the firmware
   can't be hot-reloaded the way the app can.

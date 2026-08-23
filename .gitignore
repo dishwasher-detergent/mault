@@ -44,4 +44,4 @@ next-env.d.ts
 
 **/dist/**
 
-arduino/**/build/**
+firmware/**/build/**

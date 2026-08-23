@@ -49,7 +49,7 @@ const GROUPS: Group[] = [
     key: "electronics",
     rows: [
       {
-        key: "arduino",
+        key: "board",
         qty: () => "1",
         name: (boardType) => BOARD_INFO[boardType].displayName,
         part: (_, boardType) =>
@@ -66,10 +66,10 @@ const GROUPS: Group[] = [
             t={t}
             i18nKey={
               boardType === "uno_r4"
-                ? "bom.groups.electronics.items.arduino.notes"
+                ? "bom.groups.electronics.items.unoR4.notes"
                 : "bom.groups.electronics.items.esp32.notes"
             }
-            values={{ path: "arduino/main/main.ino" }}
+            values={{ path: "firmware/main/main.ino" }}
             components={{
               code: <code className="font-mono text-[11px]" />,
             }}
@@ -276,7 +276,10 @@ const GROUPS: Group[] = [
         qty: () => "8",
         name: "M2x6 screw",
         part: (t) => t("bom.groups.fasteners.items.m2x6Screw.part"),
-        notes: (t) => t("bom.groups.fasteners.items.m2x6Screw.notes"),
+        notes: (t, _, boardType) =>
+          t("bom.groups.fasteners.items.m2x6Screw.notes", {
+            board: BOARD_INFO[boardType].shortName,
+          }),
         buyUrl: "https://www.amazon.com/dp/B0CGNP4RXK",
       },
       {
