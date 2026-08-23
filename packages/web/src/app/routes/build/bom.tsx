@@ -1,5 +1,8 @@
 import { BOARD_INFO } from "@/app/routes/build/board-info";
-import { useBoardType, type BoardType } from "@/app/routes/build/use-board-type";
+import {
+  useBoardType,
+  type BoardType,
+} from "@/app/routes/build/use-board-type";
 import {
   MAX_MODULES,
   MIN_MODULES,
@@ -33,9 +36,7 @@ function resolveRowName(row: Row, boardType: BoardType): string {
 }
 
 function resolveRowBuyUrl(row: Row, boardType: BoardType): string | undefined {
-  return typeof row.buyUrl === "function"
-    ? row.buyUrl(boardType)
-    : row.buyUrl;
+  return typeof row.buyUrl === "function" ? row.buyUrl(boardType) : row.buyUrl;
 }
 
 const BOARD_BUY_URLS: Record<BoardType, string> = {
@@ -51,7 +52,7 @@ const GROUPS: Group[] = [
         key: "arduino",
         qty: () => "1",
         name: (boardType) => BOARD_INFO[boardType].displayName,
-        part: (t, boardType) =>
+        part: (_, boardType) =>
           boardType === "uno_r4" ? (
             <>
               Arduino Uno R4 Minima{" "}
@@ -60,7 +61,7 @@ const GROUPS: Group[] = [
           ) : (
             BOARD_INFO.esp32.displayName
           ),
-        notes: (t, moduleCount, boardType) => (
+        notes: (t, _, boardType) => (
           <Trans
             t={t}
             i18nKey={
@@ -134,7 +135,7 @@ const GROUPS: Group[] = [
         qty: () => "1",
         name: "5V Power Supply",
         part: (t) => t("bom.groups.power.items.psu.part"),
-        notes: (t, moduleCount, boardType) =>
+        notes: (t, _, boardType) =>
           t("bom.groups.power.items.psu.notes", {
             board: BOARD_INFO[boardType].shortName,
           }),
@@ -150,7 +151,7 @@ const GROUPS: Group[] = [
               ? "bom.groups.power.items.usbCable.part"
               : "bom.groups.power.items.usbCableEsp32.part",
           ),
-        notes: (t, moduleCount, boardType) =>
+        notes: (t, _, boardType) =>
           t(
             boardType === "uno_r4"
               ? "bom.groups.power.items.usbCable.notes"
@@ -520,9 +521,7 @@ export function BuildBom() {
             <Button
               variant={boardType === "uno_r4" ? "secondary" : "ghost"}
               size="sm"
-              className={cn(
-                boardType !== "uno_r4" && "text-muted-foreground",
-              )}
+              className={cn(boardType !== "uno_r4" && "text-muted-foreground")}
               onClick={() => setBoardType("uno_r4")}
             >
               {t("hero.boardType.unoR4")}
