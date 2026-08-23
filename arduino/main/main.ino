@@ -2,6 +2,16 @@
 #include <Wire.h>
 #include <Adafruit_PWMServoDriver.h>
 
+// S2/S3 only: lets setup() give the USB CDC connection a custom
+// product/manufacturer name (see SORTER_HAS_NATIVE_USB below). Classic
+// ESP32 (WROOM/WROVER) and the Uno R4 Minima never define
+// CONFIG_IDF_TARGET_ESP32S2/S3, so this #include is simply skipped for
+// them - no error from a missing header.
+#if defined(ARDUINO_ARCH_ESP32) && (CONFIG_IDF_TARGET_ESP32S2 || CONFIG_IDF_TARGET_ESP32S3)
+#include <USB.h>
+#define SORTER_HAS_NATIVE_USB 1
+#endif
+
 #define FIRMWARE_VERSION "2.0.1"
 
 // Reported in getStatus/boot so the app knows how (or whether) it can
@@ -556,6 +566,12 @@ void handleCommand(char* json) {
 }
 
 void setup() {
+#if defined(SORTER_HAS_NATIVE_USB)
+  USB.manufacturerName("Mault");
+  USB.productName("Mault Card Sorter");
+  USB.begin();
+#endif
+
   Serial.begin(9600);
   while (!Serial);
 

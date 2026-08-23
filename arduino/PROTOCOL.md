@@ -16,6 +16,16 @@ a serial connection to the device can drive it by following this spec
   closing and reopening the port on one of those boards does reset the
   sketch (same as a classic Uno), so `{"getStatus": true}` still works
   either way but isn't the only source of a fresh ready/version line.
+- ESP32-S2/S3 boards have their own native USB CDC (no bridge chip), and
+  `main.ino` names that connection "Mault Card Sorter" via `USB.h` (see
+  `SORTER_HAS_NATIVE_USB` in `main.ino`) so it's identifiable in a
+  browser's serial port picker or the OS's device list - but only if the
+  board is built with "USB CDC On Boot: Enabled" and the client is
+  actually plugged into the chip's native USB port rather than a
+  secondary UART-only port some of these boards also expose. Classic
+  ESP32 (WROOM/WROVER) has no native USB at all, so its bridge chip's
+  fixed descriptor is what shows up instead - not something this
+  firmware can change.
 - **Framing:** one JSON object per line, terminated by `\n` (`\r` is
   also accepted as a line terminator). Every request produces exactly
   **one** JSON-line response, in the order it was sent — there is no
