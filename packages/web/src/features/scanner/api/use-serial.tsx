@@ -4,6 +4,7 @@ import type {
   SerialBoardType,
   SerialContextValue,
   SerialMessageListener,
+  TestResult,
 } from "@/features/scanner/types";
 import type { BinRoute } from "@magic-vault/shared";
 import { ESPLoader, Transport } from "esptool-js";
@@ -173,18 +174,22 @@ export function SerialProvider({ children }: { children: React.ReactNode }) {
     });
   }, []);
 
-  const sendTest = useCallback(async (): Promise<boolean> => {
+  const sendTest = useCallback(async (): Promise<TestResult> => {
     const sent = await sendCommand(JSON.stringify({ test: true }) + "\n");
-    if (!sent) return false;
+    if (!sent) return { ok: false, error: null };
 
     const response = await waitForLine(10000);
-    if (!response) return false;
+    if (!response) return { ok: false, error: null };
 
     try {
       const parsed = JSON.parse(response);
-      return parsed.status === "test_complete";
+      const ok = parsed.status === "test_complete";
+      return {
+        ok,
+        error: !ok && typeof parsed.error === "string" ? parsed.error : null,
+      };
     } catch {
-      return false;
+      return { ok: false, error: null };
     }
   }, [sendCommand, waitForLine]);
 
@@ -283,13 +288,13 @@ export function SerialProvider({ children }: { children: React.ReactNode }) {
         }
         if (!portRef.current) return;
         toast.info(t("serial.testingDevice"));
-        const ok = await sendTest();
+        const { ok, error: testError } = await sendTest();
         if (!portRef.current) return;
         if (ok) {
           toast.success(t("serial.deviceReady"));
         } else {
           toast.error(t("serial.deviceTestFailed.title"), {
-            description: t("serial.deviceTestFailed.description"),
+            description: testError ?? t("serial.deviceTestFailed.description"),
           });
           void reportSerialEvent({
             command: "test",

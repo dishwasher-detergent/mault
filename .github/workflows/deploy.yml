@@ -55,6 +55,40 @@ jobs:
             echo "PR_TITLE_EOF"
           } >> "$GITHUB_OUTPUT"
 
+      - name: Compute app version
+        id: appversion
+        if: steps.changes.outputs.web == 'true' || steps.changes.outputs.server == 'true'
+        run: |
+          CURRENT=$(node -p "require('./package.json').version")
+          MAJOR_MINOR=$(echo "$CURRENT" | grep -oP '^\d+\.\d+')
+          CURRENT_PATCH=$(echo "$CURRENT" | grep -oP '\d+$')
+          LAST=$(git tag -l "v${MAJOR_MINOR}.*" | sed -E "s/^v${MAJOR_MINOR}\.//" | sort -n | tail -1)
+          if [ -z "$LAST" ]; then
+            PATCH="$CURRENT_PATCH"
+          else
+            PATCH=$((LAST + 1))
+          fi
+          VERSION="${MAJOR_MINOR}.${PATCH}"
+          node scripts/set-version.mjs "$VERSION"
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+
+      - name: Commit and tag app version
+        id: appcommit
+        if: steps.changes.outputs.web == 'true' || steps.changes.outputs.server == 'true'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add package.json packages/web/package.json packages/server/package.json packages/shared/package.json
+          if git diff --cached --quiet; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          else
+            git commit -m "chore(release): v${{ steps.appversion.outputs.version }}"
+            git tag "v${{ steps.appversion.outputs.version }}"
+            git push
+            git push origin "v${{ steps.appversion.outputs.version }}"
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Set up Docker Buildx
         if: steps.changes.outputs.web == 'true' || steps.changes.outputs.server == 'true'
         uses: docker/setup-buildx-action@v3
@@ -139,6 +173,7 @@ jobs:
             --arg commit_url "$COMMIT_URL" \
             --arg author "${{ github.actor }}" \
             --arg redeployed "$REDEPLOYED" \
+            --arg version "${{ steps.appversion.outputs.version }}" \
             --arg ts "$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
             --arg role_id "$DISCORD_ROLE_ID" \
             '{
@@ -152,7 +187,8 @@ jobs:
                 fields: [
                   { name: "Commit", value: ("[`" + $commit + "`](" + $commit_url + ")"), inline: true },
                   { name: "Author", value: $author, inline: true },
-                  { name: "Redeployed", value: $redeployed, inline: true }
+                  { name: "Redeployed", value: $redeployed, inline: true },
+                  { name: "Version", value: ($version | if . == "" then "unchanged" else ("v" + .) end), inline: true }
                 ],
                 timestamp: $ts
               }]

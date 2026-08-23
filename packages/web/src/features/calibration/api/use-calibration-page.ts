@@ -147,13 +147,13 @@ export function useCalibrationPage() {
     }
     setIsTesting(true);
     toast.info(t("useCalibrationPage.toasts.runningTest"));
-    const ok = await sendTest();
+    const { ok, error } = await sendTest();
     setIsTesting(false);
     if (ok) {
       toast.success(t("useCalibrationPage.toasts.testComplete"));
     } else {
       toast.error(t("useCalibrationPage.toasts.testFailed"), {
-        description: t("useCalibrationPage.toasts.noResponse"),
+        description: error ?? t("useCalibrationPage.toasts.noResponse"),
       });
     }
   }, [sendTest, isUnconfigured, t]);

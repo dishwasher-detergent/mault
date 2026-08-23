@@ -69,6 +69,11 @@ export interface FlashEsp32Result {
   confirmedVersion?: string | null;
 }
 
+export interface TestResult {
+  ok: boolean;
+  error: string | null;
+}
+
 export interface SerialContextValue {
   isConnected: boolean;
   isReady: boolean;
@@ -77,7 +82,7 @@ export interface SerialContextValue {
   connect: () => Promise<void>;
   disconnect: () => Promise<void>;
   sendRoute: (route: BinRoute) => Promise<unknown | null>;
-  sendTest: () => Promise<boolean>;
+  sendTest: () => Promise<TestResult>;
   sendCommand: (data: string) => Promise<boolean>;
   receiveResponse: (timeoutMs?: number) => Promise<string>;
   subscribe: (listener: SerialMessageListener) => () => void;

@@ -12,7 +12,7 @@
 #define SORTER_HAS_NATIVE_USB 1
 #endif
 
-#define FIRMWARE_VERSION "2.0.2"
+#define FIRMWARE_VERSION "2.0.3"
 
 // Reported in getStatus/boot so the app knows how (or whether) it can
 // update the device - only the ESP32 build can be reflashed from the
@@ -80,6 +80,19 @@ bool waitForCard(int module, int timeoutMs = IR_TIMEOUT_MS) {
     delay(5);
   }
   return true;
+}
+
+// Returns the first module number (1-based) whose gate sensor currently
+// reads a card present, or 0 if none are blocked. Used to refuse to run
+// the mechanical self-test with something already sitting in the
+// mechanism - the test sweeps every trapdoor/paddle/pusher without regard
+// for a card that's already there. Doesn't check the hopper sensor, since
+// cards waiting in the hopper are a normal, expected state, not a jam.
+int findBlockedModule() {
+  for (int m = 1; m <= maxModuleForOffset(); m++) {
+    if (digitalRead(irPin(m)) == LOW) return m;
+  }
+  return 0;
 }
 
 struct ModuleConfig {
@@ -386,6 +399,16 @@ void handleCommand(char* json) {
 
   // {"test": true} — run a full mechanical test sequence then confirm connection
   if (doc["test"].is<bool>() && doc["test"].as<bool>()) {
+    int blockedModule = findBlockedModule();
+    if (blockedModule > 0) {
+      Serial.print(F("{\"error\":\"module "));
+      Serial.print(blockedModule);
+      Serial.print(F(" sensor is blocked - clear the device before testing\",\"module\":"));
+      Serial.print(blockedModule);
+      Serial.println(F("}"));
+      return;
+    }
+
     for (int m = 1; m <= maxModuleForOffset(); m++) {
       setServoPosition(getChannel(m, 0), moduleConfig[m - 1].bottomOpen);
       setServoPosition(getChannel(m, 1), moduleConfig[m - 1].paddleOpen);
