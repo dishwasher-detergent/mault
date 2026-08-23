@@ -75,7 +75,7 @@ export function ScanStats() {
 
   return (
     <ScrollArea className="min-h-0 rounded-lg">
-      <div className="flex flex-col gap-2 text-sm">
+      <div className="flex flex-col gap-2 pr-3 text-sm">
         <div className="rounded-lg bg-input/20 dark:bg-input/30 border border-input">
           <div className="grid grid-cols-2">
             {statCards.map((card, i) => (

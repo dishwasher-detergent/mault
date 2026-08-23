@@ -1,12 +1,5 @@
 name: Firmware Release
 
-# Builds the ESP32 firmware and publishes it whenever arduino/** changes on
-# master - the merged .bin gets committed into packages/web/public/firmware
-# so the browser-flasher (use-serial.tsx's flashEsp32, fetching
-# ESP32_FIRMWARE_URL) can serve it, and a GitHub Release is cut alongside it
-# so the same binary is available outside the app too. The Uno R4 Minima
-# build isn't affected by any of this - only ESP32 is browser-flashable
-# (see PROTOCOL.md's Transport section for why).
 on:
   push:
     branches: [master]
@@ -25,6 +18,10 @@ env:
   FQBN: esp32:esp32:esp32
   BUILD_DIR: arduino/main/build/esp32.esp32.esp32
   FIRMWARE_DEST: packages/web/public/firmware/esp32-latest.bin
+  UNO_FQBN: arduino:renesas_uno:unor4minima
+  UNO_BUILD_DIR: arduino/main/build/arduino.renesas_uno.unor4minima
+  UNO_WIFI_FQBN: arduino:renesas_uno:unor4wifi
+  UNO_WIFI_BUILD_DIR: arduino/main/build/arduino.renesas_uno.unor4wifi
 
 jobs:
   build-and-release:
@@ -38,6 +35,16 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Read firmware version
+        id: version
+        run: |
+          VERSION=$(grep -oP '#define FIRMWARE_VERSION "\K[^"]+' arduino/main/main.ino)
+          if [ -z "$VERSION" ]; then
+            echo "::error::Could not read FIRMWARE_VERSION from arduino/main/main.ino"
+            exit 1
+          fi
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+
       - name: Set up arduino-cli
         uses: arduino/setup-arduino-cli@v2
 
@@ -48,13 +55,28 @@ jobs:
           arduino-cli core update-index
           arduino-cli core install esp32:esp32
 
+      - name: Install Uno R4 core
+        run: arduino-cli core install arduino:renesas_uno
+
       - name: Install libraries
         run: |
           arduino-cli lib install ArduinoJson
           arduino-cli lib install "Adafruit PWM Servo Driver Library"
 
-      - name: Compile
+      - name: Compile (ESP32)
         run: arduino-cli compile --fqbn "$FQBN" --export-binaries arduino/main
+
+      - name: Compile (Uno R4 Minima)
+        run: arduino-cli compile --fqbn "$UNO_FQBN" --export-binaries arduino/main
+
+      - name: Compile (Uno R4 WiFi)
+        run: arduino-cli compile --fqbn "$UNO_WIFI_FQBN" --export-binaries arduino/main
+
+      - name: Prepare Uno R4 release assets
+        run: |
+          mkdir -p dist
+          cp "$UNO_BUILD_DIR/main.ino.bin" "dist/arduino-uno-r4-minima-v${{ steps.version.outputs.version }}.bin"
+          cp "$UNO_WIFI_BUILD_DIR/main.ino.bin" "dist/arduino-uno-r4-wifi-v${{ steps.version.outputs.version }}.bin"
 
       - name: Set up Python (for esptool merge fallback)
         if: hashFiles(format('{0}/main.ino.merged.bin', env.BUILD_DIR)) == ''
@@ -83,16 +105,6 @@ jobs:
             0x8000  "$BUILD_DIR/main.ino.partitions.bin" \
             0xe000  "$BOOT_APP0" \
             0x10000 "$BUILD_DIR/main.ino.bin"
-
-      - name: Read firmware version
-        id: version
-        run: |
-          VERSION=$(grep -oP '#define FIRMWARE_VERSION "\K[^"]+' arduino/main/main.ino)
-          if [ -z "$VERSION" ]; then
-            echo "::error::Could not read FIRMWARE_VERSION from arduino/main/main.ino"
-            exit 1
-          fi
-          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
 
       - name: Place binary in packages/web/public/firmware
         run: |
@@ -130,14 +142,21 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           TAG="firmware-v${{ steps.version.outputs.version }}"
+          UNO_ASSET="dist/arduino-uno-r4-minima-v${{ steps.version.outputs.version }}.bin"
+          UNO_WIFI_ASSET="dist/arduino-uno-r4-wifi-v${{ steps.version.outputs.version }}.bin"
+          NOTES="Built from arduino/main/main.ino at ${{ github.sha }}.
+
+          - **esp32-latest.bin** - same binary the app fetches for browser flashing (see /build). Merged image, flash at offset 0.
+          - **arduino-uno-r4-minima-v${{ steps.version.outputs.version }}.bin** / **arduino-uno-r4-wifi-v${{ steps.version.outputs.version }}.bin** - not browser-flashable (Renesas bootloader), flash manually: \`arduino-cli upload -i <file> --fqbn arduino:renesas_uno:unor4minima -p <port>\` (swap unor4wifi for the WiFi board), or open main.ino in the Arduino IDE directly."
+
           if gh release view "$TAG" --repo "${{ github.repository }}" >/dev/null 2>&1; then
-            echo "Release $TAG already exists - uploading binary to it instead."
-            gh release upload "$TAG" "$FIRMWARE_DEST" --repo "${{ github.repository }}" --clobber
+            echo "Release $TAG already exists - uploading binaries to it instead."
+            gh release upload "$TAG" "$FIRMWARE_DEST" "$UNO_ASSET" "$UNO_WIFI_ASSET" --repo "${{ github.repository }}" --clobber
           else
-            gh release create "$TAG" "$FIRMWARE_DEST" \
+            gh release create "$TAG" "$FIRMWARE_DEST" "$UNO_ASSET" "$UNO_WIFI_ASSET" \
               --repo "${{ github.repository }}" \
-              --title "ESP32 firmware v${{ steps.version.outputs.version }}" \
-              --notes "Built from arduino/main/main.ino at ${{ github.sha }}. Same binary the app fetches for browser flashing (see /build)."
+              --title "Firmware v${{ steps.version.outputs.version }}" \
+              --notes "$NOTES"
           fi
 
       - name: Notify Discord (success)
@@ -156,7 +175,7 @@ jobs:
               --arg ts "$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
               '{
                 embeds: [{
-                  title: ("ESP32 firmware v" + $version + " released"),
+                  title: ("Firmware v" + $version + " released (ESP32 + Uno R4 Minima + WiFi)"),
                   url: $url,
                   color: 5763719,
                   fields: [
@@ -182,7 +201,7 @@ jobs:
               --arg ts "$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
               '{
                 embeds: [{
-                  title: "ESP32 firmware build failed",
+                  title: "Firmware build failed",
                   description: "Check the run log.",
                   url: $url,
                   color: 15548997,
