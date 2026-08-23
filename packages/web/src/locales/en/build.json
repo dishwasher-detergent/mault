@@ -8,7 +8,12 @@
     "modulesIntro": "Each module has three servos - a <0>bottom</0> trapdoor, a <1>paddle</1> gate, and a left/right <2>pusher</2> - plus an IR sensor. Closing every trapdoor above the target bin and opening only the ones beneath it lets a card fall to the right module before the pusher ejects it.",
     "moduleLabel": "Module {{n}}",
     "binLabel": "Bin {{n}}",
-    "catchAllBinNote": "catch-all, all {{modules}} bottoms open"
+    "catchAllBinNote": "catch-all, all {{modules}} bottoms open",
+    "boardType": {
+      "label": "Board",
+      "unoR4": "Arduino",
+      "esp32": "ESP32"
+    }
   },
   "nav": {
     "partsList": "Parts list",
@@ -51,6 +56,9 @@
           "arduino": {
             "notes": "Runs <code>{{path}}</code>; USB connection to the host computer for Web Serial"
           },
+          "esp32": {
+            "notes": "Runs <code>{{path}}</code>; USB connection to the host computer for Web Serial - also flashable straight from the app afterward, see /app once it's set up"
+          },
           "pca9685": {
             "part": "Adafruit PCA9685 16-channel 12-bit PWM/servo driver",
             "notes": "I²C servo driver - drives all 10 servos"
@@ -80,11 +88,15 @@
         "items": {
           "psu": {
             "part": "5V regulated power supply, 4–10A",
-            "notes": "Dedicated servo bus power into the PCA9685 V+ terminal - do not power 10 servos off the Arduino's onboard 5V"
+            "notes": "Dedicated servo bus power into the PCA9685 V+ terminal - do not power 10 servos off the {{board}}'s onboard 5V"
           },
           "usbCable": {
             "part": "USB-A–to–USB-C cable",
             "notes": "Arduino Uno R4 Minima ↔ host computer"
+          },
+          "usbCableEsp32": {
+            "part": "USB-A–to–Micro-USB cable",
+            "notes": "ESP32 dev board ↔ host computer - check your specific board, some newer ones use USB-C instead"
           },
           "barrelJack": {
             "part": "DC barrel jack or screw-terminal pigtail",
@@ -168,20 +180,23 @@
   },
   "wiring": {
     "heading": "Wiring",
-    "description": "Everything hangs off one I²C bus (PCA9685) and {{count}} digital input pins (IR sensors). The PCA9685's logic side runs off the Arduino's 5V; its <pin>V+</pin> servo rail must come from the external supply, and that supply's ground must be tied back to the Arduino's ground - a floating servo ground is the most common reason a freshly wired unit won't move.",
+    "description": "Everything hangs off one I²C bus (PCA9685) and {{count}} digital input pins (IR sensors). The PCA9685's logic side runs off the {{board}}'s onboard supply; its <pin>V+</pin> servo rail must come from the external supply, and that supply's ground must be tied back to the {{board}}'s ground - a floating servo ground is the most common reason a freshly wired unit won't move.",
     "sections": {
-      "i2c": { "title": "I²C bus" },
+      "i2c": {
+        "title": "I²C bus",
+        "esp32Note": "Wire PCA9685 VCC to the ESP32's 3.3V pin, not 5V - the I²C pull-ups follow whatever powers the PCA9685, and feeding 5V into an ESP32 GPIO can damage it. The PCA9685 chip itself runs its logic fine at 3.3V, so this costs nothing."
+      },
       "servoPower": { "title": "Servo power" },
       "irSensors": { "title": "IR sensors" },
       "channelMap": { "title": "PCA9685 channel map" },
       "diagram": {
         "title": "Wiring diagram",
-        "alt": "Wiring diagram showing the PCA9685, Arduino, servo, and IR sensor connections"
+        "alt": "Wiring diagram showing the PCA9685, microcontroller, servo, and IR sensor connections",
+        "esp32Note": "This diagram shows the Arduino wiring for reference - the connection layout is the same on ESP32 (PCA9685 over I²C, one IR sensor per digital pin), just use the pin numbers and 3.3V logic voltage from the tables above instead of what's pictured."
       }
     },
     "i2cTable": {
       "colPcaPin": "PCA9685 pin",
-      "colArduino": "Arduino Uno R4 Minima",
       "vccLogic": "VCC (logic)"
     },
     "servoPowerTable": {
@@ -190,14 +205,15 @@
       "psuPlus": "External 5V PSU, +",
       "psuMinus": "External 5V PSU, −",
       "toPositive": "PCA9685 <pin>V+</pin> terminal block",
-      "toNegative": "PCA9685 <pin>GND</pin> terminal block <em>and</em> Arduino <pin>GND</pin>"
+      "toNegative": "PCA9685 <pin>GND</pin> terminal block <em>and</em> {{board}} <pin>GND</pin>"
     },
     "irSensors": {
-      "description": "All {{count}} read active-<strong>LOW</strong> (pin goes low when a card is present) using the Arduino's internal pull-up - wire the sensor's digital <pin>OUT</pin> straight to the pin, no external pull-up resistor needed."
+      "description": "All {{count}} read active-<strong>LOW</strong> (pin goes low when a card is present) using the {{board}}'s internal pull-up - wire the sensor's digital <pin>OUT</pin> straight to the pin, no external pull-up resistor needed.",
+      "esp32Note": "Power these sensors' VCC from the ESP32's 3.3V pin if the module supports it, not 5V - their digital OUT tends to swing up to whatever VCC they're fed, and 5V on OUT risks damaging the GPIO it's wired to. Check your specific sensor's datasheet accepts 3.3V."
     },
     "irTable": {
       "colSensor": "Sensor",
-      "colPin": "Arduino pin",
+      "colPin": "Pin",
       "moduleGate": "Module {{n}} gate",
       "hopperThroat": "Hopper throat"
     },
@@ -258,19 +274,27 @@
           },
           "attachBasePanels": {
             "text": "Attach the base panels to the base with 8 M3×6 screws and 8 M3 nuts.",
-            "note": "Do this after the Arduino and PCA9685 are mounted to the panels - the boards are much harder to reach once the panels are on the base."
+            "note": "Do this after the {{board}} and PCA9685 are mounted to the panels - the boards are much harder to reach once the panels are on the base."
           }
         }
       },
       "firmware": {
         "title": "Flash the firmware",
         "steps": {
+          "installEsp32Core": {
+            "text": "In the Arduino IDE, add the ESP32 board index URL (File → Preferences → Additional boards manager URLs): https://raw.githubusercontent.com/espressif/arduino-esp32/gh-pages/package_esp32_index.json, then install \"esp32 by Espressif Systems\" from the Boards Manager.",
+            "note": "This pulls down a few hundred MB (the whole Xtensa toolchain) and takes a few minutes."
+          },
           "installLibraries": {
             "text": "In the Arduino IDE, install the ArduinoJson and Adafruit PWM Servo Driver libraries.",
             "note": "Library Manager → search each by name."
           },
           "uploadSketch": {
             "text": "Select board \"Arduino Uno R4 Minima\", select the correct port, then upload arduino/main/main.ino."
+          },
+          "uploadSketchEsp32": {
+            "text": "Select board \"ESP32 Dev Module\", select the correct port, then upload arduino/main/main.ino.",
+            "note": "Uses the classic WROOM/WROVER pin layout already in the sketch - if you're on an S2/S3/C3 variant, its strapping pins differ, so double-check the IR sensor pin numbers before wiring."
           },
           "confirmReady": {
             "text": "Open the Serial Monitor at 9600 baud and confirm you see {\"status\":\"ready\"} after the board resets."
@@ -332,8 +356,8 @@
         "title": "Wire the electronics",
         "steps": {
           "wireI2c": {
-            "text": "Wire the PCA9685 to the Arduino's I²C bus (SDA/SCL) and 5V/GND for logic power.",
-            "note": "See the Wiring section above."
+            "text": "Wire the PCA9685 to the {{board}}'s I²C bus (SDA/SCL) and logic power/GND.",
+            "note": "See the Wiring section above - the logic voltage is 3.3V on ESP32, not 5V."
           },
           "wireServos": {
             "text": "Wire all {{count}} servos into PCA9685 channels 0–{{lastChannel}} and 15 per the channel map - the feeder always takes the last channel.",
@@ -344,7 +368,7 @@
             "note": "For the power and ground, you will have to combine {{count}} wires into one, either with a breadboard or by twisting and soldering them together. You will need to manually calibrate the sensors to have a shorter throw, as to not get false positives."
           },
           "wirePower": {
-            "text": "Bring the external 5V supply into the PCA9685 V+/GND terminal, and tie its ground to the Arduino's ground.",
+            "text": "Bring the external 5V supply into the PCA9685 V+/GND terminal, and tie its ground to the {{board}}'s ground.",
             "note": "Skipping the common ground is the #1 cause of servos that twitch but never move correctly."
           }
         }
@@ -366,7 +390,7 @@
         "title": "Calibrate from the app",
         "steps": {
           "connectSerial": {
-            "text": "Connect the Arduino to the app via Web Serial, then open /app/calibrate."
+            "text": "Connect the {{board}} to the app via Web Serial, then open /app/calibrate."
           },
           "calibrateModules": {
             "text": "Module Calibration Grid - set the open/closed pulse for each bottom and paddle, and left/neutral/right for each pusher, module by module."

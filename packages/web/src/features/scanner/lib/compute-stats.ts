@@ -117,3 +117,25 @@ export function computeStats(cards: ScannedCard[]): ScanStats | null {
       })),
   };
 }
+
+export function computeDisplayStats(
+  allCards: ScannedCard[],
+  visibleCards: ScannedCard[],
+): ScanStats | null {
+  const all = computeStats(allCards);
+  if (!all) return null;
+
+  const visible = computeStats(visibleCards);
+
+  return {
+    totalCount: visible?.totalCount ?? 0,
+    uniqueCount: visible?.uniqueCount ?? 0,
+    totalValue: visible?.totalValue ?? 0,
+    avgValue: visible?.avgValue ?? 0,
+    hasPricing: visible?.hasPricing ?? false,
+    mostValuable: visible?.mostValuable ?? null,
+    sets: all.sets,
+    rarities: all.rarities,
+    colors: all.colors,
+  };
+}

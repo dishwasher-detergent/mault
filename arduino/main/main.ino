@@ -2,56 +2,64 @@
 #include <Wire.h>
 #include <Adafruit_PWMServoDriver.h>
 
-#define FIRMWARE_VERSION "1.0.2"
+// S2/S3 only: lets setup() give the USB CDC connection a custom
+// product/manufacturer name (see SORTER_HAS_NATIVE_USB below). Classic
+// ESP32 (WROOM/WROVER) and the Uno R4 Minima never define
+// CONFIG_IDF_TARGET_ESP32S2/S3, so this #include is simply skipped for
+// them - no error from a missing header.
+#if defined(ARDUINO_ARCH_ESP32) && (CONFIG_IDF_TARGET_ESP32S2 || CONFIG_IDF_TARGET_ESP32S3)
+#include <USB.h>
+#define SORTER_HAS_NATIVE_USB 1
+#endif
+
+#define FIRMWARE_VERSION "2.0.1"
+
+// Reported in getStatus/boot so the app knows how (or whether) it can
+// update the device - only the ESP32 build can be reflashed from the
+// browser (see use-serial.tsx's flashEsp32).
+#if defined(ARDUINO_ARCH_ESP32)
+#define BOARD_TYPE "esp32"
+#else
+#define BOARD_TYPE "uno_r4"
+#endif
 
 Adafruit_PWMServoDriver pwm = Adafruit_PWMServoDriver();
 
-// PWM channel layout (PCA9685, 16 channels total, valid channels 0-15):
-//   Each module uses 3 consecutive channels (bottom, paddle, pusher),
-//   starting at moduleChannelOffset. The feeder (360° continuous rotation
-//   servo) takes the next channel after the last addressable module.
-//   e.g. offset=0: module1=ch0-2 ... module5=ch12-14, feeder=ch15.
-//        offset=4: module1=ch4-6 ... module3=ch10-12, feeder=ch13.
-//
-// moduleChannelOffset is runtime-configurable (via {"setChannelOffset": N}),
-// not a compile-time constant - the app sends it based on each org's
-// "channel layout" setting:
-//   0 ("standard") - current build docs/BOM, module 1 starts at channel 0.
-//   4 ("legacy") - reserves channels 0-3 for the status LEDs driven by
-//     firmware built before module expansion existed, so orgs with hardware
-//     already wired that way don't need to rewire. Caps out at 3 modules
-//     instead of 5 since the offset eats into the 16-channel budget.
-// MAX_MODULES (below) only sizes compile-time arrays - it is NOT how many
-// modules are actually addressable at any given offset; maxModuleForOffset()
-// is. The app already knows each org's real module count and only ever
-// sends {"route": ...} commands naming modules that exist, so channels
-// beyond what's addressable for the current offset just sit idle.
+// PCA9685 channels: each module uses 3 consecutive channels (bottom, paddle,
+// pusher) starting at moduleChannelOffset; the feeder gets the next channel
+// after the last addressable module. Offset is set via
+// {"setChannelOffset": N} - 0 for standard wiring, 4 for legacy hardware
+// that reserves channels 0-3 for old status LEDs (caps at 3 modules instead
+// of 5). MAX_MODULES only sizes arrays; maxModuleForOffset() is the actual
+// addressable count for the current offset.
 #define MAX_MODULES 5
 int moduleChannelOffset = 0;
 
-// IR sensor pins — one per module (active LOW: pin reads LOW when card is present).
-// Pins for modules beyond what's addressable at the current offset are simply never read.
+// IR sensor pins, one per module (active LOW: pin reads LOW when a card is
+// present). ESP32 pins avoid strapping (0, 2, 5, 12, 15), flash (6-11),
+// WROVER PSRAM (16, 17), and input-only pins (34-39, no internal pull-up) -
+// renumber for other ESP32 variants as needed.
+#if defined(ARDUINO_ARCH_ESP32)
+const int IR_PINS[MAX_MODULES] = {18, 19, 23, 25, 26};
+#define IR_PIN_HOPPER 27
+#else
 const int IR_PINS[MAX_MODULES] = {2, 3, 4, 6, 7};
-#define IR_TIMEOUT_MS  3000  // max ms to wait for a card before aborting
+#define IR_PIN_HOPPER 5
+#endif
 
-// Module 1 is where every card lands right after feeding, before any routing
-// decision is made — if it sits there this long with no routing command in
-// progress (e.g. the app never sent a route command), something's stuck.
+#define IR_TIMEOUT_MS 3000
+
+// If a card sits at module 1 this long with no route in progress, something's stuck.
 #define MODULE1_JAM_TIMEOUT_MS 20000
 
-// Hopper IR sensor — active LOW: pin reads LOW while cards remain in the feeder stack
-#define IR_PIN_HOPPER 5
-
-// Declared here (before any function - including maxModuleForOffset() right
-// below) because the Arduino builder hoists auto-generated function
-// prototypes to the top of the file, above any type defined later — if
-// FeedResult were declared after the first function instead, the hoisted
-// `FeedResult runFeeder();` prototype would precede it and fail to compile
-// ("FeedResult does not name a type").
+// Declared here (before any function) because the Arduino builder hoists
+// auto-generated function prototypes above it - a hoisted
+// `FeedResult runFeeder();` would precede this and fail to compile
+// ("FeedResult does not name a type") if it were declared later instead.
 enum FeedResult { FEED_DETECTED, FEED_TIMEOUT, FEED_EMPTY };
 
 // Largest module number whose 3 channels, plus one feeder channel right
-// after the last addressable module, still fit in channels [offset, 15].
+// after it, still fit in channels [offset, 15].
 int maxModuleForOffset() {
   int n = (15 - moduleChannelOffset) / 3;
   return n < 0 ? 0 : n;
@@ -65,7 +73,6 @@ bool hopperHasCards() {
   return digitalRead(IR_PIN_HOPPER) == LOW;
 }
 
-// Returns true when the IR sensor at 'module' detects a card within timeoutMs.
 bool waitForCard(int module, int timeoutMs = IR_TIMEOUT_MS) {
   unsigned long start = millis();
   while (digitalRead(irPin(module)) == HIGH) {
@@ -84,13 +91,12 @@ struct ModuleConfig {
 ModuleConfig moduleConfig[MAX_MODULES];
 
 struct FeederConfig {
-  int speed;          // PWM pulse for forward motion
-  int duration;       // overall timeout (ms) — max total time before giving up
-  int pulseDuration;  // ms to run the motor per pulse (0 = continuous feed, no pulsing)
-  int pauseDuration;  // ms to pause between pulses (IR checked after each stop)
-  int settleDuration; // ms to keep feeding after the IR first sees the card, so it
-                       // travels all the way into the module 1 mechanism instead of
-                       // stopping right at the sensor's beam
+  int speed;
+  int duration;        // overall timeout (ms) before giving up
+  int pulseDuration;    // ms per pulse; 0 = continuous feed, no pulsing
+  int pauseDuration;    // ms between pulses (IR checked after each stop)
+  int settleDuration;   // extra ms to feed once IR sees the card, so it
+                         // clears the sensor instead of stopping right on it
 };
 
 FeederConfig feederConfig = {315, 1000, 40, 100, 100};
@@ -105,7 +111,6 @@ char inputBuffer[MAX_CMD_LEN + 1];
 uint8_t inputLen = 0;
 bool inputOverflowed = false;
 
-// Idle-time jam watch for module 1 — see checkModule1Jam().
 unsigned long module1PresentSince = 0;
 bool module1JamAlerted = false;
 
@@ -132,12 +137,8 @@ void stopFeeder() {
   pwm.setPin(getFeederChannel(), 0);  // cut PWM signal entirely to stop 360° servo
 }
 
-// Stops the feeder once the IR sees the card. Cards still behind it in the
-// hopper push the current one the rest of the way into module 1, so no extra
-// run time is needed. But the last card has nothing behind it to push it in —
-// so if the hopper is now empty, keep the motor running for
-// feederConfig.settleDuration more ms before stopping, to carry it the rest
-// of the way into the mechanism.
+// The last card in the hopper has nothing behind it to push it fully in, so
+// once the hopper's empty, keep the motor running settleDuration ms longer.
 void settleAndStopFeeder() {
   if (!hopperHasCards()) {
     delay(feederConfig.settleDuration);
@@ -145,21 +146,13 @@ void settleAndStopFeeder() {
   stopFeeder();
 }
 
-// Runs the feeder in short pulses, checking module 1 IR between each stop.
-// Keeps feeding (see settleAndStopFeeder) once a card is detected. Returns
-// FEED_EMPTY only if there was nothing to feed AND no card already waiting
-// at module 1 - once feeding is underway, the hopper going empty is normal
-// (it just means this is the last card) and must NOT abort the feed; only
-// the module 1 sensor or the overall feederConfig.duration timeout should
-// stop it. If pulseDuration is 0, the motor runs continuously (no
-// pulse/pause cycling) while IR is polled throughout.
-//
-// routeCard() calls this again as a presence check right before routing,
-// after the card has already been fed. For the last card in the hopper,
-// hopperHasCards() is false by then even though the card is sitting right
-// at the sensor - so the module 1 check must come before the hopper check,
-// or routeCard() wrongly reports the feeder empty instead of routing the
-// card that's already there.
+// Pulses the feeder, polling module 1's IR between pulses (continuous if
+// pulseDuration is 0). Returns FEED_EMPTY only if the hopper was already
+// empty AND no card is waiting at module 1 - once feeding starts, the
+// hopper going empty just means this is the last card and must not abort
+// the feed. routeCard() also calls this again as a presence check right
+// before routing, so module 1 must be checked before the hopper check, or
+// the last card (hopper already empty by then) gets misreported as absent.
 FeedResult runFeeder() {
   unsigned long start = millis();
 
@@ -187,12 +180,10 @@ FeedResult runFeeder() {
   }
 
   while (millis() - start < (unsigned long)feederConfig.duration) {
-    // Check before starting the motor — catches cards that arrived during the pause
     if (digitalRead(irPin(1)) == LOW) return FEED_DETECTED;
 
     setServoPosition(getFeederChannel(), feederConfig.speed);
 
-    // Poll IR mid-pulse so we catch the moment the card trips the sensor
     unsigned long pulseStart = millis();
     while (millis() - pulseStart < (unsigned long)feederConfig.pulseDuration) {
       if (digitalRead(irPin(1)) == LOW) {
@@ -204,8 +195,7 @@ FeedResult runFeeder() {
 
     stopFeeder();
     if (digitalRead(irPin(1)) == LOW) {
-      // Card arrived during the pause window — motor's already off. Only the
-      // last card (hopper now empty) needs an extra push to fully seat it.
+      // Motor's already off - only the last card (hopper now empty) needs an extra push to fully seat it.
       if (!hopperHasCards()) {
         setServoPosition(getFeederChannel(), feederConfig.speed);
         delay(feederConfig.settleDuration);
@@ -218,12 +208,10 @@ FeedResult runFeeder() {
   return FEED_TIMEOUT;
 }
 
-// Watches module 1's IR sensor while idle (only runs between commands, since
-// routeCard()/runFeeder() block loop() for their duration). If a card has
-// been sitting there continuously longer than MODULE1_JAM_TIMEOUT_MS — e.g.
-// the app never followed up with a route command — report it once so it isn't
-// silently left for the operator to discover. Clears itself (and re-arms)
-// as soon as the sensor sees the card leave.
+// Runs between commands only (routeCard()/runFeeder() block loop() for
+// their duration). Reports once if a card sits at module 1 continuously
+// past MODULE1_JAM_TIMEOUT_MS with no route in progress; re-arms once the
+// sensor sees the card leave.
 void checkModule1Jam() {
   bool present = digitalRead(irPin(1)) == LOW;
   if (!present) {
@@ -278,9 +266,6 @@ void printModuleRangeError() {
   Serial.println(F("\"}"));
 }
 
-// Feeds the next card to module 1. On success returns true. On failure
-// (empty hopper or feed timeout) reports the error over Serial, resets all
-// servos to neutral, and returns false.
 bool feedNextCard() {
   FeedResult feedResult = runFeeder();
   if (feedResult == FEED_DETECTED) return true;
@@ -296,15 +281,9 @@ bool feedNextCard() {
   return false;
 }
 
-// Routes the next fed card according to `direction`:
-//   "left"/"right": every module before targetModule has its bottom opened
-//     so the card passes through to the next module; targetModule then
-//     engages its paddle and pusher to push the card out to that side.
-//   "bottom": opens every addressable module's bottom trapdoor at once so
-//     the card drops straight through and out the bottom of the whole
-//     mechanism, regardless of which module `targetModule` names — a bin
-//     can attach "bottom" to any module (there's no separate catch-all
-//     bin type).
+// "bottom" opens every addressable module's trapdoor at once, regardless of
+// targetModule - a bin can attach "bottom" to any module, there's no
+// separate catch-all bin type.
 void routeCard(int targetModule, const char* direction) {
   if (targetModule < 1 || targetModule > maxModuleForOffset()) {
     printModuleRangeError();
@@ -386,26 +365,18 @@ void handleCommand(char* json) {
     return;
   }
 
-  // {"getStatus": true} — report readiness/version on demand. setup() only
-  // prints this once per power cycle; native-USB boards like the Uno R4
-  // Minima don't reset their sketch when the host closes and reopens the
-  // CDC serial port (unlike classic Uno/FTDI boards, where that toggles DTR
-  // through a reset capacitor), so a reconnect without a physical
-  // power-cycle never re-runs setup(). The app sends this right after
-  // opening the port on every connection so it always gets a fresh
-  // status/version response instead of only on the very first connect.
+  // {"getStatus": true} — report readiness/version on demand; see
+  // PROTOCOL.md for why the app sends this on every connection.
   if (doc["getStatus"].is<bool>() && doc["getStatus"].as<bool>()) {
     Serial.print(F("{\"status\":\"ready\",\"version\":\""));
     Serial.print(FIRMWARE_VERSION);
+    Serial.print(F("\",\"board\":\""));
+    Serial.print(BOARD_TYPE);
     Serial.println(F("\"}"));
     return;
   }
 
-  // {"setChannelOffset": N} — sets the PCA9685 channel offset before module
-  // 1's servos (0 = standard layout starting at channel 0; 4 = legacy
-  // layout that reserves channels 0-3 for status LEDs, matching hardware
-  // built before module expansion supported more than 3 modules). Sent by
-  // the app once per connection, before any other setup/routing command.
+  // {"setChannelOffset": N} — see channel layout comment near the top.
   if (doc["setChannelOffset"].is<int>()) {
     moduleChannelOffset = doc["setChannelOffset"].as<int>();
     setAllNeutral();
@@ -415,30 +386,25 @@ void handleCommand(char* json) {
 
   // {"test": true} — run a full mechanical test sequence then confirm connection
   if (doc["test"].is<bool>() && doc["test"].as<bool>()) {
-    // Open all bottoms and paddles
     for (int m = 1; m <= maxModuleForOffset(); m++) {
       setServoPosition(getChannel(m, 0), moduleConfig[m - 1].bottomOpen);
       setServoPosition(getChannel(m, 1), moduleConfig[m - 1].paddleOpen);
     }
     delay(DELAY_PUSH);
 
-    // Move all pushers left
     for (int m = 1; m <= maxModuleForOffset(); m++) {
       setServoPosition(getChannel(m, 2), moduleConfig[m - 1].pusherLeft);
     }
     delay(DELAY_PUSH);
 
-    // Move all pushers right
     for (int m = 1; m <= maxModuleForOffset(); m++) {
       setServoPosition(getChannel(m, 2), moduleConfig[m - 1].pusherRight);
     }
     delay(DELAY_PUSH);
 
-    // Reset all servos
     setAllNeutral();
     delay(200);
 
-    // Test feeder: spin briefly to verify motor movement (no card expected)
     setServoPosition(getFeederChannel(), feederConfig.speed);
     delay(500);
     stopFeeder();
@@ -455,11 +421,9 @@ void handleCommand(char* json) {
     return;
   }
 
-  // {"clearDevice": true} — opens every module's bottom trapdoor at once so
-  // any card resting in the mechanism drops through to the catch-all area,
-  // then returns everything to neutral. Unlike catch-all routing, this doesn't
-  // call runFeeder() first - it's meant to flush out whatever's physically
-  // stuck regardless of feeder/hopper state.
+  // {"clearDevice": true} — flushes any physically stuck card out the
+  // bottom regardless of feeder/hopper state; unlike catch-all routing,
+  // doesn't call runFeeder() first.
   if (doc["clearDevice"].is<bool>() && doc["clearDevice"].as<bool>()) {
     for (int m = 1; m <= maxModuleForOffset(); m++) {
       setServoPosition(getChannel(m, 0), moduleConfig[m - 1].bottomOpen);
@@ -580,9 +544,7 @@ void handleCommand(char* json) {
     return;
   }
 
-  // {"route": {"module": N, "direction": "left"|"right"|"bottom"}} — route
-  // the next card to module N, pushed left/right, or dropped through the
-  // bottom (any bin can be assigned a "bottom" route, not just a fixed one).
+  // {"route": {"module": N, "direction": "left"|"right"|"bottom"}} — see routeCard()
   if (!doc["route"].isNull()) {
     JsonObject route = doc["route"];
     int module = route["module"] | 0;
@@ -604,6 +566,12 @@ void handleCommand(char* json) {
 }
 
 void setup() {
+#if defined(SORTER_HAS_NATIVE_USB)
+  USB.manufacturerName("Mault");
+  USB.productName("Mault Card Sorter");
+  USB.begin();
+#endif
+
   Serial.begin(9600);
   while (!Serial);
 
@@ -611,9 +579,8 @@ void setup() {
     moduleConfig[m] = {300, 310, 300, 310, 295, 300, 305};
   }
 
-  // IR sensors: active LOW (internal pull-up, sensor pulls LOW when card present).
-  // All MAX_MODULES pins are set up regardless of the eventual channel
-  // offset/module count - harmless, and the app hasn't told us the offset yet.
+  // All MAX_MODULES pins are set up regardless of the eventual offset/module
+  // count - harmless, and the app hasn't told us the offset yet.
   for (int m = 0; m < MAX_MODULES; m++) pinMode(IR_PINS[m], INPUT_PULLUP);
   pinMode(IR_PIN_HOPPER, INPUT_PULLUP);
 
@@ -623,6 +590,8 @@ void setup() {
   setAllNeutral();
   Serial.print(F("{\"status\":\"ready\",\"version\":\""));
   Serial.print(FIRMWARE_VERSION);
+  Serial.print(F("\",\"board\":\""));
+  Serial.print(BOARD_TYPE);
   Serial.println(F("\"}"));
 }
 

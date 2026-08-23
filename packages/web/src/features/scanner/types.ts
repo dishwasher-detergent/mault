@@ -61,10 +61,19 @@ export interface ScannedCardsContextValue {
 
 export type SerialMessageListener = (message: unknown) => void;
 
+export type SerialBoardType = "esp32" | "uno_r4";
+
+export interface FlashEsp32Result {
+  success: boolean;
+  error?: string;
+  confirmedVersion?: string | null;
+}
+
 export interface SerialContextValue {
   isConnected: boolean;
   isReady: boolean;
   firmwareVersion: string | null;
+  board: SerialBoardType | null;
   connect: () => Promise<void>;
   disconnect: () => Promise<void>;
   sendRoute: (route: BinRoute) => Promise<unknown | null>;
@@ -73,6 +82,10 @@ export interface SerialContextValue {
   receiveResponse: (timeoutMs?: number) => Promise<string>;
   subscribe: (listener: SerialMessageListener) => () => void;
   registerPreTestHook: (fn: () => Promise<void>) => void;
+  isFlashing: boolean;
+  flashProgress: number | null;
+  flashLog: string[];
+  flashEsp32: (firmwareUrl: string) => Promise<FlashEsp32Result>;
 }
 
 export interface ScannerControlsProps {

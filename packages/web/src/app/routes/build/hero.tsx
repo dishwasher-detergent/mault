@@ -1,9 +1,13 @@
+import { BOARD_INFO } from "@/app/routes/build/board-info";
+import { useBoardType } from "@/app/routes/build/use-board-type";
 import { useModuleCount } from "@/app/routes/build/use-module-count";
 import { Trans, useTranslation } from "react-i18next";
 
 export function BuildHero() {
   const { t } = useTranslation("build");
   const { moduleCount } = useModuleCount();
+  const { boardType } = useBoardType();
+  const board = BOARD_INFO[boardType];
 
   const catchAllBin = moduleCount * 2 + 1;
   const moduleBins = Array.from({ length: moduleCount }, (_, i) => [
@@ -18,7 +22,7 @@ export function BuildHero() {
       </h1>
       <p className="mt-4 max-w-2xl text-sm/relaxed text-muted-foreground md:text-base/relaxed">
         {t("hero.description", {
-          arduino: "Arduino Uno R4 Minima",
+          arduino: board.displayName,
           modules: moduleCount,
           bins: catchAllBin,
         })}

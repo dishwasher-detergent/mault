@@ -1,3 +1,8 @@
+import { BOARD_INFO } from "@/app/routes/build/board-info";
+import {
+  useBoardType,
+  type BoardType,
+} from "@/app/routes/build/use-board-type";
 import {
   MAX_MODULES,
   MIN_MODULES,
@@ -15,16 +20,29 @@ type BuildT = TFunction<"build">;
 interface Row {
   key: string;
   qty: (moduleCount: number) => string;
-  name: string;
-  part: (t: BuildT) => ReactNode;
-  notes: (t: BuildT, moduleCount: number) => ReactNode;
-  buyUrl?: string;
+  name: string | ((boardType: BoardType) => string);
+  part: (t: BuildT, boardType: BoardType) => ReactNode;
+  notes: (t: BuildT, moduleCount: number, boardType: BoardType) => ReactNode;
+  buyUrl?: string | ((boardType: BoardType) => string | undefined);
 }
 
 interface Group {
   key: string;
   rows: Row[];
 }
+
+function resolveRowName(row: Row, boardType: BoardType): string {
+  return typeof row.name === "function" ? row.name(boardType) : row.name;
+}
+
+function resolveRowBuyUrl(row: Row, boardType: BoardType): string | undefined {
+  return typeof row.buyUrl === "function" ? row.buyUrl(boardType) : row.buyUrl;
+}
+
+const BOARD_BUY_URLS: Record<BoardType, string> = {
+  uno_r4: "https://www.amazon.com/dp/B0C78K4CD4",
+  esp32: "https://www.amazon.com/dp/B08246MCL5",
+};
 
 const GROUPS: Group[] = [
   {
@@ -33,24 +51,31 @@ const GROUPS: Group[] = [
       {
         key: "arduino",
         qty: () => "1",
-        name: "Arduino Uno R4 Minima",
-        part: () => (
-          <>
-            Arduino Uno R4 Minima{" "}
-            <span className="text-muted-foreground">(ABX0080)</span>
-          </>
-        ),
-        notes: (t) => (
+        name: (boardType) => BOARD_INFO[boardType].displayName,
+        part: (_, boardType) =>
+          boardType === "uno_r4" ? (
+            <>
+              Arduino Uno R4 Minima{" "}
+              <span className="text-muted-foreground">(ABX0080)</span>
+            </>
+          ) : (
+            BOARD_INFO.esp32.displayName
+          ),
+        notes: (t, _, boardType) => (
           <Trans
             t={t}
-            i18nKey="bom.groups.electronics.items.arduino.notes"
+            i18nKey={
+              boardType === "uno_r4"
+                ? "bom.groups.electronics.items.arduino.notes"
+                : "bom.groups.electronics.items.esp32.notes"
+            }
             values={{ path: "arduino/main/main.ino" }}
             components={{
               code: <code className="font-mono text-[11px]" />,
             }}
           />
         ),
-        buyUrl: "https://www.amazon.com/dp/B0C78K4CD4",
+        buyUrl: (boardType) => BOARD_BUY_URLS[boardType],
       },
       {
         key: "pca9685",
@@ -108,17 +133,30 @@ const GROUPS: Group[] = [
       {
         key: "psu",
         qty: () => "1",
-        name: "6V Power Supply",
+        name: "5V Power Supply",
         part: (t) => t("bom.groups.power.items.psu.part"),
-        notes: (t) => t("bom.groups.power.items.psu.notes"),
+        notes: (t, _, boardType) =>
+          t("bom.groups.power.items.psu.notes", {
+            board: BOARD_INFO[boardType].shortName,
+          }),
         buyUrl: "https://www.amazon.com/dp/B0B2DZJQCR",
       },
       {
         key: "usb-cable",
         qty: () => "1",
-        name: "USB-A-to-USB-C cable",
-        part: (t) => t("bom.groups.power.items.usbCable.part"),
-        notes: (t) => t("bom.groups.power.items.usbCable.notes"),
+        name: (boardType) => BOARD_INFO[boardType].usbCableName,
+        part: (t, boardType) =>
+          t(
+            boardType === "uno_r4"
+              ? "bom.groups.power.items.usbCable.part"
+              : "bom.groups.power.items.usbCableEsp32.part",
+          ),
+        notes: (t, _, boardType) =>
+          t(
+            boardType === "uno_r4"
+              ? "bom.groups.power.items.usbCable.notes"
+              : "bom.groups.power.items.usbCableEsp32.notes",
+          ),
       },
       {
         key: "barrel-jack",
@@ -319,11 +357,13 @@ function usePartsChecklist() {
 function GroupTable({
   group,
   moduleCount,
+  boardType,
   checked,
   toggle,
 }: {
   group: Group;
   moduleCount: number;
+  boardType: BoardType;
   checked: Record<string, boolean>;
   toggle: (key: string) => void;
 }) {
@@ -385,18 +425,20 @@ function GroupTable({
                         "text-muted-foreground line-through decoration-muted-foreground/50",
                     )}
                   >
-                    {row.part(t)}
+                    {row.part(t, boardType)}
                   </td>
                   <td className="px-3 py-2.5 text-muted-foreground">
-                    {row.notes(t, moduleCount)}
+                    {row.notes(t, moduleCount, boardType)}
                   </td>
                   <td className="px-3 py-2.5">
-                    {row.buyUrl && (
+                    {resolveRowBuyUrl(row, boardType) && (
                       <a
-                        href={row.buyUrl}
+                        href={resolveRowBuyUrl(row, boardType)}
                         target="_blank"
                         rel="noopener noreferrer"
-                        aria-label={t("bom.buyAriaLabel", { part: row.name })}
+                        aria-label={t("bom.buyAriaLabel", {
+                          part: resolveRowName(row, boardType),
+                        })}
                         className="inline-flex items-center text-muted-foreground transition-colors hover:text-foreground"
                       >
                         <IconExternalLink size={14} />
@@ -417,6 +459,7 @@ export function BuildBom() {
   const { t } = useTranslation("build");
   const { checked, toggle } = usePartsChecklist();
   const { moduleCount, setModuleCount } = useModuleCount();
+  const { boardType, setBoardType } = useBoardType();
 
   const allRows = useMemo(() => GROUPS.flatMap((g) => g.rows), []);
   const doneCount = allRows.filter((r) => checked[r.key]).length;
@@ -440,32 +483,58 @@ export function BuildBom() {
         })}
       </p>
 
-      <div className="mt-6 flex items-center gap-3">
-        <span className="font-mono text-[11px] font-semibold tracking-wide text-muted-foreground uppercase">
-          {t("bom.moduleCount.label")}
-        </span>
-        <div className="flex items-center gap-1.5 rounded-md border p-0.5">
-          <Button
-            variant="ghost"
-            size="icon-sm"
-            aria-label={t("bom.moduleCount.decreaseAria")}
-            disabled={moduleCount <= MIN_MODULES}
-            onClick={() => setModuleCount(moduleCount - 1)}
-          >
-            <IconMinus />
-          </Button>
-          <span className="w-4 text-center font-mono text-xs font-medium tabular-nums">
-            {moduleCount}
+      <div className="mt-6 flex flex-wrap items-center gap-x-6 gap-y-3">
+        <div className="flex items-center gap-3">
+          <span className="font-mono text-[11px] font-semibold tracking-wide text-muted-foreground uppercase">
+            {t("bom.moduleCount.label")}
           </span>
-          <Button
-            variant="ghost"
-            size="icon-sm"
-            aria-label={t("bom.moduleCount.increaseAria")}
-            disabled={moduleCount >= MAX_MODULES}
-            onClick={() => setModuleCount(moduleCount + 1)}
-          >
-            <IconPlus />
-          </Button>
+          <div className="flex items-center gap-1.5 rounded-md border p-0.5">
+            <Button
+              variant="ghost"
+              size="icon-sm"
+              aria-label={t("bom.moduleCount.decreaseAria")}
+              disabled={moduleCount <= MIN_MODULES}
+              onClick={() => setModuleCount(moduleCount - 1)}
+            >
+              <IconMinus />
+            </Button>
+            <span className="w-4 text-center font-mono text-xs font-medium tabular-nums">
+              {moduleCount}
+            </span>
+            <Button
+              variant="ghost"
+              size="icon-sm"
+              aria-label={t("bom.moduleCount.increaseAria")}
+              disabled={moduleCount >= MAX_MODULES}
+              onClick={() => setModuleCount(moduleCount + 1)}
+            >
+              <IconPlus />
+            </Button>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-3">
+          <span className="font-mono text-[11px] font-semibold tracking-wide text-muted-foreground uppercase">
+            {t("hero.boardType.label")}
+          </span>
+          <div className="flex items-center gap-1 rounded-md border p-0.5">
+            <Button
+              variant={boardType === "uno_r4" ? "secondary" : "ghost"}
+              size="sm"
+              className={cn(boardType !== "uno_r4" && "text-muted-foreground")}
+              onClick={() => setBoardType("uno_r4")}
+            >
+              {t("hero.boardType.unoR4")}
+            </Button>
+            <Button
+              variant={boardType === "esp32" ? "secondary" : "ghost"}
+              size="sm"
+              className={cn(boardType !== "esp32" && "text-muted-foreground")}
+              onClick={() => setBoardType("esp32")}
+            >
+              {t("hero.boardType.esp32")}
+            </Button>
+          </div>
         </div>
       </div>
 
@@ -493,6 +562,7 @@ export function BuildBom() {
             key={group.key}
             group={group}
             moduleCount={moduleCount}
+            boardType={boardType}
             checked={checked}
             toggle={toggle}
           />

@@ -1,9 +1,12 @@
 import { reportSerialEvent } from "@/features/notifications/api/notification-settings";
 import type {
+  FlashEsp32Result,
+  SerialBoardType,
   SerialContextValue,
   SerialMessageListener,
 } from "@/features/scanner/types";
 import type { BinRoute } from "@magic-vault/shared";
+import { ESPLoader, Transport } from "esptool-js";
 import {
   createContext,
   useCallback,
@@ -24,6 +27,10 @@ export function SerialProvider({ children }: { children: React.ReactNode }) {
   const [isConnected, setIsConnected] = useState(false);
   const [isReady, setIsReady] = useState(false);
   const [firmwareVersion, setFirmwareVersion] = useState<string | null>(null);
+  const [board, setBoard] = useState<SerialBoardType | null>(null);
+  const [isFlashing, setIsFlashing] = useState(false);
+  const [flashProgress, setFlashProgress] = useState<number | null>(null);
+  const [flashLog, setFlashLog] = useState<string[]>([]);
   const portRef = useRef<SerialPort | null>(null);
   const readerRef = useRef<ReadableStreamDefaultReader<Uint8Array> | null>(
     null,
@@ -37,6 +44,37 @@ export function SerialProvider({ children }: { children: React.ReactNode }) {
   const preTestHookRef = useRef<(() => Promise<void>) | null>(null);
 
   const decoderRef = useRef(new TextDecoder());
+
+  // Broadcast listeners (listenersRef) fire for every parsed message
+  // regardless of the waitForLine pending-queue, so this can run alongside
+  // openPort's own internal boot-check without racing it for the same
+  // response line - used by flashEsp32 to confirm the device actually came
+  // back up (and with which version) after a reflash, rather than just
+  // trusting that writeFlash() didn't throw.
+  const waitForReadyMessage = useCallback(
+    (timeoutMs: number): Promise<string | null> => {
+      return new Promise((resolve) => {
+        const listener: SerialMessageListener = (msg) => {
+          if (
+            typeof msg === "object" &&
+            msg !== null &&
+            (msg as Record<string, unknown>).status === "ready"
+          ) {
+            clearTimeout(timeout);
+            listenersRef.current.delete(listener);
+            const version = (msg as Record<string, unknown>).version;
+            resolve(typeof version === "string" ? version : null);
+          }
+        };
+        const timeout = setTimeout(() => {
+          listenersRef.current.delete(listener);
+          resolve(null);
+        }, timeoutMs);
+        listenersRef.current.add(listener);
+      });
+    },
+    [],
+  );
 
   const startReading = useCallback(
     async (
@@ -54,8 +92,13 @@ export function SerialProvider({ children }: { children: React.ReactNode }) {
             const lines = bufferRef.current.split("\n");
             bufferRef.current = lines.pop() || "";
             for (const line of lines) {
-              const trimmed = line.trim();
-              if (!trimmed) continue;
+              const rawTrimmed = line.trim();
+              if (!rawTrimmed) continue;
+
+              const jsonStart = rawTrimmed.search(/[{[]/);
+              const trimmed =
+                jsonStart > 0 ? rawTrimmed.slice(jsonStart) : rawTrimmed;
+
               console.log("[Serial] ←", trimmed); // eslint-disable-line no-console -- hardware debug trace
 
               try {
@@ -156,6 +199,7 @@ export function SerialProvider({ children }: { children: React.ReactNode }) {
     setIsConnected(false);
     setIsReady(false);
     setFirmwareVersion(null);
+    setBoard(null);
 
     // Reject any outstanding waiters
     for (const pending of pendingRef.current) {
@@ -230,6 +274,9 @@ export function SerialProvider({ children }: { children: React.ReactNode }) {
           if (typeof parsed?.version === "string") {
             setFirmwareVersion(parsed.version);
           }
+          if (parsed?.board === "esp32" || parsed?.board === "uno_r4") {
+            setBoard(parsed.board);
+          }
         } catch {}
         if (preTestHookRef.current) {
           await preTestHookRef.current();
@@ -273,6 +320,75 @@ export function SerialProvider({ children }: { children: React.ReactNode }) {
 
     await openPort(port);
   }, [openPort]);
+
+  const flashEsp32 = useCallback(
+    async (firmwareUrl: string): Promise<FlashEsp32Result> => {
+      const port = portRef.current;
+      if (!port) return { success: false, error: "Not connected." };
+
+      setIsFlashing(true);
+      setFlashProgress(0);
+      setFlashLog([]);
+
+      try {
+        await disconnect();
+
+        const response = await fetch(firmwareUrl);
+        if (!response.ok) {
+          throw new Error(`Failed to download firmware (${response.status})`);
+        }
+        const firmwareData = new Uint8Array(await response.arrayBuffer());
+
+        const transport = new Transport(port);
+        const loader = new ESPLoader({
+          transport,
+          baudrate: 115200,
+          terminal: {
+            clean: () => setFlashLog([]),
+            writeLine: (line) => setFlashLog((prev) => [...prev, line]),
+            write: (line) => setFlashLog((prev) => [...prev, line]),
+          },
+        });
+
+        await loader.main();
+        await loader.writeFlash({
+          fileArray: [{ data: firmwareData, address: 0 }],
+          flashMode: "keep",
+          flashFreq: "keep",
+          flashSize: "keep",
+          eraseAll: false,
+          compress: true,
+          reportProgress: (_fileIndex, written, total) => {
+            setFlashProgress(total > 0 ? written / total : null);
+          },
+        });
+        await loader.after("hard_reset");
+        await transport.disconnect();
+
+        await openPort(port);
+        const confirmedVersion = await waitForReadyMessage(5000);
+
+        if (confirmedVersion) {
+          toast.success(
+            t("serial.update.toastConfirmed", { version: confirmedVersion }),
+          );
+        } else {
+          toast.warning(t("serial.update.toastUnconfirmed"));
+        }
+
+        return { success: true, confirmedVersion };
+      } catch (e) {
+        return {
+          success: false,
+          error: e instanceof Error ? e.message : "Flash failed.",
+        };
+      } finally {
+        setIsFlashing(false);
+        setFlashProgress(null);
+      }
+    },
+    [disconnect, openPort, waitForReadyMessage, t],
+  );
 
   useEffect(() => {
     if (!navigator.serial) return;
@@ -375,6 +491,7 @@ export function SerialProvider({ children }: { children: React.ReactNode }) {
         isConnected,
         isReady,
         firmwareVersion,
+        board,
         connect,
         disconnect,
         sendRoute,
@@ -383,6 +500,10 @@ export function SerialProvider({ children }: { children: React.ReactNode }) {
         receiveResponse,
         subscribe,
         registerPreTestHook,
+        isFlashing,
+        flashProgress,
+        flashLog,
+        flashEsp32,
       }}
     >
       {children}
@@ -398,10 +519,6 @@ export function useSerial() {
   return context;
 }
 
-/**
- * Subscribe to all parsed JSON messages from the Arduino.
- * The callback is stable across re-renders (uses a ref internally).
- */
 export function useSerialMessage(listener: SerialMessageListener) {
   const { subscribe } = useSerial();
   const listenerRef = useRef(listener);

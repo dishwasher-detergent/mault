@@ -1,3 +1,5 @@
+import { BOARD_INFO } from "@/app/routes/build/board-info";
+import { useBoardType } from "@/app/routes/build/use-board-type";
 import { useModuleCount } from "@/app/routes/build/use-module-count";
 import { cn } from "@/lib/utils";
 import type { ReactNode } from "react";
@@ -58,20 +60,21 @@ function MiniTable({
 export function BuildWiring() {
   const { t } = useTranslation("build");
   const { moduleCount } = useModuleCount();
+  const { boardType } = useBoardType();
+  const board = BOARD_INFO[boardType];
+  const isEsp32 = boardType === "esp32";
 
-  const MODULE_IR_PINS = [2, 3, 4, 6, 7];
-  const HOPPER_IR_PIN = 5;
   const irSensorCount = moduleCount + 1;
   const irSensorRows: [string, ReactNode][] = [
     ...Array.from({ length: moduleCount }, (_, i) => i + 1).map(
       (n): [string, ReactNode] => [
         t("wiring.irTable.moduleGate", { n }),
-        <Pin key={`ir-${n}`}>{`D${MODULE_IR_PINS[n - 1]}`}</Pin>,
+        <Pin key={`ir-${n}`}>{`${isEsp32 ? "GPIO" : "D"}${board.irPins[n - 1]}`}</Pin>,
       ],
     ),
     [
       t("wiring.irTable.hopperThroat"),
-      <Pin key="ir-hopper">{`D${HOPPER_IR_PIN}`}</Pin>,
+      <Pin key="ir-hopper">{`${isEsp32 ? "GPIO" : "D"}${board.hopperIrPin}`}</Pin>,
     ],
   ];
 
@@ -117,7 +120,7 @@ export function BuildWiring() {
         <Trans
           t={t}
           i18nKey="wiring.description"
-          values={{ count: irSensorCount }}
+          values={{ count: irSensorCount, board: board.shortName }}
           components={{ pin: <Pin /> }}
         />
       </p>
@@ -128,17 +131,28 @@ export function BuildWiring() {
             {t("wiring.sections.i2c.title")}
           </h3>
           <MiniTable
-            columns={[
-              t("wiring.i2cTable.colPcaPin"),
-              t("wiring.i2cTable.colArduino"),
-            ]}
+            columns={[t("wiring.i2cTable.colPcaPin"), board.displayName]}
             rows={[
-              [<Pin key="a">SDA</Pin>, <Pin key="b">SDA</Pin>],
-              [<Pin key="a">SCL</Pin>, <Pin key="b">SCL</Pin>],
-              [t("wiring.i2cTable.vccLogic"), <Pin key="b">5V</Pin>],
+              [
+                <Pin key="a">SDA</Pin>,
+                <Pin key="b">{isEsp32 ? "GPIO21" : "SDA"}</Pin>,
+              ],
+              [
+                <Pin key="a">SCL</Pin>,
+                <Pin key="b">{isEsp32 ? "GPIO22" : "SCL"}</Pin>,
+              ],
+              [
+                t("wiring.i2cTable.vccLogic"),
+                <Pin key="b">{board.logicVoltage}</Pin>,
+              ],
               [<Pin key="a">GND</Pin>, <Pin key="b">GND</Pin>],
             ]}
           />
+          {isEsp32 && (
+            <p className="mt-2 text-[11px]/relaxed text-muted-foreground">
+              {t("wiring.sections.i2c.esp32Note")}
+            </p>
+          )}
         </div>
 
         <div>
@@ -166,6 +180,7 @@ export function BuildWiring() {
                   key="to-minus"
                   t={t}
                   i18nKey="wiring.servoPowerTable.toNegative"
+                  values={{ board: board.shortName }}
                   components={{
                     pin: <Pin />,
                     em: <em className="text-muted-foreground not-italic" />,
@@ -184,7 +199,7 @@ export function BuildWiring() {
             <Trans
               t={t}
               i18nKey="wiring.irSensors.description"
-              values={{ count: irSensorCount }}
+              values={{ count: irSensorCount, board: board.shortName }}
               components={{
                 strong: <strong className="text-foreground" />,
                 pin: <Pin />,
@@ -198,6 +213,11 @@ export function BuildWiring() {
             ]}
             rows={irSensorRows}
           />
+          {isEsp32 && (
+            <p className="mt-2 text-[11px]/relaxed text-muted-foreground">
+              {t("wiring.irSensors.esp32Note")}
+            </p>
+          )}
         </div>
 
         <div>
@@ -227,6 +247,11 @@ export function BuildWiring() {
             alt={t("wiring.sections.diagram.alt")}
             className="w-full rounded-lg border"
           />
+          {isEsp32 && (
+            <p className="mt-2 text-[11px]/relaxed text-muted-foreground">
+              {t("wiring.sections.diagram.esp32Note")}
+            </p>
+          )}
         </div>
       </div>
     </section>
