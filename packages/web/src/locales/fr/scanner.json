@@ -21,7 +21,22 @@
       "description": "Connecté, mais aucune réponse reçue. Essaie de te reconnecter."
     },
     "firmwareOutdatedBanner": "Ta trieuse utilise le firmware v{{version}}, plus ancien que la dernière version v{{latest}}. Réimporte arduino/main/main.ino pour la mettre à jour.",
-    "firmwareVersionMissingBanner": "Le firmware de ta trieuse ne signale aucune version et ne peut pas être utilisé pour scanner. Réimporte la dernière version d'arduino/main/main.ino pour activer le scan."
+    "firmwareVersionMissingBanner": "Le firmware de ta trieuse ne signale aucune version et ne peut pas être utilisé pour scanner. Réimporte la dernière version d'arduino/main/main.ino pour activer le scan.",
+    "update": {
+      "browserButton": "Mettre à jour",
+      "manualButton": "Obtenir la mise à jour",
+      "dialogTitle": "Mise à jour du firmware",
+      "dialogDescription": "Installe le dernier firmware sur ton ESP32 connecté via cet onglet. Ne déconnecte pas l'appareil et ne ferme pas cet onglet pendant l'opération.",
+      "startButton": "Démarrer la mise à jour",
+      "flashing": "Installation en cours — ne déconnecte pas l'appareil…",
+      "successConfirmed": "Firmware mis à jour vers la v{{version}}.",
+      "successUnconfirmed": "Firmware installé, mais l'appareil ne s'est pas reconnecté à temps. Essaie de te reconnecter manuellement pour confirmer.",
+      "toastConfirmed": "Trieuse mise à jour vers le firmware v{{version}}.",
+      "toastUnconfirmed": "Firmware installé, mais l'appareil ne s'est pas reconnecté à temps. Essaie de te reconnecter manuellement.",
+      "errorTitle": "Échec de la mise à jour",
+      "close": "Fermer",
+      "tryAgain": "Réessayer"
+    }
   },
   "sessionMonitor": {
     "connectionLost": "Connexion à la session perdue."

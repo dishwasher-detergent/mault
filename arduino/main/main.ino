@@ -2,7 +2,16 @@
 #include <Wire.h>
 #include <Adafruit_PWMServoDriver.h>
 
-#define FIRMWARE_VERSION "2.0.0"
+#define FIRMWARE_VERSION "2.0.1"
+
+// Reported in getStatus/boot so the app knows how (or whether) it can
+// update the device - only the ESP32 build can be reflashed from the
+// browser (see use-serial.tsx's flashEsp32).
+#if defined(ARDUINO_ARCH_ESP32)
+#define BOARD_TYPE "esp32"
+#else
+#define BOARD_TYPE "uno_r4"
+#endif
 
 Adafruit_PWMServoDriver pwm = Adafruit_PWMServoDriver();
 
@@ -351,6 +360,8 @@ void handleCommand(char* json) {
   if (doc["getStatus"].is<bool>() && doc["getStatus"].as<bool>()) {
     Serial.print(F("{\"status\":\"ready\",\"version\":\""));
     Serial.print(FIRMWARE_VERSION);
+    Serial.print(F("\",\"board\":\""));
+    Serial.print(BOARD_TYPE);
     Serial.println(F("\"}"));
     return;
   }
@@ -563,6 +574,8 @@ void setup() {
   setAllNeutral();
   Serial.print(F("{\"status\":\"ready\",\"version\":\""));
   Serial.print(FIRMWARE_VERSION);
+  Serial.print(F("\",\"board\":\""));
+  Serial.print(BOARD_TYPE);
   Serial.println(F("\"}"));
 }
 

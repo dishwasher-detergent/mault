@@ -1,12 +1,17 @@
+import { Button } from "@/components/ui/button";
+import { Esp32FlashDialog } from "@/features/scanner/components/esp32-flash-dialog";
 import { useSerial } from "@/features/scanner/api/use-serial";
 import { LATEST_ARDUINO_VERSION } from "@/lib/arduino-version";
+import { FIRMWARE_RELEASES_URL } from "@/lib/links";
 import { isArduinoVersionOutdated } from "@magic-vault/shared";
 import { IconAlertTriangle } from "@tabler/icons-react";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
 export function FirmwareVersionBanner() {
   const { t } = useTranslation("scanner");
-  const { isConnected, firmwareVersion } = useSerial();
+  const { isConnected, firmwareVersion, board } = useSerial();
+  const [flashDialogOpen, setFlashDialogOpen] = useState(false);
 
   if (
     !isConnected ||
@@ -23,6 +28,33 @@ export function FirmwareVersionBanner() {
           latest: LATEST_ARDUINO_VERSION,
         })}
       </span>
+      {board === "esp32" ? (
+        <>
+          <Button
+            size="xs"
+            variant="outline"
+            className="shrink-0 border-amber-500/40 bg-transparent text-amber-900 hover:bg-amber-500/20 dark:text-amber-200"
+            onClick={() => setFlashDialogOpen(true)}
+          >
+            {t("serial.update.browserButton")}
+          </Button>
+          <Esp32FlashDialog
+            open={flashDialogOpen}
+            onOpenChange={setFlashDialogOpen}
+          />
+        </>
+      ) : (
+        <Button
+          size="xs"
+          variant="outline"
+          className="shrink-0 border-amber-500/40 bg-transparent text-amber-900 hover:bg-amber-500/20 dark:text-amber-200"
+          render={
+            <a href={FIRMWARE_RELEASES_URL} target="_blank" rel="noreferrer" />
+          }
+        >
+          {t("serial.update.manualButton")}
+        </Button>
+      )}
     </div>
   );
 }

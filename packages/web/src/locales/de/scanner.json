@@ -21,7 +21,22 @@
       "description": "Verbunden, aber keine Antwort erhalten. Versuche eine erneute Verbindung."
     },
     "firmwareOutdatedBanner": "Dein Sortierer läuft mit Firmware v{{version}}, älter als die aktuelle v{{latest}}. Lade arduino/main/main.ino erneut hoch, um zu aktualisieren.",
-    "firmwareVersionMissingBanner": "Die Firmware deines Sortierers meldet keine Version und kann nicht zum Scannen verwendet werden. Lade die neueste arduino/main/main.ino erneut hoch, um das Scannen zu aktivieren."
+    "firmwareVersionMissingBanner": "Die Firmware deines Sortierers meldet keine Version und kann nicht zum Scannen verwendet werden. Lade die neueste arduino/main/main.ino erneut hoch, um das Scannen zu aktivieren.",
+    "update": {
+      "browserButton": "Jetzt aktualisieren",
+      "manualButton": "Update holen",
+      "dialogTitle": "Firmware aktualisieren",
+      "dialogDescription": "Spielt die neueste Firmware über diesen Browser-Tab auf deinen verbundenen ESP32. Trenne das Gerät nicht und schließe diesen Tab nicht, während der Vorgang läuft.",
+      "startButton": "Update starten",
+      "flashing": "Wird installiert — Gerät nicht trennen…",
+      "successConfirmed": "Firmware auf v{{version}} aktualisiert.",
+      "successUnconfirmed": "Firmware wurde installiert, aber das Gerät hat sich nicht rechtzeitig wieder verbunden. Verbinde dich manuell erneut, um es zu bestätigen.",
+      "toastConfirmed": "Sortierer auf Firmware v{{version}} aktualisiert.",
+      "toastUnconfirmed": "Firmware wurde installiert, aber das Gerät hat sich nicht rechtzeitig wieder verbunden. Verbinde dich manuell erneut.",
+      "errorTitle": "Update fehlgeschlagen",
+      "close": "Schließen",
+      "tryAgain": "Erneut versuchen"
+    }
   },
   "sessionMonitor": {
     "connectionLost": "Verbindung zur Sitzung verloren."

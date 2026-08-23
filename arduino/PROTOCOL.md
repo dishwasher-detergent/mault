@@ -25,8 +25,10 @@ a serial connection to the device can drive it by following this spec
   `{"error":"command too long"}`.
 - Malformed JSON gets `{"error":"invalid JSON","reason":"...","length":N,"received":"<escaped input>"}`.
 - An unrecognized (but validly-parsed) command gets `{"error":"unknown command"}`.
-- On power-up the device prints `{"status":"ready","version":"1.0.2"}`
-  unprompted, before any command is sent.
+- On power-up the device prints `{"status":"ready","version":"1.0.2","board":"esp32"}`
+  unprompted, before any command is sent. `board` is `"esp32"` or `"uno_r4"`
+  - the app uses it to decide whether the device can be reflashed from the
+  browser (ESP32 only) or needs a link to the GitHub repo instead.
 - One other message is **unsolicited** and can arrive at any time
   between command/response pairs: `{"error":"jam","module":1}`, pushed
   if module 1's IR sensor sees a card continuously for 20 seconds
@@ -83,7 +85,7 @@ field is present.
 ```json
 {"getStatus": true}
 ```
-→ `{"status":"ready","version":"1.0.2"}`
+→ `{"status":"ready","version":"1.0.2","board":"esp32"}`
 
 ### `setChannelOffset`
 ```json
