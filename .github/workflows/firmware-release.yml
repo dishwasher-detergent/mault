@@ -1,0 +1,192 @@
+name: Firmware Release
+
+# Builds the ESP32 firmware and publishes it whenever arduino/** changes on
+# master - the merged .bin gets committed into packages/web/public/firmware
+# so the browser-flasher (use-serial.tsx's flashEsp32, fetching
+# ESP32_FIRMWARE_URL) can serve it, and a GitHub Release is cut alongside it
+# so the same binary is available outside the app too. The Uno R4 Minima
+# build isn't affected by any of this - only ESP32 is browser-flashable
+# (see PROTOCOL.md's Transport section for why).
+on:
+  push:
+    branches: [master]
+    paths:
+      - "arduino/**"
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+concurrency:
+  group: firmware-release-master
+  cancel-in-progress: false
+
+env:
+  FQBN: esp32:esp32:esp32
+  BUILD_DIR: arduino/main/build/esp32.esp32.esp32
+  FIRMWARE_DEST: packages/web/public/firmware/esp32-latest.bin
+
+jobs:
+  build-and-release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up arduino-cli
+        uses: arduino/setup-arduino-cli@v2
+
+      - name: Install ESP32 core
+        run: |
+          arduino-cli config init --overwrite
+          arduino-cli config add board_manager.additional_urls https://raw.githubusercontent.com/espressif/arduino-esp32/gh-pages/package_esp32_index.json
+          arduino-cli core update-index
+          arduino-cli core install esp32:esp32
+
+      - name: Install libraries
+        run: |
+          arduino-cli lib install ArduinoJson
+          arduino-cli lib install "Adafruit PWM Servo Driver Library"
+
+      - name: Compile
+        run: arduino-cli compile --fqbn "$FQBN" --export-binaries arduino/main
+
+      - name: Set up Python (for esptool merge fallback)
+        if: hashFiles(format('{0}/main.ino.merged.bin', env.BUILD_DIR)) == ''
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.x"
+
+      # Recent arduino-esp32 core versions produce a merged bin
+      # automatically (bootloader + partitions + app, one flashable image at
+      # offset 0). Fall back to building it by hand if the installed core
+      # version doesn't - same offsets documented in PROTOCOL.md/the build
+      # guide's firmware phase.
+      - name: Merge binary (fallback)
+        if: hashFiles(format('{0}/main.ino.merged.bin', env.BUILD_DIR)) == ''
+        run: |
+          pip install esptool
+          BOOT_APP0=$(find "$HOME/.arduino15/packages/esp32" -name boot_app0.bin | head -1)
+          if [ -z "$BOOT_APP0" ]; then
+            echo "::error::boot_app0.bin not found in the installed esp32 core"
+            exit 1
+          fi
+          esptool.py --chip esp32 merge_bin \
+            -o "$BUILD_DIR/main.ino.merged.bin" \
+            --flash_mode dio --flash_freq 40m --flash_size 4MB \
+            0x1000  "$BUILD_DIR/main.ino.bootloader.bin" \
+            0x8000  "$BUILD_DIR/main.ino.partitions.bin" \
+            0xe000  "$BOOT_APP0" \
+            0x10000 "$BUILD_DIR/main.ino.bin"
+
+      - name: Read firmware version
+        id: version
+        run: |
+          VERSION=$(grep -oP '#define FIRMWARE_VERSION "\K[^"]+' arduino/main/main.ino)
+          if [ -z "$VERSION" ]; then
+            echo "::error::Could not read FIRMWARE_VERSION from arduino/main/main.ino"
+            exit 1
+          fi
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+
+      - name: Place binary in packages/web/public/firmware
+        run: |
+          mkdir -p "$(dirname "$FIRMWARE_DEST")"
+          cp "$BUILD_DIR/main.ino.merged.bin" "$FIRMWARE_DEST"
+
+      - name: Commit binary
+        id: commit
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add "$FIRMWARE_DEST"
+          if git diff --cached --quiet; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          else
+            git commit -m "chore(firmware): rebuild esp32 firmware v${{ steps.version.outputs.version }}"
+            git push
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      # Pushes made with the default GITHUB_TOKEN don't trigger other
+      # workflow runs (GitHub's built-in loop guard), so deploy.yml's own
+      # `push: branches: [master]` trigger won't fire for the commit above -
+      # without this, the live site would keep serving whatever firmware
+      # binary was already baked into the currently-deployed image until
+      # some unrelated change happened to redeploy web next.
+      - name: Trigger Coolify deployment (web)
+        if: steps.commit.outputs.changed == 'true'
+        run: |
+          curl -sf --request POST "${{ secrets.COOLIFY_WEBHOOK_WEB }}" \
+            --header "Authorization: Bearer ${{ secrets.COOLIFY_TOKEN }}"
+
+      - name: Create release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          TAG="firmware-v${{ steps.version.outputs.version }}"
+          if gh release view "$TAG" --repo "${{ github.repository }}" >/dev/null 2>&1; then
+            echo "Release $TAG already exists - uploading binary to it instead."
+            gh release upload "$TAG" "$FIRMWARE_DEST" --repo "${{ github.repository }}" --clobber
+          else
+            gh release create "$TAG" "$FIRMWARE_DEST" \
+              --repo "${{ github.repository }}" \
+              --title "ESP32 firmware v${{ steps.version.outputs.version }}" \
+              --notes "Built from arduino/main/main.ino at ${{ github.sha }}. Same binary the app fetches for browser flashing (see /build)."
+          fi
+
+      - name: Notify Discord (success)
+        if: success()
+        env:
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_DEPLOY_WEBHOOK_URL }}
+        run: |
+          curl -sf -X POST "$DISCORD_WEBHOOK_URL" \
+            -H "Content-Type: application/json" \
+            -d "$(jq -n \
+              --arg version "${{ steps.version.outputs.version }}" \
+              --arg url "https://github.com/${{ github.repository }}/releases/tag/firmware-v${{ steps.version.outputs.version }}" \
+              --arg commit "${GITHUB_SHA::7}" \
+              --arg commit_url "https://github.com/${{ github.repository }}/commit/${{ github.sha }}" \
+              --arg author "${{ github.actor }}" \
+              --arg ts "$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
+              '{
+                embeds: [{
+                  title: ("ESP32 firmware v" + $version + " released"),
+                  url: $url,
+                  color: 5763719,
+                  fields: [
+                    { name: "Commit", value: ("[`" + $commit + "`](" + $commit_url + ")"), inline: true },
+                    { name: "Author", value: $author, inline: true }
+                  ],
+                  timestamp: $ts
+                }]
+              }')"
+
+      - name: Notify Discord (failure)
+        if: failure()
+        env:
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_DEPLOY_WEBHOOK_URL }}
+        run: |
+          curl -sf -X POST "$DISCORD_WEBHOOK_URL" \
+            -H "Content-Type: application/json" \
+            -d "$(jq -n \
+              --arg url "https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}" \
+              --arg commit "${GITHUB_SHA::7}" \
+              --arg commit_url "https://github.com/${{ github.repository }}/commit/${{ github.sha }}" \
+              --arg author "${{ github.actor }}" \
+              --arg ts "$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
+              '{
+                embeds: [{
+                  title: "ESP32 firmware build failed",
+                  description: "Check the run log.",
+                  url: $url,
+                  color: 15548997,
+                  fields: [
+                    { name: "Commit", value: ("[`" + $commit + "`](" + $commit_url + ")"), inline: true },
+                    { name: "Author", value: $author, inline: true }
+                  ],
+                  timestamp: $ts
+                }]
+              }')"
