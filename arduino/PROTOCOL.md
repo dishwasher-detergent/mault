@@ -113,6 +113,13 @@ sweeps every pusher left → sweeps every pusher right → resets all to
 neutral → briefly spins the feeder (500ms) → stops it.
 → `{"status":"test_complete"}`
 
+Refuses to run (and reports which module) if any module's gate sensor
+already reads a card present, since the sequence sweeps every
+trapdoor/paddle/pusher without regard for something already sitting in the
+mechanism - clear it first (`clearDevice`) and retry. Doesn't check the
+hopper sensor, since cards waiting to be fed are a normal state, not a jam.
+→ `{"error":"module 2 sensor is blocked - clear the device before testing","module":2}`
+
 ### `neutral`
 ```json
 {"neutral": true}
