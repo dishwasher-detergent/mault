@@ -2,7 +2,7 @@
 #include <Wire.h>
 #include <Adafruit_PWMServoDriver.h>
 
-#define FIRMWARE_VERSION "1.0.2"
+#define FIRMWARE_VERSION "2.0.0"
 
 Adafruit_PWMServoDriver pwm = Adafruit_PWMServoDriver();
 
