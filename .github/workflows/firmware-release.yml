@@ -18,10 +18,10 @@ env:
   FQBN: esp32:esp32:esp32
   BUILD_DIR: arduino/main/build/esp32.esp32.esp32
   FIRMWARE_DEST: packages/web/public/firmware/esp32-latest.bin
-  UNO_FQBN: arduino:renesas_uno:unor4minima
-  UNO_BUILD_DIR: arduino/main/build/arduino.renesas_uno.unor4minima
-  UNO_WIFI_FQBN: arduino:renesas_uno:unor4wifi
-  UNO_WIFI_BUILD_DIR: arduino/main/build/arduino.renesas_uno.unor4wifi
+  UNO_FQBN: arduino:renesas_uno:unor4_minima
+  UNO_BUILD_DIR: arduino/main/build/arduino.renesas_uno.unor4_minima
+  UNO_WIFI_FQBN: arduino:renesas_uno:unor4_wifi
+  UNO_WIFI_BUILD_DIR: arduino/main/build/arduino.renesas_uno.unor4_wifi
 
 jobs:
   build-and-release:
@@ -157,7 +157,7 @@ jobs:
           NOTES="Built from arduino/main/main.ino at ${{ github.sha }}.
 
           - **esp32-latest.bin** - same binary the app fetches for browser flashing (see /build). Merged image, flash at offset 0.
-          - **arduino-uno-r4-minima-v${{ steps.version.outputs.version }}.bin** / **arduino-uno-r4-wifi-v${{ steps.version.outputs.version }}.bin** - not browser-flashable (Renesas bootloader), flash manually: \`arduino-cli upload -i <file> --fqbn arduino:renesas_uno:unor4minima -p <port>\` (swap unor4wifi for the WiFi board), or open main.ino in the Arduino IDE directly."
+          - **arduino-uno-r4-minima-v${{ steps.version.outputs.version }}.bin** / **arduino-uno-r4-wifi-v${{ steps.version.outputs.version }}.bin** - not browser-flashable (Renesas bootloader), flash manually: \`arduino-cli upload -i <file> --fqbn arduino:renesas_uno:unor4_minima -p <port>\` (swap unor4_wifi for the WiFi board), or open main.ino in the Arduino IDE directly."
 
           if gh release view "$TAG" --repo "${{ github.repository }}" >/dev/null 2>&1; then
             echo "Release $TAG already exists - uploading binaries to it instead."
