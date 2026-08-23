@@ -12,6 +12,7 @@ on:
     branches: [master]
     paths:
       - "arduino/**"
+  workflow_dispatch: {}
 
 permissions:
   contents: write
