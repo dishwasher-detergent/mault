@@ -91,7 +91,7 @@
     "subtitle": "Le logiciel et la trieuse physique sont tous deux libres à construire, inspecter et modifier. Récupère le code et imprime la tienne.",
     "sourceCode": {
       "title": "Code source",
-      "description": "L'application web, l'API et le firmware Arduino sont tous dans un seul dépôt sous licence libre.",
+      "description": "L'application web, l'API et le firmware de la trieuse sont tous dans un seul dépôt sous licence libre.",
       "cta": "Voir sur GitHub"
     },
     "printableSorter": {

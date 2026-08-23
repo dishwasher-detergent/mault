@@ -91,7 +91,7 @@
     "subtitle": "Die Software und der physische Sortierer sind beide frei zugänglich zum Nachbauen, Prüfen und Anpassen. Hol dir den Code und drucke deinen eigenen.",
     "sourceCode": {
       "title": "Quellcode",
-      "description": "Die Web-App, die API und die Arduino-Firmware liegen alle in einem Repository unter einer offenen Lizenz.",
+      "description": "Die Web-App, die API und die Sortierer-Firmware liegen alle in einem Repository unter einer offenen Lizenz.",
       "cta": "Auf GitHub ansehen"
     },
     "printableSorter": {

@@ -1,7 +1,7 @@
 {
   "hero": {
     "title": "Build the card sorter",
-    "description": "Parts list and assembly instructions for the physical sorting unit: a hopper feeds cards one at a time through {{modules}} stacked routing modules, each capable of dropping a card into one of two side bins or passing it down to the next module - {{bins}} bins total, driven by an {{arduino}} over I²C.",
+    "description": "Parts list and assembly instructions for the physical sorting unit: a hopper feeds cards one at a time through {{modules}} stacked routing modules, each capable of dropping a card into one of two side bins or passing it down to the next module - {{bins}} bins total, driven by an {{board}} over I²C.",
     "firmwareLabel": "Firmware",
     "enclosureLabel": "Enclosure",
     "calibrationLabel": "Calibration",
@@ -53,7 +53,7 @@
       "electronics": {
         "title": "Electronics",
         "items": {
-          "arduino": {
+          "unoR4": {
             "notes": "Runs <code>{{path}}</code>; USB connection to the host computer for Web Serial"
           },
           "esp32": {
@@ -147,7 +147,7 @@
           },
           "m2x6Screw": {
             "part": "M2×6 screw",
-            "notes": "Mounts the Arduino and PCA9685 servo driver board to the base panels"
+            "notes": "Mounts the {{board}} and PCA9685 servo driver board to the base panels"
           },
           "servoHornScrew": {
             "part": "Servo horn screw (Included with servos)",
@@ -270,7 +270,7 @@
             "text": "Dry-fit each module housing before inserting any electronics - sand or adjust any tight servo pockets now."
           },
           "mountBoardsToPanels": {
-            "text": "Mount the Arduino and PCA9685 servo driver board to the base panels with 8 M2×6 screws."
+            "text": "Mount the {{board}} and PCA9685 servo driver board to the base panels with 8 M2×6 screws."
           },
           "attachBasePanels": {
             "text": "Attach the base panels to the base with 8 M3×6 screws and 8 M3 nuts.",
@@ -290,10 +290,10 @@
             "note": "Library Manager → search each by name."
           },
           "uploadSketch": {
-            "text": "Select board \"Arduino Uno R4 Minima\", select the correct port, then upload arduino/main/main.ino."
+            "text": "Select board \"Arduino Uno R4 Minima\", select the correct port, then upload firmware/main/main.ino."
           },
           "uploadSketchEsp32": {
-            "text": "Select board \"ESP32 Dev Module\", select the correct port, then upload arduino/main/main.ino.",
+            "text": "Select board \"ESP32 Dev Module\", select the correct port, then upload firmware/main/main.ino.",
             "note": "Uses the classic WROOM/WROVER pin layout already in the sketch - if you're on an S2/S3/C3 variant, its strapping pins differ, so double-check the IR sensor pin numbers before wiring."
           },
           "confirmReady": {

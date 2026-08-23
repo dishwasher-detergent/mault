@@ -125,7 +125,9 @@ function buildPhases(
         },
         {
           key: "mount-boards-to-panels",
-          text: t("assembly.phases.print.steps.mountBoardsToPanels.text"),
+          text: t("assembly.phases.print.steps.mountBoardsToPanels.text", {
+            board: board.shortName,
+          }),
         },
         {
           key: "attach-base-panels",

@@ -1,9 +1,9 @@
 import { Button } from "@/components/ui/button";
-import { Esp32FlashDialog } from "@/features/scanner/components/esp32-flash-dialog";
 import { useSerial } from "@/features/scanner/api/use-serial";
-import { LATEST_ARDUINO_VERSION } from "@/lib/arduino-version";
+import { Esp32FlashDialog } from "@/features/scanner/components/esp32-flash-dialog";
+import { LATEST_FIRMWARE_VERSION } from "@/lib/firmware-version";
 import { FIRMWARE_RELEASES_URL } from "@/lib/links";
-import { isArduinoVersionOutdated } from "@magic-vault/shared";
+import { isFirmwareVersionOutdated } from "@magic-vault/shared";
 import { IconAlertTriangle } from "@tabler/icons-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -15,7 +15,7 @@ export function FirmwareVersionBanner() {
 
   if (
     !isConnected ||
-    !isArduinoVersionOutdated(firmwareVersion, LATEST_ARDUINO_VERSION)
+    !isFirmwareVersionOutdated(firmwareVersion, LATEST_FIRMWARE_VERSION)
   )
     return null;
 
@@ -25,7 +25,7 @@ export function FirmwareVersionBanner() {
       <span>
         {t("serial.firmwareOutdatedBanner", {
           version: firmwareVersion,
-          latest: LATEST_ARDUINO_VERSION,
+          latest: LATEST_FIRMWARE_VERSION,
         })}
       </span>
       {board === "esp32" ? (

@@ -1,6 +1,6 @@
 # Magic Vault
 
-A TCG card scanner and physical sorter. A webcam identifies cards via AI image embeddings, a rule engine decides which bin each card belongs in, and an Arduino-driven feeder and servo mechanism physically routes the card there.
+A TCG card scanner and physical sorter. A webcam identifies cards via AI image embeddings, a rule engine decides which bin each card belongs in, and a feeder and servo mechanism driven by an Arduino or ESP32 physically routes the card there.
 
 ## MakerWorld
 
@@ -13,7 +13,7 @@ https://makerworld.com/en/models/3066180-tcg-card-sorting-machine#profileId-3451
 3. The image is sent to the server for embedding search (Hugging Face SigLIP)
 4. PostgreSQL vector similarity search (pgvector) identifies the card
 5. Configurable, per-collection bin rules decide which bin the card should go to
-6. The web app sends a serial command to the Arduino, which drives the trapdoor/paddle/pusher servos to route the card into that bin
+6. The web app sends a serial command to the microcontroller, which drives the trapdoor/paddle/pusher servos to route the card into that bin
 
 ## Features
 
@@ -33,7 +33,7 @@ https://makerworld.com/en/models/3066180-tcg-card-sorting-machine#profileId-3451
 - **Web**: React 19, Vite, React Router v7, Tailwind CSS 4, TanStack Query
 - **Server**: Hono 4, Drizzle ORM, Neon PostgreSQL (pgvector)
 - **Auth**: Neon Auth (JWT), backed by Better Auth on the client
-- **Hardware**: Arduino Uno R4 via Web Serial API (9600 baud), PCA9685 servo driver
+- **Hardware**: Arduino Uno R4 or ESP32 via Web Serial API (9600 baud), PCA9685 servo driver
 - **Monorepo**: Turborepo + pnpm workspaces
 
 ## Project structure
@@ -43,7 +43,7 @@ packages/
 ├── shared/   @magic-vault/shared - types, constants, evaluate-bin rule engine
 ├── server/   @magic-vault/server - Hono API, Drizzle schema/db, auth middleware
 └── web/      @magic-vault/web    - React SPA (scanner, bins, collections, admin, build guide)
-arduino/      Arduino sketch (arduino/main/main.ino)
+firmware/     Arduino/ESP32 sketch (firmware/main/main.ino)
 "3d model"/   Printable enclosure/module design (Fusion 360 + .3mf)
 drizzle/      Generated SQL migrations
 scripts/      Release/version-bump helpers
@@ -82,18 +82,24 @@ cp .env.example .env
 ```
 
 ```
-# Server
-DATABASE_URL=                 # Neon Postgres connection string (pooled), from step 3 above
-NEON_AUTH_URL=                # Neon Auth base URL, from step 5 above
-PORT=                         # optional, defaults to 3001
-WEB_URL=                      # optional, used for CORS and to build absolute links (Discord monitor-page links) - must be publicly reachable for those links/images to work outside your own machine
+WEB_URL=http://localhost:5173
+PORT=3001
 
-# Public variables for the React app (baked into the client bundle at build time)
-VITE_API_URL=                 # base URL of the Hono API, e.g. http://localhost:3001
-VITE_APP_ENV=                 # local/developement/QA/production
-VITE_NEON_AUTH_URL=           # from step 5 above
-VITE_NEON_DATA_API_URL=       # from step 5 above
-VITE_LATEST_ARDUINO_VERSION=  # keep in sync with FIRMWARE_VERSION in arduino/main/main.ino - shows an outdated-firmware banner when a connected device reports an older version
+# Get from neon.com
+DATABASE_URL=
+NEON_AUTH_URL=
+VITE_NEON_DATA_API_URL=
+VITE_NEON_AUTH_URL=
+
+# Optional - tuning for the admin card-image-vector sync job
+VECTORIZE_CONCURRENCY=1
+SYNC_INSERT_BATCH_SIZE=50
+SCAN_VECTORIZE_CONCURRENCY=2
+
+# Public variables for the React app
+VITE_API_URL=http://localhost:3001
+VITE_APP_ENV=local
+VITE_LATEST_FIRMWARE_VERSION=1.0.1 # Must match the latest release in main.ino
 ```
 
 ## Database
@@ -109,7 +115,7 @@ pnpm --filter @magic-vault/server db:studio    # open Drizzle Studio
 
 `Dockerfile.server` builds the Hono API (and pre-downloads the SigLIP model at build time). `Dockerfile.web` builds the Vite SPA and serves it with nginx (`nginx.conf`); `VITE_API_URL` must be supplied as a build arg since it's baked into the client bundle.
 
-Self-hosting only replaces where the _app_ runs — the database and auth still need a [Neon project](#setting-up-neon) set up first, and its connection details passed to the server container as env vars (`DATABASE_URL`, `NEON_AUTH_URL`, `WEB_URL`) and to the web build as build args (`VITE_API_URL`, `VITE_NEON_AUTH_URL`, `VITE_NEON_DATA_API_URL`, `VITE_APP_ENV`, `VITE_LATEST_ARDUINO_VERSION`). A minimal setup:
+Self-hosting only replaces where the _app_ runs — the database and auth still need a [Neon project](#setting-up-neon) set up first, and its connection details passed to the server container as env vars (`DATABASE_URL`, `NEON_AUTH_URL`, `WEB_URL`) and to the web build as build args (`VITE_API_URL`, `VITE_NEON_AUTH_URL`, `VITE_NEON_DATA_API_URL`, `VITE_APP_ENV`, `VITE_LATEST_FIRMWARE_VERSION`). A minimal setup:
 
 ```bash
 docker build -f Dockerfile.server -t magic-vault-server .
@@ -120,7 +126,7 @@ docker build -f Dockerfile.web \
   --build-arg VITE_NEON_AUTH_URL=$VITE_NEON_AUTH_URL \
   --build-arg VITE_NEON_DATA_API_URL=$VITE_NEON_DATA_API_URL \
   --build-arg VITE_APP_ENV=production \
-  --build-arg VITE_LATEST_ARDUINO_VERSION=1.0.2 \
+  --build-arg VITE_LATEST_FIRMWARE_VERSION=1.0.2 \
   -t magic-vault-web .
 docker run -p 8080:80 magic-vault-web
 ```
@@ -131,12 +137,12 @@ Point `WEB_URL` (server env) at the public URL of the web container so CORS and 
 
 The full bill of materials, wiring diagrams, and assembly instructions live in the app at `/build`. In short:
 
-- Arduino Uno R4 Minima, driving a PCA9685 servo controller over I2C
+- Arduino Uno R4 Minima or ESP32 Dev Module, driving a PCA9685 servo controller over I2C
 - 3 positional SG90 servos per sorting module (trapdoor, paddle gate, pusher) plus 1 continuous-rotation SG90 for the feeder — module count is configurable (up to 5 on a single PCA9685) in Calibration
 - IR sensor for card-feed detection
 - Enclosure and module parts are in `3d model/` (Fusion 360 source + printable `.3mf`)
 
-Upload `arduino/main/main.ino` (requires the ArduinoJson library). The sketch is always compiled for the full module ceiling a single PCA9685 supports — it doesn't need to match how many modules you've actually built, since the app already knows each org's real module count and only ever sends route commands for modules that exist, so you can add modules later without reflashing. It communicates via JSON over USB serial: the web app sends `{"route": {"module": N, "direction": "left"|"right"|"bottom"}}`, resolved from the bin's routing assignment in Calibration, and the Arduino runs the routing sequence. `"bottom"` drops the card straight through the whole mechanism (any bin can be assigned to any module's bottom output — there's no single fixed catch-all bin).
+Upload `firmware/main/main.ino` (requires the ArduinoJson library) to either board via the Arduino IDE — see `/build` for the full flashing steps and per-board pin/wiring differences. The sketch is always compiled for the full module ceiling a single PCA9685 supports — it doesn't need to match how many modules you've actually built, since the app already knows each org's real module count and only ever sends route commands for modules that exist, so you can add modules later without reflashing. It communicates via JSON over USB serial: the web app sends `{"route": {"module": N, "direction": "left"|"right"|"bottom"}}`, resolved from the bin's routing assignment in Calibration, and the board runs the routing sequence. `"bottom"` drops the card straight through the whole mechanism (any bin can be assigned to any module's bottom output — there's no single fixed catch-all bin).
 
 Where module 1 starts on the PCA9685 is also runtime-configurable, not baked into the firmware: a "PCA9685 channel layout" toggle in Calibration (Standard = channel 0, up to 5 modules; Legacy = channel 4, reserving 0-3 for the status LEDs older firmware drove, up to 3 modules) sends `{"setChannelOffset": N}` once per connection. Orgs with pre-existing module calibration data default to Legacy so already-wired hardware keeps working unchanged; new orgs default to Standard.
 
