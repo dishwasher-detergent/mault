@@ -8,7 +8,12 @@
     "modulesIntro": "Jedes Modul hat drei Servos – eine <0>Bodenklappe</0>, ein <1>Paddel</1>-Tor und einen Links/Rechts-<2>Schieber</2> – sowie einen IR-Sensor. Wenn alle Bodenklappen oberhalb des Zielfachs geschlossen bleiben und nur die darunter liegenden geöffnet werden, fällt die Karte bis zum richtigen Modul, bevor der Schieber sie auswirft.",
     "moduleLabel": "Modul {{n}}",
     "binLabel": "Fach {{n}}",
-    "catchAllBinNote": "Sammelfach, alle {{modules}} Bodenklappen offen"
+    "catchAllBinNote": "Sammelfach, alle {{modules}} Bodenklappen offen",
+    "boardType": {
+      "label": "Board",
+      "unoR4": "Arduino",
+      "esp32": "ESP32"
+    }
   },
   "nav": {
     "partsList": "Teileliste",
@@ -51,6 +56,9 @@
           "arduino": {
             "notes": "Führt <code>{{path}}</code> aus; USB-Verbindung zum Host-Computer für Web Serial"
           },
+          "esp32": {
+            "notes": "Führt <code>{{path}}</code> aus; USB-Verbindung zum Host-Computer für Web Serial - kann später auch direkt aus der App aktualisiert werden, siehe /app nach der Einrichtung"
+          },
           "pca9685": {
             "part": "Adafruit PCA9685 16-Kanal-12-Bit-PWM-/Servotreiber",
             "notes": "I²C-Servotreiber – steuert alle 10 Servos an"
@@ -80,11 +88,15 @@
         "items": {
           "psu": {
             "part": "5-V-geregeltes Netzteil, 4–10 A",
-            "notes": "Eigene Servobus-Versorgung an die V+-Klemme des PCA9685 – versorge nicht 10 Servos über die 5V-Onboard-Versorgung des Arduino"
+            "notes": "Eigene Servobus-Versorgung an die V+-Klemme des PCA9685 – versorge nicht 10 Servos über die 5V-Onboard-Versorgung des {{board}}-Boards"
           },
           "usbCable": {
             "part": "USB-A-auf-USB-C-Kabel",
             "notes": "Arduino Uno R4 Minima ↔ Host-Computer"
+          },
+          "usbCableEsp32": {
+            "part": "USB-A-auf-Micro-USB-Kabel",
+            "notes": "ESP32-Board ↔ Host-Computer - prüfe dein Board, manche neueren Modelle haben USB-C"
           },
           "barrelJack": {
             "part": "DC-Hohlstecker oder Schraubklemmen-Anschlusskabel",
@@ -168,20 +180,23 @@
   },
   "wiring": {
     "heading": "Verkabelung",
-    "description": "Alles hängt an einem einzigen I²C-Bus (PCA9685) und {{count}} digitalen Eingangspins (IR-Sensoren). Die Logikseite des PCA9685 wird über die 5V-Versorgung des Arduino gespeist; seine <pin>V+</pin>-Servoschiene muss von der externen Versorgung kommen, und deren Masse muss mit der Masse des Arduino verbunden sein – eine schwebende Servomasse ist der häufigste Grund, warum sich ein frisch verkabeltes Gerät nicht bewegt.",
+    "description": "Alles hängt an einem einzigen I²C-Bus (PCA9685) und {{count}} digitalen Eingangspins (IR-Sensoren). Die Logikseite des PCA9685 wird über die Onboard-Versorgung des {{board}} gespeist; seine <pin>V+</pin>-Servoschiene muss von der externen Versorgung kommen, und deren Masse muss mit der Masse des {{board}} verbunden sein – eine schwebende Servomasse ist der häufigste Grund, warum sich ein frisch verkabeltes Gerät nicht bewegt.",
     "sections": {
-      "i2c": { "title": "I²C-Bus" },
+      "i2c": {
+        "title": "I²C-Bus",
+        "esp32Note": "Verbinde das VCC des PCA9685 mit dem 3.3V-Pin des ESP32, nicht mit 5V - die I²C-Pull-ups richten sich danach, womit der PCA9685 versorgt wird, und 5V an einem ESP32-GPIO kann diesen beschädigen. Der PCA9685-Chip selbst läuft problemlos mit 3.3V-Logik, das kostet also nichts."
+      },
       "servoPower": { "title": "Servostromversorgung" },
       "irSensors": { "title": "IR-Sensoren" },
       "channelMap": { "title": "PCA9685-Kanalbelegung" },
       "diagram": {
         "title": "Verkabelungsdiagramm",
-        "alt": "Verkabelungsdiagramm mit den Anschlüssen von PCA9685, Arduino, Servos und IR-Sensoren"
+        "alt": "Verkabelungsdiagramm mit den Anschlüssen von PCA9685, Mikrocontroller, Servos und IR-Sensoren",
+        "esp32Note": "Dieses Diagramm zeigt die Arduino-Verkabelung als Referenz - der Aufbau ist beim ESP32 derselbe (PCA9685 über I²C, ein IR-Sensor pro digitalem Pin), verwende einfach die Pin-Nummern und die 3.3V-Logikspannung aus den Tabellen oben statt der Abbildung."
       }
     },
     "i2cTable": {
       "colPcaPin": "PCA9685-Pin",
-      "colArduino": "Arduino Uno R4 Minima",
       "vccLogic": "VCC (Logik)"
     },
     "servoPowerTable": {
@@ -190,14 +205,15 @@
       "psuPlus": "Externes 5V-Netzteil, +",
       "psuMinus": "Externes 5V-Netzteil, −",
       "toPositive": "PCA9685-<pin>V+</pin>-Klemmenblock",
-      "toNegative": "PCA9685-<pin>GND</pin>-Klemmenblock <em>und</em> Arduino-<pin>GND</pin>"
+      "toNegative": "PCA9685-<pin>GND</pin>-Klemmenblock <em>und</em> {{board}}-<pin>GND</pin>"
     },
     "irSensors": {
-      "description": "Alle {{count}} lesen aktiv-<strong>LOW</strong> (der Pin wird LOW, wenn eine Karte vorhanden ist) über den internen Pull-up des Arduino – verbinde den digitalen <pin>OUT</pin>-Ausgang des Sensors direkt mit dem Pin, ein externer Pull-up-Widerstand ist nicht nötig."
+      "description": "Alle {{count}} lesen aktiv-<strong>LOW</strong> (der Pin wird LOW, wenn eine Karte vorhanden ist) über den internen Pull-up des {{board}} – verbinde den digitalen <pin>OUT</pin>-Ausgang des Sensors direkt mit dem Pin, ein externer Pull-up-Widerstand ist nicht nötig.",
+      "esp32Note": "Versorge das VCC dieser Sensoren nach Möglichkeit über den 3.3V-Pin des ESP32, nicht über 5V - ihr digitaler OUT-Ausgang folgt tendenziell der angelegten VCC-Spannung, und 5V am OUT riskiert den daran angeschlossenen GPIO zu beschädigen. Prüfe im Datenblatt deines Sensors, ob 3.3V unterstützt werden."
     },
     "irTable": {
       "colSensor": "Sensor",
-      "colPin": "Arduino-Pin",
+      "colPin": "Pin",
       "moduleGate": "Tor Modul {{n}}",
       "hopperThroat": "Trichterhals"
     },
@@ -258,19 +274,27 @@
           },
           "attachBasePanels": {
             "text": "Befestige die Bodenplatten mit 8 M3×6-Schrauben und 8 M3-Muttern an der Basis.",
-            "note": "Mache dies, nachdem Arduino und PCA9685 an den Platten montiert sind – die Platinen sind viel schwerer zu erreichen, sobald die Platten auf der Basis sitzen."
+            "note": "Mache dies, nachdem {{board}} und PCA9685 an den Platten montiert sind – die Platinen sind viel schwerer zu erreichen, sobald die Platten auf der Basis sitzen."
           }
         }
       },
       "firmware": {
         "title": "Die Firmware aufspielen",
         "steps": {
+          "installEsp32Core": {
+            "text": "Füge in der Arduino-IDE die ESP32-Board-Index-URL hinzu (Datei → Voreinstellungen → Zusätzliche Boardverwalter-URLs): https://raw.githubusercontent.com/espressif/arduino-esp32/gh-pages/package_esp32_index.json, und installiere dann „esp32 by Espressif Systems“ über den Boardverwalter.",
+            "note": "Das lädt einige hundert MB herunter (die komplette Xtensa-Toolchain) und dauert ein paar Minuten."
+          },
           "installLibraries": {
             "text": "Installiere in der Arduino-IDE die Bibliotheken ArduinoJson und Adafruit PWM Servo Driver.",
             "note": "Bibliotheksverwaltung → jeweils nach Namen suchen."
           },
           "uploadSketch": {
             "text": "Wähle das Board „Arduino Uno R4 Minima“, wähle den richtigen Port und lade dann arduino/main/main.ino hoch."
+          },
+          "uploadSketchEsp32": {
+            "text": "Wähle das Board „ESP32 Dev Module“, wähle den richtigen Port und lade dann arduino/main/main.ino hoch.",
+            "note": "Verwendet das klassische WROOM/WROVER-Pinlayout, das bereits im Sketch steht - bei einer S2/S3/C3-Variante unterscheiden sich deren Strapping-Pins, prüfe also vor dem Verkabeln die Pin-Nummern der IR-Sensoren."
           },
           "confirmReady": {
             "text": "Öffne den seriellen Monitor mit 9600 Baud und bestätige, dass nach dem Neustart des Boards {\"status\":\"ready\"} angezeigt wird."
@@ -332,8 +356,8 @@
         "title": "Die Elektronik verkabeln",
         "steps": {
           "wireI2c": {
-            "text": "Verbinde den PCA9685 mit dem I²C-Bus des Arduino (SDA/SCL) sowie mit 5V/GND für die Logikversorgung.",
-            "note": "Siehe den Abschnitt Verkabelung oben."
+            "text": "Verbinde den PCA9685 mit dem I²C-Bus des {{board}} (SDA/SCL) sowie mit der Logikversorgung/GND.",
+            "note": "Siehe den Abschnitt Verkabelung oben - die Logikspannung ist beim ESP32 3.3V, nicht 5V."
           },
           "wireServos": {
             "text": "Verkabele alle {{count}} Servos gemäß der Kanalbelegung mit den PCA9685-Kanälen 0–{{lastChannel}} und 15 - die Zuführung belegt immer den letzten Kanal.",
@@ -344,7 +368,7 @@
             "note": "Für Versorgung und Masse musst du {{count}} Leitungen zu einer zusammenführen, entweder mit einem Breadboard oder indem du sie verdrillst und verlötest. Du musst die Sensoren manuell auf eine kürzere Reichweite kalibrieren, um Fehlauslösungen zu vermeiden."
           },
           "wirePower": {
-            "text": "Führe die externe 5V-Versorgung an die V+/GND-Klemme des PCA9685 und verbinde deren Masse mit der Masse des Arduino.",
+            "text": "Führe die externe 5V-Versorgung an die V+/GND-Klemme des PCA9685 und verbinde deren Masse mit der Masse des {{board}}.",
             "note": "Eine fehlende gemeinsame Masse ist die häufigste Ursache dafür, dass Servos zucken, sich aber nie korrekt bewegen."
           }
         }
@@ -366,7 +390,7 @@
         "title": "Über die App kalibrieren",
         "steps": {
           "connectSerial": {
-            "text": "Verbinde den Arduino über Web Serial mit der App und öffne dann /app/calibrate."
+            "text": "Verbinde den {{board}} über Web Serial mit der App und öffne dann /app/calibrate."
           },
           "calibrateModules": {
             "text": "Modul-Kalibrierungsraster – lege modulweise den Öffnungs-/Schließimpuls für jede Boden- und Paddelklappe sowie links/neutral/rechts für jeden Schieber fest."

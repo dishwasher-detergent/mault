@@ -1,3 +1,5 @@
+import { BOARD_INFO } from "@/app/routes/build/board-info";
+import { useBoardType, type BoardType } from "@/app/routes/build/use-board-type";
 import { useModuleCount } from "@/app/routes/build/use-module-count";
 import { DISCORD_URL } from "@/lib/links";
 import { cn } from "@/lib/utils";
@@ -28,7 +30,13 @@ interface Phase {
   steps: Step[];
 }
 
-function buildPhases(t: TFunction<"build">, moduleCount: number): Phase[] {
+function buildPhases(
+  t: TFunction<"build">,
+  moduleCount: number,
+  boardType: BoardType,
+): Phase[] {
+  const board = BOARD_INFO[boardType];
+  const isEsp32 = boardType === "esp32";
   const sortingModules = moduleCount;
   const plateBase = ((moduleCount + 1) * (moduleCount + 2)) / 2;
   const genericBase = Math.max(0, moduleCount - 2);
@@ -122,7 +130,9 @@ function buildPhases(t: TFunction<"build">, moduleCount: number): Phase[] {
         {
           key: "attach-base-panels",
           text: t("assembly.phases.print.steps.attachBasePanels.text"),
-          note: t("assembly.phases.print.steps.attachBasePanels.note"),
+          note: t("assembly.phases.print.steps.attachBasePanels.note", {
+            board: board.shortName,
+          }),
         },
       ],
     },
@@ -131,15 +141,30 @@ function buildPhases(t: TFunction<"build">, moduleCount: number): Phase[] {
       title: t("assembly.phases.firmware.title"),
       icon: IconCpu,
       steps: [
+        ...(isEsp32
+          ? [
+              {
+                key: "install-esp32-core",
+                text: t("assembly.phases.firmware.steps.installEsp32Core.text"),
+                note: t("assembly.phases.firmware.steps.installEsp32Core.note"),
+              },
+            ]
+          : []),
         {
           key: "install-libraries",
           text: t("assembly.phases.firmware.steps.installLibraries.text"),
           note: t("assembly.phases.firmware.steps.installLibraries.note"),
         },
-        {
-          key: "upload-sketch",
-          text: t("assembly.phases.firmware.steps.uploadSketch.text"),
-        },
+        isEsp32
+          ? {
+              key: "upload-sketch",
+              text: t("assembly.phases.firmware.steps.uploadSketchEsp32.text"),
+              note: t("assembly.phases.firmware.steps.uploadSketchEsp32.note"),
+            }
+          : {
+              key: "upload-sketch",
+              text: t("assembly.phases.firmware.steps.uploadSketch.text"),
+            },
         {
           key: "confirm-ready",
           text: t("assembly.phases.firmware.steps.confirmReady.text"),
@@ -243,7 +268,9 @@ function buildPhases(t: TFunction<"build">, moduleCount: number): Phase[] {
       steps: [
         {
           key: "wire-i2c",
-          text: t("assembly.phases.wiring.steps.wireI2c.text"),
+          text: t("assembly.phases.wiring.steps.wireI2c.text", {
+            board: board.shortName,
+          }),
           note: t("assembly.phases.wiring.steps.wireI2c.note"),
         },
         {
@@ -265,7 +292,9 @@ function buildPhases(t: TFunction<"build">, moduleCount: number): Phase[] {
         },
         {
           key: "wire-power",
-          text: t("assembly.phases.wiring.steps.wirePower.text"),
+          text: t("assembly.phases.wiring.steps.wirePower.text", {
+            board: board.shortName,
+          }),
           note: t("assembly.phases.wiring.steps.wirePower.note"),
         },
       ],
@@ -277,7 +306,9 @@ function buildPhases(t: TFunction<"build">, moduleCount: number): Phase[] {
       steps: [
         {
           key: "connect-serial",
-          text: t("assembly.phases.calibrate.steps.connectSerial.text"),
+          text: t("assembly.phases.calibrate.steps.connectSerial.text", {
+            board: board.shortName,
+          }),
         },
         {
           key: "calibrate-modules",
@@ -353,8 +384,12 @@ export function BuildAssembly() {
   const { t } = useTranslation("build");
   const { checked, toggle } = useChecklist();
   const { moduleCount } = useModuleCount();
+  const { boardType } = useBoardType();
 
-  const PHASES = useMemo(() => buildPhases(t, moduleCount), [t, moduleCount]);
+  const PHASES = useMemo(
+    () => buildPhases(t, moduleCount, boardType),
+    [t, moduleCount, boardType],
+  );
 
   const allSteps = useMemo(() => PHASES.flatMap((p) => p.steps), [PHASES]);
   const doneCount = allSteps.filter((s) => checked[s.key]).length;

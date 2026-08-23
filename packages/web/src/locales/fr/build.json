@@ -8,7 +8,12 @@
     "modulesIntro": "Chaque module possède trois servos - une trappe <0>inférieure</0>, une <1>palette</1> de porte, et un <2>poussoir</2> gauche/droite - plus un capteur IR. Fermer chaque trappe au-dessus du bac cible et n'ouvrir que celles en dessous permet à une carte de tomber jusqu'au bon module avant que le poussoir ne l'éjecte.",
     "moduleLabel": "Module {{n}}",
     "binLabel": "Bac {{n}}",
-    "catchAllBinNote": "fourre-tout, les {{modules}} fonds ouverts"
+    "catchAllBinNote": "fourre-tout, les {{modules}} fonds ouverts",
+    "boardType": {
+      "label": "Carte",
+      "unoR4": "Arduino",
+      "esp32": "ESP32"
+    }
   },
   "nav": {
     "partsList": "Liste des pièces",
@@ -51,6 +56,9 @@
           "arduino": {
             "notes": "Exécute <code>{{path}}</code> ; connexion USB à l'ordinateur hôte pour le Web Serial"
           },
+          "esp32": {
+            "notes": "Exécute <code>{{path}}</code> ; connexion USB à l'ordinateur hôte pour le Web Serial - peut aussi être mis à jour directement depuis l'app ensuite, voir /app une fois configuré"
+          },
           "pca9685": {
             "part": "Adafruit PCA9685, driver PWM/servo 16 canaux 12 bits",
             "notes": "Driver de servo I²C - pilote les 10 servos"
@@ -80,11 +88,15 @@
         "items": {
           "psu": {
             "part": "Alimentation régulée 5V, 4–10A",
-            "notes": "Alimentation dédiée au bus des servos vers la borne V+ du PCA9685 - ne pas alimenter 10 servos depuis le 5V embarqué de l'Arduino"
+            "notes": "Alimentation dédiée au bus des servos vers la borne V+ du PCA9685 - ne pas alimenter 10 servos depuis le 5V embarqué de la carte {{board}}"
           },
           "usbCable": {
             "part": "Câble USB-A vers USB-C",
             "notes": "Arduino Uno R4 Minima ↔ ordinateur hôte"
+          },
+          "usbCableEsp32": {
+            "part": "Câble USB-A vers Micro-USB",
+            "notes": "Carte ESP32 ↔ ordinateur hôte - vérifie ta carte, certains modèles récents utilisent l'USB-C"
           },
           "barrelJack": {
             "part": "Prise jack CC ou pigtail à bornier à vis",
@@ -168,20 +180,23 @@
   },
   "wiring": {
     "heading": "Câblage",
-    "description": "Tout dépend d'un seul bus I²C (PCA9685) et de {{count}} broches d'entrée numériques (capteurs IR). Le côté logique du PCA9685 fonctionne sur le 5V de l'Arduino ; son rail servo <pin>V+</pin> doit provenir de l'alimentation externe, et la masse de cette alimentation doit être reliée à la masse de l'Arduino - une masse de servo flottante est la cause la plus courante d'une unité fraîchement câblée qui ne bouge pas.",
+    "description": "Tout dépend d'un seul bus I²C (PCA9685) et de {{count}} broches d'entrée numériques (capteurs IR). Le côté logique du PCA9685 fonctionne sur l'alimentation embarquée du {{board}} ; son rail servo <pin>V+</pin> doit provenir de l'alimentation externe, et la masse de cette alimentation doit être reliée à la masse du {{board}} - une masse de servo flottante est la cause la plus courante d'une unité fraîchement câblée qui ne bouge pas.",
     "sections": {
-      "i2c": { "title": "Bus I²C" },
+      "i2c": {
+        "title": "Bus I²C",
+        "esp32Note": "Câble le VCC du PCA9685 sur la broche 3.3V de l'ESP32, pas le 5V - les résistances de tirage I²C suivent ce qui alimente le PCA9685, et envoyer du 5V dans un GPIO ESP32 peut l'endommager. La puce PCA9685 fonctionne très bien en logique 3.3V, donc ça ne coûte rien."
+      },
       "servoPower": { "title": "Alimentation des servos" },
       "irSensors": { "title": "Capteurs IR" },
       "channelMap": { "title": "Carte des canaux du PCA9685" },
       "diagram": {
         "title": "Schéma de câblage",
-        "alt": "Schéma de câblage montrant les connexions du PCA9685, de l'Arduino, des servos et des capteurs IR"
+        "alt": "Schéma de câblage montrant les connexions du PCA9685, du microcontrôleur, des servos et des capteurs IR",
+        "esp32Note": "Ce schéma montre le câblage Arduino à titre de référence - la disposition est la même sur ESP32 (PCA9685 via I²C, un capteur IR par broche numérique), utilise simplement les numéros de broches et la tension logique 3.3V des tableaux ci-dessus au lieu de ce qui est représenté."
       }
     },
     "i2cTable": {
       "colPcaPin": "Broche PCA9685",
-      "colArduino": "Arduino Uno R4 Minima",
       "vccLogic": "VCC (logique)"
     },
     "servoPowerTable": {
@@ -190,14 +205,15 @@
       "psuPlus": "Alimentation externe 5V, +",
       "psuMinus": "Alimentation externe 5V, −",
       "toPositive": "Bornier <pin>V+</pin> du PCA9685",
-      "toNegative": "Bornier <pin>GND</pin> du PCA9685 <em>et</em> <pin>GND</pin> de l'Arduino"
+      "toNegative": "Bornier <pin>GND</pin> du PCA9685 <em>et</em> <pin>GND</pin> du {{board}}"
     },
     "irSensors": {
-      "description": "Les {{count}} capteurs sont actifs à l'état <strong>BAS</strong> (la broche passe à l'état bas quand une carte est présente) en utilisant la résistance de tirage interne de l'Arduino - câble la sortie numérique <pin>OUT</pin> du capteur directement à la broche, aucune résistance de tirage externe n'est nécessaire."
+      "description": "Les {{count}} capteurs sont actifs à l'état <strong>BAS</strong> (la broche passe à l'état bas quand une carte est présente) en utilisant la résistance de tirage interne du {{board}} - câble la sortie numérique <pin>OUT</pin> du capteur directement à la broche, aucune résistance de tirage externe n'est nécessaire.",
+      "esp32Note": "Alimente le VCC de ces capteurs depuis la broche 3.3V de l'ESP32 si le module le supporte, pas le 5V - leur sortie numérique OUT a tendance à suivre la tension VCC fournie, et du 5V sur OUT risque d'endommager le GPIO auquel il est relié. Vérifie que la fiche technique de ton capteur accepte le 3.3V."
     },
     "irTable": {
       "colSensor": "Capteur",
-      "colPin": "Broche Arduino",
+      "colPin": "Broche",
       "moduleGate": "Porte du module {{n}}",
       "hopperThroat": "Gorge de la trémie"
     },
@@ -258,19 +274,27 @@
           },
           "attachBasePanels": {
             "text": "Fixe les panneaux de base à la base avec 8 vis M3×6 et 8 écrous M3.",
-            "note": "Fais ceci après avoir monté l'Arduino et le PCA9685 sur les panneaux - les cartes sont bien plus difficiles à atteindre une fois les panneaux fixés à la base."
+            "note": "Fais ceci après avoir monté le {{board}} et le PCA9685 sur les panneaux - les cartes sont bien plus difficiles à atteindre une fois les panneaux fixés à la base."
           }
         }
       },
       "firmware": {
         "title": "Flasher le firmware",
         "steps": {
+          "installEsp32Core": {
+            "text": "Dans l'IDE Arduino, ajoute l'URL de l'index de cartes ESP32 (Fichier → Préférences → URL de gestionnaire de cartes supplémentaires) : https://raw.githubusercontent.com/espressif/arduino-esp32/gh-pages/package_esp32_index.json, puis installe « esp32 by Espressif Systems » depuis le gestionnaire de cartes.",
+            "note": "Cela télécharge quelques centaines de Mo (toute la chaîne d'outils Xtensa) et prend quelques minutes."
+          },
           "installLibraries": {
             "text": "Dans l'IDE Arduino, installe les bibliothèques ArduinoJson et Adafruit PWM Servo Driver.",
             "note": "Gestionnaire de bibliothèques → recherche chacune par son nom."
           },
           "uploadSketch": {
             "text": "Sélectionne la carte « Arduino Uno R4 Minima », sélectionne le bon port, puis téléverse arduino/main/main.ino."
+          },
+          "uploadSketchEsp32": {
+            "text": "Sélectionne la carte « ESP32 Dev Module », sélectionne le bon port, puis téléverse arduino/main/main.ino.",
+            "note": "Utilise la disposition de broches classique WROOM/WROVER déjà présente dans le sketch - si tu es sur une variante S2/S3/C3, ses broches de strapping diffèrent, donc vérifie les numéros de broches des capteurs IR avant de câbler."
           },
           "confirmReady": {
             "text": "Ouvre le moniteur série à 9600 bauds et confirme que tu vois {\"status\":\"ready\"} après la réinitialisation de la carte."
@@ -332,8 +356,8 @@
         "title": "Câbler l'électronique",
         "steps": {
           "wireI2c": {
-            "text": "Câble le PCA9685 au bus I²C de l'Arduino (SDA/SCL) et au 5V/GND pour l'alimentation logique.",
-            "note": "Voir la section Câblage ci-dessus."
+            "text": "Câble le PCA9685 au bus I²C du {{board}} (SDA/SCL) et à l'alimentation logique/GND.",
+            "note": "Voir la section Câblage ci-dessus - la tension logique est de 3.3V sur ESP32, pas 5V."
           },
           "wireServos": {
             "text": "Câble les {{count}} servos dans les canaux 0 à {{lastChannel}} et 15 du PCA9685 selon la carte des canaux - le chargeur prend toujours le dernier canal.",
@@ -344,7 +368,7 @@
             "note": "Pour l'alimentation et la masse, tu devras combiner {{count}} fils en un seul, soit avec une plaque d'essai, soit en les torsadant et en les soudant ensemble. Tu devras calibrer manuellement les capteurs pour avoir une portée plus courte, afin d'éviter les faux positifs."
           },
           "wirePower": {
-            "text": "Amène l'alimentation externe 5V au bornier V+/GND du PCA9685, et relie sa masse à celle de l'Arduino.",
+            "text": "Amène l'alimentation externe 5V au bornier V+/GND du PCA9685, et relie sa masse à celle du {{board}}.",
             "note": "Oublier la masse commune est la cause n°1 des servos qui tremblent sans jamais bouger correctement."
           }
         }
@@ -366,7 +390,7 @@
         "title": "Calibrer depuis l'application",
         "steps": {
           "connectSerial": {
-            "text": "Connecte l'Arduino à l'application via Web Serial, puis ouvre /app/calibrate."
+            "text": "Connecte le {{board}} à l'application via Web Serial, puis ouvre /app/calibrate."
           },
           "calibrateModules": {
             "text": "Grille de calibration des modules - définis l'impulsion ouvert/fermé pour chaque trappe inférieure et palette, et gauche/neutre/droite pour chaque poussoir, module par module."
