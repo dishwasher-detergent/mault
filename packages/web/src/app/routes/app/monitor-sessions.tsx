@@ -164,7 +164,7 @@ export default function MonitorSessionsPage() {
           const scannerLock = locks[collection.guid];
           const isOwn = scannerLock?.userId === currentUserId;
           const watchers = rawViewers.filter(
-            (v) => v.userId !== scannerLock?.userId,
+            (v) => v.userId !== scannerLock?.userId && v.userId !== currentUserId,
           );
 
           return (

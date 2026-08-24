@@ -63,11 +63,8 @@ jobs:
           MAJOR_MINOR=$(echo "$CURRENT" | grep -oP '^\d+\.\d+')
           CURRENT_PATCH=$(echo "$CURRENT" | grep -oP '\d+$')
           LAST=$(git tag -l "v${MAJOR_MINOR}.*" | sed -E "s/^v${MAJOR_MINOR}\.//" | sort -n | tail -1)
-          if [ -z "$LAST" ]; then
-            PATCH="$CURRENT_PATCH"
-          else
-            PATCH=$((LAST + 1))
-          fi
+          LAST="${LAST:-$CURRENT_PATCH}"
+          PATCH=$((LAST + 1))
           VERSION="${MAJOR_MINOR}.${PATCH}"
           node scripts/set-version.mjs "$VERSION"
           echo "version=$VERSION" >> "$GITHUB_OUTPUT"
