@@ -20,8 +20,8 @@
       "title": "Gerätetest fehlgeschlagen",
       "description": "Verbunden, aber keine Antwort erhalten. Versuche eine erneute Verbindung."
     },
-    "firmwareOutdatedBanner": "Dein Sortierer läuft mit Firmware v{{version}}, älter als die aktuelle v{{latest}}. Lade arduino/main/main.ino erneut hoch, um zu aktualisieren.",
-    "firmwareVersionMissingBanner": "Die Firmware deines Sortierers meldet keine Version und kann nicht zum Scannen verwendet werden. Lade die neueste arduino/main/main.ino erneut hoch, um das Scannen zu aktivieren.",
+    "firmwareOutdatedBanner": "Dein Sortierer läuft mit Firmware v{{version}}, älter als die aktuelle v{{latest}}. Lade firmware/main/main.ino erneut hoch, um zu aktualisieren.",
+    "firmwareVersionMissingBanner": "Die Firmware deines Sortierers meldet keine Version und kann nicht zum Scannen verwendet werden. Lade die neueste firmware/main/main.ino erneut hoch, um das Scannen zu aktivieren.",
     "update": {
       "browserButton": "Jetzt aktualisieren",
       "manualButton": "Update holen",
@@ -204,7 +204,7 @@
     "connectScannerButton": "Verbinden",
     "testingScanner": "Verbindung zum Kartensortierer wird getestet…",
     "autoFeedOff": "Automatische Zufuhr ist deaktiviert - Karten manuell zuführen.",
-    "firmwareVersionMissing": "Die Firmware des Kartensortierers meldet keine Version. Lade die neueste arduino/main/main.ino erneut hoch, um das Scannen zu aktivieren.",
+    "firmwareVersionMissing": "Die Firmware des Kartensortierers meldet keine Version. Lade die neueste firmware/main/main.ino erneut hoch, um das Scannen zu aktivieren.",
     "noCatchAllBin": "Kein Sammelfach konfiguriert - nicht zugeordnete Karten werden nicht sortiert.",
     "initializing": "Scanner wird initialisiert…",
     "requestingCameraAccess": "Kamerazugriff wird angefordert…",

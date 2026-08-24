@@ -1,7 +1,7 @@
 {
   "hero": {
     "title": "Construire la trieuse de cartes",
-    "description": "Liste des pièces et instructions de montage pour l'unité de tri physique : une trémie fait passer les cartes une par une à travers {{modules}} modules de routage empilés, chacun capable de faire tomber une carte dans l'un de ses deux bacs latéraux ou de la transmettre au module suivant - {{bins}} bacs au total, pilotés par un {{arduino}} via I²C.",
+    "description": "Liste des pièces et instructions de montage pour l'unité de tri physique : une trémie fait passer les cartes une par une à travers {{modules}} modules de routage empilés, chacun capable de faire tomber une carte dans l'un de ses deux bacs latéraux ou de la transmettre au module suivant - {{bins}} bacs au total, pilotés par un {{board}} via I²C.",
     "firmwareLabel": "Firmware",
     "enclosureLabel": "Boîtier",
     "calibrationLabel": "Calibration",
@@ -53,7 +53,7 @@
       "electronics": {
         "title": "Électronique",
         "items": {
-          "arduino": {
+          "unoR4": {
             "notes": "Exécute <code>{{path}}</code> ; connexion USB à l'ordinateur hôte pour le Web Serial"
           },
           "esp32": {
@@ -147,7 +147,7 @@
           },
           "m2x6Screw": {
             "part": "Vis M2×6",
-            "notes": "Fixe l'Arduino et la carte driver de servo PCA9685 aux panneaux de base"
+            "notes": "Fixe le {{board}} et la carte driver de servo PCA9685 aux panneaux de base"
           },
           "servoHornScrew": {
             "part": "Vis de palonnier de servo (incluse avec les servos)",
@@ -270,7 +270,7 @@
             "text": "Fais un essai à sec de chaque logement de module avant d'insérer l'électronique - ponce ou ajuste dès maintenant les logements de servo trop serrés."
           },
           "mountBoardsToPanels": {
-            "text": "Fixe l'Arduino et la carte driver de servo PCA9685 aux panneaux de base avec 8 vis M2×6."
+            "text": "Fixe le {{board}} et la carte driver de servo PCA9685 aux panneaux de base avec 8 vis M2×6."
           },
           "attachBasePanels": {
             "text": "Fixe les panneaux de base à la base avec 8 vis M3×6 et 8 écrous M3.",
@@ -290,10 +290,10 @@
             "note": "Gestionnaire de bibliothèques → recherche chacune par son nom."
           },
           "uploadSketch": {
-            "text": "Sélectionne la carte « Arduino Uno R4 Minima », sélectionne le bon port, puis téléverse arduino/main/main.ino."
+            "text": "Sélectionne la carte « Arduino Uno R4 Minima », sélectionne le bon port, puis téléverse firmware/main/main.ino."
           },
           "uploadSketchEsp32": {
-            "text": "Sélectionne la carte « ESP32 Dev Module », sélectionne le bon port, puis téléverse arduino/main/main.ino.",
+            "text": "Sélectionne la carte « ESP32 Dev Module », sélectionne le bon port, puis téléverse firmware/main/main.ino.",
             "note": "Utilise la disposition de broches classique WROOM/WROVER déjà présente dans le sketch - si tu es sur une variante S2/S3/C3, ses broches de strapping diffèrent, donc vérifie les numéros de broches des capteurs IR avant de câbler."
           },
           "confirmReady": {

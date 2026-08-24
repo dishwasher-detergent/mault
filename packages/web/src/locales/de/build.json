@@ -1,7 +1,7 @@
 {
   "hero": {
     "title": "Den Kartensortierer bauen",
-    "description": "Teileliste und Montageanleitung für die physische Sortiereinheit: Ein Trichter führt Karten einzeln durch {{modules}} übereinander gestapelte Verteilermodule, von denen jedes eine Karte in eines von zwei seitlichen Fächern fallen lassen oder an das nächste Modul weiterreichen kann – insgesamt {{bins}} Fächer, gesteuert von einem {{arduino}} über I²C.",
+    "description": "Teileliste und Montageanleitung für die physische Sortiereinheit: Ein Trichter führt Karten einzeln durch {{modules}} übereinander gestapelte Verteilermodule, von denen jedes eine Karte in eines von zwei seitlichen Fächern fallen lassen oder an das nächste Modul weiterreichen kann – insgesamt {{bins}} Fächer, gesteuert von einem {{board}} über I²C.",
     "firmwareLabel": "Firmware",
     "enclosureLabel": "Gehäuse",
     "calibrationLabel": "Kalibrierung",
@@ -53,7 +53,7 @@
       "electronics": {
         "title": "Elektronik",
         "items": {
-          "arduino": {
+          "unoR4": {
             "notes": "Führt <code>{{path}}</code> aus; USB-Verbindung zum Host-Computer für Web Serial"
           },
           "esp32": {
@@ -147,7 +147,7 @@
           },
           "m2x6Screw": {
             "part": "M2×6-Schraube",
-            "notes": "Befestigt den Arduino und die PCA9685-Servotreiberplatine an den Bodenplatten"
+            "notes": "Befestigt den {{board}} und die PCA9685-Servotreiberplatine an den Bodenplatten"
           },
           "servoHornScrew": {
             "part": "Servohorn-Schraube (im Lieferumfang der Servos enthalten)",
@@ -270,7 +270,7 @@
             "text": "Passe jedes Modulgehäuse trocken an, bevor du Elektronik einsetzt – schleife oder korrigiere jetzt enge Servoaussparungen."
           },
           "mountBoardsToPanels": {
-            "text": "Befestige den Arduino und die PCA9685-Servotreiberplatine mit 8 M2×6-Schrauben an den Bodenplatten."
+            "text": "Befestige den {{board}} und die PCA9685-Servotreiberplatine mit 8 M2×6-Schrauben an den Bodenplatten."
           },
           "attachBasePanels": {
             "text": "Befestige die Bodenplatten mit 8 M3×6-Schrauben und 8 M3-Muttern an der Basis.",
@@ -290,10 +290,10 @@
             "note": "Bibliotheksverwaltung → jeweils nach Namen suchen."
           },
           "uploadSketch": {
-            "text": "Wähle das Board „Arduino Uno R4 Minima“, wähle den richtigen Port und lade dann arduino/main/main.ino hoch."
+            "text": "Wähle das Board „Arduino Uno R4 Minima“, wähle den richtigen Port und lade dann firmware/main/main.ino hoch."
           },
           "uploadSketchEsp32": {
-            "text": "Wähle das Board „ESP32 Dev Module“, wähle den richtigen Port und lade dann arduino/main/main.ino hoch.",
+            "text": "Wähle das Board „ESP32 Dev Module“, wähle den richtigen Port und lade dann firmware/main/main.ino hoch.",
             "note": "Verwendet das klassische WROOM/WROVER-Pinlayout, das bereits im Sketch steht - bei einer S2/S3/C3-Variante unterscheiden sich deren Strapping-Pins, prüfe also vor dem Verkabeln die Pin-Nummern der IR-Sensoren."
           },
           "confirmReady": {

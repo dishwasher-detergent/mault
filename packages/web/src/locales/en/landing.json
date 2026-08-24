@@ -91,7 +91,7 @@
     "subtitle": "The software and the physical sorter are both free to build, inspect, and modify. Grab the code and print your own.",
     "sourceCode": {
       "title": "Source code",
-      "description": "The web app, API, and Arduino firmware are all in one repo under an open license.",
+      "description": "The web app, API, and sorter firmware are all in one repo under an open license.",
       "cta": "View on GitHub"
     },
     "printableSorter": {

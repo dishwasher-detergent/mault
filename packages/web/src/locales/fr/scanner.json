@@ -20,8 +20,8 @@
       "title": "Échec du test de l'appareil",
       "description": "Connecté, mais aucune réponse reçue. Essaie de te reconnecter."
     },
-    "firmwareOutdatedBanner": "Ta trieuse utilise le firmware v{{version}}, plus ancien que la dernière version v{{latest}}. Réimporte arduino/main/main.ino pour la mettre à jour.",
-    "firmwareVersionMissingBanner": "Le firmware de ta trieuse ne signale aucune version et ne peut pas être utilisé pour scanner. Réimporte la dernière version d'arduino/main/main.ino pour activer le scan.",
+    "firmwareOutdatedBanner": "Ta trieuse utilise le firmware v{{version}}, plus ancien que la dernière version v{{latest}}. Réimporte firmware/main/main.ino pour la mettre à jour.",
+    "firmwareVersionMissingBanner": "Le firmware de ta trieuse ne signale aucune version et ne peut pas être utilisé pour scanner. Réimporte la dernière version de firmware/main/main.ino pour activer le scan.",
     "update": {
       "browserButton": "Mettre à jour",
       "manualButton": "Obtenir la mise à jour",
@@ -204,7 +204,7 @@
     "connectScannerButton": "Connecter",
     "testingScanner": "Test de la connexion à la trieuse…",
     "autoFeedOff": "L'alimentation auto est désactivée - alimente les cartes manuellement.",
-    "firmwareVersionMissing": "Le firmware de la trieuse ne signale aucune version. Réimporte la dernière version d'arduino/main/main.ino pour activer le scan.",
+    "firmwareVersionMissing": "Le firmware de la trieuse ne signale aucune version. Réimporte la dernière version de firmware/main/main.ino pour activer le scan.",
     "noCatchAllBin": "Aucun bac fourre-tout configuré - les cartes non associées ne seront pas triées.",
     "initializing": "Initialisation du scanner…",
     "requestingCameraAccess": "Demande d'accès à la caméra…",

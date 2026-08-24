@@ -106,7 +106,6 @@ export function CardToolbar({
 
   return (
     <div className="flex flex-row gap-2 items-center w-full">
-      {watchers?.toString()}
       {watchers && watchers.length > 0 && <WatcherStack watchers={watchers} />}
       <Input
         placeholder={t("cardToolbar.searchPlaceholder")}
