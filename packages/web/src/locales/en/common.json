@@ -49,6 +49,10 @@
     "cardTotal_one": "{{count}} card · ${{value}} USD",
     "cardTotal_other": "{{count}} cards · ${{value}} USD"
   },
+  "appVersion": {
+    "outdatedBanner": "A new version of Magic Vault is available.",
+    "refreshButton": "Refresh"
+  },
   "theme": {
     "toggle": "Toggle theme",
     "light": "Light",

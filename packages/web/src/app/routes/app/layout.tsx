@@ -1,6 +1,7 @@
 import { AppProviders } from "@/app/providers";
 import { AppNav } from "@/app/routes/app/nav";
 import { AppBreadcrumb } from "@/components/app-breadcrumb";
+import { AppVersionBanner } from "@/components/app-version-banner";
 import { ChannelLayoutBanner } from "@/components/channel-layout-banner";
 import { EmailVerificationBanner } from "@/components/email-verification-banner";
 import { EnvBanner } from "@/components/env-banner";
@@ -21,6 +22,7 @@ export default function AppLayout() {
         <div className="h-dvh w-dvw overflow-hidden flex flex-col">
           <EmailVerificationBanner />
           <ChannelLayoutBanner />
+          <AppVersionBanner />
           <FirmwareVersionBanner />
           <FirmwareVersionMissingBanner />
           <main className="flex-1 min-h-0 overflow-hidden flex flex-col">
@@ -37,6 +39,7 @@ export default function AppLayout() {
           <div className="flex flex-col border rounded-lg size-full overflow-hidden relative">
             <EmailVerificationBanner />
             <ChannelLayoutBanner />
+            <AppVersionBanner />
             <FirmwareVersionBanner />
             <FirmwareVersionMissingBanner />
             <div className="flex flex-row flex-1 min-h-0 overflow-hidden">

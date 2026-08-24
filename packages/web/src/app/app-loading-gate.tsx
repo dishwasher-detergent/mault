@@ -89,7 +89,7 @@ export function AppLoadingGate({ children }: { children: ReactNode }) {
       {children}
       <AppLoadingScreen
         className={cn(
-          "fixed inset-0 z-50 transition-opacity duration-500 ease-out",
+          "fixed inset-0 z-9999 transition-opacity duration-500 ease-out",
           overlayVisible ? "opacity-100" : "pointer-events-none opacity-0",
         )}
         onTransitionEnd={() => setPhase("ready")}
