@@ -1,0 +1,57 @@
+{
+  "title": "Konto",
+  "subtitle": "Verwalte deinen Namen, deine E-Mail-Adresse, dein Passwort und aktive Sitzungen.",
+  "profile": {
+    "heading": "Name",
+    "nameLabel": "Anzeigename",
+    "save": "Speichern",
+    "updated": "Name aktualisiert",
+    "updateFailed": "Name konnte nicht aktualisiert werden"
+  },
+  "email": {
+    "heading": "E-Mail",
+    "verified": "Bestätigt",
+    "unverified": "Nicht bestätigt",
+    "newLabel": "Neue E-Mail-Adresse",
+    "placeholder": "du@beispiel.de",
+    "submit": "E-Mail aktualisieren",
+    "confirmationSent": "Bestätigungs-E-Mail gesendet",
+    "confirmationSentDescription": "Öffne {{email}} und klicke auf den Link, um die Änderung abzuschließen.",
+    "updateFailed": "E-Mail konnte nicht aktualisiert werden",
+    "sameAsCurrent": "Das ist bereits deine aktuelle E-Mail-Adresse"
+  },
+  "password": {
+    "heading": "Passwort",
+    "currentLabel": "Aktuelles Passwort",
+    "currentRequired": "Gib dein aktuelles Passwort ein",
+    "newLabel": "Neues Passwort",
+    "confirmLabel": "Neues Passwort bestätigen",
+    "revokeOtherSessions": "Auf allen anderen Geräten abmelden",
+    "submit": "Passwort aktualisieren",
+    "updated": "Passwort aktualisiert",
+    "updateFailed": "Passwort konnte nicht aktualisiert werden",
+    "mismatch": "Passwörter stimmen nicht überein",
+    "tooShort": "Muss mindestens 8 Zeichen lang sein"
+  },
+  "sessions": {
+    "heading": "Sitzungen",
+    "description": "Geräte, die aktuell bei deinem Konto angemeldet sind.",
+    "current": "Dieses Gerät",
+    "revoke": "Widerrufen",
+    "revokeAll": "Alle anderen Sitzungen widerrufen",
+    "revokeAllConfirmTitle": "Alle anderen Sitzungen widerrufen?",
+    "revokeAllConfirmDescription": "Du wirst auf jedem anderen Gerät abgemeldet. Dieses Gerät bleibt angemeldet.",
+    "revokeConfirmTitle": "Diese Sitzung widerrufen?",
+    "revokeConfirmDescription": "Das Gerät wird sofort abgemeldet.",
+    "revokeCurrentConfirmDescription": "Dies ist deine aktuelle Sitzung - du wirst sofort abgemeldet und zur Anmeldeseite zurückgeleitet.",
+    "revoked": "Sitzung widerrufen",
+    "revokeFailed": "Sitzung konnte nicht widerrufen werden",
+    "allRevoked": "Andere Sitzungen widerrufen",
+    "revokeAllFailed": "Andere Sitzungen konnten nicht widerrufen werden",
+    "loadFailed": "Sitzungen konnten nicht geladen werden",
+    "empty": "Keine aktiven Sitzungen",
+    "lastActive": "Zuletzt aktiv am {{date}}",
+    "unknownDevice": "Unbekanntes Gerät",
+    "noIp": "Unbekannter Standort"
+  }
+}

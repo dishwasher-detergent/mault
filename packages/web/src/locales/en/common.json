@@ -14,6 +14,10 @@
     "account": "Account",
     "sortingLogic": "Sorting Logic"
   },
+  "userMenu": {
+    "trigger": "Account menu",
+    "signOut": "Sign out"
+  },
   "emailVerification": {
     "banner": "Please verify your email address ({{email}}) to secure your account.",
     "sendCode": "Send code",
@@ -76,6 +80,12 @@
   "notFound": {
     "title": "Page not found",
     "description": "The page you're looking for doesn't exist or has been moved.",
+    "backHome": "Back to home"
+  },
+  "errorPage": {
+    "title": "Something went wrong",
+    "description": "An unexpected error occurred. Try reloading the page.",
+    "reload": "Reload page",
     "backHome": "Back to home"
   }
 }

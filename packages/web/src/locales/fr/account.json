@@ -1,0 +1,57 @@
+{
+  "title": "Compte",
+  "subtitle": "Gère ton nom, ton adresse e-mail, ton mot de passe et tes sessions actives.",
+  "profile": {
+    "heading": "Nom",
+    "nameLabel": "Nom affiché",
+    "save": "Enregistrer",
+    "updated": "Nom mis à jour",
+    "updateFailed": "Impossible de mettre à jour le nom"
+  },
+  "email": {
+    "heading": "E-mail",
+    "verified": "Vérifié",
+    "unverified": "Non vérifié",
+    "newLabel": "Nouvelle adresse e-mail",
+    "placeholder": "toi@exemple.fr",
+    "submit": "Mettre à jour l'e-mail",
+    "confirmationSent": "E-mail de confirmation envoyé",
+    "confirmationSentDescription": "Ouvre {{email}} et clique sur le lien pour terminer le changement d'adresse.",
+    "updateFailed": "Impossible de mettre à jour l'e-mail",
+    "sameAsCurrent": "C'est déjà ton adresse e-mail actuelle"
+  },
+  "password": {
+    "heading": "Mot de passe",
+    "currentLabel": "Mot de passe actuel",
+    "currentRequired": "Saisis ton mot de passe actuel",
+    "newLabel": "Nouveau mot de passe",
+    "confirmLabel": "Confirmer le nouveau mot de passe",
+    "revokeOtherSessions": "Déconnecter tous les autres appareils",
+    "submit": "Mettre à jour le mot de passe",
+    "updated": "Mot de passe mis à jour",
+    "updateFailed": "Impossible de mettre à jour le mot de passe",
+    "mismatch": "Les mots de passe ne correspondent pas",
+    "tooShort": "Doit contenir au moins 8 caractères"
+  },
+  "sessions": {
+    "heading": "Sessions",
+    "description": "Appareils actuellement connectés à ton compte.",
+    "current": "Cet appareil",
+    "revoke": "Révoquer",
+    "revokeAll": "Révoquer toutes les autres sessions",
+    "revokeAllConfirmTitle": "Révoquer toutes les autres sessions ?",
+    "revokeAllConfirmDescription": "Tu seras déconnecté de tous les autres appareils. Celui-ci reste connecté.",
+    "revokeConfirmTitle": "Révoquer cette session ?",
+    "revokeConfirmDescription": "L'appareil sera déconnecté immédiatement.",
+    "revokeCurrentConfirmDescription": "Il s'agit de ta session actuelle - tu seras déconnecté immédiatement et renvoyé vers la page de connexion.",
+    "revoked": "Session révoquée",
+    "revokeFailed": "Impossible de révoquer la session",
+    "allRevoked": "Autres sessions révoquées",
+    "revokeAllFailed": "Impossible de révoquer les autres sessions",
+    "loadFailed": "Impossible de charger les sessions",
+    "empty": "Aucune session active",
+    "lastActive": "Dernière activité {{date}}",
+    "unknownDevice": "Appareil inconnu",
+    "noIp": "Emplacement inconnu"
+  }
+}

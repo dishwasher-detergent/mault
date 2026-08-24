@@ -14,6 +14,10 @@
     "account": "Konto",
     "sortingLogic": "Sortierlogik"
   },
+  "userMenu": {
+    "trigger": "Kontomenü",
+    "signOut": "Abmelden"
+  },
   "emailVerification": {
     "banner": "Bitte bestätige deine E-Mail-Adresse ({{email}}), um dein Konto abzusichern.",
     "sendCode": "Code senden",
@@ -76,6 +80,12 @@
   "notFound": {
     "title": "Seite nicht gefunden",
     "description": "Die gesuchte Seite existiert nicht oder wurde verschoben.",
+    "backHome": "Zurück zur Startseite"
+  },
+  "errorPage": {
+    "title": "Etwas ist schiefgelaufen",
+    "description": "Es ist ein unerwarteter Fehler aufgetreten. Lade die Seite neu.",
+    "reload": "Seite neu laden",
     "backHome": "Zurück zur Startseite"
   }
 }

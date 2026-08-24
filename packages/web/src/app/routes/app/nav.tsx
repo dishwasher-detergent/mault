@@ -7,6 +7,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { UserMenu } from "@/features/account/components/user-menu";
 import { useCollectionLocks } from "@/features/collections/api/use-collection-locks";
 import { useCollections } from "@/features/collections/api/use-collections";
 import { useLiveSessionCounts } from "@/features/collections/api/use-live-counts";
@@ -14,7 +15,6 @@ import { OrgSwitcher } from "@/features/companies/components/org-switcher";
 import { useIsMobile } from "@/hooks/use-is-mobile";
 import { useRole } from "@/hooks/use-role";
 import { cn } from "@/lib/utils";
-import { UserButton } from "@neondatabase/neon-js/auth/react";
 import {
   IconAdjustments,
   IconAlbum,
@@ -251,7 +251,7 @@ export function AppNav() {
           <BottomNavItem key={item.to} {...item} />
         ))}
         <div className="flex flex-col items-center gap-0.5 px-2 py-1">
-          <UserButton size="icon" side="top" />
+          <UserMenu size="icon" side="top" />
         </div>
       </nav>
     );
@@ -354,7 +354,7 @@ export function AppNav() {
         <OrgSwitcher side="right" />
         <LanguageSwitcherIcon side="right" />
         <ThemeToggle />
-        <UserButton size="icon" side="right" />
+        <UserMenu size="icon" side="right" />
       </div>
     </aside>
   );
