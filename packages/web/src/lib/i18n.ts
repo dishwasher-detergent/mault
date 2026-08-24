@@ -1,6 +1,7 @@
 import i18n from "i18next";
 import { initReactI18next } from "react-i18next";
 
+import accountDe from "@/locales/de/account.json";
 import adminDe from "@/locales/de/admin.json";
 import authDe from "@/locales/de/auth.json";
 import binsDe from "@/locales/de/bins.json";
@@ -15,6 +16,7 @@ import landingDe from "@/locales/de/landing.json";
 import notificationsDe from "@/locales/de/notifications.json";
 import scannerDe from "@/locales/de/scanner.json";
 import settingsDe from "@/locales/de/settings.json";
+import accountEn from "@/locales/en/account.json";
 import adminEn from "@/locales/en/admin.json";
 import authEn from "@/locales/en/auth.json";
 import binsEn from "@/locales/en/bins.json";
@@ -29,6 +31,7 @@ import landingEn from "@/locales/en/landing.json";
 import notificationsEn from "@/locales/en/notifications.json";
 import scannerEn from "@/locales/en/scanner.json";
 import settingsEn from "@/locales/en/settings.json";
+import accountFr from "@/locales/fr/account.json";
 import adminFr from "@/locales/fr/admin.json";
 import authFr from "@/locales/fr/auth.json";
 import binsFr from "@/locales/fr/bins.json";
@@ -71,6 +74,7 @@ const resources = {
     admin: adminEn,
     games: gamesEn,
     settings: settingsEn,
+    account: accountEn,
   },
   de: {
     common: commonDe,
@@ -87,6 +91,7 @@ const resources = {
     admin: adminDe,
     games: gamesDe,
     settings: settingsDe,
+    account: accountDe,
   },
   fr: {
     common: commonFr,
@@ -103,6 +108,7 @@ const resources = {
     admin: adminFr,
     games: gamesFr,
     settings: settingsFr,
+    account: accountFr,
   },
 };
 

@@ -14,6 +14,10 @@
     "account": "Compte",
     "sortingLogic": "Logique de tri"
   },
+  "userMenu": {
+    "trigger": "Menu du compte",
+    "signOut": "Se déconnecter"
+  },
   "emailVerification": {
     "banner": "Merci de vérifier ton adresse e-mail ({{email}}) pour sécuriser ton compte.",
     "sendCode": "Envoyer le code",
@@ -76,6 +80,12 @@
   "notFound": {
     "title": "Page introuvable",
     "description": "La page que tu recherches n'existe pas ou a été déplacée.",
+    "backHome": "Retour à l'accueil"
+  },
+  "errorPage": {
+    "title": "Une erreur est survenue",
+    "description": "Une erreur inattendue s'est produite. Essaie de recharger la page.",
+    "reload": "Recharger la page",
     "backHome": "Retour à l'accueil"
   }
 }

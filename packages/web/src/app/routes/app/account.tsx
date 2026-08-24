@@ -1,27 +1,48 @@
-import { AccountView } from "@neondatabase/neon-js/auth/react/ui";
-import { useParams } from "react-router-dom";
+import { ChangeEmailForm } from "@/features/account/components/change-email-form";
+import { ChangePasswordForm } from "@/features/account/components/change-password-form";
+import { SessionsList } from "@/features/account/components/sessions-list";
+import { UpdateNameForm } from "@/features/account/components/update-name-form";
+import { useTranslation } from "react-i18next";
 
 export default function AccountPage() {
-  const { path } = useParams();
+  const { t } = useTranslation("account");
 
   return (
-    <div>
-      <AccountView
-        path={path}
-        classNames={{
-          base: "p-2",
-          card: {
-            base: "shadow-none border-none ring-foreground/10 bg-card text-card-foreground gap-4 overflow-hidden rounded-lg pt-4 text-xs/relaxed ring-1 has-[>img:first-child]:pt-0 data-[size=sm]:gap-3 data-[size=sm]:py-3 *:[img:first-child]:rounded-t-lg *:[img:last-child]:rounded-b-lg group/card flex flex-col",
-            content: "px-4 group-data-[size=sm]/card:px-3",
-            header:
-              "gap-1 rounded-t-lg px-4 group-data-[size=sm]/card:px-3 [.border-b]:pb-4 group-data-[size=sm]/card:[.border-b]:pb-3 group/card-header @container/card-header grid auto-rows-min items-start has-data-[slot=card-action]:grid-cols-[1fr_auto] has-data-[slot=card-description]:grid-rows-[auto_auto]",
-            title: "text-sm font-medium md:text-sm",
-            description:
-              "text-muted-foreground text-xs/relaxed md:text-xs/relaxed",
-            footer: "text-xs p-2 pl-4 !py-2",
-          },
-        }}
-      />
+    <div className="h-full w-full overflow-y-auto">
+      <div className="mx-auto flex w-full max-w-4xl flex-col gap-4 p-4 md:p-6">
+        <div>
+          <h1 className="font-heading text-lg font-semibold">{t("title")}</h1>
+          <p className="text-xs text-muted-foreground">{t("subtitle")}</p>
+        </div>
+
+        <div className="flex flex-col gap-4 rounded-lg border p-4">
+          <h2 className="font-heading text-sm font-semibold">
+            {t("profile.heading")}
+          </h2>
+          <UpdateNameForm />
+        </div>
+
+        <div className="flex flex-col gap-4 rounded-lg border p-4">
+          <h2 className="font-heading text-sm font-semibold">
+            {t("email.heading")}
+          </h2>
+          <ChangeEmailForm />
+        </div>
+
+        <div className="flex flex-col gap-4 rounded-lg border p-4">
+          <h2 className="font-heading text-sm font-semibold">
+            {t("password.heading")}
+          </h2>
+          <ChangePasswordForm />
+        </div>
+
+        <div className="flex flex-col gap-4 rounded-lg border p-4">
+          <h2 className="font-heading text-sm font-semibold">
+            {t("sessions.heading")}
+          </h2>
+          <SessionsList />
+        </div>
+      </div>
     </div>
   );
 }

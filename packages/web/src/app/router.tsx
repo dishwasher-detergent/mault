@@ -12,6 +12,7 @@ import SettingsPage from "@/app/routes/app/settings";
 import VerifyEmailPage from "@/app/routes/app/verify-email";
 import AuthPage from "@/app/routes/auth";
 import BuildGuidePage from "@/app/routes/build";
+import ErrorPage from "@/app/routes/error";
 import LandingPage from "@/app/routes/index";
 import NotFoundPage from "@/app/routes/not-found";
 import { useIsMobile } from "@/hooks/use-is-mobile";
@@ -45,83 +46,89 @@ function DesktopOnlyGuard() {
 
 export const router = createBrowserRouter([
   {
-    path: "/",
-    element: <LandingPage />,
-  },
-  {
-    path: "/build",
-    element: <BuildGuidePage />,
-  },
-  {
-    path: "/auth/:path",
-    element: <AuthPage />,
-  },
-  {
-    element: <AuthGuard />,
+    element: <Outlet />,
+    errorElement: <ErrorPage />,
     children: [
       {
-        path: "/app/verify-email",
-        element: <VerifyEmailPage />,
+        path: "/",
+        element: <LandingPage />,
       },
       {
-        element: <AppLayout />,
+        path: "/build",
+        element: <BuildGuidePage />,
+      },
+      {
+        path: "/auth/:path",
+        element: <AuthPage />,
+      },
+      {
+        element: <AuthGuard />,
         children: [
           {
-            element: <DesktopOnlyGuard />,
+            path: "/app/verify-email",
+            element: <VerifyEmailPage />,
+          },
+          {
+            element: <AppLayout />,
             children: [
               {
-                path: "/app",
-                element: <ScannerPage />,
-              },
-              {
-                path: "/app/collections",
-                element: <CollectionsPage />,
-              },
-              {
-                path: "/app/collections/:collectionGuid/bins",
-                element: <BinsPage />,
-              },
-              {
-                path: "/app/calibrate",
-                element: <CalibratePage />,
-              },
-              {
-                element: <AdminGuard />,
+                element: <DesktopOnlyGuard />,
                 children: [
                   {
-                    path: "/app/admin",
-                    element: <AdminPage />,
+                    path: "/app",
+                    element: <ScannerPage />,
+                  },
+                  {
+                    path: "/app/collections",
+                    element: <CollectionsPage />,
+                  },
+                  {
+                    path: "/app/collections/:collectionGuid/bins",
+                    element: <BinsPage />,
+                  },
+                  {
+                    path: "/app/calibrate",
+                    element: <CalibratePage />,
+                  },
+                  {
+                    element: <AdminGuard />,
+                    children: [
+                      {
+                        path: "/app/admin",
+                        element: <AdminPage />,
+                      },
+                    ],
                   },
                 ],
               },
+              {
+                path: "/app/monitor",
+                element: <MonitorSessionsPage />,
+              },
+              {
+                path: "/app/monitor/:collectionGuid",
+                element: <MonitorPage />,
+              },
+              {
+                path: "/app/monitor/:collectionGuid/camera",
+                element: <PhoneCameraPage />,
+              },
+              {
+                path: "/app/settings",
+                element: <SettingsPage />,
+              },
+              {
+                path: "/app/account/:path",
+                element: <AccountPage />,
+              },
             ],
-          },
-          {
-            path: "/app/monitor",
-            element: <MonitorSessionsPage />,
-          },
-          {
-            path: "/app/monitor/:collectionGuid",
-            element: <MonitorPage />,
-          },
-          {
-            path: "/app/monitor/:collectionGuid/camera",
-            element: <PhoneCameraPage />,
-          },
-          {
-            path: "/app/settings",
-            element: <SettingsPage />,
-          },
-          {
-            path: "/app/account/:path",
-            element: <AccountPage />,
           },
         ],
       },
+      {
+        path: "*",
+        element: <NotFoundPage />,
+      },
     ],
-  },
-  {
-    path: "*",
-    element: <NotFoundPage />,
   },
 ]);

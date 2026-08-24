@@ -1,0 +1,57 @@
+{
+  "title": "Account",
+  "subtitle": "Manage your name, email, password, and active sessions.",
+  "profile": {
+    "heading": "Name",
+    "nameLabel": "Display name",
+    "save": "Save",
+    "updated": "Name updated",
+    "updateFailed": "Couldn't update your name"
+  },
+  "email": {
+    "heading": "Email",
+    "verified": "Verified",
+    "unverified": "Unverified",
+    "newLabel": "New email",
+    "placeholder": "you@example.com",
+    "submit": "Update email",
+    "confirmationSent": "Confirmation email sent",
+    "confirmationSentDescription": "Check {{email}} and click the link to finish changing your email.",
+    "updateFailed": "Couldn't update your email",
+    "sameAsCurrent": "That's already your current email"
+  },
+  "password": {
+    "heading": "Password",
+    "currentLabel": "Current password",
+    "currentRequired": "Enter your current password",
+    "newLabel": "New password",
+    "confirmLabel": "Confirm new password",
+    "revokeOtherSessions": "Sign out of all other devices",
+    "submit": "Update password",
+    "updated": "Password updated",
+    "updateFailed": "Couldn't update your password",
+    "mismatch": "Passwords don't match",
+    "tooShort": "Must be at least 8 characters"
+  },
+  "sessions": {
+    "heading": "Sessions",
+    "description": "Devices currently signed in to your account.",
+    "current": "This device",
+    "revoke": "Revoke",
+    "revokeAll": "Revoke all other sessions",
+    "revokeAllConfirmTitle": "Revoke all other sessions?",
+    "revokeAllConfirmDescription": "You'll be signed out on every other device. This one stays signed in.",
+    "revokeConfirmTitle": "Revoke this session?",
+    "revokeConfirmDescription": "The device will be signed out immediately.",
+    "revokeCurrentConfirmDescription": "This is your current session - you'll be signed out immediately and returned to the sign-in page.",
+    "revoked": "Session revoked",
+    "revokeFailed": "Couldn't revoke session",
+    "allRevoked": "Other sessions revoked",
+    "revokeAllFailed": "Couldn't revoke other sessions",
+    "loadFailed": "Couldn't load sessions",
+    "empty": "No active sessions",
+    "lastActive": "Last active {{date}}",
+    "unknownDevice": "Unknown device",
+    "noIp": "Unknown location"
+  }
+}
