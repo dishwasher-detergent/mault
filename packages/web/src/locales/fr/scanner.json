@@ -194,7 +194,9 @@
     "streamingTo": "Prêt pour {{name}}",
     "disconnected": "Déconnecté de la trieuse.",
     "reconnect": "Reconnecter",
-    "disconnectButton": "Déconnecter"
+    "disconnectButton": "Déconnecter",
+    "sessionEndedTitle": "Session terminée",
+    "sessionEndedDescription": "Le scanner a déconnecté cette caméra. Tu peux éteindre la caméra ou scanner un nouveau code QR pour te reconnecter."
   },
   "scannerOverlay": {
     "connectCamera": "Connecte une caméra pour commencer à scanner.",

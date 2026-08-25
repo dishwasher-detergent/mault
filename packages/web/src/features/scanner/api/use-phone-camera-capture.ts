@@ -79,11 +79,12 @@ export function usePhoneCameraCapture(collectionGuid: string | undefined) {
   }, []);
 
   const stop = useCallback(() => {
+    if (activeRef.current) send({ kind: "desktop_disconnected" });
     activeRef.current = false;
     clearPresenceTimeout();
     setStatus("idle");
     resolvePending(null);
-  }, [clearPresenceTimeout, resolvePending]);
+  }, [clearPresenceTimeout, resolvePending, send]);
 
   const requestCapture = useCallback((): Promise<string | null> => {
     if (status !== "connected") return Promise.resolve(null);

@@ -1,4 +1,5 @@
 import { Button } from "@/components/ui/button";
+import { DynamicDialog } from "@/components/ui/responsive-dialog";
 import { collectionsQueryOptions } from "@/features/collections/api/collections";
 import { orgSettingsQueryOptions } from "@/features/companies/api/org-settings";
 import { useOrg } from "@/features/companies/api/use-organization";
@@ -42,11 +43,17 @@ export default function PhoneCameraPage() {
     setTimeout(() => setJustCaptured(false), CAPTURE_FLASH_MS);
   }, []);
 
+  const [sessionEnded, setSessionEnded] = useState(false);
+  const handleDesktopDisconnected = useCallback(() => {
+    setSessionEnded(true);
+  }, []);
+
   usePhoneCameraResponder(
     collectionGuid,
     displayCanvasRef,
     status === "ready",
     handleCapture,
+    handleDesktopDisconnected,
   );
 
   const statusText: Record<typeof status, string> = {
@@ -55,6 +62,26 @@ export default function PhoneCameraPage() {
     ready: t("phoneCamera.ready"),
     disconnected: t("phoneCamera.disconnected"),
   };
+
+  const sessionEndedDialog = (
+    <DynamicDialog
+      open={sessionEnded}
+      onOpenChange={setSessionEnded}
+      title={t("phoneCamera.sessionEndedTitle")}
+      description={t("phoneCamera.sessionEndedDescription")}
+      footer={
+        <Button
+          variant="outline-destructive"
+          onClick={() => {
+            setSessionEnded(false);
+            disconnect();
+          }}
+        >
+          {t("phoneCamera.disconnectButton")}
+        </Button>
+      }
+    />
+  );
 
   if (status === "disconnected") {
     return (
@@ -65,6 +92,7 @@ export default function PhoneCameraPage() {
           <IconRefresh />
           {t("phoneCamera.reconnect")}
         </Button>
+        {sessionEndedDialog}
       </div>
     );
   }
@@ -89,7 +117,7 @@ export default function PhoneCameraPage() {
             ? t("phoneCamera.streamingTo", { name: collection.name })
             : t("phoneCamera.dialogTitle")}
         </p>
-        {status !== "camera-error" && (
+        {status === "requesting-camera" && (
           <Button
             variant="secondary"
             size="icon-sm"
@@ -110,6 +138,16 @@ export default function PhoneCameraPage() {
             <IconLoader2 className="size-4 animate-spin shrink-0" />
           )}
           <span>{statusText[status]}</span>
+          {status === "ready" && (
+            <button
+              type="button"
+              onClick={disconnect}
+              title={t("phoneCamera.disconnectButton")}
+              className="ml-1 -mr-1 shrink-0 rounded-full p-1 text-white/70 transition-colors hover:bg-white/10 hover:text-white"
+            >
+              <IconPlugOff className="size-3.5" />
+            </button>
+          )}
         </div>
       </div>
       {status === "camera-error" && errorMessage && (
@@ -119,6 +157,7 @@ export default function PhoneCameraPage() {
           </p>
         </div>
       )}
+      {sessionEndedDialog}
     </div>
   );
 }
