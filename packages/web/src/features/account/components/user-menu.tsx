@@ -15,10 +15,10 @@ import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 
 export function UserMenu({
-  size = "icon",
+  variant = "icon",
   side = "right",
 }: {
-  size?: "icon" | "icon-lg";
+  variant?: "icon" | "tab";
   side?: "top" | "right";
 }) {
   const { t } = useTranslation("common");
@@ -35,16 +35,35 @@ export function UserMenu({
 
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger
-        render={
-          <Button variant="outline" size={size}>
-            <span className="text-[10px] font-semibold">
-              {getInitials(name)}
-            </span>
-            <span className="sr-only">{t("userMenu.trigger")}</span>
-          </Button>
-        }
-      />
+      {variant === "tab" ? (
+        <DropdownMenuTrigger
+          render={
+            <button
+              type="button"
+              className="flex flex-col items-center gap-0.5 px-2 py-1 rounded-md transition-all active:scale-90 text-muted-foreground aria-expanded:text-foreground"
+            >
+              <span className="grid size-5 place-items-center rounded-full bg-muted text-[9px] font-semibold">
+                {getInitials(name)}
+              </span>
+              <span className="text-[10px] leading-none font-medium">
+                {t("breadcrumb.account")}
+              </span>
+              <span className="sr-only">{t("userMenu.trigger")}</span>
+            </button>
+          }
+        />
+      ) : (
+        <DropdownMenuTrigger
+          render={
+            <Button variant="outline" size="icon">
+              <span className="text-[10px] font-semibold">
+                {getInitials(name)}
+              </span>
+              <span className="sr-only">{t("userMenu.trigger")}</span>
+            </Button>
+          }
+        />
+      )}
       <DropdownMenuContent
         side={side}
         align="end"

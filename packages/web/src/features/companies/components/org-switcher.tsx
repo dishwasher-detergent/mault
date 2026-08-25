@@ -18,6 +18,7 @@ import {
   IconPlus,
   IconSettings,
 } from "@tabler/icons-react";
+import { AnimatePresence, motion } from "framer-motion";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
@@ -29,8 +30,41 @@ import { useOrg } from "../api/use-organization";
 const createSchema = z.object({ name: z.string().min(1) });
 type CreateValues = z.infer<typeof createSchema>;
 
-export function OrgSwitcher({ side = "right" }: { side?: "right" | "top" }) {
+function OrgBadge({
+  orgId,
+  initial,
+  className,
+}: {
+  orgId: string;
+  initial: string;
+  className: string;
+}) {
+  return (
+    <AnimatePresence mode="popLayout" initial={false}>
+      <motion.span
+        key={orgId}
+        initial={{ rotateY: 90, scale: 0.4, opacity: 0 }}
+        animate={{ rotateY: 0, scale: 1, opacity: 1 }}
+        exit={{ rotateY: -90, scale: 0.4, opacity: 0 }}
+        transition={{ duration: 0.3, ease: "easeOut" }}
+        style={{ transformPerspective: 60 }}
+        className={className}
+      >
+        {initial}
+      </motion.span>
+    </AnimatePresence>
+  );
+}
+
+export function OrgSwitcher({
+  side = "right",
+  variant = "icon",
+}: {
+  side?: "right" | "top";
+  variant?: "icon" | "tab";
+}) {
   const { t } = useTranslation("companies");
+  const { t: tCommon } = useTranslation("common");
   const { orgs, activeOrg, setActiveOrg } = useOrg();
   const navigate = useNavigate();
   const [createOpen, setCreateOpen] = useState(false);
@@ -66,20 +100,47 @@ export function OrgSwitcher({ side = "right" }: { side?: "right" | "top" }) {
   return (
     <>
       <DropdownMenu>
-        <div className="relative">
+        {variant === "tab" ? (
           <DropdownMenuTrigger
             render={
-              <Button size="icon-lg" variant="outline">
-                <IconBuilding />
-              </Button>
+              <button
+                type="button"
+                className="flex flex-col items-center gap-0.5 px-2 py-1 rounded-md transition-all active:scale-90 text-muted-foreground aria-expanded:text-foreground"
+              >
+                <span className="relative">
+                  <IconBuilding size={20} />
+                  {activeOrg && (
+                    <OrgBadge
+                      orgId={activeOrg.id}
+                      initial={activeOrg.name[0].toUpperCase()}
+                      className="pointer-events-none absolute -right-1.5 -top-1 grid size-3 place-items-center rounded-full bg-primary text-[0.5rem] font-bold leading-none text-primary-foreground"
+                    />
+                  )}
+                </span>
+                <span className="text-[10px] leading-none font-medium">
+                  {tCommon("nav.organization")}
+                </span>
+              </button>
             }
           />
-          {activeOrg && (
-            <span className="pointer-events-none absolute -right-1 -top-1 grid size-4 place-items-center rounded-full bg-primary text-[0.6rem] font-bold leading-none text-primary-foreground">
-              {activeOrg.name[0].toUpperCase()}
-            </span>
-          )}
-        </div>
+        ) : (
+          <div className="relative">
+            <DropdownMenuTrigger
+              render={
+                <Button size="icon-lg" variant="outline">
+                  <IconBuilding />
+                </Button>
+              }
+            />
+            {activeOrg && (
+              <OrgBadge
+                orgId={activeOrg.id}
+                initial={activeOrg.name[0].toUpperCase()}
+                className="pointer-events-none absolute -right-1 -top-1 grid size-4 place-items-center rounded-full bg-primary text-[0.6rem] font-bold leading-none text-primary-foreground"
+              />
+            )}
+          </div>
+        )}
         <DropdownMenuContent
           side={side}
           align="end"

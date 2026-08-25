@@ -5,7 +5,12 @@
     "monitor": "Überwachung",
     "calibrate": "Kalibrieren",
     "settings": "Einstellungen",
+    "organization": "Org",
+    "cart": "Warenkorb",
+    "comingSoon": "Demnächst verfügbar",
     "admin": "Admin",
+    "discord": "Discord",
+    "discordAriaLabel": "Discord beitreten",
     "collapse": "Einklappen",
     "collapseSidebar": "Seitenleiste einklappen ([)",
     "expandSidebar": "Seitenleiste ausklappen ([)"

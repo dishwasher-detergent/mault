@@ -10,6 +10,7 @@ export function useOrg() {
     neon.auth.useListOrganizations();
   const { data: activeOrg, isPending: orgLoading } =
     neon.auth.useActiveOrganization();
+  const { refetch: refetchActiveMember } = neon.auth.useActiveMember();
   const [isRestoring, setIsRestoring] = useState(
     () => !!localStorage.getItem(ORG_KEY),
   );
@@ -18,27 +19,36 @@ export function useOrg() {
     async (orgId: string) => {
       localStorage.setItem(ORG_KEY, orgId);
       await neon.auth.organization.setActive({ organizationId: orgId });
-      await queryClient.invalidateQueries({
-        predicate: (query) => query.queryKey[0] !== "games",
-      });
+      await Promise.all([
+        refetchActiveMember(),
+        queryClient.invalidateQueries({
+          predicate: (query) => query.queryKey[0] !== "games",
+        }),
+      ]);
     },
-    [queryClient],
+    [queryClient, refetchActiveMember],
   );
 
-  if (activeOrg?.id) {
-    localStorage.setItem(ORG_KEY, activeOrg.id);
-  }
+  useEffect(() => {
+    // Only fires when activeOrg.id actually changes — not on every render — so it
+    // can't stomp the localStorage value setActiveOrg() just wrote with a stale
+    // activeOrg still catching up to an in-flight switch.
+    if (activeOrg?.id) {
+      localStorage.setItem(ORG_KEY, activeOrg.id);
+    }
+  }, [activeOrg?.id]);
 
   useEffect(() => {
     if (orgLoading || orgsLoading) return;
-    if (activeOrg || !orgs?.length) {
+    if (activeOrg) {
       setIsRestoring(false);
       return;
     }
     const lastOrgId = localStorage.getItem(ORG_KEY);
-    if (lastOrgId && orgs.some((o) => o.id === lastOrgId)) {
+    if (lastOrgId && orgs?.some((o) => o.id === lastOrgId)) {
       setActiveOrg(lastOrgId).finally(() => setIsRestoring(false));
     } else {
+      if (lastOrgId) localStorage.removeItem(ORG_KEY);
       setIsRestoring(false);
     }
   }, [orgLoading, orgsLoading, activeOrg, orgs, setActiveOrg]);

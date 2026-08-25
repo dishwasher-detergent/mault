@@ -14,17 +14,19 @@ import { useLiveSessionCounts } from "@/features/collections/api/use-live-counts
 import { OrgSwitcher } from "@/features/companies/components/org-switcher";
 import { useIsMobile } from "@/hooks/use-is-mobile";
 import { useRole } from "@/hooks/use-role";
+import { DISCORD_URL } from "@/lib/links";
 import { cn } from "@/lib/utils";
 import {
   IconAdjustments,
   IconAlbum,
+  IconBrandDiscord,
   IconCameraSpark,
   IconDatabaseCog,
   IconHeartRateMonitor,
   IconLayoutSidebarLeftCollapse,
   IconLayoutSidebarLeftExpand,
   IconPigFilled,
-  IconSettings,
+  IconShoppingCart,
 } from "@tabler/icons-react";
 import { useCallback, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -39,23 +41,43 @@ interface NavItemDef {
   end?: boolean;
   badge?: boolean;
   desktopOnly?: boolean;
+  disabled?: boolean;
+  tooltip?: string;
 }
 
-function CollapsedNavItem({ to, icon, label, end, badge }: NavItemDef) {
+function CollapsedNavItem({
+  icon,
+  label,
+  to,
+  end,
+  badge,
+  disabled,
+  tooltip,
+}: NavItemDef) {
   return (
     <Tooltip>
       <TooltipTrigger
         render={
-          <NavLink
-            to={to}
-            end={end}
-            className={({ isActive }) =>
-              buttonVariants({
-                variant: isActive ? "secondary" : "ghost",
-                size: "icon-lg",
-              })
-            }
-          />
+          disabled ? (
+            <span
+              aria-disabled="true"
+              className={cn(
+                buttonVariants({ variant: "ghost", size: "icon-lg" }),
+                "cursor-not-allowed text-muted-foreground/40 hover:bg-transparent hover:text-muted-foreground/40",
+              )}
+            />
+          ) : (
+            <NavLink
+              to={to}
+              end={end}
+              className={({ isActive }) =>
+                buttonVariants({
+                  variant: isActive ? "secondary" : "ghost",
+                  size: "icon-lg",
+                })
+              }
+            />
+          )
         }
       >
         <span className="relative">
@@ -65,12 +87,53 @@ function CollapsedNavItem({ to, icon, label, end, badge }: NavItemDef) {
           )}
         </span>
       </TooltipTrigger>
-      <TooltipContent side="right">{label}</TooltipContent>
+      <TooltipContent side="right">{disabled ? tooltip : label}</TooltipContent>
     </Tooltip>
   );
 }
 
-function ExpandedNavItem({ to, icon, label, end, badge }: NavItemDef) {
+function ExpandedNavItem({
+  to,
+  icon,
+  label,
+  end,
+  badge,
+  disabled,
+  tooltip,
+}: NavItemDef) {
+  const inner = (
+    <>
+      <span className="relative shrink-0">
+        {icon}
+        {badge && (
+          <span className="absolute -top-0.5 -right-0.5 size-2 rounded-full bg-green-500 ring-1 ring-background" />
+        )}
+      </span>
+      <span className="truncate text-sm">{label}</span>
+    </>
+  );
+
+  if (disabled) {
+    return (
+      <Tooltip>
+        <TooltipTrigger
+          render={
+            <span
+              aria-disabled="true"
+              className={cn(
+                buttonVariants({ variant: "ghost" }),
+                "w-full justify-start gap-2.5 px-2.5 border-0 cursor-not-allowed text-muted-foreground/40 hover:bg-transparent hover:text-muted-foreground/40",
+              )}
+            />
+          }
+        >
+          {inner}
+        </TooltipTrigger>
+        <TooltipContent side="right">{tooltip}</TooltipContent>
+      </Tooltip>
+    );
+  }
+
   return (
     <NavLink
       to={to}
@@ -82,13 +145,7 @@ function ExpandedNavItem({ to, icon, label, end, badge }: NavItemDef) {
         )
       }
     >
-      <span className="relative shrink-0">
-        {icon}
-        {badge && (
-          <span className="absolute -top-0.5 -right-0.5 size-2 rounded-full bg-green-500 ring-1 ring-background" />
-        )}
-      </span>
-      <span className="truncate text-sm">{label}</span>
+      {inner}
     </NavLink>
   );
 }
@@ -122,18 +179,17 @@ function SubItem({
   );
 }
 
-function BottomNavItem({ to, icon, label, end, badge }: NavItemDef) {
-  return (
-    <NavLink
-      to={to}
-      end={end}
-      className={({ isActive }) =>
-        cn(
-          "flex flex-col items-center gap-0.5 px-2 py-1 rounded-md transition-colors text-muted-foreground",
-          isActive && "text-foreground",
-        )
-      }
-    >
+function BottomNavItem({
+  to,
+  icon,
+  label,
+  end,
+  badge,
+  disabled,
+  tooltip,
+}: NavItemDef) {
+  const inner = (
+    <>
       <span className="relative">
         {icon}
         {badge && (
@@ -141,6 +197,39 @@ function BottomNavItem({ to, icon, label, end, badge }: NavItemDef) {
         )}
       </span>
       <span className="text-[10px] leading-none font-medium">{label}</span>
+    </>
+  );
+
+  if (disabled) {
+    return (
+      <Tooltip>
+        <TooltipTrigger
+          render={
+            <span
+              aria-disabled="true"
+              className="flex flex-col items-center gap-0.5 px-2 py-1 rounded-md cursor-not-allowed text-muted-foreground/40"
+            />
+          }
+        >
+          {inner}
+        </TooltipTrigger>
+        <TooltipContent side="top">{tooltip}</TooltipContent>
+      </Tooltip>
+    );
+  }
+
+  return (
+    <NavLink
+      to={to}
+      end={end}
+      className={({ isActive }) =>
+        cn(
+          "flex flex-col items-center gap-0.5 px-2 py-1 rounded-md transition-all active:scale-90 text-muted-foreground",
+          isActive && "text-foreground",
+        )
+      }
+    >
+      {inner}
     </NavLink>
   );
 }
@@ -227,9 +316,11 @@ export function AppNav() {
       desktopOnly: true,
     },
     {
-      to: "/app/settings",
-      icon: <IconSettings size={20} />,
-      label: t("nav.settings"),
+      to: "",
+      icon: <IconShoppingCart size={20} />,
+      label: t("nav.cart"),
+      disabled: true,
+      tooltip: t("nav.comingSoon"),
     },
     ...(isAdmin
       ? [
@@ -250,9 +341,8 @@ export function AppNav() {
         {mobileItems.map((item) => (
           <BottomNavItem key={item.to} {...item} />
         ))}
-        <div className="flex flex-col items-center gap-0.5 px-2 py-1">
-          <UserMenu size="icon" side="top" />
-        </div>
+        <OrgSwitcher variant="tab" side="top" />
+        <UserMenu variant="tab" side="top" />
       </nav>
     );
   }
@@ -325,15 +415,29 @@ export function AppNav() {
           );
         })}
       </nav>
+      <a
+        href={DISCORD_URL}
+        target="_blank"
+        rel="noreferrer"
+        title={t("nav.discordAriaLabel")}
+        aria-label={t("nav.discordAriaLabel")}
+        className={cn(
+          buttonVariants({ variant: "ghost" }),
+          expanded
+            ? "h-8 mx-2 justify-start gap-2.5 px-2.5 border-0"
+            : "size-8",
+        )}
+      >
+        <IconBrandDiscord size={16} />
+        {expanded && (
+          <span className="truncate text-sm">{t("nav.discord")}</span>
+        )}
+      </a>
       <Button
         onClick={toggle}
         className={cn(expanded ? "h-8 mx-2" : "size-8")}
         variant="ghost"
-        title={
-          expanded
-            ? t("nav.collapseSidebar")
-            : t("nav.expandSidebar")
-        }
+        title={expanded ? t("nav.collapseSidebar") : t("nav.expandSidebar")}
       >
         {expanded ? (
           <>
@@ -354,7 +458,7 @@ export function AppNav() {
         <OrgSwitcher side="right" />
         <LanguageSwitcherIcon side="right" />
         <ThemeToggle />
-        <UserMenu size="icon" side="right" />
+        <UserMenu side="right" />
       </div>
     </aside>
   );

@@ -5,7 +5,12 @@
     "monitor": "Monitor",
     "calibrate": "Calibrate",
     "settings": "Settings",
+    "organization": "Org",
+    "cart": "Cart",
+    "comingSoon": "Coming soon",
     "admin": "Admin",
+    "discord": "Discord",
+    "discordAriaLabel": "Join the Discord",
     "collapse": "Collapse",
     "collapseSidebar": "Collapse sidebar ([)",
     "expandSidebar": "Expand sidebar ([)"
