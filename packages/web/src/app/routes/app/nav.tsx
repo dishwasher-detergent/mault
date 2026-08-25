@@ -224,7 +224,7 @@ function BottomNavItem({
       end={end}
       className={({ isActive }) =>
         cn(
-          "flex flex-col items-center gap-0.5 px-2 py-1 rounded-md transition-colors text-muted-foreground",
+          "flex flex-col items-center gap-0.5 px-2 py-1 rounded-md transition-all active:scale-90 text-muted-foreground",
           isActive && "text-foreground",
         )
       }

@@ -40,7 +40,7 @@ export function UserMenu({
           render={
             <button
               type="button"
-              className="flex flex-col items-center gap-0.5 px-2 py-1 rounded-md transition-colors text-muted-foreground aria-expanded:text-foreground"
+              className="flex flex-col items-center gap-0.5 px-2 py-1 rounded-md transition-all active:scale-90 text-muted-foreground aria-expanded:text-foreground"
             >
               <span className="grid size-5 place-items-center rounded-full bg-muted text-[9px] font-semibold">
                 {getInitials(name)}
