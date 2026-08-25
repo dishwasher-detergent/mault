@@ -69,7 +69,9 @@ export function BuildWiring() {
     ...Array.from({ length: moduleCount }, (_, i) => i + 1).map(
       (n): [string, ReactNode] => [
         t("wiring.irTable.moduleGate", { n }),
-        <Pin key={`ir-${n}`}>{`${isEsp32 ? "GPIO" : "D"}${board.irPins[n - 1]}`}</Pin>,
+        <Pin
+          key={`ir-${n}`}
+        >{`${isEsp32 ? "GPIO" : "D"}${board.irPins[n - 1]}`}</Pin>,
       ],
     ),
     [
@@ -243,7 +245,7 @@ export function BuildWiring() {
             {t("wiring.sections.diagram.title")}
           </h3>
           <img
-            src="/instructions/wiring-diagram.png"
+            src="/instructions/wiring_diagram.png"
             alt={t("wiring.sections.diagram.alt")}
             className="w-full rounded-lg border"
           />
