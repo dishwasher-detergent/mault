@@ -26,7 +26,6 @@ import {
   IconLayoutSidebarLeftCollapse,
   IconLayoutSidebarLeftExpand,
   IconPigFilled,
-  IconSettings,
   IconShoppingCart,
 } from "@tabler/icons-react";
 import { useCallback, useEffect, useState } from "react";
@@ -317,11 +316,6 @@ export function AppNav() {
       desktopOnly: true,
     },
     {
-      to: "/app/settings",
-      icon: <IconSettings size={20} />,
-      label: t("nav.settings"),
-    },
-    {
       to: "",
       icon: <IconShoppingCart size={20} />,
       label: t("nav.cart"),
@@ -435,7 +429,9 @@ export function AppNav() {
         )}
       >
         <IconBrandDiscord size={16} />
-        {expanded && <span className="truncate text-sm">{t("nav.discord")}</span>}
+        {expanded && (
+          <span className="truncate text-sm">{t("nav.discord")}</span>
+        )}
       </a>
       <Button
         onClick={toggle}
