@@ -305,7 +305,7 @@
         "title": "Die Servos montieren",
         "steps": {
           "mountModuleServos": {
-            "text": "Setze den Boden-, Paddel- und Schieberservo in jedes der 3 Modulgehäuse ein (insgesamt 9 Servos).",
+            "text": "Setze den Boden-, Paddel- und Schieberservo - alles 180°-Positionsservos vom Typ SG90 - in jedes der 3 Modulgehäuse ein (insgesamt 9 Servos).",
             "note": "Schraube noch keine Hörner fest – die Zentrierung erfolgt im nächsten Schritt, wenn die Servos unter Strom stehen und in ihre Ruheposition gefahren werden."
           },
           "centerServos": {

@@ -305,7 +305,7 @@
         "title": "Mount the servos",
         "steps": {
           "mountModuleServos": {
-            "text": "Install the bottom, paddle, and pusher servo into each of the 3 module housings (9 servos total).",
+            "text": "Install the bottom, paddle, and pusher servo - all 180° positional SG90s - into each of the 3 module housings (9 servos total).",
             "note": "Don't install the horns onto the servo shafts yet - fit the flappers/pusher arm to their horns below, but leave the horn itself off the servo until each module is calibrated from the app."
           },
           "centerServos": {
