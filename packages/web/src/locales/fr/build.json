@@ -305,7 +305,7 @@
         "title": "Monter les servos",
         "steps": {
           "mountModuleServos": {
-            "text": "Installe le servo inférieur, le servo de palette et le poussoir dans chacun des 3 logements de module (9 servos au total).",
+            "text": "Installe le servo inférieur, le servo de palette et le poussoir - tous des servos SG90 positionnels à 180° - dans chacun des 3 logements de module (9 servos au total).",
             "note": "Ne visse pas encore de palonnier - le centrage se fait à l'étape suivante, une fois les servos alimentés et commandés vers leur position de repos."
           },
           "centerServos": {
