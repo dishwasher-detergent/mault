@@ -29,8 +29,15 @@ import { useOrg } from "../api/use-organization";
 const createSchema = z.object({ name: z.string().min(1) });
 type CreateValues = z.infer<typeof createSchema>;
 
-export function OrgSwitcher({ side = "right" }: { side?: "right" | "top" }) {
+export function OrgSwitcher({
+  side = "right",
+  variant = "icon",
+}: {
+  side?: "right" | "top";
+  variant?: "icon" | "tab";
+}) {
   const { t } = useTranslation("companies");
+  const { t: tCommon } = useTranslation("common");
   const { orgs, activeOrg, setActiveOrg } = useOrg();
   const navigate = useNavigate();
   const [createOpen, setCreateOpen] = useState(false);
@@ -66,20 +73,43 @@ export function OrgSwitcher({ side = "right" }: { side?: "right" | "top" }) {
   return (
     <>
       <DropdownMenu>
-        <div className="relative">
+        {variant === "tab" ? (
           <DropdownMenuTrigger
             render={
-              <Button size="icon-lg" variant="outline">
-                <IconBuilding />
-              </Button>
+              <button
+                type="button"
+                className="flex flex-col items-center gap-0.5 px-2 py-1 rounded-md transition-colors text-muted-foreground aria-expanded:text-foreground"
+              >
+                <span className="relative">
+                  <IconBuilding size={20} />
+                  {activeOrg && (
+                    <span className="pointer-events-none absolute -right-1.5 -top-1 grid size-3 place-items-center rounded-full bg-primary text-[0.5rem] font-bold leading-none text-primary-foreground">
+                      {activeOrg.name[0].toUpperCase()}
+                    </span>
+                  )}
+                </span>
+                <span className="text-[10px] leading-none font-medium">
+                  {tCommon("nav.organization")}
+                </span>
+              </button>
             }
           />
-          {activeOrg && (
-            <span className="pointer-events-none absolute -right-1 -top-1 grid size-4 place-items-center rounded-full bg-primary text-[0.6rem] font-bold leading-none text-primary-foreground">
-              {activeOrg.name[0].toUpperCase()}
-            </span>
-          )}
-        </div>
+        ) : (
+          <div className="relative">
+            <DropdownMenuTrigger
+              render={
+                <Button size="icon-lg" variant="outline">
+                  <IconBuilding />
+                </Button>
+              }
+            />
+            {activeOrg && (
+              <span className="pointer-events-none absolute -right-1 -top-1 grid size-4 place-items-center rounded-full bg-primary text-[0.6rem] font-bold leading-none text-primary-foreground">
+                {activeOrg.name[0].toUpperCase()}
+              </span>
+            )}
+          </div>
+        )}
         <DropdownMenuContent
           side={side}
           align="end"

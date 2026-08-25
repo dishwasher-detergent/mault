@@ -5,7 +5,12 @@
     "monitor": "Surveillance",
     "calibrate": "Calibrer",
     "settings": "Paramètres",
+    "organization": "Org",
+    "cart": "Panier",
+    "comingSoon": "Bientôt disponible",
     "admin": "Admin",
+    "discord": "Discord",
+    "discordAriaLabel": "Rejoindre le Discord",
     "collapse": "Réduire",
     "collapseSidebar": "Réduire la barre latérale ([)",
     "expandSidebar": "Développer la barre latérale ([)"

@@ -10,6 +10,7 @@ export function useOrg() {
     neon.auth.useListOrganizations();
   const { data: activeOrg, isPending: orgLoading } =
     neon.auth.useActiveOrganization();
+  const { refetch: refetchActiveMember } = neon.auth.useActiveMember();
   const [isRestoring, setIsRestoring] = useState(
     () => !!localStorage.getItem(ORG_KEY),
   );
@@ -18,11 +19,14 @@ export function useOrg() {
     async (orgId: string) => {
       localStorage.setItem(ORG_KEY, orgId);
       await neon.auth.organization.setActive({ organizationId: orgId });
-      await queryClient.invalidateQueries({
-        predicate: (query) => query.queryKey[0] !== "games",
-      });
+      await Promise.all([
+        refetchActiveMember(),
+        queryClient.invalidateQueries({
+          predicate: (query) => query.queryKey[0] !== "games",
+        }),
+      ]);
     },
-    [queryClient],
+    [queryClient, refetchActiveMember],
   );
 
   if (activeOrg?.id) {
@@ -31,14 +35,15 @@ export function useOrg() {
 
   useEffect(() => {
     if (orgLoading || orgsLoading) return;
-    if (activeOrg || !orgs?.length) {
+    if (activeOrg) {
       setIsRestoring(false);
       return;
     }
     const lastOrgId = localStorage.getItem(ORG_KEY);
-    if (lastOrgId && orgs.some((o) => o.id === lastOrgId)) {
+    if (lastOrgId && orgs?.some((o) => o.id === lastOrgId)) {
       setActiveOrg(lastOrgId).finally(() => setIsRestoring(false));
     } else {
+      if (lastOrgId) localStorage.removeItem(ORG_KEY);
       setIsRestoring(false);
     }
   }, [orgLoading, orgsLoading, activeOrg, orgs, setActiveOrg]);

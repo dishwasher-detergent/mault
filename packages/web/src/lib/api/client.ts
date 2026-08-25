@@ -1,3 +1,4 @@
+import { neon } from "@/lib/auth/client";
 import { getAuthSession, getOrgId } from "@/lib/auth/session";
 
 export const API_BASE = import.meta.env.VITE_API_URL ?? "";
@@ -12,11 +13,28 @@ export async function getAuthHeaders(): Promise<HeadersInit> {
   };
 }
 
+let forbiddenHandled = false;
+
+export async function handleForbidden(res: Response): Promise<void> {
+  if (res.status !== 403) return;
+  if (!forbiddenHandled) {
+    forbiddenHandled = true;
+    await neon.auth.signOut();
+    window.location.href = "/auth/sign-in";
+  }
+  throw new Error("API error: 403");
+}
+
+async function checkResponse(res: Response): Promise<void> {
+  await handleForbidden(res);
+  if (!res.ok) throw new Error(`API error: ${res.status}`);
+}
+
 export async function apiGet<T>(path: string): Promise<T> {
   const res = await fetch(`${API_BASE}${path}`, {
     headers: { ...(await getAuthHeaders()) },
   });
-  if (!res.ok) throw new Error(`API error: ${res.status}`);
+  await checkResponse(res);
   return res.json();
 }
 
@@ -29,7 +47,7 @@ export async function apiPost<T>(path: string, body?: unknown): Promise<T> {
     },
     body: body !== undefined ? JSON.stringify(body) : undefined,
   });
-  if (!res.ok) throw new Error(`API error: ${res.status}`);
+  await checkResponse(res);
   return res.json();
 }
 
@@ -42,7 +60,7 @@ export async function apiPut<T>(path: string, body?: unknown): Promise<T> {
     },
     body: body !== undefined ? JSON.stringify(body) : undefined,
   });
-  if (!res.ok) throw new Error(`API error: ${res.status}`);
+  await checkResponse(res);
   return res.json();
 }
 
@@ -51,7 +69,7 @@ export async function apiDelete<T>(path: string): Promise<T> {
     method: "DELETE",
     headers: { ...(await getAuthHeaders()) },
   });
-  if (!res.ok) throw new Error(`API error: ${res.status}`);
+  await checkResponse(res);
   return res.json();
 }
 
@@ -64,6 +82,6 @@ export async function apiPostForm<T>(
     headers: { ...(await getAuthHeaders()) },
     body: formData,
   });
-  if (!res.ok) throw new Error(`API error: ${res.status}`);
+  await checkResponse(res);
   return res.json();
 }

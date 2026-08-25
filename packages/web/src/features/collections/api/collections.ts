@@ -1,4 +1,4 @@
-import { apiDelete, apiGet, apiPost, apiPut, getAuthHeaders } from "@/lib/api/client";
+import { apiDelete, apiGet, apiPost, apiPut, getAuthHeaders, handleForbidden } from "@/lib/api/client";
 import type { Collection, Result, ScannedCard } from "@magic-vault/shared";
 import { queryOptions } from "@tanstack/react-query";
 
@@ -51,6 +51,7 @@ export async function addCollectionCard(
     headers: { "Content-Type": "application/json", ...(await getAuthHeaders()) },
     body: JSON.stringify(record),
   });
+  await handleForbidden(res);
   // Return body for both success and 423 (locked)
   if (res.ok || res.status === 423) return res.json();
   throw new Error(`API error: ${res.status}`);
