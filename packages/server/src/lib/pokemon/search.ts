@@ -58,15 +58,14 @@ interface PokemonCardDetail extends PokemonCardBrief {
   };
 }
 
-// TCGdex serves images as a base URL with no extension - the actual asset is
-// at `${image}/<quality>.<ext>`. See https://tcgdex.dev/rest/card.
 function assetUrl(image: string, quality: "low" | "high"): string {
   return `/api/cards/image-proxy?url=${encodeURIComponent(`${image}/${quality}.webp`)}`;
 }
 
-// TCGdex reports pricing in multiple currencies (cardmarket is EUR); only
-// tcgplayer is USD, so that's the sole source for price/priceFoil - we never
-// want to label a EUR figure as USD.
+function urlForLang(lang: string): string {
+  return POKEMON_DEFAULT_URL.replace(/\/v2\/[^/]+\//, `/v2/${lang}/`);
+}
+
 function resolvePrice(pricing: PokemonPricing | undefined): number | null {
   return pricing?.tcgplayer?.normal?.marketPrice ?? null;
 }
@@ -200,6 +199,7 @@ export async function SearchById(
 
 export const pokemonAdapter: CardSearchAdapter = {
   defaultUrl: POKEMON_DEFAULT_URL,
+  urlForLang,
   search: Search,
   searchById: SearchById,
 };

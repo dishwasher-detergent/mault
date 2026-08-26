@@ -109,7 +109,7 @@ router.get("/sample-card", requireAuth, requireRole("admin"), async (c) => {
   }
 
   try {
-    const result = await adapter.search(query, adapter.defaultUrl);
+    const result = await adapter.search(query, adapter.defaultUrl, "en");
     if (!result.success || !result.data?.length) {
       return c.json(
         { success: false, message: result.message || "No cards found." },

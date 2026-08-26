@@ -56,9 +56,11 @@ export function withCache(adapter: CardSearchAdapter): CardSearchAdapter {
 
   return {
     ...adapter,
-    search(query, baseUrl) {
-      const key = `${baseUrl}::${query.trim().toLowerCase()}`;
-      return searchCache.getOrFetch(key, () => adapter.search(query, baseUrl));
+    search(query, baseUrl, lang) {
+      const key = `${baseUrl}::${lang}::${query.trim().toLowerCase()}`;
+      return searchCache.getOrFetch(key, () =>
+        adapter.search(query, baseUrl, lang),
+      );
     },
     searchById(id, baseUrl) {
       const key = `${baseUrl}::${id}`;
