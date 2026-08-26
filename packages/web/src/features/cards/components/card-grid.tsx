@@ -329,7 +329,7 @@ export function CardGrid() {
         />
       )}
       <div className="p-2 flex-1">
-        <div className="grid grid-cols-3 @md:grid-cols-4 @4xl:grid-cols-6 gap-2">
+        <div className="grid grid-cols-3 @4xl:grid-cols-4 @6xl:grid-cols-6 @7xl:grid-cols-8 gap-2">
           {pagedCards.map((card) => (
             <ScannedCardItem
               key={card.scanId}
