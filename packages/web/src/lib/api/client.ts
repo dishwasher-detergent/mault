@@ -39,8 +39,11 @@ export async function handleForbidden(res: Response): Promise<void> {
   throw new Error("API error: 403");
 }
 
-async function checkResponse(res: Response): Promise<void> {
-  if ((res.status === 401 || res.status === 403) && getImpersonationState()) {
+async function checkResponse(
+  res: Response,
+  wasImpersonating: boolean,
+): Promise<void> {
+  if ((res.status === 401 || res.status === 403) && wasImpersonating) {
     clearImpersonation();
     throw new Error(`API error: ${res.status}`);
   }
@@ -49,14 +52,16 @@ async function checkResponse(res: Response): Promise<void> {
 }
 
 export async function apiGet<T>(path: string): Promise<T> {
+  const wasImpersonating = !!getImpersonationState();
   const res = await fetch(`${API_BASE}${path}`, {
     headers: { ...(await getAuthHeaders()) },
   });
-  await checkResponse(res);
+  await checkResponse(res, wasImpersonating);
   return res.json();
 }
 
 export async function apiPost<T>(path: string, body?: unknown): Promise<T> {
+  const wasImpersonating = !!getImpersonationState();
   const res = await fetch(`${API_BASE}${path}`, {
     method: "POST",
     headers: {
@@ -65,11 +70,12 @@ export async function apiPost<T>(path: string, body?: unknown): Promise<T> {
     },
     body: body !== undefined ? JSON.stringify(body) : undefined,
   });
-  await checkResponse(res);
+  await checkResponse(res, wasImpersonating);
   return res.json();
 }
 
 export async function apiPut<T>(path: string, body?: unknown): Promise<T> {
+  const wasImpersonating = !!getImpersonationState();
   const res = await fetch(`${API_BASE}${path}`, {
     method: "PUT",
     headers: {
@@ -78,16 +84,17 @@ export async function apiPut<T>(path: string, body?: unknown): Promise<T> {
     },
     body: body !== undefined ? JSON.stringify(body) : undefined,
   });
-  await checkResponse(res);
+  await checkResponse(res, wasImpersonating);
   return res.json();
 }
 
 export async function apiDelete<T>(path: string): Promise<T> {
+  const wasImpersonating = !!getImpersonationState();
   const res = await fetch(`${API_BASE}${path}`, {
     method: "DELETE",
     headers: { ...(await getAuthHeaders()) },
   });
-  await checkResponse(res);
+  await checkResponse(res, wasImpersonating);
   return res.json();
 }
 
@@ -95,11 +102,12 @@ export async function apiPostForm<T>(
   path: string,
   formData: FormData,
 ): Promise<T> {
+  const wasImpersonating = !!getImpersonationState();
   const res = await fetch(`${API_BASE}${path}`, {
     method: "POST",
     headers: { ...(await getAuthHeaders()) },
     body: formData,
   });
-  await checkResponse(res);
+  await checkResponse(res, wasImpersonating);
   return res.json();
 }

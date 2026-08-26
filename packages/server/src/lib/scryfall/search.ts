@@ -47,13 +47,28 @@ interface ScryfallApiCard {
   prices: { usd: string | null; usd_foil: string | null };
 }
 
-function normalizeScryfallCard(raw: ScryfallApiCard): PlayingCard {
+function withPrintedFields(raw: ScryfallApiCard): ScryfallApiCard {
+  const face = raw.card_faces?.[0];
+  return {
+    ...raw,
+    name: raw.printed_name ?? face?.printed_name ?? face?.name ?? raw.name,
+    type_line: raw.printed_type_line ?? raw.type_line,
+    oracle_text:
+      raw.printed_text ??
+      face?.printed_text ??
+      raw.oracle_text ??
+      face?.oracle_text,
+  };
+}
+
+function normalizeScryfallCard(rawInput: ScryfallApiCard): PlayingCard {
+  const raw = withPrintedFields(rawInput);
   const face = raw.card_faces?.[0];
   const imageUris = raw.image_uris ?? face?.image_uris;
 
   return {
     id: raw.id,
-    name: raw.printed_name ?? face?.printed_name ?? face?.name ?? raw.name,
+    name: raw.name,
     image: imageUris
       ? { small: imageUris.small, normal: imageUris.normal }
       : null,
@@ -61,12 +76,8 @@ function normalizeScryfallCard(raw: ScryfallApiCard): PlayingCard {
     setName: raw.set_name,
     collectorNumber: raw.collector_number,
     rarity: raw.rarity,
-    typeLine: raw.printed_type_line ?? raw.type_line,
-    text:
-      raw.printed_text ??
-      face?.printed_text ??
-      raw.oracle_text ??
-      face?.oracle_text,
+    typeLine: raw.type_line,
+    text: raw.oracle_text,
     manaCost: raw.mana_cost ?? face?.mana_cost,
     power: raw.power ?? face?.power,
     toughness: raw.toughness ?? face?.toughness,

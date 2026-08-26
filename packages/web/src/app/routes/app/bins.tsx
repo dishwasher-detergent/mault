@@ -5,6 +5,7 @@ import {
 } from "@/features/bins/api/use-bin-configs";
 import { BinConfigPanel } from "@/features/bins/components/bin-config-panel";
 import { BinList } from "@/features/bins/components/bin-list";
+import { NonEnglishRulesBanner } from "@/features/bins/components/non-english-rules-banner";
 import { PresetSelector } from "@/features/bins/components/preset-selector";
 import { CollectionSwitcher } from "@/features/collections/components/collection-switcher";
 import { useCollections } from "@/features/collections/api/use-collections";
@@ -85,7 +86,10 @@ export default function BinsPage() {
 
   return (
     <BinConfigsProvider collectionGuid={collectionGuid}>
-      {content}
+      <div className="flex flex-col flex-1 min-h-0 overflow-hidden">
+        <NonEnglishRulesBanner />
+        {content}
+      </div>
     </BinConfigsProvider>
   );
 }
