@@ -115,7 +115,11 @@ router.get("/search", requireAuth, async (c) => {
       400,
     );
   }
-  const result = await resolved.adapter.search(query, resolved.baseUrl);
+  const result = await resolved.adapter.search(
+    query,
+    resolved.baseUrl,
+    resolved.lang,
+  );
   return c.json(result);
 });
 

@@ -11,6 +11,7 @@ export type AppVariables = {
   userRole: string;
   orgId: string;
   orgRole: OrgRole;
+  impersonatedBy: string | null;
 };
 export type AppEnv = { Variables: AppVariables };
 
@@ -31,6 +32,51 @@ export async function verifyToken(
   }
 }
 
+export const IMPERSONATION_ISSUER = "magic-vault-impersonation";
+export const IMPERSONATION_TTL_SECONDS = 60 * 60;
+
+function impersonationSecret(): Uint8Array {
+  const secret = process.env.IMPERSONATION_SECRET;
+  if (!secret) {
+    throw new Error("IMPERSONATION_SECRET is not configured.");
+  }
+  return new TextEncoder().encode(secret);
+}
+
+export async function signImpersonationToken(
+  adminUserId: string,
+  targetUserId: string,
+): Promise<{ token: string; expiresAt: Date }> {
+  const expiresAt = new Date(Date.now() + IMPERSONATION_TTL_SECONDS * 1000);
+  const token = await new jose.SignJWT({ act: { sub: adminUserId } })
+    .setProtectedHeader({ alg: "HS256" })
+    .setIssuer(IMPERSONATION_ISSUER)
+    .setSubject(targetUserId)
+    .setIssuedAt()
+    .setExpirationTime(Math.floor(expiresAt.getTime() / 1000))
+    .sign(impersonationSecret());
+  return { token, expiresAt };
+}
+
+interface ImpersonationPayload {
+  sub: string;
+  act?: { sub?: string };
+}
+
+async function verifyImpersonationToken(
+  token: string,
+): Promise<ImpersonationPayload | null> {
+  try {
+    const { payload } = await jose.jwtVerify(token, impersonationSecret(), {
+      issuer: IMPERSONATION_ISSUER,
+    });
+    if (!payload.sub) return null;
+    return payload as ImpersonationPayload;
+  } catch {
+    return null;
+  }
+}
+
 export async function getUserRole(userId: string): Promise<string> {
   try {
     const result = await db.execute(
@@ -39,6 +85,22 @@ export async function getUserRole(userId: string): Promise<string> {
     return (result.rows[0]?.role as string) ?? "user";
   } catch {
     return "user";
+  }
+}
+
+export async function getUserContact(
+  userId: string,
+): Promise<{ name: string | null; email: string | null }> {
+  try {
+    const result = await db.execute<{
+      name: string | null;
+      email: string | null;
+    }>(
+      sql`SELECT name, email FROM neon_auth.user WHERE id = ${userId} LIMIT 1`,
+    );
+    return result.rows[0] ?? { name: null, email: null };
+  } catch {
+    return { name: null, email: null };
   }
 }
 
@@ -64,6 +126,21 @@ export const requireAuth = createMiddleware<AppEnv>(async (c, next) => {
     return c.json({ success: false, message: "Unauthorized" }, 401);
   }
   const token = authHeader.slice(7);
+
+  const impersonation = await verifyImpersonationToken(token);
+  if (impersonation) {
+    const role = await getUserRole(impersonation.sub);
+    c.set(
+      "jwtClaims",
+      JSON.stringify({ sub: impersonation.sub, role: "authenticated" }),
+    );
+    c.set("userId", impersonation.sub);
+    c.set("userRole", role);
+    c.set("impersonatedBy", impersonation.act?.sub ?? null);
+    await next();
+    return;
+  }
+
   const payload = await verifyToken(token);
   if (!payload?.sub)
     return c.json({ success: false, message: "Unauthorized" }, 401);
@@ -74,6 +151,7 @@ export const requireAuth = createMiddleware<AppEnv>(async (c, next) => {
   );
   c.set("userId", payload.sub);
   c.set("userRole", role);
+  c.set("impersonatedBy", null);
   await next();
 });
 

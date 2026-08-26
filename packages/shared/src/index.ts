@@ -4,6 +4,7 @@ export * from "./interfaces/bulk-import.interface";
 export * from "./interfaces/card.interface";
 export * from "./interfaces/collections.interface";
 export * from "./interfaces/games.interface";
+export * from "./interfaces/impersonation.interface";
 export * from "./interfaces/module-configs.interface";
 export * from "./interfaces/notification-settings.interface";
 export * from "./interfaces/result.interface";

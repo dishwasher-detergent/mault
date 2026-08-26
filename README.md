@@ -92,6 +92,10 @@ NEON_AUTH_URL=
 VITE_NEON_DATA_API_URL=
 VITE_NEON_AUTH_URL=
 
+# Generate yourself (any random string) - signs the server's short-lived
+# admin impersonation tokens
+IMPERSONATION_SECRET=
+
 # Optional - tuning for the admin card-image-vector sync job
 VECTORIZE_CONCURRENCY=1
 SYNC_INSERT_BATCH_SIZE=50

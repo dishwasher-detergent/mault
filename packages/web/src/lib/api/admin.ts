@@ -1,6 +1,12 @@
 import { API_BASE, apiDelete, apiGet, apiPost } from "@/lib/api/client";
 import { getAuthSession } from "@/lib/auth/session";
-import type { SyncState } from "@magic-vault/shared";
+import type {
+  AdminUserSummary,
+  ImpersonationAuditEntry,
+  ImpersonationSession,
+  Result,
+  SyncState,
+} from "@magic-vault/shared";
 
 export interface AdminCard {
   id: number;
@@ -112,4 +118,32 @@ export async function createSyncEventSource(): Promise<EventSource> {
   const session = await getAuthSession();
   const url = `${API_BASE}/api/admin/sync/stream${session?.token ? `?token=${encodeURIComponent(session.token)}` : ""}`;
   return new EventSource(url);
+}
+
+export async function searchAdminUsers(
+  search: string,
+): Promise<Result<AdminUserSummary[]>> {
+  const params = new URLSearchParams();
+  if (search) params.set("search", search);
+  return apiGet<Result<AdminUserSummary[]>>(`/api/admin/users?${params}`);
+}
+
+export async function startImpersonation(
+  userId: string,
+): Promise<Result<ImpersonationSession>> {
+  return apiPost<Result<ImpersonationSession>>(
+    `/api/admin/impersonate/${encodeURIComponent(userId)}`,
+  );
+}
+
+export async function listImpersonationAudit(): Promise<
+  Result<ImpersonationAuditEntry[]>
+> {
+  return apiGet<Result<ImpersonationAuditEntry[]>>(
+    "/api/admin/impersonation-audit",
+  );
+}
+
+export async function stopImpersonation(): Promise<Result<null>> {
+  return apiPost<Result<null>>("/api/admin/impersonate/stop");
 }

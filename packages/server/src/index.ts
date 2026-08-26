@@ -10,6 +10,7 @@ import { cardRouter } from "./routes/card";
 import { collectionsRouter } from "./routes/collections";
 import { feederRouter } from "./routes/feeder";
 import { gamesRouter } from "./routes/games";
+import { impersonationRouter } from "./routes/impersonation";
 import { moduleConfigsRouter } from "./routes/module-configs";
 import { notificationsRouter } from "./routes/notifications";
 import { orgSettingsRouter } from "./routes/org-settings";
@@ -37,6 +38,7 @@ app.route("/games", gamesRouter);
 app.route("/notifications", notificationsRouter);
 app.route("/org-settings", orgSettingsRouter);
 app.route("/admin", adminRouter);
+app.route("/admin", impersonationRouter);
 app.route("/public", publicRouter);
 
 serve({ fetch: app.fetch, port: PORT, hostname: "0.0.0.0" }, () => {

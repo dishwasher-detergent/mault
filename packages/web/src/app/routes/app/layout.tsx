@@ -7,6 +7,7 @@ import { EmailVerificationBanner } from "@/components/email-verification-banner"
 import { EnvBanner } from "@/components/env-banner";
 import { FirmwareVersionBanner } from "@/components/firmware-version-banner";
 import { FirmwareVersionMissingBanner } from "@/components/firmware-version-missing-banner";
+import { ImpersonationBanner } from "@/components/impersonation-banner";
 import { PageTransition } from "@/components/page-transition";
 import { RequireCollectionDialog } from "@/components/require-collection-dialog";
 import { FooterDivider, StatusFooter } from "@/components/status-footer";
@@ -21,6 +22,7 @@ export default function AppLayout() {
       <RequireCollectionDialog />
       {isMobile ? (
         <div className="h-dvh w-dvw overflow-hidden flex flex-col">
+          <ImpersonationBanner />
           <EmailVerificationBanner />
           <ChannelLayoutBanner />
           <AppVersionBanner />
@@ -40,6 +42,7 @@ export default function AppLayout() {
             className="pointer-events-none absolute top-8 left-8 -translate-x-1/2 -translate-y-1/2 size-60 rounded-full bg-primary/50 blur-[60px]"
           />
           <div className="flex flex-col border rounded-lg size-full overflow-hidden relative">
+            <ImpersonationBanner />
             <EmailVerificationBanner />
             <ChannelLayoutBanner />
             <AppVersionBanner />

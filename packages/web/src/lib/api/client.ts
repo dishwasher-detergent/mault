@@ -1,9 +1,23 @@
 import { neon } from "@/lib/auth/client";
+import {
+  clearImpersonation,
+  getImpersonationState,
+} from "@/lib/auth/impersonation";
 import { getAuthSession, getOrgId } from "@/lib/auth/session";
 
 export const API_BASE = import.meta.env.VITE_API_URL ?? "";
 
 export async function getAuthHeaders(): Promise<HeadersInit> {
+  const impersonation = getImpersonationState();
+  if (impersonation) {
+    return {
+      Authorization: `Bearer ${impersonation.token}`,
+      ...(impersonation.activeOrgId
+        ? { "X-Org-Id": impersonation.activeOrgId }
+        : {}),
+    };
+  }
+
   const session = await getAuthSession();
   const token = session?.token;
   const orgId = getOrgId(session);
@@ -26,6 +40,10 @@ export async function handleForbidden(res: Response): Promise<void> {
 }
 
 async function checkResponse(res: Response): Promise<void> {
+  if ((res.status === 401 || res.status === 403) && getImpersonationState()) {
+    clearImpersonation();
+    throw new Error(`API error: ${res.status}`);
+  }
   await handleForbidden(res);
   if (!res.ok) throw new Error(`API error: ${res.status}`);
 }

@@ -61,5 +61,35 @@
     "revectorizeError": "Échec de la revectorisation de {{name}}",
     "syncCardError": "Échec de la synchronisation de la carte {{id}}",
     "dumpError": "Échec de la suppression de la base de données"
+  },
+  "impersonationUsersManager": {
+    "heading": "Emprunter l'identité d'un utilisateur",
+    "description": "Recherche un utilisateur pour voir l'application comme lui, à des fins de support/débogage",
+    "searchPlaceholder": "Rechercher par nom ou email...",
+    "loading": "Chargement...",
+    "empty": "Aucun utilisateur trouvé",
+    "noOrgs": "Aucune organisation",
+    "adminBadge": "Admin",
+    "cannotImpersonateAdmin": "Impossible d'emprunter l'identité d'un autre admin",
+    "impersonateButton": "Emprunter l'identité",
+    "viewAuditLog": "Voir le journal d'audit des emprunts d'identité",
+    "confirmDialog": {
+      "title": "Emprunter l'identité de cet utilisateur ?",
+      "description": "Tu verras l'application exactement comme {{email}}, y compris ses organisations et ses données. Ceci est journalisé. Tu peux quitter l'emprunt d'identité à tout moment depuis le bandeau en haut de l'écran.",
+      "cancel": "Annuler",
+      "confirm": "Démarrer l'emprunt d'identité",
+      "starting": "Démarrage..."
+    },
+    "toasts": {
+      "startError": "Échec du démarrage de l'emprunt d'identité"
+    }
+  },
+  "impersonationAuditDrawer": {
+    "title": "Journal d'audit des emprunts d'identité",
+    "empty": "Aucune session d'emprunt d'identité pour l'instant",
+    "active": "Active",
+    "entryLabel": "{{admin}} → {{target}}",
+    "startedAndEnded": "{{started}} – {{ended}}",
+    "startedOnly": "Démarré {{started}}"
   }
 }

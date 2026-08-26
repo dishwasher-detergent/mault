@@ -86,11 +86,13 @@ function normalizeScryfallCard(raw: ScryfallApiCard): PlayingCard {
 export async function Search(
   query: string,
   baseUrl: string = SCRYFALL_DEFAULT_URL,
+  lang?: string,
 ): Promise<Result<PlayingCard[]>> {
   const invalid = validateQuery(query);
   if (invalid) return invalid;
 
-  const scryfallUrl = `${baseUrl}/search?q=${encodeURIComponent(query)}&unique=prints&order=released&dir=desc`;
+  const scopedQuery = lang ? `${query} lang:${lang}` : query;
+  const scryfallUrl = `${baseUrl}/search?q=${encodeURIComponent(scopedQuery)}&unique=prints&order=released&dir=desc`;
 
   const response = await fetch(scryfallUrl, {
     headers: CARD_API_HEADERS,

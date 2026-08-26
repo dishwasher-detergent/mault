@@ -40,7 +40,7 @@ export async function resolveGameKeyAndLang(
 export async function resolveCardSearch(
   jwtClaims: string,
   collectionGuid: string | undefined,
-): Promise<{ adapter: CardSearchAdapter; baseUrl: string } | null> {
+): Promise<{ adapter: CardSearchAdapter; baseUrl: string; lang: string } | null> {
   const resolved = await resolveGameKeyAndLang(jwtClaims, collectionGuid);
   if (!resolved) return null;
 
@@ -48,5 +48,5 @@ export async function resolveCardSearch(
   if (!adapter) return null;
 
   const baseUrl = adapter.urlForLang?.(resolved.lang) ?? adapter.defaultUrl;
-  return { adapter, baseUrl };
+  return { adapter, baseUrl, lang: resolved.lang };
 }

@@ -1,3 +1,4 @@
+import { useImpersonation } from "@/hooks/use-impersonation";
 import { neon } from "@/lib/auth/client";
 import { useQueryClient } from "@tanstack/react-query";
 import { useCallback, useEffect, useState } from "react";
@@ -14,9 +15,17 @@ export function useOrg() {
   const [isRestoring, setIsRestoring] = useState(
     () => !!localStorage.getItem(ORG_KEY),
   );
+  const impersonation = useImpersonation();
 
   const setActiveOrg = useCallback(
     async (orgId: string) => {
+      if (impersonation.isImpersonating) {
+        impersonation.setActiveOrgId(orgId);
+        await queryClient.invalidateQueries({
+          predicate: (query) => query.queryKey[0] !== "games",
+        });
+        return;
+      }
       localStorage.setItem(ORG_KEY, orgId);
       await neon.auth.organization.setActive({ organizationId: orgId });
       await Promise.all([
@@ -26,7 +35,7 @@ export function useOrg() {
         }),
       ]);
     },
-    [queryClient, refetchActiveMember],
+    [queryClient, refetchActiveMember, impersonation],
   );
 
   useEffect(() => {
@@ -39,6 +48,7 @@ export function useOrg() {
   }, [activeOrg?.id]);
 
   useEffect(() => {
+    if (impersonation.isImpersonating) return;
     if (orgLoading || orgsLoading) return;
     if (activeOrg) {
       setIsRestoring(false);
@@ -51,7 +61,27 @@ export function useOrg() {
       if (lastOrgId) localStorage.removeItem(ORG_KEY);
       setIsRestoring(false);
     }
-  }, [orgLoading, orgsLoading, activeOrg, orgs, setActiveOrg]);
+  }, [
+    orgLoading,
+    orgsLoading,
+    activeOrg,
+    orgs,
+    setActiveOrg,
+    impersonation.isImpersonating,
+  ]);
+
+  if (impersonation.isImpersonating) {
+    const impersonatedActiveOrg =
+      impersonation.orgs.find((o) => o.id === impersonation.activeOrgId) ??
+      impersonation.orgs[0] ??
+      null;
+    return {
+      orgs: impersonation.orgs,
+      activeOrg: impersonatedActiveOrg,
+      isLoading: false,
+      setActiveOrg,
+    };
+  }
 
   return {
     orgs: orgs ?? [],
