@@ -1,5 +1,6 @@
 import { useImpersonation } from "@/hooks/use-impersonation";
 import { neon } from "@/lib/auth/client";
+import { invalidateAppQueries } from "@/lib/query-client";
 import { useQueryClient } from "@tanstack/react-query";
 import { useCallback, useEffect, useState } from "react";
 
@@ -21,18 +22,14 @@ export function useOrg() {
     async (orgId: string) => {
       if (impersonation.isImpersonating) {
         impersonation.setActiveOrgId(orgId);
-        await queryClient.invalidateQueries({
-          predicate: (query) => query.queryKey[0] !== "games",
-        });
+        await invalidateAppQueries(queryClient);
         return;
       }
       localStorage.setItem(ORG_KEY, orgId);
       await neon.auth.organization.setActive({ organizationId: orgId });
       await Promise.all([
         refetchActiveMember(),
-        queryClient.invalidateQueries({
-          predicate: (query) => query.queryKey[0] !== "games",
-        }),
+        invalidateAppQueries(queryClient),
       ]);
     },
     [queryClient, refetchActiveMember, impersonation],
