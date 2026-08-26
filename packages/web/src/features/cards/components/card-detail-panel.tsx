@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { BinLocationDiagram } from "@/features/bins/components/bin-location-diagram";
-import { searchCards } from "@/features/cards/api/card-search";
+import { getCardById, searchCards } from "@/features/cards/api/card-search";
 import { useCollections } from "@/features/collections/api/use-collections";
 import { useScannedCards } from "@/features/scanner/api/use-scanned-cards";
 import { formatUsd } from "@/features/scanner/components/scan-stats";
@@ -29,6 +29,7 @@ import {
   IconExternalLink,
   IconLoader2,
   IconPencil,
+  IconRefresh,
   IconSearch,
   IconTrash,
   IconX,
@@ -36,6 +37,7 @@ import {
 import { useQuery } from "@tanstack/react-query";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { toast } from "sonner";
 
 function formatManaCost(manaCost: string): string {
   return manaCost.replace(/[{}]/g, " ").trim().replace(/\s+/g, " ");
@@ -174,6 +176,25 @@ export function CardDetailPanel({
   const selectedCard =
     candidates.find((c) => c.id === selectedId) ?? currentCard;
   const hasMultipleCandidates = candidates.length > 1;
+
+  const [isRefetching, setIsRefetching] = useState(false);
+  const handleRefetch = useCallback(async () => {
+    if (!scanId || !selectedCard) return;
+    setIsRefetching(true);
+    try {
+      const result = await getCardById(selectedCard.id, activeCollection?.guid);
+      if (!result.success || !result.data) {
+        toast.error(result.message || t("cardDetailPanel.refetchError"));
+        return;
+      }
+      correctCard(scanId, result.data);
+      toast.success(t("cardDetailPanel.refetchSuccess"));
+    } catch {
+      toast.error(t("cardDetailPanel.refetchError"));
+    } finally {
+      setIsRefetching(false);
+    }
+  }, [scanId, selectedCard, activeCollection?.guid, correctCard, t]);
 
   const cardName =
     selectedCard?.name ?? t("cardDetailPanel.cardDetailsFallback");
@@ -421,6 +442,19 @@ export function CardDetailPanel({
                 {t("cardDetailPanel.foil")}
               </Label>
               <div className="flex gap-3 pt-1">
+                <Button
+                  variant="outline"
+                  onClick={handleRefetch}
+                  disabled={isRefetching || !selectedCard}
+                  title={t("cardDetailPanel.refetchCardDataTitle")}
+                >
+                  <IconRefresh
+                    className={cn("size-4", isRefetching && "animate-spin")}
+                  />
+                  {isRefetching
+                    ? t("cardDetailPanel.refetching")
+                    : t("cardDetailPanel.refetchCardData")}
+                </Button>
                 <Button
                   variant="outline"
                   onClick={() => {
