@@ -66,6 +66,7 @@
     "heading": "Impersonate User",
     "description": "Search for a user to view the app as them, for support/debugging",
     "searchPlaceholder": "Search by name or email...",
+    "startTyping": "Start typing a name or email to search",
     "loading": "Loading...",
     "empty": "No users found",
     "noOrgs": "No organizations",

@@ -66,6 +66,7 @@
     "heading": "Als Benutzer anmelden",
     "description": "Suche einen Benutzer, um die App aus dessen Sicht zu sehen (für Support/Debugging)",
     "searchPlaceholder": "Nach Name oder E-Mail suchen...",
+    "startTyping": "Beginne mit der Eingabe eines Namens oder einer E-Mail, um zu suchen",
     "loading": "Wird geladen...",
     "empty": "Keine Benutzer gefunden",
     "noOrgs": "Keine Organisationen",

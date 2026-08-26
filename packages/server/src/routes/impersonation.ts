@@ -6,6 +6,7 @@ import { and, desc, eq, isNull, sql } from "drizzle-orm";
 import { Hono } from "hono";
 import { db } from "../db";
 import { impersonationAudit } from "../db/schema";
+import { validateQuery } from "../lib/card-search/validate";
 import {
   getUserContact,
   getUserRole,
@@ -19,46 +20,31 @@ const router = new Hono<AppEnv>();
 
 router.get("/users", requireAuth, requireRole("admin"), async (c) => {
   const search = (c.req.query("search") ?? "").trim();
-  const pattern = `%${search}%`;
+  const invalid = validateQuery(search);
+  if (invalid) return c.json(invalid);
 
+  const pattern = `%${search}%`;
   const rows = await db.execute<{
     id: string;
     name: string | null;
     email: string;
     role: string;
     orgs: ImpersonationOrgSummary[];
-  }>(
-    search
-      ? sql`
-          SELECT u.id, u.name, u.email, u.role,
-            COALESCE(
-              json_agg(json_build_object('id', o.id, 'name', o.name, 'role', m.role))
-                FILTER (WHERE o.id IS NOT NULL),
-              '[]'
-            ) AS orgs
-          FROM neon_auth.user u
-          LEFT JOIN neon_auth.member m ON m."userId" = u.id
-          LEFT JOIN neon_auth.organization o ON o.id = m."organizationId"
-          WHERE u.name ILIKE ${pattern} OR u.email ILIKE ${pattern}
-          GROUP BY u.id, u.name, u.email, u.role
-          ORDER BY u.email
-          LIMIT 20
-        `
-      : sql`
-          SELECT u.id, u.name, u.email, u.role,
-            COALESCE(
-              json_agg(json_build_object('id', o.id, 'name', o.name, 'role', m.role))
-                FILTER (WHERE o.id IS NOT NULL),
-              '[]'
-            ) AS orgs
-          FROM neon_auth.user u
-          LEFT JOIN neon_auth.member m ON m."userId" = u.id
-          LEFT JOIN neon_auth.organization o ON o.id = m."organizationId"
-          GROUP BY u.id, u.name, u.email, u.role
-          ORDER BY u.email
-          LIMIT 20
-        `,
-  );
+  }>(sql`
+    SELECT u.id, u.name, u.email, u.role,
+      COALESCE(
+        json_agg(json_build_object('id', o.id, 'name', o.name, 'role', m.role))
+          FILTER (WHERE o.id IS NOT NULL),
+        '[]'
+      ) AS orgs
+    FROM neon_auth.user u
+    LEFT JOIN neon_auth.member m ON m."userId" = u.id
+    LEFT JOIN neon_auth.organization o ON o.id = m."organizationId"
+    WHERE u.name ILIKE ${pattern} OR u.email ILIKE ${pattern}
+    GROUP BY u.id, u.name, u.email, u.role
+    ORDER BY u.email
+    LIMIT 20
+  `);
 
   const users: AdminUserSummary[] = rows.rows.map((row) => ({
     id: row.id,
@@ -71,12 +57,6 @@ router.get("/users", requireAuth, requireRole("admin"), async (c) => {
   return c.json({ success: true, data: users });
 });
 
-// POST /admin/impersonate/stop — must be registered before the
-// /impersonate/:userId route below: Hono matches path segments in
-// registration order, not by static-vs-dynamic specificity, so a dynamic
-// route registered first will shadow a static route registered after it
-// (a POST here would otherwise be captured as /impersonate/:userId with
-// userId = "stop").
 router.post("/impersonate/stop", requireAuth, async (c) => {
   const adminUserId = c.get("impersonatedBy");
   const targetUserId = c.get("userId");

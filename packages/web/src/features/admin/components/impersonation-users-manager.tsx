@@ -10,7 +10,7 @@ import {
 import { ImpersonationAuditDrawer } from "@/features/admin/components/impersonation-audit-drawer";
 import { useImpersonation } from "@/hooks/use-impersonation";
 import { searchAdminUsers } from "@/lib/api/admin";
-import type { AdminUserSummary } from "@magic-vault/shared";
+import { QUERY_MIN_LENGTH, type AdminUserSummary } from "@magic-vault/shared";
 import { IconClockHour3, IconUserScan } from "@tabler/icons-react";
 import { useQuery } from "@tanstack/react-query";
 import { useRef, useState } from "react";
@@ -29,9 +29,12 @@ export function ImpersonationUsersManager() {
   const [auditOpen, setAuditOpen] = useState(false);
   const debounceRef = useRef<ReturnType<typeof setTimeout>>(null);
 
+  const isQueryReady = search.trim().length >= QUERY_MIN_LENGTH;
+
   const usersQuery = useQuery({
     queryKey: ["admin", "users", search],
     queryFn: () => searchAdminUsers(search).then((r) => r.data ?? []),
+    enabled: isQueryReady,
     staleTime: 10_000,
   });
 
@@ -98,56 +101,66 @@ export function ImpersonationUsersManager() {
       </div>
 
       <div className="divide-y max-h-80 overflow-y-auto">
-        {usersQuery.isLoading && (
+        {!isQueryReady && (
+          <p className="text-xs text-muted-foreground text-center py-6">
+            {t("impersonationUsersManager.startTyping")}
+          </p>
+        )}
+        {isQueryReady && usersQuery.isLoading && (
           <p className="text-xs text-muted-foreground text-center py-6">
             {t("impersonationUsersManager.loading")}
           </p>
         )}
-        {usersQuery.data?.map((user) => (
-          <div key={user.id} className="flex items-center gap-3 px-4 py-2.5">
-            <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-2">
-                <p className="text-sm font-medium truncate">
-                  {user.name || user.email}
+        {isQueryReady &&
+          usersQuery.data?.map((user) => (
+            <div key={user.id} className="flex items-center gap-3 px-4 py-2.5">
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2">
+                  <p className="text-sm font-medium truncate">
+                    {user.name || user.email}
+                  </p>
+                  {user.role === "admin" && (
+                    <Badge variant="outline">
+                      {t("impersonationUsersManager.adminBadge")}
+                    </Badge>
+                  )}
+                </div>
+                <p className="text-xs text-muted-foreground truncate">
+                  {user.email}
+                  {user.orgs.length > 0
+                    ? ` · ${user.orgs.map((o) => o.name).join(", ")}`
+                    : ` · ${t("impersonationUsersManager.noOrgs")}`}
                 </p>
-                {user.role === "admin" && (
-                  <Badge variant="outline">
-                    {t("impersonationUsersManager.adminBadge")}
-                  </Badge>
-                )}
               </div>
-              <p className="text-xs text-muted-foreground truncate">
-                {user.email}
-                {user.orgs.length > 0
-                  ? ` · ${user.orgs.map((o) => o.name).join(", ")}`
-                  : ` · ${t("impersonationUsersManager.noOrgs")}`}
-              </p>
+              <Button
+                size="sm"
+                variant="outline"
+                disabled={
+                  user.role === "admin" ||
+                  isImpersonating ||
+                  user.orgs.length === 0
+                }
+                title={
+                  user.role === "admin"
+                    ? t("impersonationUsersManager.cannotImpersonateAdmin")
+                    : user.orgs.length === 0
+                      ? t("impersonationUsersManager.noOrgs")
+                      : undefined
+                }
+                onClick={() => setTarget(user)}
+              >
+                <IconUserScan size={14} />
+                {t("impersonationUsersManager.impersonateButton")}
+              </Button>
             </div>
-            <Button
-              size="sm"
-              variant="outline"
-              disabled={
-                user.role === "admin" || isImpersonating || user.orgs.length === 0
-              }
-              title={
-                user.role === "admin"
-                  ? t("impersonationUsersManager.cannotImpersonateAdmin")
-                  : user.orgs.length === 0
-                    ? t("impersonationUsersManager.noOrgs")
-                    : undefined
-              }
-              onClick={() => setTarget(user)}
-            >
-              <IconUserScan size={14} />
-              {t("impersonationUsersManager.impersonateButton")}
-            </Button>
-          </div>
-        ))}
-        {usersQuery.data?.length === 0 && (
-          <p className="text-xs text-muted-foreground text-center py-6">
-            {t("impersonationUsersManager.empty")}
-          </p>
-        )}
+          ))}
+        {isQueryReady &&
+          !usersQuery.isLoading &&
+          usersQuery.data?.length === 0 && (
+            <p className="text-xs text-muted-foreground text-center py-6">
+              {t("impersonationUsersManager.empty")}
+            </p>
+          )}
       </div>
 
       <DynamicDialog
