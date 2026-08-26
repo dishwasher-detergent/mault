@@ -11,13 +11,13 @@ const NOT_LINKED_MESSAGE =
   "This server isn't linked yet - run `/link <code>` first (generate a code from Magic Vault's Settings page).";
 
 export const data = new SlashCommandBuilder()
-  .setName("scan-channel")
-  .setDescription("Set the channel for Magic Vault card-scan notifications")
+  .setName("notification")
+  .setDescription("Set the channel for Magic Vault error/status notifications")
   .setDefaultMemberPermissions(PermissionFlagsBits.ManageGuild)
   .addChannelOption((opt) =>
     opt
       .setName("channel")
-      .setDescription("Channel to post card scans in (defaults to this channel)")
+      .setDescription("Channel to post notifications in (defaults to this channel)")
       .addChannelTypes(ChannelType.GuildText)
       .setRequired(false),
   );
@@ -41,7 +41,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
   }
 
   await interaction.deferReply({ flags: MessageFlags.Ephemeral });
-  const result = await setChannel(interaction.guildId, channel.id, "scan");
+  const result = await setChannel(interaction.guildId, channel.id, "error");
   if (!result.success) {
     await interaction.editReply(
       result.message === "not_linked" ? NOT_LINKED_MESSAGE : "Couldn't save that.",
@@ -49,5 +49,5 @@ export async function execute(interaction: ChatInputCommandInteraction) {
     return;
   }
 
-  await interaction.editReply(`Card scans will now be posted in <#${channel.id}>.`);
+  await interaction.editReply(`Error notifications will now be posted in <#${channel.id}>.`);
 }
