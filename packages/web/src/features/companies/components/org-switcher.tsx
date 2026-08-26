@@ -10,6 +10,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { DynamicDialog } from "@/components/ui/responsive-dialog";
+import { useImpersonation } from "@/hooks/use-impersonation";
 import { neon } from "@/lib/auth/client";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
@@ -66,6 +67,7 @@ export function OrgSwitcher({
   const { t } = useTranslation("companies");
   const { t: tCommon } = useTranslation("common");
   const { orgs, activeOrg, setActiveOrg } = useOrg();
+  const { isImpersonating } = useImpersonation();
   const navigate = useNavigate();
   const [createOpen, setCreateOpen] = useState(false);
 
@@ -161,15 +163,19 @@ export function OrgSwitcher({
               </DropdownMenuItem>
             ))}
           </DropdownMenuGroup>
-          <DropdownMenuSeparator />
-          <DropdownMenuItem onClick={() => setCreateOpen(true)}>
-            <IconPlus size={14} />
-            {t("orgSwitcher.newOrganization")}
-          </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => navigate("/app/settings")}>
-            <IconSettings size={14} />
-            {t("orgSwitcher.manageOrganizations")}
-          </DropdownMenuItem>
+          {!isImpersonating && (
+            <>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={() => setCreateOpen(true)}>
+                <IconPlus size={14} />
+                {t("orgSwitcher.newOrganization")}
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => navigate("/app/settings")}>
+                <IconSettings size={14} />
+                {t("orgSwitcher.manageOrganizations")}
+              </DropdownMenuItem>
+            </>
+          )}
         </DropdownMenuContent>
       </DropdownMenu>
 

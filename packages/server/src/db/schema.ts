@@ -383,6 +383,28 @@ export const feederConfigAudit = pgTable(
   ],
 ).enableRLS();
 
+export const impersonationAudit = pgTable(
+  "impersonation_audit",
+  {
+    id: serial().primaryKey(),
+    guid: uuid("guid").defaultRandom(),
+    adminUserId: text("admin_user_id").notNull(),
+    adminEmail: text("admin_email"),
+    targetUserId: text("target_user_id").notNull(),
+    targetEmail: text("target_email"),
+    startedAt: timestamp("started_at").defaultNow().notNull(),
+    endedAt: timestamp("ended_at"),
+  },
+  (table) => [
+    unique("impersonation_audit_guid_idx").on(table.guid),
+    crudPolicy({
+      role: authenticatedRole,
+      read: false,
+      modify: false,
+    }),
+  ],
+).enableRLS();
+
 export const binSetRelations = relations(binSets, ({ many, one }) => ({
   bins: many(bins),
   game: one(games, {

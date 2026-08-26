@@ -10,6 +10,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { getInitials } from "@/components/ui/initials-avatar";
 import { neon } from "@/lib/auth/client";
+import { clearImpersonation } from "@/lib/auth/impersonation";
 import { IconLogout, IconUserCircle } from "@tabler/icons-react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
@@ -29,6 +30,7 @@ export function UserMenu({
   const email = data?.user?.email;
 
   async function handleSignOut() {
+    clearImpersonation();
     await neon.auth.signOut();
     navigate("/", { replace: true });
   }

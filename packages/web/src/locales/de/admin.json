@@ -61,5 +61,35 @@
     "revectorizeError": "Neu-Vektorisierung von {{name}} fehlgeschlagen",
     "syncCardError": "Synchronisierung der Karte {{id}} fehlgeschlagen",
     "dumpError": "Datenbank konnte nicht geleert werden"
+  },
+  "impersonationUsersManager": {
+    "heading": "Als Benutzer anmelden",
+    "description": "Suche einen Benutzer, um die App aus dessen Sicht zu sehen (für Support/Debugging)",
+    "searchPlaceholder": "Nach Name oder E-Mail suchen...",
+    "loading": "Wird geladen...",
+    "empty": "Keine Benutzer gefunden",
+    "noOrgs": "Keine Organisationen",
+    "adminBadge": "Admin",
+    "cannotImpersonateAdmin": "Ein anderer Admin kann nicht imitiert werden",
+    "impersonateButton": "Anmelden als",
+    "viewAuditLog": "Imitations-Protokoll anzeigen",
+    "confirmDialog": {
+      "title": "Als diesen Benutzer anmelden?",
+      "description": "Du siehst die App genau so wie {{email}}, einschließlich seiner Organisationen und Daten. Dies wird protokolliert. Du kannst die Imitation jederzeit über das Banner am oberen Bildschirmrand beenden.",
+      "cancel": "Abbrechen",
+      "confirm": "Imitation starten",
+      "starting": "Wird gestartet..."
+    },
+    "toasts": {
+      "startError": "Imitation konnte nicht gestartet werden"
+    }
+  },
+  "impersonationAuditDrawer": {
+    "title": "Imitations-Protokoll",
+    "empty": "Noch keine Imitationssitzungen",
+    "active": "Aktiv",
+    "entryLabel": "{{admin}} → {{target}}",
+    "startedAndEnded": "{{started}} – {{ended}}",
+    "startedOnly": "Gestartet {{started}}"
   }
 }

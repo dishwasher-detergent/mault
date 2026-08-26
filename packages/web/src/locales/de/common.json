@@ -58,6 +58,10 @@
     "outdatedBanner": "Eine neue Version von Magic Vault ist verfügbar.",
     "refreshButton": "Aktualisieren"
   },
+  "impersonation": {
+    "banner": "Du siehst die App aus der Sicht von {{name}}.",
+    "exitButton": "Imitation beenden"
+  },
   "theme": {
     "toggle": "Design umschalten",
     "light": "Hell",
