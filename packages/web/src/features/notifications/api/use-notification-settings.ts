@@ -1,25 +1,17 @@
 import {
+  DEFAULT_ORG_SETTINGS,
   orgSettingsQueryOptions,
   saveOrgSettings,
   type OrgSettings,
 } from "@/features/companies/api/org-settings";
 import { useOrg } from "@/features/companies/api/use-organization";
-import {
-  DEFAULT_CAPTURE_SETTLE_DELAY_MS,
-  DEFAULT_CHANNEL_LAYOUT,
-  DEFAULT_MODULE_COUNT,
-  DEFAULT_SCAN_REGION,
-} from "@magic-vault/shared";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import type { NotificationTestType } from "./notification-settings";
 import { sendTestNotification } from "./notification-settings";
 
-type NotificationSettingsPatch = Pick<
-  OrgSettings,
-  "discordWebhookUrl" | "discordNotifyOnScan"
->;
+type NotificationSettingsPatch = Pick<OrgSettings, "discordNotifyOnScan">;
 
 export function useNotificationSettings() {
   const { t } = useTranslation("notifications");
@@ -29,7 +21,6 @@ export function useNotificationSettings() {
 
   const { data, isLoading } = useQuery(queryOpts);
   const settings = {
-    discordWebhookUrl: data?.discordWebhookUrl ?? null,
     discordNotifyOnScan: data?.discordNotifyOnScan ?? false,
   };
 
@@ -42,15 +33,7 @@ export function useNotificationSettings() {
       queryClient.setQueryData(
         queryOpts.queryKey,
         (old: typeof data): typeof data => ({
-          primaryColor: old?.primaryColor ?? null,
-          scannerLayout: old?.scannerLayout ?? "horizontal",
-          scanRegion: old?.scanRegion ?? DEFAULT_SCAN_REGION,
-          discordWebhookUrl: old?.discordWebhookUrl ?? null,
-          discordNotifyOnScan: old?.discordNotifyOnScan ?? false,
-          captureSettleDelayMs:
-            old?.captureSettleDelayMs ?? DEFAULT_CAPTURE_SETTLE_DELAY_MS,
-          moduleCount: old?.moduleCount ?? DEFAULT_MODULE_COUNT,
-          channelLayout: old?.channelLayout ?? DEFAULT_CHANNEL_LAYOUT,
+          ...(old ?? DEFAULT_ORG_SETTINGS),
           ...patch,
         }),
       );
@@ -80,6 +63,7 @@ export function useNotificationSettings() {
   return {
     settings,
     isLoading,
+    isLinked: !!data?.discordGuildId,
     save: (patch: Partial<NotificationSettingsPatch>) =>
       saveMutation.mutateAsync(patch),
     isSaving: saveMutation.isPending,

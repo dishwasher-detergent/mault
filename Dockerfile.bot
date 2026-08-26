@@ -1,0 +1,18 @@
+FROM node:20-slim
+RUN npm install -g corepack && corepack enable && corepack prepare pnpm@latest --activate
+
+WORKDIR /app
+
+# Copy manifests for layer caching
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
+COPY packages/bot/package.json packages/bot/
+RUN pnpm install --frozen-lockfile
+
+# Copy source
+COPY packages/bot/ packages/bot/
+
+# Build bot
+RUN pnpm --filter @magic-vault/bot build
+
+EXPOSE 3002
+CMD ["node", "packages/bot/dist/index.js"]

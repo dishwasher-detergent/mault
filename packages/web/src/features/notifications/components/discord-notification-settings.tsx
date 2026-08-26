@@ -1,9 +1,7 @@
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { IconBrandDiscord } from "@tabler/icons-react";
-import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import type { NotificationTestType } from "../api/notification-settings";
 import { useNotificationSettings } from "../api/use-notification-settings";
@@ -16,70 +14,42 @@ const TEST_TYPES: NotificationTestType[] = [
   "sync-failure",
 ];
 
-export function DiscordWebhookSettings() {
+export function DiscordNotificationSettings() {
   const { t } = useTranslation("notifications");
-  const {
-    settings,
-    isLoading,
-    save,
-    isSaving,
-    sendTest,
-    isTesting,
-    testingType,
-  } = useNotificationSettings();
-  const [webhookUrl, setWebhookUrl] = useState("");
+  const { settings, isLoading, save, isLinked, sendTest, isTesting, testingType } =
+    useNotificationSettings();
 
-  useEffect(() => {
-    setWebhookUrl(settings.discordWebhookUrl ?? "");
-  }, [settings.discordWebhookUrl]);
-
-  const isDirty = webhookUrl !== (settings.discordWebhookUrl ?? "");
-  const canTest = !isDirty && !!webhookUrl && !isTesting && !isLoading;
+  const canTest = isLinked && !isTesting && !isLoading;
 
   return (
     <div className="flex flex-col gap-3">
       <div className="flex items-center gap-2">
         <IconBrandDiscord className="size-4" />
-        <Label>{t("discordWebhookSettings.heading")}</Label>
+        <Label>{t("discordNotifications.heading")}</Label>
       </div>
       <p className="text-sm text-muted-foreground">
-        {t("discordWebhookSettings.description")}
+        {t("discordNotifications.description")}
       </p>
-      <div className="flex gap-2">
-        <Input
-          placeholder={t("discordWebhookSettings.urlPlaceholder")}
-          value={webhookUrl}
-          onChange={(e) => setWebhookUrl(e.target.value)}
-          disabled={isLoading}
-          className="flex-1"
-        />
-        <Button
-          onClick={() => save({ discordWebhookUrl: webhookUrl || null })}
-          disabled={!isDirty || isSaving || isLoading}
-        >
-          {t("discordWebhookSettings.saveButton")}
-        </Button>
-      </div>
       <label className="flex items-center justify-between gap-3">
         <span className="flex flex-col gap-0.5">
           <span className="text-sm">
-            {t("discordWebhookSettings.notifyToggleLabel")}
+            {t("discordNotifications.notifyToggleLabel")}
           </span>
           <span className="text-xs text-muted-foreground">
-            {t("discordWebhookSettings.notifyToggleDescription")}
+            {t("discordNotifications.notifyToggleDescription")}
           </span>
         </span>
         <Switch
           checked={settings.discordNotifyOnScan}
-          disabled={isLoading || !settings.discordWebhookUrl}
+          disabled={isLoading}
           onCheckedChange={(checked) => save({ discordNotifyOnScan: checked })}
         />
       </label>
       <div className="flex flex-col gap-1.5">
         <Label className="text-xs text-muted-foreground">
-          {isDirty
-            ? t("discordWebhookSettings.testHintDirty")
-            : t("discordWebhookSettings.testHintReady")}
+          {isLinked
+            ? t("discordNotifications.testHintReady")
+            : t("discordNotifications.testHintNotLinked")}
         </Label>
         <div className="flex flex-wrap gap-2">
           {TEST_TYPES.map((type) => (
@@ -91,8 +61,8 @@ export function DiscordWebhookSettings() {
               disabled={!canTest}
             >
               {isTesting && testingType === type
-                ? t("discordWebhookSettings.sending")
-                : t(`discordWebhookSettings.testTypes.${type}`)}
+                ? t("discordNotifications.sending")
+                : t(`discordNotifications.testTypes.${type}`)}
             </Button>
           ))}
         </div>

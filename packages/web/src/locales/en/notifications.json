@@ -1,12 +1,10 @@
 {
-  "discordWebhookSettings": {
-    "heading": "Discord Webhook",
-    "description": "Receive a notification when card sorting fails, the device reports an error (jams, empty feeder, connection issues), a card search errors, or the sync job crashes.",
-    "urlPlaceholder": "https://discord.com/api/webhooks/...",
-    "saveButton": "Save",
+  "discordNotifications": {
+    "heading": "Discord Notifications",
+    "description": "Error and status notifications (sorter errors, jams, sync failures, card search errors) post to the channel picked with /notify-channel in your linked Discord server.",
     "notifyToggleLabel": "Notify on every card scanned",
     "notifyToggleDescription": "Posts the card's name, price, and image to Discord each time one is scanned.",
-    "testHintDirty": "Save webhook URL to enable test notifications",
+    "testHintNotLinked": "Link a Discord server above and run /notify-channel to enable test notifications",
     "testHintReady": "Send a test notification",
     "sending": "Sending…",
     "testTypes": {

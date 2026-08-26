@@ -1,7 +1,7 @@
 # Contributing to Magic Vault
 
 Thanks for taking a look at contributing. This covers the dev workflow
-for the three workspace packages (`shared`, `server`, `web`) and, in
+for the four workspace packages (`shared`, `server`, `web`, `bot`) and, in
 particular, how to make and ship a database change safely.
 
 ## Getting set up
@@ -29,7 +29,8 @@ pnpm --filter @magic-vault/web dev
 packages/
 ├── shared/   @magic-vault/shared - types, constants, evaluate-bin rule engine
 ├── server/   @magic-vault/server - Hono API, Drizzle schema/db, auth middleware
-└── web/      @magic-vault/web    - React SPA (scanner, bins, collections, admin, build guide)
+├── web/      @magic-vault/web    - React SPA (scanner, bins, collections, admin, build guide)
+└── bot/      @magic-vault/bot    - Discord bot (slash commands)
 firmware/      Firmware sketch + wire protocol (firmware/PROTOCOL.md)
 drizzle/      Generated SQL migrations (see Database changes below)
 ```
@@ -86,6 +87,19 @@ forms.
 pnpm --filter @magic-vault/web lint    # eslint
 pnpm --filter @magic-vault/web build   # tsc -b && vite build - also the source of truth for type errors
 ```
+
+## `packages/bot`
+
+Discord bot (discord.js). It's a client of `packages/server`'s HTTP API,
+authenticated with a shared `BOT_API_SECRET` header instead of a user JWT —
+it never imports Drizzle or touches Postgres directly, and its own commands
+live in `src/commands/`. The bot-facing endpoints it calls live in
+`packages/server/src/routes/bot.ts`, gated by the `requireBotSecret`
+middleware; adding a new slash command usually means adding both a route
+there and a command file here.
+
+There's no `lint` script here either — same as `server`, rely on your
+editor's TypeScript diagnostics and `pnpm --filter @magic-vault/bot build`.
 
 ## Database changes
 

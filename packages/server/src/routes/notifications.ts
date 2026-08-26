@@ -1,72 +1,10 @@
-import type {
-  NotificationSettings,
-  SerialEventReport,
-} from "@magic-vault/shared";
+import type { SerialEventReport } from "@magic-vault/shared";
 import { Hono } from "hono";
-import { authQuery } from "../db";
-import { notificationSettings } from "../db/schema";
 import { sendDiscordNotification } from "../lib/discord";
 import { classifySerialEvent } from "../lib/serial-events";
 import { requireAuth, requireOrg, type AppEnv } from "../middleware/auth";
 
 const router = new Hono<AppEnv>();
-
-router.get("/", requireAuth, requireOrg, async (c) => {
-  const orgId = c.get("orgId");
-  try {
-    const result = await authQuery(c.get("jwtClaims"), async (tx) => {
-      const row = await tx.query.notificationSettings.findFirst({
-        where: (t, { eq }) => eq(t.orgId, orgId),
-      });
-      const settings: NotificationSettings = {
-        discordWebhookUrl: row?.discordWebhookUrl ?? null,
-      };
-      return {
-        success: true,
-        message: "Loaded notification settings.",
-        data: settings,
-      };
-    });
-    return c.json(result);
-  } catch (err) {
-    console.error(err);
-    return c.json({ success: false, message: "Database error." }, 500);
-  }
-});
-
-router.put("/", requireAuth, requireOrg, async (c) => {
-  const orgId = c.get("orgId");
-  const body = await c.req.json<NotificationSettings>();
-  try {
-    const result = await authQuery(c.get("jwtClaims"), async (tx) => {
-      await tx
-        .insert(notificationSettings)
-        .values({ discordWebhookUrl: body.discordWebhookUrl, orgId })
-        .onConflictDoUpdate({
-          target: [notificationSettings.orgId],
-          set: {
-            discordWebhookUrl: body.discordWebhookUrl,
-            updatedAt: new Date(),
-          },
-        });
-      const row = await tx.query.notificationSettings.findFirst({
-        where: (t, { eq }) => eq(t.orgId, orgId),
-      });
-      const saved: NotificationSettings = {
-        discordWebhookUrl: row?.discordWebhookUrl ?? null,
-      };
-      return {
-        success: true,
-        message: "Saved notification settings.",
-        data: saved,
-      };
-    });
-    return c.json(result);
-  } catch (err) {
-    console.error(err);
-    return c.json({ success: false, message: "Database error." }, 500);
-  }
-});
 
 const TEST_EMBEDS: Record<string, { title: string; description: string }> = {
   "sorter-error": {
@@ -105,11 +43,15 @@ router.post("/test", requireAuth, requireOrg, async (c) => {
     );
   }
   const orgId = c.get("orgId");
-  await sendDiscordNotification(orgId, {
-    ...embed,
-    color: 0xed4245,
-    timestamp: new Date().toISOString(),
-  });
+  await sendDiscordNotification(
+    orgId,
+    {
+      ...embed,
+      color: 0xed4245,
+      timestamp: new Date().toISOString(),
+    },
+    "error",
+  );
   return c.json({ success: true, message: "Test notification sent." });
 });
 
@@ -118,12 +60,16 @@ router.post("/serial-event", requireAuth, requireOrg, async (c) => {
   const classified = classifySerialEvent(event);
   if (classified) {
     const orgId = c.get("orgId");
-    void sendDiscordNotification(orgId, {
-      title: `Magic Vault — ${classified.title}`,
-      description: classified.description,
-      color: 0xed4245,
-      timestamp: new Date().toISOString(),
-    });
+    void sendDiscordNotification(
+      orgId,
+      {
+        title: `Magic Vault — ${classified.title}`,
+        description: classified.description,
+        color: 0xed4245,
+        timestamp: new Date().toISOString(),
+      },
+      "error",
+    );
   }
   return c.json({ success: true, message: "Serial event reported." });
 });

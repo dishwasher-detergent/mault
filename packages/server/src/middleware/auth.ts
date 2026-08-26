@@ -129,3 +129,15 @@ export function requireOrgRole(...roles: OrgRole[]) {
     await next();
   });
 }
+
+export const requireBotSecret = createMiddleware<AppEnv>(async (c, next) => {
+  const secret = c.req.header("X-Bot-Secret");
+  if (
+    !secret ||
+    !process.env.BOT_API_SECRET ||
+    secret !== process.env.BOT_API_SECRET
+  ) {
+    return c.json({ success: false, message: "Unauthorized" }, 401);
+  }
+  await next();
+});

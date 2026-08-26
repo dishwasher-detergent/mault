@@ -194,7 +194,9 @@
     "streamingTo": "Ready for {{name}}",
     "disconnected": "Disconnected from the sorter.",
     "reconnect": "Reconnect",
-    "disconnectButton": "Disconnect"
+    "disconnectButton": "Disconnect",
+    "sessionEndedTitle": "Session ended",
+    "sessionEndedDescription": "The scanner disconnected this camera. You can turn off the camera or scan a new QR code to reconnect."
   },
   "scannerOverlay": {
     "connectCamera": "Connect a camera to start scanning.",

@@ -1,6 +1,14 @@
 import { LanguageSwitcherIcon } from "@/components/language-switcher";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { Button, buttonVariants } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Separator } from "@/components/ui/separator";
 import {
   Tooltip,
@@ -30,9 +38,17 @@ import {
 } from "@tabler/icons-react";
 import { useCallback, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { NavLink } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 
 const EXPANDED_KEY = "sidebarExpanded";
+
+interface NavSubItemDef {
+  key: string;
+  to: string;
+  label: string;
+  badge?: boolean;
+  onClick?: () => void;
+}
 
 interface NavItemDef {
   to: string;
@@ -43,6 +59,7 @@ interface NavItemDef {
   desktopOnly?: boolean;
   disabled?: boolean;
   tooltip?: string;
+  subItems?: NavSubItemDef[];
 }
 
 function CollapsedNavItem({
@@ -89,6 +106,75 @@ function CollapsedNavItem({
       </TooltipTrigger>
       <TooltipContent side="right">{disabled ? tooltip : label}</TooltipContent>
     </Tooltip>
+  );
+}
+
+// Collapsed sidebar has no room to show a sub-item list inline (unlike
+// ExpandedNavItem), so any item with subItems opens them as a hover flyout
+// instead - the NavLink still navigates on click same as any other collapsed
+// item.
+function CollapsedNavItemWithSubItems({
+  to,
+  end,
+  icon,
+  label,
+  subItems,
+}: NavItemDef & { subItems: NavSubItemDef[] }) {
+  const { t } = useTranslation("collections");
+  const navigate = useNavigate();
+
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger
+        openOnHover
+        delay={150}
+        closeDelay={100}
+        render={
+          <NavLink
+            to={to}
+            end={end}
+            className={({ isActive }) =>
+              buttonVariants({
+                variant: isActive ? "secondary" : "ghost",
+                size: "icon-lg",
+              })
+            }
+          />
+        }
+      >
+        {icon}
+      </DropdownMenuTrigger>
+      <DropdownMenuContent
+        side="right"
+        align="start"
+        sideOffset={8}
+        className="w-56"
+      >
+        <DropdownMenuGroup>
+          <DropdownMenuLabel>{label}</DropdownMenuLabel>
+          {subItems.length > 0 ? (
+            subItems.map((sub) => (
+              <DropdownMenuItem
+                key={sub.key}
+                onClick={() => {
+                  sub.onClick?.();
+                  navigate(sub.to);
+                }}
+              >
+                <span className="flex-1 truncate">{sub.label}</span>
+                {sub.badge && (
+                  <span className="shrink-0 size-1.5 rounded-full bg-green-500" />
+                )}
+              </DropdownMenuItem>
+            ))
+          ) : (
+            <p className="px-2 py-1.5 text-xs text-muted-foreground">
+              {t("noCollectionsYet")}
+            </p>
+          )}
+        </DropdownMenuGroup>
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 }
 
@@ -154,14 +240,17 @@ function SubItem({
   to,
   label,
   badge,
+  onClick,
 }: {
   to: string;
   label: string;
   badge?: boolean;
+  onClick?: () => void;
 }) {
   return (
     <NavLink
       to={to}
+      onClick={onClick}
       className={({ isActive }) =>
         cn(
           "flex items-center gap-2 pl-9 pr-2 py-1 rounded-md text-xs transition-colors",
@@ -238,7 +327,7 @@ export function AppNav() {
   const { t } = useTranslation("common");
   const { isAdmin } = useRole();
   const isMobile = useIsMobile();
-  const { collections } = useCollections();
+  const { collections, activateCollection } = useCollections();
   const { locks, currentUserId } = useCollectionLocks();
 
   const [expanded, setExpanded] = useState(
@@ -278,16 +367,12 @@ export function AppNav() {
     )
   );
 
-  const topCollections = collections.slice(0, 5);
-
-  const topMonitor = [...collections]
-    .sort((a, b) => {
-      const aLive = !!locks[a.guid];
-      const bLive = !!locks[b.guid];
-      if (aLive !== bLive) return aLive ? -1 : 1;
-      return 0;
-    })
-    .slice(0, 5);
+  const monitorCollections = [...collections].sort((a, b) => {
+    const aLive = !!locks[a.guid];
+    const bLive = !!locks[b.guid];
+    if (aLive !== bLive) return aLive ? -1 : 1;
+    return 0;
+  });
 
   const navItems: NavItemDef[] = [
     {
@@ -302,12 +387,24 @@ export function AppNav() {
       icon: <IconAlbum size={20} />,
       label: t("nav.collections"),
       desktopOnly: true,
+      subItems: collections.map((c) => ({
+        key: c.guid,
+        to: `/app/collections/${c.guid}/bins`,
+        label: c.name,
+        onClick: () => activateCollection(c.guid),
+      })),
     },
     {
       to: "/app/monitor",
       icon: <IconHeartRateMonitor size={20} />,
       label: t("nav.monitor"),
       badge: hasLiveSessions,
+      subItems: monitorCollections.map((c) => ({
+        key: c.guid,
+        to: `/app/monitor/${c.guid}`,
+        label: c.name,
+        badge: !!locks[c.guid],
+      })),
     },
     {
       to: "/app/calibrate",
@@ -379,34 +476,30 @@ export function AppNav() {
       >
         {navItems.map((item) => {
           if (!expanded) {
+            if (item.subItems) {
+              return (
+                <CollapsedNavItemWithSubItems
+                  key={item.to}
+                  {...item}
+                  subItems={item.subItems}
+                />
+              );
+            }
             return <CollapsedNavItem key={item.to} {...item} />;
           }
-
-          const isCollections = item.to === "/app/collections";
-          const isMonitor = item.to === "/app/monitor";
 
           return (
             <div key={item.to} className="mx-1">
               <ExpandedNavItem {...item} />
-              {isCollections && topCollections.length > 0 && (
+              {item.subItems && item.subItems.length > 0 && (
                 <div className="mt-0.5 flex flex-col gap-0.5">
-                  {topCollections.map((c) => (
+                  {item.subItems.slice(0, 5).map((sub) => (
                     <SubItem
-                      key={c.guid}
-                      to={`/app/collections/${c.guid}/bins`}
-                      label={c.name}
-                    />
-                  ))}
-                </div>
-              )}
-              {isMonitor && topMonitor.length > 0 && (
-                <div className="mt-0.5 flex flex-col gap-0.5">
-                  {topMonitor.map((c) => (
-                    <SubItem
-                      key={c.guid}
-                      to={`/app/monitor/${c.guid}`}
-                      label={c.name}
-                      badge={!!locks[c.guid]}
+                      key={sub.key}
+                      to={sub.to}
+                      label={sub.label}
+                      badge={sub.badge}
+                      onClick={sub.onClick}
                     />
                   ))}
                 </div>
@@ -435,14 +528,18 @@ export function AppNav() {
       </a>
       <Button
         onClick={toggle}
-        className={cn(expanded ? "h-8 mx-2" : "size-8")}
+        className={cn(
+          expanded
+            ? "h-8 mx-2 w-full justify-start gap-2.5 px-2.5 border-0 text-sm"
+            : "size-8",
+        )}
         variant="ghost"
         title={expanded ? t("nav.collapseSidebar") : t("nav.expandSidebar")}
       >
         {expanded ? (
           <>
-            {t("nav.collapse")}
             <IconLayoutSidebarLeftCollapse size={16} />
+            {t("nav.collapse")}
           </>
         ) : (
           <IconLayoutSidebarLeftExpand size={16} />

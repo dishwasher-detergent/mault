@@ -10,7 +10,12 @@ import { Hono } from "hono";
 import { streamSSE } from "hono/streaming";
 import { authQuery, db, type Transaction } from "../db";
 import { collectionCards, collections, games, orgSettings } from "../db/schema";
-import { buildCardScannedEmbed, sendDiscordNotification } from "../lib/discord";
+import {
+  buildCardScannedEmbed,
+  buildScanSessionStartEmbed,
+  buildSortingLogicSummary,
+  sendDiscordNotification,
+} from "../lib/discord";
 import {
   acquireLock,
   getLocksForGuids,
@@ -455,7 +460,13 @@ router.post("/:guid/cards", requireAuth, requireOrg, async (c) => {
   } = await c.req.json<ScannedCard>();
 
   const displayName = await getUserDisplayName(userId);
-  if (!acquireLock(guid, userId, orgId, displayName)) {
+  const { ok: lockOk, isNewSession } = acquireLock(
+    guid,
+    userId,
+    orgId,
+    displayName,
+  );
+  if (!lockOk) {
     return c.json(
       {
         success: false,
@@ -471,10 +482,11 @@ router.post("/:guid/cards", requireAuth, requireOrg, async (c) => {
     | { success: false; message: string };
 
   try {
-    const { result, collectionName, gameName } = await authQuery<{
+    const { result, collectionName, gameName, gameId } = await authQuery<{
       result: AddCardResult;
       collectionName: string | undefined;
       gameName: string | undefined;
+      gameId: number | null;
     }>(c.get("jwtClaims"), async (tx) => {
       const collection = await tx.query.collections.findFirst({
         where: (t, { eq, and }) => and(eq(t.guid, guid), eq(t.orgId, orgId)),
@@ -485,6 +497,7 @@ router.post("/:guid/cards", requireAuth, requireOrg, async (c) => {
           result: { success: false, message: "Collection not found." },
           collectionName: undefined,
           gameName: undefined,
+          gameId: null,
         };
 
       await tx
@@ -532,6 +545,7 @@ router.post("/:guid/cards", requireAuth, requireOrg, async (c) => {
         },
         collectionName: collection.name,
         gameName: game?.name,
+        gameId: collection.gameId,
       };
     });
     if (result.success) {
@@ -543,18 +557,41 @@ router.post("/:guid/cards", requireAuth, requireOrg, async (c) => {
           where: eq(orgSettings.orgId, orgId),
           columns: { discordNotifyOnScan: true },
         })
-        .then((row) => {
-          if (row?.discordNotifyOnScan) {
-            void sendDiscordNotification(
+        .then(async (row) => {
+          if (!row?.discordNotifyOnScan) return;
+
+          if (isNewSession) {
+            const sortingLogicSummary = await buildSortingLogicSummary(
               orgId,
-              buildCardScannedEmbed(card as PlayingCardWithDistance, {
-                isFoil,
-                collectionName,
-                gameName,
-                collectionGuid: guid,
-              }),
+              gameId,
+            );
+            await sendDiscordNotification(
+              orgId,
+              buildScanSessionStartEmbed(
+                collectionName ?? "Unknown collection",
+                sortingLogicSummary,
+              ),
+              "scan",
             );
           }
+
+          const { embed, referenceImageUrl } = buildCardScannedEmbed(
+            card as PlayingCardWithDistance,
+            {
+              isFoil,
+              collectionName,
+              gameName,
+              collectionGuid: guid,
+              capturedImageDataUrl: capturedImageUrl,
+            },
+          );
+          void sendDiscordNotification(
+            orgId,
+            embed,
+            "scan",
+            capturedImageUrl,
+            referenceImageUrl,
+          );
         })
         .catch((err) => {
           console.error("[discord] Failed to check discordNotifyOnScan:", err);
@@ -770,12 +807,17 @@ router.post("/:guid/debug/error", requireAuth, requireOrg, async (c) => {
 // SSE below; this just fans a message out to them. No WebRTC - the "photo"
 // case carries the actual captured image as a data URL, same as how
 // scanned cards already store capturedImageDataUrl.
-router.post("/:guid/phone-camera-signal", requireAuth, requireOrg, async (c) => {
-  const guid = c.req.param("guid");
-  const message = await c.req.json<PhoneCameraMessage>();
-  emitToSession(guid, "phone_camera_message", message);
-  return c.json({ success: true, data: null });
-});
+router.post(
+  "/:guid/phone-camera-signal",
+  requireAuth,
+  requireOrg,
+  async (c) => {
+    const guid = c.req.param("guid");
+    const message = await c.req.json<PhoneCameraMessage>();
+    emitToSession(guid, "phone_camera_message", message);
+    return c.json({ success: true, data: null });
+  },
+);
 
 // GET /collections/:guid/stream — SSE, auth via ?token= and ?orgId= query params
 router.get("/:guid/stream", async (c) => {

@@ -1,7 +1,12 @@
-import type { PlayingCard } from "@magic-vault/shared";
-import { eq } from "drizzle-orm";
+import {
+  isRuleGroup,
+  type BinCondition,
+  type BinRuleGroup,
+  type PlayingCard,
+} from "@magic-vault/shared";
+import { and, eq } from "drizzle-orm";
 import { db } from "../db";
-import { orgSettings } from "../db/schema";
+import { bins, binSets, orgSettings } from "../db/schema";
 
 type DiscordEmbed = {
   title: string;
@@ -13,6 +18,7 @@ type DiscordEmbed = {
 };
 
 const CARD_SCANNED_COLOR = 0x5865f2; // Discord blurple
+export const SCAN_ATTACHMENT_NAME = "scan.jpg";
 
 function resolveImageUrl(url: string): string {
   const proxied = url.match(/\/cards\/image-proxy\?url=([^&]+)/);
@@ -33,13 +39,25 @@ export interface CardScannedEmbedOptions {
   collectionName?: string;
   gameName?: string;
   collectionGuid?: string;
+  capturedImageDataUrl?: string;
+}
+
+export interface CardScannedEmbedResult {
+  embed: DiscordEmbed;
+  referenceImageUrl?: string;
 }
 
 export function buildCardScannedEmbed(
   card: PlayingCard,
   options: CardScannedEmbedOptions = {},
-): DiscordEmbed {
-  const { isFoil, collectionName, gameName, collectionGuid } = options;
+): CardScannedEmbedResult {
+  const {
+    isFoil,
+    collectionName,
+    gameName,
+    collectionGuid,
+    capturedImageDataUrl,
+  } = options;
 
   const lines = [];
   if (card.price != null) {
@@ -53,47 +71,207 @@ export function buildCardScannedEmbed(
   if (collectionName) lines.push(`**Collection:** ${collectionName}`);
   if (gameName) lines.push(`**Game:** ${gameName}`);
 
-  const imageUrl = card.image?.normal;
   const monitorUrl = collectionGuid
     ? `${process.env.WEB_URL ?? "http://localhost:5173"}/app/monitor/${collectionGuid}`
     : undefined;
 
-  return {
+  const referenceImageUrl = card.image?.normal
+    ? resolveImageUrl(card.image.normal)
+    : undefined;
+
+  const image = capturedImageDataUrl
+    ? { url: `attachment://${SCAN_ATTACHMENT_NAME}` }
+    : referenceImageUrl
+      ? { url: referenceImageUrl }
+      : undefined;
+
+  const embed: DiscordEmbed = {
     title: card.name,
     description: lines.join("\n"),
     color: CARD_SCANNED_COLOR,
     timestamp: new Date().toISOString(),
     ...(monitorUrl ? { url: monitorUrl } : {}),
-    ...(imageUrl ? { image: { url: resolveImageUrl(imageUrl) } } : {}),
+    ...(image ? { image } : {}),
+  };
+
+  return {
+    embed,
+    referenceImageUrl: capturedImageDataUrl ? referenceImageUrl : undefined,
   };
 }
 
-async function getWebhookUrl(orgId: string): Promise<string | null> {
+const OPERATOR_TEXT: Record<string, string> = {
+  equals: "is",
+  not_equals: "is not",
+  contains: "contains",
+  not_contains: "does not contain",
+  starts_with: "starts with",
+  ends_with: "ends with",
+  gt: ">",
+  gte: "≥",
+  lt: "<",
+  lte: "≤",
+  in: "is one of",
+  not_in: "is not one of",
+  contains_any: "contains any of",
+  contains_all: "contains all of",
+  contains_none: "contains none of",
+};
+
+function describeCondition(cond: BinCondition): string {
+  const value = Array.isArray(cond.value)
+    ? cond.value.join(", ")
+    : String(cond.value);
+  return `${cond.field} ${OPERATOR_TEXT[cond.operator] ?? cond.operator} ${value}`;
+}
+
+function describeRuleGroup(group: BinRuleGroup): string {
+  if (!group.conditions || group.conditions.length === 0) return "always";
+  const parts = group.conditions.map((c) =>
+    isRuleGroup(c) ? `(${describeRuleGroup(c)})` : describeCondition(c),
+  );
+  return parts.join(group.combinator === "and" ? " AND " : " OR ");
+}
+
+export async function buildSortingLogicSummary(
+  orgId: string,
+  gameId: number | null,
+): Promise<string> {
+  const setRows = await db
+    .select({ id: binSets.id, name: binSets.name })
+    .from(binSets)
+    .where(
+      gameId != null
+        ? and(
+            eq(binSets.orgId, orgId),
+            eq(binSets.isActive, true),
+            eq(binSets.gameId, gameId),
+          )
+        : and(eq(binSets.orgId, orgId), eq(binSets.isActive, true)),
+    )
+    .limit(1);
+  const set = setRows[0];
+  if (!set) return "No active sorting rules configured.";
+
+  const binRows = await db
+    .select({
+      binNumber: bins.binNumber,
+      rules: bins.rules,
+      isCatchAll: bins.isCatchAll,
+    })
+    .from(bins)
+    .where(eq(bins.binSet, set.id))
+    .orderBy(bins.binNumber);
+
+  if (binRows.length === 0)
+    return `**Sorting logic:** ${set.name} (no bins configured)`;
+
+  const lines = binRows.map((b) =>
+    b.isCatchAll
+      ? `**Bin ${b.binNumber}:** everything else`
+      : `**Bin ${b.binNumber}:** ${describeRuleGroup(b.rules as BinRuleGroup)}`,
+  );
+
+  return `**Sorting logic:** ${set.name}\n${lines.join("\n")}`;
+}
+
+export function buildScanSessionStartEmbed(
+  collectionName: string,
+  sortingLogicSummary: string,
+): DiscordEmbed {
+  return {
+    title: `New scan session — ${collectionName}`,
+    description: sortingLogicSummary,
+    color: CARD_SCANNED_COLOR,
+    timestamp: new Date().toISOString(),
+  };
+}
+
+export type DiscordNotificationKind = "scan" | "error";
+
+const THREAD_NAMES: Record<DiscordNotificationKind, string> = {
+  scan: "Card Scans",
+  error: "Notifications",
+};
+
+async function getNotifyConfig(
+  orgId: string,
+  kind: DiscordNotificationKind,
+): Promise<{ channelId: string | null; threadId: string | null }> {
   const rows = await db
-    .select({ discordWebhookUrl: orgSettings.discordWebhookUrl })
+    .select({
+      discordScanChannelId: orgSettings.discordScanChannelId,
+      discordScanThreadId: orgSettings.discordScanThreadId,
+      discordErrorChannelId: orgSettings.discordErrorChannelId,
+      discordErrorThreadId: orgSettings.discordErrorThreadId,
+    })
     .from(orgSettings)
     .where(eq(orgSettings.orgId, orgId))
     .limit(1);
-  return rows[0]?.discordWebhookUrl ?? null;
+  const row = rows[0];
+  if (kind === "scan") {
+    return {
+      channelId: row?.discordScanChannelId ?? null,
+      threadId: row?.discordScanThreadId ?? null,
+    };
+  }
+  return {
+    channelId: row?.discordErrorChannelId ?? null,
+    threadId: row?.discordErrorThreadId ?? null,
+  };
 }
 
 export async function sendDiscordNotification(
   orgId: string,
   embed: DiscordEmbed,
+  kind: DiscordNotificationKind,
+  attachmentDataUrl?: string,
+  secondaryImageUrl?: string,
 ): Promise<void> {
-  const webhookUrl = await getWebhookUrl(orgId);
-  if (!webhookUrl) return;
+  const config = await getNotifyConfig(orgId, kind);
+  if (!config.channelId) return;
+
+  const botUrl = process.env.BOT_URL;
+  const botSecret = process.env.BOT_API_SECRET;
+  if (!botUrl || !botSecret) return;
 
   try {
-    const res = await fetch(webhookUrl, {
+    const res = await fetch(`${botUrl}/notify`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ embeds: [embed] }),
+      headers: {
+        "Content-Type": "application/json",
+        "X-Bot-Secret": botSecret,
+      },
+      body: JSON.stringify({
+        channelId: config.channelId,
+        threadId: config.threadId,
+        threadName: THREAD_NAMES[kind],
+        embed,
+        attachmentDataUrl,
+        secondaryImageUrl,
+      }),
     });
     if (!res.ok) {
-      console.error(`[discord] Webhook POST failed: ${res.status}`);
+      console.error(`[discord] Bot notify POST failed: ${res.status}`);
+      return;
+    }
+
+    const result = (await res.json()) as {
+      success: boolean;
+      data?: { threadId?: string };
+    };
+    const newThreadId = result.data?.threadId;
+    if (newThreadId && newThreadId !== config.threadId) {
+      await db
+        .update(orgSettings)
+        .set(
+          kind === "scan"
+            ? { discordScanThreadId: newThreadId, updatedAt: new Date() }
+            : { discordErrorThreadId: newThreadId, updatedAt: new Date() },
+        )
+        .where(eq(orgSettings.orgId, orgId));
     }
   } catch (err) {
-    console.error("[discord] Failed to send notification:", err);
+    console.error("[discord] Failed to send bot notification:", err);
   }
 }
