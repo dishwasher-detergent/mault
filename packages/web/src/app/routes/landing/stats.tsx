@@ -6,7 +6,7 @@ export function LandingStats() {
   const stats = useLandingStats();
 
   return (
-    <section className="border-y bg-secondary/30">
+    <section className="border-t bg-secondary/20">
       <div className="mx-auto grid max-w-6xl grid-cols-2 gap-6 px-4 py-8 md:grid-cols-4">
         {stats.map((stat) => (
           <div key={stat.key} className="flex flex-col items-center text-center">

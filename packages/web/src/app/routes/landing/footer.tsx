@@ -41,6 +41,12 @@ export function LandingFooter() {
             {t("nav.build")}
           </Link>
           <Link
+            to="/discord-bot"
+            className="transition-colors hover:text-foreground"
+          >
+            {t("nav.discordBot")}
+          </Link>
+          <Link
             to="/auth/sign-in"
             className="transition-colors hover:text-foreground"
           >

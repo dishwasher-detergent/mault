@@ -12,6 +12,7 @@ import SettingsPage from "@/app/routes/app/settings";
 import VerifyEmailPage from "@/app/routes/app/verify-email";
 import AuthPage from "@/app/routes/auth";
 import BuildGuidePage from "@/app/routes/build";
+import DiscordBotPage from "@/app/routes/discord-bot";
 import ErrorPage from "@/app/routes/error";
 import LandingPage from "@/app/routes/index";
 import NotFoundPage from "@/app/routes/not-found";
@@ -56,6 +57,10 @@ export const router = createBrowserRouter([
       {
         path: "/build",
         element: <BuildGuidePage />,
+      },
+      {
+        path: "/discord-bot",
+        element: <DiscordBotPage />,
       },
       {
         path: "/auth/:path",

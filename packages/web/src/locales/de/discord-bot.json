@@ -1,0 +1,90 @@
+{
+  "nav": {
+    "setup": "Einrichtung",
+    "commands": "Befehle",
+    "features": "Funktionen",
+    "joinDiscordAria": "Discord beitreten",
+    "openApp": "App öffnen",
+    "getStarted": "Loslegen"
+  },
+  "hero": {
+    "eyebrow": "Discord-Integration",
+    "title": "Hol dir deinen Kartensortierer in Discord",
+    "description": "Der Discord-Bot von Magic Vault postet für jede sortierte Karte eine Nachricht, warnt deinen Server bei Problemen und beantwortet /stats auf Abruf - so musst du nicht ständig die Monitor-Seite offen halten, um zu wissen, was passiert.",
+    "getStarted": "Loslegen",
+    "openSettings": "Einstellungen öffnen",
+    "seeSetup": "Einrichtungsschritte ansehen",
+    "selfHostedNote": "Der Bot läuft als eigener Prozess (packages/bot) neben dem Rest von Magic Vault - die benötigten Umgebungsvariablen fürs Self-Hosting findest du in der README."
+  },
+  "setup": {
+    "title": "Einen Server in unter einer Minute verknüpfen",
+    "description": "Das Verbinden von Discord verändert weder deine Hardware noch dein Scan-Setup - es sind drei Schritte in der App und ein Befehl in Discord.",
+    "steps": [
+      {
+        "title": "Code generieren",
+        "description": "Gehe in Magic Vault zu Einstellungen → Discord-Bot und generiere einen Verknüpfungscode. Er ist nur wenige Minuten gültig."
+      },
+      {
+        "title": "/link ausführen",
+        "description": "Führe in deinem Discord-Server /link <code> mit dem Code aus den Einstellungen aus. Erfordert die Berechtigung „Server verwalten“."
+      },
+      {
+        "title": "Kanäle auswählen",
+        "description": "Führe /scanning und /notification aus, um festzulegen, wo Scan- und Fehlerbenachrichtigungen gepostet werden - standardmäßig der aktuelle Kanal."
+      }
+    ]
+  },
+  "commands": {
+    "title": "Befehle",
+    "description": "Alles, was der Bot versteht, direkt in deinem Discord-Server ausgeführt.",
+    "items": {
+      "link": {
+        "usage": "/link <code>",
+        "description": "Verknüpft diesen Discord-Server mit einer Magic-Vault-Organisation."
+      },
+      "stats": {
+        "usage": "/stats [Sammlung]",
+        "description": "Zeigt die Sammlungsstatistiken dieser Organisation, optional auf eine Sammlung beschränkt."
+      },
+      "scanning": {
+        "usage": "/scanning [Kanal]",
+        "description": "Legt den Kanal für Scan-Benachrichtigungen fest (Standard: aktueller Kanal)."
+      },
+      "notification": {
+        "usage": "/notification [Kanal]",
+        "description": "Legt den Kanal für Fehler-/Statusbenachrichtigungen fest (Standard: aktueller Kanal)."
+      },
+      "help": {
+        "usage": "/help",
+        "description": "Listet alle Befehle des Bots auf."
+      }
+    }
+  },
+  "features": {
+    "title": "Was gepostet wird",
+    "description": "Sobald ein Server verknüpft ist, hält der Bot ihn automatisch auf dem Laufenden - kein Polling, kein Dashboard-Neuladen.",
+    "items": [
+      {
+        "title": "Scan-Benachrichtigungen",
+        "description": "Jede sortierte Karte postet ein Embed mit Name, Preis (und Foil-Preis), Sammlung, Spiel, dem aufgenommenen Scan-Foto und einem Link direkt zum Live-Monitor."
+      },
+      {
+        "title": "Fehler- und Statusmeldungen",
+        "description": "Sortierer-Stau, Zuführungsprobleme und andere Fehler werden separat gepostet, damit sie nicht im Scan-Feed untergehen."
+      },
+      {
+        "title": "Statistiken auf Abruf",
+        "description": "/stats antwortet direkt in Discord mit Kartenanzahl und geschätztem Wert für die ganze Organisation oder eine einzelne Sammlung."
+      },
+      {
+        "title": "Live-Präsenz",
+        "description": "Der Status des Bots wechselt durch die Spiele, die deine Magic-Vault-Instanz unterstützt, sodass klar ist, dass er online und verbunden ist."
+      }
+    ]
+  },
+  "footer": {
+    "reportIssue": "Problem melden",
+    "signIn": "Anmelden",
+    "copyright": "© {{year}} Magic Vault"
+  }
+}
