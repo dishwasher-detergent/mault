@@ -116,7 +116,15 @@
     "msValue": "{{value}} ms",
     "captureSettleLabel": "Délai avant capture (ms)",
     "captureSettleDescription": "Temps d'attente après que le chargeur confirme l'arrivée d'une carte avant de capturer une image, pour qu'elle soit parfaitement immobile et nette.",
-    "setCaptureSettle": "Définir le délai avant capture"
+    "setCaptureSettle": "Définir le délai avant capture",
+    "usePhoneAsCamera": "Utiliser le téléphone comme caméra",
+    "phoneCameraConnected": "Caméra du téléphone connectée",
+    "takePhoto": "Prendre une photo",
+    "retakePhoto": "Reprendre la photo",
+    "capturingPhoto": "Capture…",
+    "takePhotoPrompt": "Prends une photo avec ton téléphone pour positionner le cadre.",
+    "waitingForPhone": "En attente du téléphone…",
+    "phoneCaptureFailed": "Le téléphone n'a pas répondu avec une photo à temps."
   },
   "useCalibrationPage": {
     "toasts": {

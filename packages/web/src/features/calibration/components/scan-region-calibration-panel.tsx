@@ -7,6 +7,7 @@ import {
 } from "@/features/companies/api/org-settings";
 import { useOrg } from "@/features/companies/api/use-organization";
 import { useCameraContext } from "@/features/scanner/api/use-camera";
+import { PhoneCameraPairingDialog } from "@/features/scanner/components/phone-camera-pairing-dialog";
 import { getDefaultCardContour } from "@/features/scanner/lib/card-detection";
 import {
   DEFAULT_CAPTURE_SETTLE_DELAY_MS,
@@ -14,7 +15,11 @@ import {
   type CardContour,
   type ScanRegion,
 } from "@magic-vault/shared";
-import { IconCameraSpark, IconRotate } from "@tabler/icons-react";
+import {
+  IconCameraSpark,
+  IconDeviceMobile,
+  IconRotate,
+} from "@tabler/icons-react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   useEffect,
@@ -49,6 +54,23 @@ function rawContourToPortraitBox(
   }));
   const xs = portraitPoints.map((p) => p.x);
   const ys = portraitPoints.map((p) => p.y);
+  return {
+    left: Math.min(...xs),
+    top: Math.min(...ys),
+    width: Math.max(...xs) - Math.min(...xs),
+    height: Math.max(...ys) - Math.min(...ys),
+  };
+}
+
+function contourToBox(contour: CardContour, width: number, height: number) {
+  const corners = [
+    contour.topLeft,
+    contour.topRight,
+    contour.bottomRight,
+    contour.bottomLeft,
+  ];
+  const xs = corners.map((p) => p.x / width);
+  const ys = corners.map((p) => p.y / height);
   return {
     left: Math.min(...xs),
     top: Math.min(...ys),
@@ -99,8 +121,15 @@ export function ScanRegionCalibrationPanel() {
     status: cameraStatus,
     errorMessage,
     retryCamera,
+    cameraSource,
+    phonePairingStatus,
+    phonePairingUrl,
+    startPhonePairing,
+    stopPhonePairing,
+    requestPhoneCapture,
+    sendPhoneScanRegion,
   } = useCameraContext();
-  const isCameraActive = cameraStatus === "ready";
+  const isCameraActive = cameraSource === "local" && cameraStatus === "ready";
   const [isConnecting, setIsConnecting] = useState(false);
 
   const handleConnectCamera = async () => {
@@ -109,6 +138,58 @@ export function ScanRegionCalibrationPanel() {
       await retryCamera();
     } finally {
       setIsConnecting(false);
+    }
+  };
+
+  const [phoneDialogOpen, setPhoneDialogOpen] = useState(false);
+  const [phonePhotoUrl, setPhonePhotoUrl] = useState<string | null>(null);
+  const [phonePhotoSize, setPhonePhotoSize] = useState<{
+    width: number;
+    height: number;
+  } | null>(null);
+  const [isCapturingPhoto, setIsCapturingPhoto] = useState(false);
+  const [phoneCaptureError, setPhoneCaptureError] = useState<string | null>(
+    null,
+  );
+
+  useEffect(() => {
+    if (cameraSource !== "phone") {
+      setPhonePhotoUrl(null);
+      setPhonePhotoSize(null);
+      setPhoneCaptureError(null);
+    }
+  }, [cameraSource]);
+
+  const handleOpenPhonePairing = () => {
+    setPhoneDialogOpen(true);
+    if (phonePairingStatus === "idle" || phonePairingStatus === "error")
+      startPhonePairing();
+  };
+
+  const handlePhoneDialogOpenChange = (open: boolean) => {
+    setPhoneDialogOpen(open);
+    if (!open && phonePairingStatus !== "connected") stopPhonePairing();
+  };
+
+  const handleDisconnectPhone = () => {
+    stopPhonePairing();
+    setPhoneDialogOpen(false);
+  };
+
+  const handleTakePhoto = async () => {
+    setIsCapturingPhoto(true);
+    setPhoneCaptureError(null);
+    try {
+      const dataUrl = await requestPhoneCapture();
+      if (dataUrl) {
+        setPhonePhotoUrl(dataUrl);
+      } else {
+        setPhoneCaptureError(
+          t("scanRegionCalibrationPanel.phoneCaptureFailed"),
+        );
+      }
+    } finally {
+      setIsCapturingPhoto(false);
     }
   };
 
@@ -186,13 +267,68 @@ export function ScanRegionCalibrationPanel() {
     };
   }, [stream]);
 
-  const box = videoSize
-    ? rawContourToPortraitBox(
-        getDefaultCardContour(videoSize.width, videoSize.height, region),
-        videoSize.width,
-        videoSize.height,
-      )
-    : null;
+  useEffect(() => {
+    if (!phonePhotoUrl) return;
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    let cancelled = false;
+    const img = new Image();
+    img.onload = () => {
+      if (cancelled) return;
+      canvas.width = img.naturalWidth;
+      canvas.height = img.naturalHeight;
+      const ctx = canvas.getContext("2d");
+      if (ctx) ctx.drawImage(img, 0, 0);
+      setPhonePhotoSize({ width: img.naturalWidth, height: img.naturalHeight });
+
+      const frame = frameRef.current;
+      const container = frame?.parentElement;
+      if (container && frame) {
+        const cw = container.clientWidth;
+        const ch = container.clientHeight;
+        const scale = Math.max(cw / canvas.width, ch / canvas.height);
+        const cssW = Math.round(canvas.width * scale);
+        const cssH = Math.round(canvas.height * scale);
+        frame.style.width = `${cssW}px`;
+        frame.style.height = `${cssH}px`;
+        frame.style.left = `${(cw - cssW) / 2}px`;
+        frame.style.top = `${(ch - cssH) / 2}px`;
+      }
+    };
+    img.src = phonePhotoUrl;
+
+    return () => {
+      cancelled = true;
+    };
+  }, [phonePhotoUrl]);
+
+  useEffect(() => {
+    if (cameraSource !== "phone" || phonePairingStatus !== "connected") return;
+    const timeout = setTimeout(() => sendPhoneScanRegion(region), 80);
+    return () => clearTimeout(timeout);
+  }, [region, cameraSource, phonePairingStatus, sendPhoneScanRegion]);
+
+  const box =
+    cameraSource === "phone"
+      ? phonePhotoSize
+        ? contourToBox(
+            getDefaultCardContour(
+              phonePhotoSize.width,
+              phonePhotoSize.height,
+              region,
+            ),
+            phonePhotoSize.width,
+            phonePhotoSize.height,
+          )
+        : null
+      : videoSize
+        ? rawContourToPortraitBox(
+            getDefaultCardContour(videoSize.width, videoSize.height, region),
+            videoSize.width,
+            videoSize.height,
+          )
+        : null;
 
   const dragStateRef = useRef<DragState | null>(null);
 
@@ -238,11 +374,20 @@ export function ScanRegionCalibrationPanel() {
       const rect = frame.getBoundingClientRect();
       const dxFrac = (e.clientX - drag.startClientX) / rect.width;
       const dyFrac = (e.clientY - drag.startClientY) / rect.height;
+      const offsets =
+        cameraSource === "phone"
+          ? {
+              offsetX: drag.startOffsetX + dxFrac,
+              offsetY: drag.startOffsetY + dyFrac,
+            }
+          : {
+              offsetX: drag.startOffsetX + dyFrac,
+              offsetY: drag.startOffsetY - dxFrac,
+            };
       setDraft(
         clampRegion({
           ...regionRef.current,
-          offsetX: drag.startOffsetX + dyFrac,
-          offsetY: drag.startOffsetY - dxFrac,
+          ...offsets,
         }),
       );
     } else {
@@ -293,19 +438,59 @@ export function ScanRegionCalibrationPanel() {
       </p>
 
       <div className="flex flex-col gap-2 w-full max-w-sm mx-auto md:mx-0">
-        <Button
-          variant="outline"
-          onClick={handleConnectCamera}
-          disabled={isConnecting}
-          className="w-full"
-        >
-          <IconCameraSpark />
-          {isConnecting
-            ? t("scanRegionCalibrationPanel.connecting")
-            : isCameraActive
-              ? t("scanRegionCalibrationPanel.reconnectWebcam")
-              : t("scanRegionCalibrationPanel.connectWebcam")}
-        </Button>
+        <PhoneCameraPairingDialog
+          open={phoneDialogOpen}
+          onOpenChange={handlePhoneDialogOpenChange}
+          status={phonePairingStatus}
+          pairingUrl={phonePairingUrl}
+          onRetry={startPhonePairing}
+          onDisconnect={handleDisconnectPhone}
+        />
+
+        <div className="flex gap-2">
+          <Button
+            variant="outline"
+            onClick={handleConnectCamera}
+            disabled={isConnecting}
+            className="flex-1"
+          >
+            <IconCameraSpark />
+            {isConnecting
+              ? t("scanRegionCalibrationPanel.connecting")
+              : isCameraActive
+                ? t("scanRegionCalibrationPanel.reconnectWebcam")
+                : t("scanRegionCalibrationPanel.connectWebcam")}
+          </Button>
+          <Button
+            variant="outline"
+            onClick={handleOpenPhonePairing}
+            className="flex-1"
+          >
+            <IconDeviceMobile />
+            {cameraSource === "phone" && phonePairingStatus === "connected"
+              ? t("scanRegionCalibrationPanel.phoneCameraConnected")
+              : t("scanRegionCalibrationPanel.usePhoneAsCamera")}
+          </Button>
+        </div>
+
+        {cameraSource === "phone" && (
+          <Button
+            variant="outline"
+            onClick={handleTakePhoto}
+            disabled={phonePairingStatus !== "connected" || isCapturingPhoto}
+            className="w-full"
+          >
+            <IconCameraSpark />
+            {isCapturingPhoto
+              ? t("scanRegionCalibrationPanel.capturingPhoto")
+              : phonePhotoUrl
+                ? t("scanRegionCalibrationPanel.retakePhoto")
+                : t("scanRegionCalibrationPanel.takePhoto")}
+          </Button>
+        )}
+        {phoneCaptureError && (
+          <p className="text-xs text-destructive">{phoneCaptureError}</p>
+        )}
 
         <div className="relative overflow-hidden bg-background w-full rounded-lg border aspect-[2.5/3.5]">
           <video ref={videoRef} className="hidden" playsInline muted />
@@ -335,14 +520,24 @@ export function ScanRegionCalibrationPanel() {
               </div>
             )}
           </div>
-          {!isCameraActive && (
-            <div className="absolute inset-0 flex items-center justify-center p-4 text-center">
-              <p className="text-xs text-muted-foreground">
-                {errorMessage ||
-                  t("scanRegionCalibrationPanel.waitingForCamera")}
-              </p>
-            </div>
-          )}
+          {cameraSource === "phone"
+            ? !phonePhotoUrl && (
+                <div className="absolute inset-0 flex items-center justify-center p-4 text-center">
+                  <p className="text-xs text-muted-foreground">
+                    {phonePairingStatus === "connected"
+                      ? t("scanRegionCalibrationPanel.takePhotoPrompt")
+                      : t("scanRegionCalibrationPanel.waitingForPhone")}
+                  </p>
+                </div>
+              )
+            : !isCameraActive && (
+                <div className="absolute inset-0 flex items-center justify-center p-4 text-center">
+                  <p className="text-xs text-muted-foreground">
+                    {errorMessage ||
+                      t("scanRegionCalibrationPanel.waitingForCamera")}
+                  </p>
+                </div>
+              )}
         </div>
 
         <div className="flex items-center gap-2">

@@ -78,7 +78,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
         return;
       }
       await interaction.editReply({
-        content: `Linked this server to **${confirmed.data.orgName}**. Try \`/stats\` or \`/collections\`.`,
+        content: `Linked this server to **${confirmed.data.orgName}**. Run \`/stats\` to check collection stats, or \`/scanning\` and \`/notification\` to get card-scan and error notifications here.`,
         components: [],
       });
     } catch {
@@ -96,6 +96,6 @@ export async function execute(interaction: ChatInputCommandInteraction) {
   }
 
   await interaction.editReply(
-    `Linked this server to **${result.data.orgName}**. Try \`/stats\` or \`/collections\`.`,
+    `Linked this server to **${result.data.orgName}**. Run \`/stats\` to check collection stats, or \`/scanning\` and \`/notification\` to get card-scan and error notifications here.`,
   );
 }

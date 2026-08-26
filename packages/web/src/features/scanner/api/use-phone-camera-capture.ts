@@ -1,5 +1,5 @@
 import { useCameraSignalChannel } from "@/features/scanner/api/use-camera-signal-channel";
-import type { PhoneCameraMessage } from "@magic-vault/shared";
+import type { PhoneCameraMessage, ScanRegion } from "@magic-vault/shared";
 import { useCallback, useEffect, useRef, useState } from "react";
 
 // The phone heartbeats "camera_ready" roughly this often while its camera
@@ -8,7 +8,11 @@ import { useCallback, useEffect, useRef, useState } from "react";
 const PRESENCE_TIMEOUT_MS = 8000;
 const CAPTURE_TIMEOUT_MS = 8000;
 
-export type PhoneCameraCaptureStatus = "idle" | "waiting" | "connected" | "error";
+export type PhoneCameraCaptureStatus =
+  | "idle"
+  | "waiting"
+  | "connected"
+  | "error";
 
 interface PendingCapture {
   requestId: string;
@@ -16,12 +20,6 @@ interface PendingCapture {
   timeout: ReturnType<typeof setTimeout>;
 }
 
-// Desktop side of "use a phone as a webcam": tracks whether a phone (paired
-// via the QR/link shown in the pairing dialog) is currently present and
-// ready, and lets the scanner ask it for a single fresh photo on demand -
-// no continuous video, no WebRTC. Each capture is a plain request/response
-// over the collection's existing session SSE stream + a REST POST, so it
-// works across any network the app's normal API already reaches.
 export function usePhoneCameraCapture(collectionGuid: string | undefined) {
   const [status, setStatus] = useState<PhoneCameraCaptureStatus>("idle");
   const activeRef = useRef(false);
@@ -54,7 +52,10 @@ export function usePhoneCameraCapture(collectionGuid: string | undefined) {
         if (!activeRef.current) return;
         setStatus("connected");
         clearPresenceTimeout();
-        presenceTimeoutRef.current = setTimeout(markAbsent, PRESENCE_TIMEOUT_MS);
+        presenceTimeoutRef.current = setTimeout(
+          markAbsent,
+          PRESENCE_TIMEOUT_MS,
+        );
         return;
       }
       if (message.kind === "camera_left") {
@@ -100,7 +101,15 @@ export function usePhoneCameraCapture(collectionGuid: string | undefined) {
     });
   }, [status, send, resolvePending]);
 
+  const sendScanRegion = useCallback(
+    (region: ScanRegion) => {
+      if (status !== "connected") return;
+      send({ kind: "scan_region_updated", scanRegion: region });
+    },
+    [status, send],
+  );
+
   useEffect(() => stop, [stop]);
 
-  return { status, start, stop, requestCapture };
+  return { status, start, stop, requestCapture, sendScanRegion };
 }

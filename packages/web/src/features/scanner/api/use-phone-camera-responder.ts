@@ -1,5 +1,5 @@
 import { useCameraSignalChannel } from "@/features/scanner/api/use-camera-signal-channel";
-import type { PhoneCameraMessage } from "@magic-vault/shared";
+import type { PhoneCameraMessage, ScanRegion } from "@magic-vault/shared";
 import { useCallback, useEffect, useRef } from "react";
 
 const HEARTBEAT_INTERVAL_MS = 3000;
@@ -11,17 +11,24 @@ export function usePhoneCameraResponder(
   isCameraReady: boolean,
   onCapture?: () => void,
   onDesktopDisconnected?: () => void,
+  onScanRegionUpdate?: (region: ScanRegion) => void,
 ) {
   const sendRef = useRef<(message: PhoneCameraMessage) => void>(() => {});
   const onCaptureRef = useRef(onCapture);
   onCaptureRef.current = onCapture;
   const onDesktopDisconnectedRef = useRef(onDesktopDisconnected);
   onDesktopDisconnectedRef.current = onDesktopDisconnected;
+  const onScanRegionUpdateRef = useRef(onScanRegionUpdate);
+  onScanRegionUpdateRef.current = onScanRegionUpdate;
 
   const handleMessage = useCallback(
     (message: PhoneCameraMessage) => {
       if (message.kind === "desktop_disconnected") {
         onDesktopDisconnectedRef.current?.();
+        return;
+      }
+      if (message.kind === "scan_region_updated") {
+        if (message.scanRegion) onScanRegionUpdateRef.current?.(message.scanRegion);
         return;
       }
       if (message.kind !== "capture_requested" || !message.requestId) return;

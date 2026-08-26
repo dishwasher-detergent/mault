@@ -3,6 +3,7 @@ import type {
   BinRoute,
   PlayingCard,
   PlayingCardWithDistance,
+  ScanRegion,
   ScannedCard,
   ScannerStatus,
 } from "@magic-vault/shared";
@@ -34,6 +35,7 @@ export interface CameraContextValue {
   startPhonePairing: () => void;
   stopPhonePairing: () => void;
   requestPhoneCapture: () => Promise<string | null>;
+  sendPhoneScanRegion: (region: ScanRegion) => void;
 }
 
 export interface ScannedCardsContextValue {

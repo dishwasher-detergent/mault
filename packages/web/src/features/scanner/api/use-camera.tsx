@@ -116,6 +116,7 @@ export function CameraProvider({ children }: { children: React.ReactNode }) {
     start: startPhonePairingInternal,
     stop: stopPhonePairingInternal,
     requestCapture: requestPhoneCapture,
+    sendScanRegion: sendPhoneScanRegion,
   } = usePhoneCameraCapture(activeCollection?.guid);
 
   const phonePairingUrl = activeCollection
@@ -202,6 +203,7 @@ export function CameraProvider({ children }: { children: React.ReactNode }) {
         startPhonePairing,
         stopPhonePairing,
         requestPhoneCapture,
+        sendPhoneScanRegion,
       }}
     >
       {children}
