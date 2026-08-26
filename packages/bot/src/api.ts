@@ -71,3 +71,12 @@ export function getCollections(guildId: string) {
     `/bot/collections?guildId=${encodeURIComponent(guildId)}`,
   );
 }
+
+export interface GameSummary {
+  key: string;
+  name: string;
+}
+
+export function getGames() {
+  return botFetch<GameSummary[]>("/public/games");
+}

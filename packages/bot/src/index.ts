@@ -15,6 +15,7 @@ import * as notifyChannel from "./commands/notify-channel";
 import * as scanChannel from "./commands/scan-channel";
 import * as stats from "./commands/stats";
 import { startNotifyServer } from "./notify-server";
+import { startPresenceCycle } from "./presence";
 
 interface BotCommand {
   data:
@@ -61,6 +62,7 @@ const client = new Client({ intents: [GatewayIntentBits.Guilds] });
 
 client.once(Events.ClientReady, (readyClient) => {
   console.log(`[bot] Logged in as ${readyClient.user.tag}`);
+  startPresenceCycle(readyClient);
 });
 
 client.on(Events.GuildCreate, async (guild) => {
