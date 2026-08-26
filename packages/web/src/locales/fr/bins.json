@@ -1,4 +1,7 @@
 {
+  "nonEnglishRulesBanner": {
+    "message": "Cette collection est en {{language}}, donc les champs de règles ci-dessous utilisent du texte libre plutôt que des menus déroulants — les données des cartes reviennent elles-mêmes en {{language}}, pas en anglais, donc les options anglaises ne correspondraient pas."
+  },
   "binCard": {
     "binLabel": "Bac {{number}}",
     "catchAll": "Fourre-tout",
@@ -26,7 +29,8 @@
   },
   "conditionRow": {
     "selectPlaceholder": "Sélectionner...",
-    "valuePlaceholder": "Valeur..."
+    "valuePlaceholder": "Valeur...",
+    "freeformMultiPlaceholder": "Valeurs séparées par des virgules..."
   },
   "ruleGroupEditor": {
     "and": "ET",

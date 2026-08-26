@@ -1,4 +1,7 @@
 {
+  "nonEnglishRulesBanner": {
+    "message": "This collection is in {{language}}, so rule fields below use free text instead of dropdowns — the card data itself comes back in {{language}}, not English, so English options wouldn't match."
+  },
   "binCard": {
     "binLabel": "Bin {{number}}",
     "catchAll": "Catch-all",
@@ -26,7 +29,8 @@
   },
   "conditionRow": {
     "selectPlaceholder": "Select...",
-    "valuePlaceholder": "Value..."
+    "valuePlaceholder": "Value...",
+    "freeformMultiPlaceholder": "Comma-separated values..."
   },
   "ruleGroupEditor": {
     "and": "AND",

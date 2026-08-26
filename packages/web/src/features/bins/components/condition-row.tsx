@@ -8,7 +8,6 @@ import {
 } from "@magic-vault/shared";
 
 import { Button, buttonVariants } from "@/components/ui/button";
-import { useBinConfigs } from "@/features/bins/api/use-bin-configs";
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
@@ -23,10 +22,51 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { useBinConfigs } from "@/features/bins/api/use-bin-configs";
+import { useCollections } from "@/features/collections/api/use-collections";
 import { cn } from "@/lib/utils";
 import { IconChevronDown, IconX } from "@tabler/icons-react";
-import { useCallback } from "react";
+import { useCallback, useState } from "react";
 import { useTranslation } from "react-i18next";
+
+const MULTI_VALUE_OPERATORS: ConditionOperator[] = [
+  "in",
+  "not_in",
+  "contains_any",
+  "contains_all",
+  "contains_none",
+];
+
+function FreeformMultiInput({
+  value,
+  onChange,
+  placeholder,
+}: {
+  value: string[];
+  onChange: (value: string[]) => void;
+  placeholder: string;
+}) {
+  const [text, setText] = useState(() => value.join(", "));
+
+  return (
+    <Input
+      type="text"
+      placeholder={placeholder}
+      className="min-w-24 flex-1"
+      value={text}
+      onChange={(e) => {
+        const next = e.target.value;
+        setText(next);
+        onChange(
+          next
+            .split(",")
+            .map((s) => s.trim())
+            .filter(Boolean),
+        );
+      }}
+    />
+  );
+}
 
 function getFieldMeta(
   field: ConditionField,
@@ -93,7 +133,10 @@ export function ConditionRow({
 }: ConditionRowProps) {
   const { t } = useTranslation("bins");
   const { fieldDefinitions } = useBinConfigs();
+  const { activeCollection } = useCollections();
   const fieldMeta = getFieldMeta(condition.field, fieldDefinitions);
+  const isFreeformOptions =
+    !!activeCollection?.lang && activeCollection.lang !== "en";
 
   const handleFieldChange = useCallback(
     (field: ConditionField) => {
@@ -128,23 +171,29 @@ export function ConditionRow({
   const renderValueInput = () => {
     if (!fieldMeta) return null;
 
-    if (
+    const isMulti = MULTI_VALUE_OPERATORS.includes(condition.operator);
+    const isOptionsField =
       (fieldMeta.type === "enum" || fieldMeta.type === "set") &&
-      fieldMeta.options
-    ) {
-      const isMulti = [
-        "in",
-        "not_in",
-        "contains_any",
-        "contains_all",
-        "contains_none",
-      ].includes(condition.operator);
+      !!fieldMeta.options;
 
+    if (isOptionsField && isFreeformOptions && isMulti) {
+      const arrValue = Array.isArray(condition.value) ? condition.value : [];
+      return (
+        <FreeformMultiInput
+          key={`${condition.field}:${condition.operator}`}
+          value={arrValue}
+          onChange={handleValueChange}
+          placeholder={t("conditionRow.freeformMultiPlaceholder")}
+        />
+      );
+    }
+
+    if (isOptionsField && !isFreeformOptions) {
       if (isMulti) {
         const arrValue = Array.isArray(condition.value) ? condition.value : [];
         return (
           <MultiSelect
-            options={fieldMeta.options}
+            options={fieldMeta.options!}
             value={arrValue}
             onChange={handleValueChange}
           />
@@ -159,14 +208,14 @@ export function ConditionRow({
           <SelectTrigger className="min-w-24 flex-1">
             <SelectValue placeholder={t("conditionRow.selectPlaceholder")}>
               {
-                fieldMeta.options.find(
+                fieldMeta.options!.find(
                   (opt) => opt.value === String(condition.value),
                 )?.label
               }
             </SelectValue>
           </SelectTrigger>
           <SelectContent>
-            {fieldMeta.options.map((opt) => (
+            {fieldMeta.options!.map((opt) => (
               <SelectItem key={opt.value} value={opt.value}>
                 {opt.label}
               </SelectItem>

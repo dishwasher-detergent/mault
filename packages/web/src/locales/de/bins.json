@@ -1,4 +1,7 @@
 {
+  "nonEnglishRulesBanner": {
+    "message": "Diese Sammlung ist auf {{language}} eingestellt, daher verwenden die Regelfelder unten Freitext statt Dropdowns — die Kartendaten selbst kommen auf {{language}} zurück, nicht auf Englisch, weshalb englische Optionen nicht passen würden."
+  },
   "binCard": {
     "binLabel": "Fach {{number}}",
     "catchAll": "Auffangfach",
@@ -26,7 +29,8 @@
   },
   "conditionRow": {
     "selectPlaceholder": "Auswählen...",
-    "valuePlaceholder": "Wert..."
+    "valuePlaceholder": "Wert...",
+    "freeformMultiPlaceholder": "Werte, durch Komma getrennt..."
   },
   "ruleGroupEditor": {
     "and": "UND",

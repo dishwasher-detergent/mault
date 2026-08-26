@@ -6,10 +6,9 @@ import {
   setImpersonationOrgId,
   subscribeImpersonation,
 } from "@/lib/auth/impersonation";
+import { invalidateAppQueries } from "@/lib/query-client";
 import { useQueryClient } from "@tanstack/react-query";
 import { useCallback, useSyncExternalStore } from "react";
-
-const AUDIT_QUERY_KEY = ["admin", "impersonation-audit"];
 
 export function useImpersonation() {
   const state = useSyncExternalStore(
@@ -25,7 +24,7 @@ export function useImpersonation() {
         throw new Error(result.message || "Failed to start impersonation.");
       }
       beginImpersonation(result.data);
-      queryClient.invalidateQueries({ queryKey: AUDIT_QUERY_KEY });
+      await invalidateAppQueries(queryClient);
     },
     [queryClient],
   );
@@ -35,12 +34,10 @@ export function useImpersonation() {
     try {
       await stopImpersonation();
     } catch (err) {
-      // Best-effort - the audit row just won't get an endedAt if this fails,
-      // but the admin's own session must be restored regardless.
       console.error("Failed to close out impersonation session:", err);
     } finally {
       clearImpersonation();
-      queryClient.invalidateQueries({ queryKey: AUDIT_QUERY_KEY });
+      await invalidateAppQueries(queryClient);
     }
   }, [queryClient]);
 

@@ -66,6 +66,7 @@
     "heading": "Emprunter l'identité d'un utilisateur",
     "description": "Recherche un utilisateur pour voir l'application comme lui, à des fins de support/débogage",
     "searchPlaceholder": "Rechercher par nom ou email...",
+    "startTyping": "Commence à taper un nom ou un email pour rechercher",
     "loading": "Chargement...",
     "empty": "Aucun utilisateur trouvé",
     "noOrgs": "Aucune organisation",
