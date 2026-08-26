@@ -127,6 +127,7 @@ export function ScanRegionCalibrationPanel() {
     startPhonePairing,
     stopPhonePairing,
     requestPhoneCapture,
+    sendPhoneScanRegion,
   } = useCameraContext();
   const isCameraActive = cameraSource === "local" && cameraStatus === "ready";
   const [isConnecting, setIsConnecting] = useState(false);
@@ -301,6 +302,12 @@ export function ScanRegionCalibrationPanel() {
       cancelled = true;
     };
   }, [phonePhotoUrl]);
+
+  useEffect(() => {
+    if (cameraSource !== "phone" || phonePairingStatus !== "connected") return;
+    const timeout = setTimeout(() => sendPhoneScanRegion(region), 80);
+    return () => clearTimeout(timeout);
+  }, [region, cameraSource, phonePairingStatus, sendPhoneScanRegion]);
 
   const box =
     cameraSource === "phone"

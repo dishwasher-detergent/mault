@@ -7,7 +7,7 @@ import { usePhoneCameraResponder } from "@/features/scanner/api/use-phone-camera
 import { usePhoneLocalCamera } from "@/features/scanner/api/use-phone-local-camera";
 import { useVideoCanvasPreview } from "@/features/scanner/api/use-video-canvas-preview";
 import { cn } from "@/lib/utils";
-import { DEFAULT_SCAN_REGION } from "@magic-vault/shared";
+import { DEFAULT_SCAN_REGION, type ScanRegion } from "@magic-vault/shared";
 import {
   IconCameraSpark,
   IconLoader2,
@@ -33,7 +33,9 @@ export default function PhoneCameraPage() {
   const { data: orgSettingsData } = useQuery(
     orgSettingsQueryOptions(activeOrg?.id),
   );
-  const scanRegion = orgSettingsData?.scanRegion ?? DEFAULT_SCAN_REGION;
+  const [liveScanRegion, setLiveScanRegion] = useState<ScanRegion | null>(null);
+  const scanRegion =
+    liveScanRegion ?? orgSettingsData?.scanRegion ?? DEFAULT_SCAN_REGION;
   const { videoRef, displayCanvasRef, overlayCanvasRef } =
     useVideoCanvasPreview(localStream, scanRegion);
 
@@ -54,6 +56,7 @@ export default function PhoneCameraPage() {
     status === "ready",
     handleCapture,
     handleDesktopDisconnected,
+    setLiveScanRegion,
   );
 
   const statusText: Record<typeof status, string> = {
