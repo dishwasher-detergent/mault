@@ -116,7 +116,15 @@
     "msValue": "{{value}} ms",
     "captureSettleLabel": "Aufnahme-Verzögerung (ms)",
     "captureSettleDescription": "Wie lange nach der Bestätigung der Zuführung gewartet wird, bevor ein Bild aufgenommen wird, damit die Karte vollständig still liegt und scharf ist.",
-    "setCaptureSettle": "Aufnahme-Verzögerung setzen"
+    "setCaptureSettle": "Aufnahme-Verzögerung setzen",
+    "usePhoneAsCamera": "Telefon als Kamera verwenden",
+    "phoneCameraConnected": "Telefonkamera verbunden",
+    "takePhoto": "Foto aufnehmen",
+    "retakePhoto": "Foto erneut aufnehmen",
+    "capturingPhoto": "Wird aufgenommen…",
+    "takePhotoPrompt": "Nimm mit deinem Telefon ein Foto auf, um das Rechteck zu positionieren.",
+    "waitingForPhone": "Warte auf Telefon…",
+    "phoneCaptureFailed": "Das Telefon hat nicht rechtzeitig mit einem Foto geantwortet."
   },
   "useCalibrationPage": {
     "toasts": {
