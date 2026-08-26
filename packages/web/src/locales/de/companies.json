@@ -54,5 +54,18 @@
     "organizationNamePlaceholder": "Name der Organisation",
     "organizationCreated": "Organisation \"{{name}}\" erstellt.",
     "failedToCreate": "Organisation konnte nicht erstellt werden."
+  },
+  "discordBot": {
+    "heading": "Discord-Bot",
+    "description": "Verknüpfe einen Discord-Server mit dieser Organisation, damit alle darin Sammlungsstatistiken abrufen und Karten mit Slash-Befehlen nachschlagen können.",
+    "linked": "Mit einem Discord-Server verknüpft",
+    "unlink": "Trennen",
+    "unlinkSuccess": "Discord-Server getrennt.",
+    "unlinkError": "Discord-Server konnte nicht getrennt werden.",
+    "generateButton": "Verknüpfungscode erstellen",
+    "generating": "Wird erstellt…",
+    "generateError": "Verknüpfungscode konnte nicht erstellt werden.",
+    "codeInstructions": "Führe /link <code> auf deinem Discord-Server aus, um die Verknüpfung abzuschließen.",
+    "expiresIn": "Läuft in {{seconds}}s ab"
   }
 }

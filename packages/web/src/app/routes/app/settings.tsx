@@ -1,9 +1,10 @@
 import { LanguageSwitcher } from "@/components/language-switcher";
 import { PrimaryColorPicker } from "@/components/primary-color-picker";
 import { ScannerLayoutToggle } from "@/components/scanner-layout-toggle";
+import { DiscordBotSettings } from "@/features/companies/components/discord-bot-settings";
 import { OrgSettings } from "@/features/companies/components/org-settings";
 import { GameCoverageList } from "@/features/games/components/game-coverage-list";
-import { DiscordWebhookSettings } from "@/features/notifications/components/discord-webhook-settings";
+import { DiscordNotificationSettings } from "@/features/notifications/components/discord-notification-settings";
 import { useTranslation } from "react-i18next";
 
 export default function SettingsPage() {
@@ -61,10 +62,13 @@ export default function SettingsPage() {
           <GameCoverageList />
         </div>
         <div className="rounded-lg border p-4 flex flex-col gap-4">
+          <DiscordBotSettings />
+        </div>
+        <div className="rounded-lg border p-4 flex flex-col gap-4">
           <h2 className="text-sm font-semibold font-heading">
             {t("notifications.heading")}
           </h2>
-          <DiscordWebhookSettings />
+          <DiscordNotificationSettings />
         </div>
       </div>
     </div>

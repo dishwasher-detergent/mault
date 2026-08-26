@@ -1,4 +1,5 @@
 import {
+  DEFAULT_ORG_SETTINGS,
   orgSettingsQueryOptions,
   saveOrgSettings,
 } from "@/features/companies/api/org-settings";
@@ -10,12 +11,6 @@ import {
   type ThemeColor,
 } from "@/lib/primary-color";
 import { cn } from "@/lib/utils";
-import {
-  DEFAULT_CAPTURE_SETTLE_DELAY_MS,
-  DEFAULT_CHANNEL_LAYOUT,
-  DEFAULT_MODULE_COUNT,
-  DEFAULT_SCAN_REGION,
-} from "@magic-vault/shared";
 import { IconCheck, IconRotate } from "@tabler/icons-react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
@@ -38,15 +33,8 @@ export function PrimaryColorPicker() {
       queryClient.setQueryData(
         queryOpts.queryKey,
         (old: typeof data): typeof data => ({
-          scannerLayout: old?.scannerLayout ?? "horizontal",
-          discordWebhookUrl: old?.discordWebhookUrl ?? null,
-          discordNotifyOnScan: old?.discordNotifyOnScan ?? false,
-          scanRegion: old?.scanRegion ?? DEFAULT_SCAN_REGION,
+          ...(old ?? DEFAULT_ORG_SETTINGS),
           primaryColor,
-          captureSettleDelayMs:
-            old?.captureSettleDelayMs ?? DEFAULT_CAPTURE_SETTLE_DELAY_MS,
-          moduleCount: old?.moduleCount ?? DEFAULT_MODULE_COUNT,
-          channelLayout: old?.channelLayout ?? DEFAULT_CHANNEL_LAYOUT,
         }),
       );
       return { previous };

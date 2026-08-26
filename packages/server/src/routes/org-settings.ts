@@ -10,11 +10,17 @@ import { and, eq, gt } from "drizzle-orm";
 import { Hono } from "hono";
 import { authQuery, type Transaction } from "../db";
 import { binRoutes, bins, moduleConfigs, orgSettings } from "../db/schema";
-import { requireAuth, requireOrg, type AppEnv } from "../middleware/auth";
+import {
+  requireAuth,
+  requireOrg,
+  requireOrgRole,
+  type AppEnv,
+} from "../middleware/auth";
 
 const router = new Hono<AppEnv>();
 
 const DEFAULT_SCAN_REGION = { coverage: 0.85, offsetX: 0, offsetY: 0 };
+const DISCORD_LINK_CODE_TTL_MS = 10 * 60 * 1000;
 
 function toScanRegion(row?: {
   scanCoverage: number | null;
@@ -83,8 +89,8 @@ router.get("/", requireAuth, requireOrg, async (c) => {
           primaryColor: row?.primaryColor ?? null,
           scannerLayout:
             (row?.scannerLayout as "horizontal" | "vertical") ?? "horizontal",
-          discordWebhookUrl: row?.discordWebhookUrl ?? null,
           discordNotifyOnScan: row?.discordNotifyOnScan ?? false,
+          discordGuildId: row?.discordGuildId ?? null,
           scanRegion: toScanRegion(row),
           captureSettleDelayMs:
             row?.captureSettleDelayMs ?? DEFAULT_CAPTURE_SETTLE_DELAY_MS,
@@ -105,7 +111,6 @@ router.put("/", requireAuth, requireOrg, async (c) => {
   const body = await c.req.json<{
     primaryColor?: string | null;
     scannerLayout?: string | null;
-    discordWebhookUrl?: string | null;
     discordNotifyOnScan?: boolean;
     scanRegion?: { coverage: number; offsetX: number; offsetY: number } | null;
     captureSettleDelayMs?: number | null;
@@ -133,10 +138,6 @@ router.put("/", requireAuth, requireOrg, async (c) => {
           "scannerLayout" in body
             ? (body.scannerLayout ?? null)
             : (existing?.scannerLayout ?? null),
-        discordWebhookUrl:
-          "discordWebhookUrl" in body
-            ? (body.discordWebhookUrl ?? null)
-            : (existing?.discordWebhookUrl ?? null),
         discordNotifyOnScan:
           "discordNotifyOnScan" in body
             ? (body.discordNotifyOnScan ?? false)
@@ -214,7 +215,6 @@ router.put("/", requireAuth, requireOrg, async (c) => {
           primaryColor: merged.primaryColor,
           scannerLayout:
             (merged.scannerLayout as "horizontal" | "vertical") ?? "horizontal",
-          discordWebhookUrl: merged.discordWebhookUrl,
           discordNotifyOnScan: merged.discordNotifyOnScan,
           scanRegion: toScanRegion(merged),
           captureSettleDelayMs:
@@ -230,5 +230,70 @@ router.put("/", requireAuth, requireOrg, async (c) => {
     return c.json({ success: false, message: "Database error." }, 500);
   }
 });
+
+router.post(
+  "/discord-link-code",
+  requireAuth,
+  requireOrg,
+  requireOrgRole("owner", "admin"),
+  async (c) => {
+    const orgId = c.get("orgId");
+    const code = crypto
+      .randomUUID()
+      .replace(/-/g, "")
+      .slice(0, 6)
+      .toUpperCase();
+    const expiresAt = new Date(Date.now() + DISCORD_LINK_CODE_TTL_MS);
+    try {
+      await authQuery(c.get("jwtClaims"), (tx) =>
+        tx
+          .insert(orgSettings)
+          .values({
+            orgId,
+            discordLinkCode: code,
+            discordLinkCodeExpiresAt: expiresAt,
+          })
+          .onConflictDoUpdate({
+            target: [orgSettings.orgId],
+            set: {
+              discordLinkCode: code,
+              discordLinkCodeExpiresAt: expiresAt,
+              updatedAt: new Date(),
+            },
+          }),
+      );
+      return c.json({
+        success: true,
+        message: "Code generated.",
+        data: { code, expiresAt },
+      });
+    } catch (err) {
+      console.error(err);
+      return c.json({ success: false, message: "Database error." }, 500);
+    }
+  },
+);
+
+router.post(
+  "/discord-unlink",
+  requireAuth,
+  requireOrg,
+  requireOrgRole("owner", "admin"),
+  async (c) => {
+    const orgId = c.get("orgId");
+    try {
+      await authQuery(c.get("jwtClaims"), (tx) =>
+        tx
+          .update(orgSettings)
+          .set({ discordGuildId: null, updatedAt: new Date() })
+          .where(eq(orgSettings.orgId, orgId)),
+      );
+      return c.json({ success: true, message: "Unlinked." });
+    } catch (err) {
+      console.error(err);
+      return c.json({ success: false, message: "Database error." }, 500);
+    }
+  },
+);
 
 export { router as orgSettingsRouter };

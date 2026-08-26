@@ -1,0 +1,101 @@
+import {
+  ActionRowBuilder,
+  ButtonBuilder,
+  ButtonStyle,
+  ComponentType,
+  MessageFlags,
+  PermissionFlagsBits,
+  SlashCommandBuilder,
+  type ChatInputCommandInteraction,
+} from "discord.js";
+import { linkGuild } from "../api";
+
+const CONFIRM_TIMEOUT_MS = 30_000;
+
+export const data = new SlashCommandBuilder()
+  .setName("link")
+  .setDescription("Link this Discord server to a Magic Vault organization")
+  .setDefaultMemberPermissions(PermissionFlagsBits.ManageGuild)
+  .addStringOption((opt) =>
+    opt
+      .setName("code")
+      .setDescription("The code shown on Magic Vault's Settings page")
+      .setRequired(true),
+  );
+
+export async function execute(interaction: ChatInputCommandInteraction) {
+  if (!interaction.guildId) {
+    await interaction.reply({
+      content: "This command only works in a server.",
+      flags: MessageFlags.Ephemeral,
+    });
+    return;
+  }
+
+  const guildId = interaction.guildId;
+  const code = interaction.options.getString("code", true);
+  await interaction.deferReply({ flags: MessageFlags.Ephemeral });
+
+  const result = await linkGuild(guildId, code);
+
+  if (result.message === "already_linked") {
+    const currentOrgName =
+      result.data?.currentOrgName ?? "another organization";
+    const row = new ActionRowBuilder<ButtonBuilder>().addComponents(
+      new ButtonBuilder()
+        .setCustomId("link-confirm")
+        .setLabel("Relink")
+        .setStyle(ButtonStyle.Danger),
+      new ButtonBuilder()
+        .setCustomId("link-cancel")
+        .setLabel("Cancel")
+        .setStyle(ButtonStyle.Secondary),
+    );
+    const message = await interaction.editReply({
+      content: `This server is already linked to **${currentOrgName}**. Relinking will disconnect it from that organization. Continue?`,
+      components: [row],
+    });
+
+    try {
+      const button = await message.awaitMessageComponent({
+        componentType: ComponentType.Button,
+        time: CONFIRM_TIMEOUT_MS,
+        filter: (i) => i.user.id === interaction.user.id,
+      });
+
+      if (button.customId === "link-cancel") {
+        await button.update({ content: "Cancelled.", components: [] });
+        return;
+      }
+
+      await button.deferUpdate();
+      const confirmed = await linkGuild(guildId, code, true);
+      if (!confirmed.success || !confirmed.data?.orgName) {
+        await interaction.editReply({
+          content: confirmed.message ?? "Invalid or expired code.",
+          components: [],
+        });
+        return;
+      }
+      await interaction.editReply({
+        content: `Linked this server to **${confirmed.data.orgName}**. Try \`/stats\` or \`/collections\`.`,
+        components: [],
+      });
+    } catch {
+      await interaction.editReply({
+        content: "Timed out - run `/link` again if you still want to relink.",
+        components: [],
+      });
+    }
+    return;
+  }
+
+  if (!result.success || !result.data?.orgName) {
+    await interaction.editReply(result.message ?? "Invalid or expired code.");
+    return;
+  }
+
+  await interaction.editReply(
+    `Linked this server to **${result.data.orgName}**. Try \`/stats\` or \`/collections\`.`,
+  );
+}

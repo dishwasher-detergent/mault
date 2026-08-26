@@ -5,6 +5,7 @@ import type { AppEnv } from "./middleware/auth";
 import { adminRouter } from "./routes/admin";
 import { binRoutesRouter } from "./routes/bin-routes";
 import { sortBinsRouter } from "./routes/bins";
+import { botRouter } from "./routes/bot";
 import { cardRouter } from "./routes/card";
 import { collectionsRouter } from "./routes/collections";
 import { feederRouter } from "./routes/feeder";
@@ -25,6 +26,7 @@ app.use(
   }),
 );
 
+app.route("/bot", botRouter);
 app.route("/cards", cardRouter);
 app.route("/bins", sortBinsRouter);
 app.route("/bin-routes", binRoutesRouter);

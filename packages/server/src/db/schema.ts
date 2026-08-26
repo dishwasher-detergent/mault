@@ -254,26 +254,6 @@ export const collectionCards = pgTable(
   ],
 ).enableRLS();
 
-export const notificationSettings = pgTable(
-  "notification_settings",
-  {
-    id: serial().primaryKey(),
-    guid: uuid("guid").defaultRandom(),
-    orgId: text("org_id").notNull(),
-    discordWebhookUrl: text("discord_webhook_url"),
-    createdAt: timestamp("created_at").defaultNow().notNull(),
-    updatedAt: timestamp("updated_at").defaultNow().notNull(),
-  },
-  (table) => [
-    unique("notification_settings_org_idx").on(table.orgId),
-    crudPolicy({
-      role: authenticatedRole,
-      read: orgRls(table.orgId),
-      modify: orgRls(table.orgId),
-    }),
-  ],
-).enableRLS();
-
 export const orgSettings = pgTable(
   "org_settings",
   {
@@ -282,7 +262,6 @@ export const orgSettings = pgTable(
     orgId: text("org_id").notNull(),
     primaryColor: text("primary_color"),
     scannerLayout: text("scanner_layout"),
-    discordWebhookUrl: text("discord_webhook_url"),
     discordNotifyOnScan: boolean("discord_notify_on_scan")
       .notNull()
       .default(false),
@@ -292,6 +271,13 @@ export const orgSettings = pgTable(
     captureSettleDelayMs: integer("capture_settle_delay_ms"),
     moduleCount: integer("module_count").notNull().default(3),
     channelLayout: text("channel_layout"),
+    discordGuildId: text("discord_guild_id"),
+    discordLinkCode: text("discord_link_code"),
+    discordLinkCodeExpiresAt: timestamp("discord_link_code_expires_at"),
+    discordScanChannelId: text("discord_scan_channel_id"),
+    discordScanThreadId: text("discord_scan_thread_id"),
+    discordErrorChannelId: text("discord_error_channel_id"),
+    discordErrorThreadId: text("discord_error_thread_id"),
     createdAt: timestamp("created_at").defaultNow().notNull(),
     updatedAt: timestamp("updated_at").defaultNow().notNull(),
   },

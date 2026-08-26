@@ -1,14 +1,13 @@
 import {
+  DEFAULT_ORG_SETTINGS,
   orgSettingsQueryOptions,
   saveOrgSettings,
 } from "@/features/companies/api/org-settings";
 import { useOrg } from "@/features/companies/api/use-organization";
 import { cn } from "@/lib/utils";
 import {
-  DEFAULT_CAPTURE_SETTLE_DELAY_MS,
   DEFAULT_CHANNEL_LAYOUT,
   DEFAULT_MODULE_COUNT,
-  DEFAULT_SCAN_REGION,
   maxModulesForLayout,
   type ChannelLayout,
 } from "@magic-vault/shared";
@@ -56,13 +55,7 @@ export function ChannelLayoutToggle() {
       queryClient.setQueryData(
         queryOpts.queryKey,
         (old: typeof data): typeof data => ({
-          primaryColor: old?.primaryColor ?? null,
-          scannerLayout: old?.scannerLayout ?? "horizontal",
-          discordWebhookUrl: old?.discordWebhookUrl ?? null,
-          discordNotifyOnScan: old?.discordNotifyOnScan ?? false,
-          scanRegion: old?.scanRegion ?? DEFAULT_SCAN_REGION,
-          captureSettleDelayMs:
-            old?.captureSettleDelayMs ?? DEFAULT_CAPTURE_SETTLE_DELAY_MS,
+          ...(old ?? DEFAULT_ORG_SETTINGS),
           channelLayout,
           moduleCount: Math.min(
             old?.moduleCount ?? DEFAULT_MODULE_COUNT,

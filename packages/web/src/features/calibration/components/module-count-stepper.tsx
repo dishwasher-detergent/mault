@@ -8,15 +8,14 @@ import {
 import { DeleteDialog } from "@/components/delete-dialog";
 import { binRoutesQueryOptions } from "@/features/calibration/api/bin-routes";
 import {
+  DEFAULT_ORG_SETTINGS,
   orgSettingsQueryOptions,
   saveOrgSettings,
 } from "@/features/companies/api/org-settings";
 import { useOrg } from "@/features/companies/api/use-organization";
 import {
-  DEFAULT_CAPTURE_SETTLE_DELAY_MS,
   DEFAULT_CHANNEL_LAYOUT,
   DEFAULT_MODULE_COUNT,
-  DEFAULT_SCAN_REGION,
   maxModulesForLayout,
 } from "@magic-vault/shared";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -43,14 +42,7 @@ export function ModuleCountStepper() {
       queryClient.setQueryData(
         queryOpts.queryKey,
         (old: typeof data): typeof data => ({
-          primaryColor: old?.primaryColor ?? null,
-          scannerLayout: old?.scannerLayout ?? "horizontal",
-          discordWebhookUrl: old?.discordWebhookUrl ?? null,
-          discordNotifyOnScan: old?.discordNotifyOnScan ?? false,
-          scanRegion: old?.scanRegion ?? DEFAULT_SCAN_REGION,
-          captureSettleDelayMs:
-            old?.captureSettleDelayMs ?? DEFAULT_CAPTURE_SETTLE_DELAY_MS,
-          channelLayout: old?.channelLayout ?? DEFAULT_CHANNEL_LAYOUT,
+          ...(old ?? DEFAULT_ORG_SETTINGS),
           moduleCount,
         }),
       );

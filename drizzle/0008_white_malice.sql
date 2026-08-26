@@ -1,0 +1,1 @@
+ALTER TABLE "org_settings" DROP COLUMN "discord_notify_channel_id";

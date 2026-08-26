@@ -1,0 +1,1 @@
+ALTER TABLE "org_settings" ADD COLUMN "discord_notify_channel_id" text;

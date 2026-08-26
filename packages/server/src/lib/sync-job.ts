@@ -101,12 +101,16 @@ export function startSync(
     addLog(`Fatal error: ${msg}`);
     emit("error", { message: msg });
     if (orgId) {
-      void sendDiscordNotification(orgId, {
-        title: "Magic Vault — Sync Failed",
-        description: `The card database sync job encountered a fatal error.\n\n**Error:** ${msg}`,
-        color: 0xed4245,
-        timestamp: new Date().toISOString(),
-      });
+      void sendDiscordNotification(
+        orgId,
+        {
+          title: "Magic Vault — Sync Failed",
+          description: `The card database sync job encountered a fatal error.\n\n**Error:** ${msg}`,
+          color: 0xed4245,
+          timestamp: new Date().toISOString(),
+        },
+        "error",
+      );
     }
   });
 }

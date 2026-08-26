@@ -54,5 +54,18 @@
     "organizationNamePlaceholder": "Organization name",
     "organizationCreated": "Organization \"{{name}}\" created.",
     "failedToCreate": "Failed to create organization."
+  },
+  "discordBot": {
+    "heading": "Discord Bot",
+    "description": "Link a Discord server to this organization so anyone in it can check collection stats and look up cards with slash commands.",
+    "linked": "Linked to a Discord server",
+    "unlink": "Unlink",
+    "unlinkSuccess": "Discord server unlinked.",
+    "unlinkError": "Failed to unlink Discord server.",
+    "generateButton": "Generate link code",
+    "generating": "Generating…",
+    "generateError": "Failed to generate a link code.",
+    "codeInstructions": "Run /link <code> in your Discord server to finish linking it.",
+    "expiresIn": "Expires in {{seconds}}s"
   }
 }

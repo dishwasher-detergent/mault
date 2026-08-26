@@ -88,21 +88,21 @@ router.post("/", requireAuth, async (c) => {
     console.error(err);
     const orgId = c.req.header("X-Org-Id");
     if (orgId) {
-      void sendDiscordNotification(orgId, {
-        title: "Magic Vault — Card Search Error",
-        description: "A database error occurred while searching for a card.",
-        color: 0xed4245,
-        timestamp: new Date().toISOString(),
-      });
+      void sendDiscordNotification(
+        orgId,
+        {
+          title: "Magic Vault — Card Search Error",
+          description: "A database error occurred while searching for a card.",
+          color: 0xed4245,
+          timestamp: new Date().toISOString(),
+        },
+        "error",
+      );
     }
     return c.json({ success: false, message: "Database error." }, 500);
   }
 });
 
-// /search must be registered before /search/:id to avoid path conflicts.
-// Dispatches to whichever game's card API backs the given collection -
-// see lib/card-search/resolve.ts. Every game (including MTG/Scryfall) is
-// registered explicitly there; there is no implicit default game.
 router.get("/search", requireAuth, async (c) => {
   const query = c.req.query("q") ?? "";
   const resolved = await resolveCardSearch(

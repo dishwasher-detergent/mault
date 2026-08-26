@@ -54,5 +54,18 @@
     "organizationNamePlaceholder": "Nom de l'organisation",
     "organizationCreated": "Organisation « {{name}} » créée.",
     "failedToCreate": "Échec de la création de l'organisation."
+  },
+  "discordBot": {
+    "heading": "Bot Discord",
+    "description": "Associe un serveur Discord à cette organisation pour que tout le monde puisse consulter les statistiques des collections et rechercher des cartes avec des commandes slash.",
+    "linked": "Associé à un serveur Discord",
+    "unlink": "Dissocier",
+    "unlinkSuccess": "Serveur Discord dissocié.",
+    "unlinkError": "Échec de la dissociation du serveur Discord.",
+    "generateButton": "Générer un code de liaison",
+    "generating": "Génération…",
+    "generateError": "Échec de la génération du code de liaison.",
+    "codeInstructions": "Exécute /link <code> sur ton serveur Discord pour terminer la liaison.",
+    "expiresIn": "Expire dans {{seconds}}s"
   }
 }

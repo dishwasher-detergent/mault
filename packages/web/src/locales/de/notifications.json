@@ -1,12 +1,10 @@
 {
-  "discordWebhookSettings": {
-    "heading": "Discord-Webhook",
-    "description": "Erhalte eine Benachrichtigung, wenn das Sortieren fehlschlägt, das Gerät einen Fehler meldet (Klemmer, leerer Feeder, Verbindungsprobleme), eine Kartensuche fehlschlägt oder der Sync-Job abstürzt.",
-    "urlPlaceholder": "https://discord.com/api/webhooks/...",
-    "saveButton": "Speichern",
+  "discordNotifications": {
+    "heading": "Discord-Benachrichtigungen",
+    "description": "Fehler- und Statusbenachrichtigungen (Sortierfehler, Klemmer, Sync-Fehler, Kartensuchfehler) werden in den mit /notify-channel festgelegten Kanal deines verknüpften Discord-Servers gesendet.",
     "notifyToggleLabel": "Bei jeder gescannten Karte benachrichtigen",
     "notifyToggleDescription": "Sendet Name, Preis und Bild der Karte bei jedem Scan an Discord.",
-    "testHintDirty": "Webhook-URL speichern, um Testbenachrichtigungen zu aktivieren",
+    "testHintNotLinked": "Verknüpfe oben einen Discord-Server und führe /notify-channel aus, um Testbenachrichtigungen zu aktivieren",
     "testHintReady": "Testbenachrichtigung senden",
     "sending": "Wird gesendet…",
     "testTypes": {

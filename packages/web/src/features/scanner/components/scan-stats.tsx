@@ -201,7 +201,7 @@ export function ScanStats() {
                   </span>
                   <div className="flex items-center gap-2 shrink-0">
                     <span className="text-muted-foreground">{s.count}</span>
-                    <span className="text-muted-foreground w-14 text-right">
+                    <span className="text-muted-foreground text-right">
                       {formatUsd(s.value)}
                     </span>
                   </div>

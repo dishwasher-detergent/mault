@@ -1,7 +1,3 @@
-export interface NotificationSettings {
-  discordWebhookUrl: string | null;
-}
-
 export type SerialCommand =
   | "connect"
   | "test"

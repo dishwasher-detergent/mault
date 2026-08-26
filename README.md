@@ -23,7 +23,7 @@ https://makerworld.com/en/models/3066180-tcg-card-sorting-machine#profileId-3451
 - Card grid sorting (by name, price, rarity, etc.) adapts automatically to whichever game a collection uses
 - Multiple collections per organization, each with their own bin configuration and card history
 - Remote monitoring: watch an in-progress scan session live from another device
-- Discord notifications for sorter errors/jams, plus an optional per-card-scanned notification with the card's image, name, price, collection/game, and a link to watch the session live
+- Discord bot: link a Discord server to an organization from Settings, then anyone in it can run `/stats` (optionally scoped to one collection via autocomplete) to check collection stats. `/notify-channel` and `/scan-channel` independently pick where error/status alerts (sorter errors, jams, sync failures) and card-scan messages get posted — no webhook URLs to configure
 - Per-organization branding and scanner layout settings
 - Feeder, servo, and camera scan-region calibration tools: the camera's capture region can be dragged/resized live against the feed to match different webcam mountings and fields of view
 - In-app hardware build guide (`/build`) with bill of materials, wiring diagrams, and assembly instructions
@@ -42,7 +42,8 @@ https://makerworld.com/en/models/3066180-tcg-card-sorting-machine#profileId-3451
 packages/
 ├── shared/   @magic-vault/shared - types, constants, evaluate-bin rule engine
 ├── server/   @magic-vault/server - Hono API, Drizzle schema/db, auth middleware
-└── web/      @magic-vault/web    - React SPA (scanner, bins, collections, admin, build guide)
+├── web/      @magic-vault/web    - React SPA (scanner, bins, collections, admin, build guide)
+└── bot/      @magic-vault/bot    - Discord bot (slash commands), talks to the server's HTTP API only
 firmware/     Arduino/ESP32 sketch (firmware/main/main.ino)
 "3d model"/   Printable enclosure/module design (Fusion 360 + .3mf)
 drizzle/      Generated SQL migrations
@@ -96,6 +97,17 @@ VECTORIZE_CONCURRENCY=1
 SYNC_INSERT_BATCH_SIZE=50
 SCAN_VECTORIZE_CONCURRENCY=2
 
+# Discord bot (packages/bot) - optional, only needed if you're running it.
+# Bot token/client id come from the Discord Developer Portal; BOT_API_SECRET
+# is any random string shared between the server and bot processes.
+DISCORD_BOT_TOKEN=
+DISCORD_CLIENT_ID=
+BOT_API_SECRET=
+SERVER_URL=http://localhost:3001
+DISCORD_DEV_GUILD_ID=
+BOT_PORT=3002
+BOT_URL=http://localhost:3002
+
 # Public variables for the React app
 VITE_API_URL=http://localhost:3001
 VITE_APP_ENV=local
@@ -113,7 +125,7 @@ pnpm --filter @magic-vault/server db:studio    # open Drizzle Studio
 
 ## Deployment
 
-`Dockerfile.server` builds the Hono API (and pre-downloads the SigLIP model at build time). `Dockerfile.web` builds the Vite SPA and serves it with nginx (`nginx.conf`); `VITE_API_URL` must be supplied as a build arg since it's baked into the client bundle.
+`Dockerfile.server` builds the Hono API (and pre-downloads the SigLIP model at build time). `Dockerfile.web` builds the Vite SPA and serves it with nginx (`nginx.conf`); `VITE_API_URL` must be supplied as a build arg since it's baked into the client bundle. `Dockerfile.bot` builds the optional Discord bot — it talks to the server over HTTP (`SERVER_URL`), never the database directly, but the connection is bidirectional: the server also calls back into the bot's own small HTTP server (`BOT_PORT`, exposed to the server as `BOT_URL`) to post every notification into whichever channel was set with `/notify-channel` (errors, jams, sync failures) or `/scan-channel` (card scans). Both directions share `BOT_API_SECRET`.
 
 Self-hosting only replaces where the _app_ runs — the database and auth still need a [Neon project](#setting-up-neon) set up first, and its connection details passed to the server container as env vars (`DATABASE_URL`, `NEON_AUTH_URL`, `WEB_URL`) and to the web build as build args (`VITE_API_URL`, `VITE_NEON_AUTH_URL`, `VITE_NEON_DATA_API_URL`, `VITE_APP_ENV`, `VITE_LATEST_FIRMWARE_VERSION`). A minimal setup:
 
