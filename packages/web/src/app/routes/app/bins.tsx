@@ -7,8 +7,8 @@ import { BinConfigPanel } from "@/features/bins/components/bin-config-panel";
 import { BinList } from "@/features/bins/components/bin-list";
 import { NonEnglishRulesBanner } from "@/features/bins/components/non-english-rules-banner";
 import { PresetSelector } from "@/features/bins/components/preset-selector";
-import { CollectionSwitcher } from "@/features/collections/components/collection-switcher";
 import { useCollections } from "@/features/collections/api/use-collections";
+import { CollectionSwitcher } from "@/features/collections/components/collection-switcher";
 import { useIsMobile } from "@/hooks/use-is-mobile";
 import { IconLayoutGrid } from "@tabler/icons-react";
 import { useEffect, useRef } from "react";
@@ -52,9 +52,6 @@ export default function BinsPage() {
   const { activeCollection } = useCollections();
   const navigate = useNavigate();
 
-  // Keep the URL in sync when the user switches collections from this page
-  // (but don't hijack the URL on mount just because it points at a
-  // collection other than the currently-active one).
   const seenGuid = useRef(activeCollection?.guid);
   useEffect(() => {
     if (
