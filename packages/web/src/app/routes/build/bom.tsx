@@ -40,7 +40,7 @@ function resolveRowBuyUrl(row: Row, boardType: BoardType): string | undefined {
 }
 
 const BOARD_BUY_URLS: Record<BoardType, string> = {
-  uno_r4: "https://www.amazon.com/dp/B0C78K4CD4",
+  uno_r4: "https://amzn.to/4zFfnmv",
   esp32: "https://www.amazon.com/dp/B08246MCL5",
 };
 
@@ -83,7 +83,7 @@ const GROUPS: Group[] = [
         name: "Adafruit PCA9685",
         part: (t) => t("bom.groups.electronics.items.pca9685.part"),
         notes: (t) => t("bom.groups.electronics.items.pca9685.notes"),
-        buyUrl: "https://www.amazon.com/dp/B0CNVBWX2M",
+        buyUrl: "https://amzn.to/4choCPU",
       },
       {
         key: "sg90-positional",
@@ -94,7 +94,7 @@ const GROUPS: Group[] = [
           t("bom.groups.electronics.items.sg90Positional.notes", {
             count: n,
           }),
-        buyUrl: "https://www.amazon.com/dp/B07L2SF3R4",
+        buyUrl: "https://amzn.to/4gwmuX7",
       },
       {
         key: "sg90-continuous",
@@ -102,7 +102,7 @@ const GROUPS: Group[] = [
         name: "SG90 servo, continuous rotation",
         part: (t) => t("bom.groups.electronics.items.sg90Continuous.part"),
         notes: (t) => t("bom.groups.electronics.items.sg90Continuous.notes"),
-        buyUrl: "https://www.amazon.com/dp/B086ZGTLZB",
+        buyUrl: "https://amzn.to/3UciimD",
       },
     ],
   },
@@ -123,7 +123,7 @@ const GROUPS: Group[] = [
         ),
         notes: (t, n) =>
           t("bom.groups.sensing.items.irSensor.notes", { count: n }),
-        buyUrl: "https://www.amazon.com/dp/B0CWKWWKYL",
+        buyUrl: "https://amzn.to/4guPkWo",
       },
     ],
   },
@@ -164,7 +164,7 @@ const GROUPS: Group[] = [
         name: "DC barrel jack or screw-terminal pigtail",
         part: (t) => t("bom.groups.power.items.barrelJack.part"),
         notes: (t) => t("bom.groups.power.items.barrelJack.notes"),
-        buyUrl: "https://www.amazon.com/dp/B0CR8TZ41W",
+        buyUrl: "https://amzn.to/4yaOrK1CC",
       },
     ],
   },
@@ -207,7 +207,7 @@ const GROUPS: Group[] = [
         name: "PLA or PETG filament",
         part: (t) => t("bom.groups.structural.items.filament.part"),
         notes: (t) => t("bom.groups.structural.items.filament.notes"),
-        buyUrl: "https://www.amazon.com/dp/B0C14M5HR9",
+        buyUrl: "https://amzn.to/45Qt8RK",
       },
       {
         key: "o-ring",
@@ -215,8 +215,7 @@ const GROUPS: Group[] = [
         name: "20mm ID 26mm OD 3mm Width O-Ring",
         part: (t) => t("bom.groups.structural.items.oRing.part"),
         notes: (t) => t("bom.groups.structural.items.oRing.notes"),
-        buyUrl:
-          "https://www.amazon.com/uxcell-Silicone-Rings-Diameter-Gasket/dp/B07MNJXJSG",
+        buyUrl: "https://amzn.to/4wQReqm",
       },
       {
         key: "bin-holders",
@@ -237,7 +236,7 @@ const GROUPS: Group[] = [
         name: "M3x6 screw",
         part: (t) => t("bom.groups.fasteners.items.m3x6Screw.part"),
         notes: (t) => t("bom.groups.fasteners.items.m3x6Screw.notes"),
-        buyUrl: "https://www.amazon.com/dp/B0CGNP4RXK",
+        buyUrl: "https://amzn.to/3UmCJx8",
       },
       {
         key: "m3-nut",
@@ -245,7 +244,7 @@ const GROUPS: Group[] = [
         name: "M3 nut",
         part: (t) => t("bom.groups.fasteners.items.m3Nut.part"),
         notes: (t) => t("bom.groups.fasteners.items.m3Nut.notes"),
-        buyUrl: "https://www.amazon.com/dp/B0CGNP4RXK",
+        buyUrl: "https://amzn.to/3UmCJx8",
       },
       {
         key: "m3x8-screw",
@@ -253,7 +252,7 @@ const GROUPS: Group[] = [
         name: "M3x8 screw",
         part: (t) => t("bom.groups.fasteners.items.m3x8Screw.part"),
         notes: (t) => t("bom.groups.fasteners.items.m3x8Screw.notes"),
-        buyUrl: "https://www.amazon.com/dp/B0CGNP4RXK",
+        buyUrl: "https://amzn.to/3UmCJx8",
       },
       {
         key: "m2x4-screw",
@@ -269,7 +268,7 @@ const GROUPS: Group[] = [
         ),
         notes: (t, n) =>
           t("bom.groups.fasteners.items.m2x4Screw.notes", { count: n }),
-        buyUrl: "https://www.amazon.com/dp/B0CGNP4RXK",
+        buyUrl: "https://amzn.to/3UmCJx8",
       },
       {
         key: "m2x6-screw",
@@ -280,7 +279,7 @@ const GROUPS: Group[] = [
           t("bom.groups.fasteners.items.m2x6Screw.notes", {
             board: BOARD_INFO[boardType].shortName,
           }),
-        buyUrl: "https://www.amazon.com/dp/B0CGNP4RXK",
+        buyUrl: "https://amzn.to/3UmCJx8",
       },
       {
         key: "servo-horn-screw",
@@ -295,8 +294,7 @@ const GROUPS: Group[] = [
         name: "Low Voltage Wire",
         part: (t) => t("bom.groups.fasteners.items.hookupWire.part"),
         notes: (t) => t("bom.groups.fasteners.items.hookupWire.notes"),
-        buyUrl:
-          "https://www.amazon.com/dp/B01EV70C78?ref_=ppx_hzsearch_conn_dt_b_fed_asin_title_9",
+        buyUrl: "https://amzn.to/45T0LCt",
       },
       {
         key: "dupont-connectors",
@@ -304,7 +302,7 @@ const GROUPS: Group[] = [
         name: "Dupont Connectors",
         part: (t) => t("bom.groups.fasteners.items.dupontConnectors.part"),
         notes: (t) => t("bom.groups.fasteners.items.dupontConnectors.notes"),
-        buyUrl: "https://www.amazon.com/dp/B07QGBKFYZ",
+        buyUrl: "https://amzn.to/4xZY124",
       },
       {
         key: "dupont-crimper",
@@ -312,7 +310,7 @@ const GROUPS: Group[] = [
         name: "Dupont Crimper",
         part: (t) => t("bom.groups.fasteners.items.dupontCrimper.part"),
         notes: (t) => t("bom.groups.fasteners.items.dupontCrimper.notes"),
-        buyUrl: "https://www.amazon.com/dp/B0D1FR76Q7",
+        buyUrl: "https://amzn.to/4zWaIwO",
       },
     ],
   },
@@ -325,8 +323,7 @@ const GROUPS: Group[] = [
         name: "Webcam",
         part: (t) => t("bom.groups.optional.items.webcam.part"),
         notes: (t) => t("bom.groups.optional.items.webcam.notes"),
-        buyUrl:
-          "https://www.amazon.com/Logitech-C920x-Pro-HD-Webcam/dp/B085TFF7M1",
+        buyUrl: "https://amzn.to/3SvwSVM",
       },
     ],
   },

@@ -91,7 +91,9 @@ export function OrgSwitcher({
       if (data) await setActiveOrg(data.id);
       form.reset();
       setCreateOpen(false);
-      toast.success(t("orgSwitcher.organizationCreated", { name: name.trim() }));
+      toast.success(
+        t("orgSwitcher.organizationCreated", { name: name.trim() }),
+      );
     } catch (e: unknown) {
       toast.error(
         e instanceof Error ? e.message : t("orgSwitcher.failedToCreate"),
@@ -129,7 +131,7 @@ export function OrgSwitcher({
           <div className="relative">
             <DropdownMenuTrigger
               render={
-                <Button size="icon-lg" variant="outline">
+                <Button size="icon-lg" variant="ghost">
                   <IconBuilding />
                 </Button>
               }
@@ -150,7 +152,9 @@ export function OrgSwitcher({
           className="w-64"
         >
           <DropdownMenuGroup>
-            <DropdownMenuLabel>{t("orgSwitcher.organizations")}</DropdownMenuLabel>
+            <DropdownMenuLabel>
+              {t("orgSwitcher.organizations")}
+            </DropdownMenuLabel>
             {orgs.map((org) => (
               <DropdownMenuItem
                 key={org.id}
@@ -197,7 +201,9 @@ export function OrgSwitcher({
               form="create-org-form"
               disabled={form.formState.isSubmitting}
             >
-              {form.formState.isSubmitting ? t("orgSwitcher.creating") : t("orgSwitcher.create")}
+              {form.formState.isSubmitting
+                ? t("orgSwitcher.creating")
+                : t("orgSwitcher.create")}
             </Button>
           </>
         }

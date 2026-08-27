@@ -1,4 +1,5 @@
 import { BrandMark } from "@/components/brand-mark";
+import { MobileNavDrawer } from "@/components/mobile-nav-drawer";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { buttonVariants } from "@/components/ui/button";
 import { neon } from "@/lib/auth/client";
@@ -10,6 +11,8 @@ import { Link } from "react-router-dom";
 
 const navLinkClass =
   "relative py-1 transition-colors hover:text-foreground after:absolute after:inset-x-0 after:-bottom-0.5 after:h-px after:origin-left after:scale-x-0 after:bg-primary after:transition-transform after:duration-200 hover:after:scale-x-100";
+const drawerLinkClass =
+  "rounded-md px-3 py-2.5 text-foreground transition-colors hover:bg-muted";
 
 export function BuildNav() {
   const { t } = useTranslation("build");
@@ -52,6 +55,25 @@ export function BuildNav() {
             <IconBrandDiscord size={18} />
           </a>
           <ThemeToggle />
+          <MobileNavDrawer label={t("nav.menuAria")}>
+            <a href="#parts" className={drawerLinkClass}>
+              {t("nav.partsList")}
+            </a>
+            <a href="#wiring" className={drawerLinkClass}>
+              {t("nav.wiring")}
+            </a>
+            <a href="#assembly" className={drawerLinkClass}>
+              {t("nav.assembly")}
+            </a>
+            <a
+              href="https://github.com/dishwasher-detergent/mault/issues/new"
+              target="_blank"
+              rel="noopener noreferrer"
+              className={drawerLinkClass}
+            >
+              {t("nav.reportIssue")}
+            </a>
+          </MobileNavDrawer>
           {isSignedIn ? (
             <Link
               to="/app"

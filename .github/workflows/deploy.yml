@@ -38,6 +38,18 @@ jobs:
               - 'drizzle/**'
               - 'Dockerfile.server'
 
+      # Web and server are always deployed together: if only one of them
+      # changed, deploying just that one would leave the other running an
+      # older version, and the two are expected to stay on the same release.
+      - name: Compute deploy flag
+        id: deploy
+        run: |
+          if [ "${{ steps.changes.outputs.web }}" = "true" ] || [ "${{ steps.changes.outputs.server }}" = "true" ]; then
+            echo "should_deploy=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "should_deploy=false" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Get PR info
         id: pr
         env:
@@ -57,7 +69,7 @@ jobs:
 
       - name: Compute app version
         id: appversion
-        if: steps.changes.outputs.web == 'true' || steps.changes.outputs.server == 'true'
+        if: steps.deploy.outputs.should_deploy == 'true'
         run: |
           CURRENT=$(node -p "require('./package.json').version")
           MAJOR_MINOR=$(echo "$CURRENT" | grep -oP '^\d+\.\d+')
@@ -71,7 +83,7 @@ jobs:
 
       - name: Commit and tag app version
         id: appcommit
-        if: steps.changes.outputs.web == 'true' || steps.changes.outputs.server == 'true'
+        if: steps.deploy.outputs.should_deploy == 'true'
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
@@ -87,11 +99,11 @@ jobs:
           fi
 
       - name: Set up Docker Buildx
-        if: steps.changes.outputs.web == 'true' || steps.changes.outputs.server == 'true'
+        if: steps.deploy.outputs.should_deploy == 'true'
         uses: docker/setup-buildx-action@v3
 
       - name: Build web image
-        if: steps.changes.outputs.web == 'true'
+        if: steps.deploy.outputs.should_deploy == 'true'
         uses: docker/build-push-action@v6
         with:
           context: .
@@ -101,13 +113,13 @@ jobs:
           cache-to: type=gha,mode=max,scope=web
 
       - name: Trigger Coolify deployment (web)
-        if: steps.changes.outputs.web == 'true'
+        if: steps.deploy.outputs.should_deploy == 'true'
         run: |
           curl -sf --request POST "${{ secrets.COOLIFY_WEBHOOK_WEB }}" \
             --header "Authorization: Bearer ${{ secrets.COOLIFY_TOKEN }}"
 
       - name: Build server image
-        if: steps.changes.outputs.server == 'true'
+        if: steps.deploy.outputs.should_deploy == 'true'
         uses: docker/build-push-action@v6
         with:
           context: .
@@ -117,28 +129,28 @@ jobs:
           cache-to: type=gha,mode=max,scope=server
 
       - name: Set up pnpm
-        if: steps.changes.outputs.server == 'true'
+        if: steps.deploy.outputs.should_deploy == 'true'
         uses: pnpm/action-setup@v4
 
       - name: Set up Node
-        if: steps.changes.outputs.server == 'true'
+        if: steps.deploy.outputs.should_deploy == 'true'
         uses: actions/setup-node@v4
         with:
           node-version: 20
           cache: pnpm
 
       - name: Install server dependencies
-        if: steps.changes.outputs.server == 'true'
+        if: steps.deploy.outputs.should_deploy == 'true'
         run: pnpm install --frozen-lockfile --filter @magic-vault/server...
 
       - name: Run database migrations
-        if: steps.changes.outputs.server == 'true'
+        if: steps.deploy.outputs.should_deploy == 'true'
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
         run: pnpm --filter @magic-vault/server db:migrate
 
       - name: Trigger Coolify deployment (server)
-        if: steps.changes.outputs.server == 'true'
+        if: steps.deploy.outputs.should_deploy == 'true'
         run: |
           curl -sf --request POST "${{ secrets.COOLIFY_WEBHOOK_SERVER }}" \
             --header "Authorization: Bearer ${{ secrets.COOLIFY_TOKEN }}"
@@ -152,12 +164,17 @@ jobs:
           PR_URL: ${{ steps.pr.outputs.url }}
         run: |
           REDEPLOYED="None"
-          if [ "${{ steps.changes.outputs.web }}" = "true" ] && [ "${{ steps.changes.outputs.server }}" = "true" ]; then
+          if [ "${{ steps.deploy.outputs.should_deploy }}" = "true" ]; then
             REDEPLOYED="Web, Server"
+          fi
+
+          CHANGED="None"
+          if [ "${{ steps.changes.outputs.web }}" = "true" ] && [ "${{ steps.changes.outputs.server }}" = "true" ]; then
+            CHANGED="Web, Server"
           elif [ "${{ steps.changes.outputs.web }}" = "true" ]; then
-            REDEPLOYED="Web"
+            CHANGED="Web"
           elif [ "${{ steps.changes.outputs.server }}" = "true" ]; then
-            REDEPLOYED="Server"
+            CHANGED="Server"
           fi
 
           COMMIT_URL="https://github.com/${{ github.repository }}/commit/${{ github.sha }}"
@@ -169,6 +186,7 @@ jobs:
             --arg commit "${GITHUB_SHA::7}" \
             --arg commit_url "$COMMIT_URL" \
             --arg author "${{ github.actor }}" \
+            --arg changed "$CHANGED" \
             --arg redeployed "$REDEPLOYED" \
             --arg version "${{ steps.appversion.outputs.version }}" \
             --arg ts "$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
@@ -184,6 +202,7 @@ jobs:
                 fields: [
                   { name: "Commit", value: ("[`" + $commit + "`](" + $commit_url + ")"), inline: true },
                   { name: "Author", value: $author, inline: true },
+                  { name: "Changed", value: $changed, inline: true },
                   { name: "Redeployed", value: $redeployed, inline: true },
                   { name: "Version", value: ($version | if . == "" then "unchanged" else ("v" + .) end), inline: true }
                 ],

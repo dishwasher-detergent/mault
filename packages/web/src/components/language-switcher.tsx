@@ -55,7 +55,7 @@ export function LanguageSwitcherIcon({
     <DropdownMenu>
       <DropdownMenuTrigger
         render={
-          <Button variant="outline" size="icon-lg">
+          <Button variant="ghost" size="icon-lg">
             <IconLanguage />
             <span className="sr-only">{t("settings:appearance.language")}</span>
           </Button>

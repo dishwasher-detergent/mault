@@ -1,4 +1,5 @@
 import { BrandMark } from "@/components/brand-mark";
+import { MobileNavDrawer } from "@/components/mobile-nav-drawer";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { buttonVariants } from "@/components/ui/button";
 import { neon } from "@/lib/auth/client";
@@ -9,6 +10,8 @@ import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
 
 const navLinkClass = "transition-colors hover:text-foreground";
+const drawerLinkClass =
+  "rounded-md px-3 py-2.5 text-foreground transition-colors hover:bg-muted";
 
 export function LandingNav() {
   const { t } = useTranslation("landing");
@@ -49,6 +52,23 @@ export function LandingNav() {
             <IconBrandDiscord size={18} />
           </a>
           <ThemeToggle />
+          <MobileNavDrawer label={t("nav.menuAria")}>
+            <a href="#features" className={drawerLinkClass}>
+              {t("nav.features")}
+            </a>
+            <a href="#how-it-works" className={drawerLinkClass}>
+              {t("nav.howItWorks")}
+            </a>
+            <a href="#open-source" className={drawerLinkClass}>
+              {t("nav.openSource")}
+            </a>
+            <Link to="/build" className={drawerLinkClass}>
+              {t("nav.build")}
+            </Link>
+            <Link to="/discord-bot" className={drawerLinkClass}>
+              {t("nav.discordBot")}
+            </Link>
+          </MobileNavDrawer>
           <span className="mx-1 h-4 w-px bg-border" aria-hidden />
           {isSignedIn ? (
             <Link

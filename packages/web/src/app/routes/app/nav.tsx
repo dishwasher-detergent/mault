@@ -109,10 +109,6 @@ function CollapsedNavItem({
   );
 }
 
-// Collapsed sidebar has no room to show a sub-item list inline (unlike
-// ExpandedNavItem), so any item with subItems opens them as a hover flyout
-// instead - the NavLink still navigates on click same as any other collapsed
-// item.
 function CollapsedNavItemWithSubItems({
   to,
   end,
@@ -515,10 +511,11 @@ export function AppNav() {
         title={t("nav.discordAriaLabel")}
         aria-label={t("nav.discordAriaLabel")}
         className={cn(
-          buttonVariants({ variant: "ghost" }),
-          expanded
-            ? "h-8 mx-2 justify-start gap-2.5 px-2.5 border-0"
-            : "size-8",
+          buttonVariants({
+            variant: "ghost",
+            size: `${expanded ? "default" : "icon-lg"}`,
+          }),
+          expanded ? "mx-2 justify-start gap-2.5 px-2.5 border-0" : "",
         )}
       >
         <IconBrandDiscord size={16} />
@@ -530,9 +527,10 @@ export function AppNav() {
         onClick={toggle}
         className={cn(
           expanded
-            ? "h-8 mx-2 w-full justify-start gap-2.5 px-2.5 border-0 text-sm"
-            : "size-8",
+            ? "mx-2 w-full justify-start gap-2.5 px-2.5 border-0 text-sm"
+            : "",
         )}
+        size={expanded ? "default" : "icon-lg"}
         variant="ghost"
         title={expanded ? t("nav.collapseSidebar") : t("nav.expandSidebar")}
       >
