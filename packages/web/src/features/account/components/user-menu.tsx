@@ -57,7 +57,7 @@ export function UserMenu({
       ) : (
         <DropdownMenuTrigger
           render={
-            <Button variant="outline" size="icon">
+            <Button variant="ghost" size="icon-lg">
               <span className="text-[10px] font-semibold">
                 {getInitials(name)}
               </span>

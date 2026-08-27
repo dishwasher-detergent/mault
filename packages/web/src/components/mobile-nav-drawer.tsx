@@ -21,11 +21,11 @@ export function MobileNavDrawer({ label, children }: MobileNavDrawerProps) {
       <DrawerTrigger asChild>
         <Button
           variant="ghost"
-          size="icon"
+          size="icon-lg"
           className="md:hidden"
           aria-label={label}
         >
-          <IconMenu2 className="size-5" />
+          <IconMenu2 />
         </Button>
       </DrawerTrigger>
       <DrawerContent className="md:hidden">
