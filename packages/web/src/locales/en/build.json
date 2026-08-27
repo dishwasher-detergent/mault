@@ -13,7 +13,7 @@
     "boardType": {
       "label": "Board",
       "unoR4": "Arduino",
-      "esp32": "ESP32"
+      "esp32": "ESP32-S3"
     }
   },
   "nav": {
@@ -35,6 +35,7 @@
   "bom": {
     "heading": "Bill of materials",
     "description": "Quantities scale with the number of modules you're building - {{modules}} modules × 3 servos, 1 feeder, {{irSensors}} IR sensors, {{channelsUsed}} of the PCA9685's 16 channels in use. The remaining channels are free for additional sorting modules (up to 5 modules on a single PCA9685). Check off each part as you gather it - checkmarks are saved in this browser.",
+    "affiliateDisclaimer": "Some \"Buy\" links are Amazon affiliate links - we may earn a small commission on qualifying purchases at no extra cost to you.",
     "moduleCount": {
       "label": "Modules",
       "decreaseAria": "Decrease module count",
@@ -97,8 +98,8 @@
             "notes": "Arduino Uno R4 Minima ↔ host computer"
           },
           "usbCableEsp32": {
-            "part": "USB-A–to–Micro-USB cable",
-            "notes": "ESP32 dev board ↔ host computer - check your specific board, some newer ones use USB-C instead"
+            "part": "USB-A–to–USB-C cable",
+            "notes": "ESP32-S3 dev board ↔ host computer, via the board's native USB port"
           },
           "barrelJack": {
             "part": "DC barrel jack or screw-terminal pigtail",
@@ -247,8 +248,7 @@
         "title": "Print the structural parts",
         "steps": {
           "printSortingModule": {
-            "text": "Slice and print {{count}} Sorting Module plates - one per sorting module - from <mesh>card_sorter.3mf</mesh> (or re-export from <source>Card Sorter.f3d</source>).",
-            "note": "PLA is fine for the housings; PETG if the unit will sit somewhere warm."
+            "text": "Slice and print {{count}} Sorting Module plates - one per sorting module - from <mesh>card_sorter.3mf</mesh> (or re-export from <source>Card Sorter.f3d</source>)."
           },
           "printFeederModule": {
             "text": "Print 1 Feeder Module plate from the same file - only one needed, regardless of module count. Houses the feeder roller and hopper throat."
@@ -257,10 +257,10 @@
             "text": "Print 1 Sorting Module Shroud - only one needed. The cover that sits over the stacked modules."
           },
           "printPlateBase": {
-            "text": "For {{modules}} sorting modules, print {{count}} Plate Base support pieces from the same file - the modules stack in a staircase, so each added tier needs one more support piece than the tier above it. Change the module count in the parts list above to update this."
+            "text": "For {{modules}} sorting modules, print {{count}} Base plate(s) pieces from the same file - the modules stack in a staircase, so each added tier needs one more support piece than the tier above it. Change the module count in the parts list above to update this."
           },
           "printPlateBaseBottom": {
-            "text": "Print 1 Plate Base Bottom - only one needed. Caps the bottom of the base stack."
+            "text": "Print 1 Base Bottom plate."
           },
           "printGenericBase": {
             "text": "For {{modules}} sorting modules, print {{count}} Generic Base plates. Change the module count in the parts list above to update this."
@@ -295,8 +295,8 @@
             "text": "Select board \"Arduino Uno R4 Minima\", select the correct port, then upload firmware/main/main.ino."
           },
           "uploadSketchEsp32": {
-            "text": "Select board \"ESP32 Dev Module\", select the correct port, then upload firmware/main/main.ino.",
-            "note": "Uses the classic WROOM/WROVER pin layout already in the sketch - if you're on an S2/S3/C3 variant, its strapping pins differ, so double-check the IR sensor pin numbers before wiring."
+            "text": "Select board \"ESP32S3 Dev Module\", select the correct port, then upload firmware/main/main.ino.",
+            "note": "Uses the ESP32-S3 pin layout already in the sketch (see the IR_PINS comment in main.ino) - if you're on a different ESP32 variant, its pins differ, so renumber IR_PINS/IR_PIN_HOPPER before wiring."
           },
           "confirmReady": {
             "text": "Open the Serial Monitor at 9600 baud and confirm you see {\"status\":\"ready\"} after the board resets."

@@ -10,7 +10,12 @@ import {
 } from "@/app/routes/build/use-module-count";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { IconExternalLink, IconMinus, IconPlus } from "@tabler/icons-react";
+import {
+  IconExternalLink,
+  IconInfoCircle,
+  IconMinus,
+  IconPlus,
+} from "@tabler/icons-react";
 import type { TFunction } from "i18next";
 import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { Trans, useTranslation } from "react-i18next";
@@ -39,9 +44,9 @@ function resolveRowBuyUrl(row: Row, boardType: BoardType): string | undefined {
   return typeof row.buyUrl === "function" ? row.buyUrl(boardType) : row.buyUrl;
 }
 
-const BOARD_BUY_URLS: Record<BoardType, string> = {
+const BOARD_BUY_URLS: Partial<Record<BoardType, string>> = {
   uno_r4: "https://amzn.to/4zFfnmv",
-  esp32: "https://www.amazon.com/dp/B08246MCL5",
+  esp32: "https://amzn.to/4gmsm51",
 };
 
 const GROUPS: Group[] = [
@@ -59,7 +64,7 @@ const GROUPS: Group[] = [
               <span className="text-muted-foreground">(ABX0080)</span>
             </>
           ) : (
-            BOARD_INFO.esp32.displayName
+            BOARD_INFO[boardType].displayName
           ),
         notes: (t, _, boardType) => (
           <Trans
@@ -164,7 +169,7 @@ const GROUPS: Group[] = [
         name: "DC barrel jack or screw-terminal pigtail",
         part: (t) => t("bom.groups.power.items.barrelJack.part"),
         notes: (t) => t("bom.groups.power.items.barrelJack.notes"),
-        buyUrl: "https://amzn.to/4yaOrK1CC",
+        buyUrl: "https://amzn.to/4guET5e",
       },
     ],
   },
@@ -482,6 +487,10 @@ export function BuildBom() {
           channelsFree: 16 - channelsUsed,
         })}
       </p>
+      <div className="mt-4 flex max-w-2xl items-start gap-2 rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-2.5 text-xs/relaxed text-amber-900 dark:bg-amber-500/10 dark:text-amber-300">
+        <IconInfoCircle className="mt-0.5 size-4 shrink-0" />
+        <span>{t("bom.affiliateDisclaimer")}</span>
+      </div>
 
       <div className="mt-6 flex flex-wrap items-center gap-x-6 gap-y-3">
         <div className="flex items-center gap-3">

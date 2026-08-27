@@ -13,7 +13,7 @@
     "boardType": {
       "label": "Carte",
       "unoR4": "Arduino",
-      "esp32": "ESP32"
+      "esp32": "ESP32-S3"
     }
   },
   "nav": {
@@ -35,6 +35,7 @@
   "bom": {
     "heading": "Nomenclature",
     "description": "Les quantités évoluent avec le nombre de modules que tu construis - {{modules}} modules × 3 servos, 1 chargeur, {{irSensors}} capteurs IR, {{channelsUsed}} des 16 canaux du PCA9685 utilisés. Les canaux restants sont libres pour des modules de tri supplémentaires (jusqu'à 5 modules sur un seul PCA9685). Coche chaque pièce au fur et à mesure que tu la récupères - les coches sont enregistrées dans ce navigateur.",
+    "affiliateDisclaimer": "Certains liens « Acheter » sont des liens d'affiliation Amazon - nous pouvons toucher une petite commission sur les achats éligibles, sans coût supplémentaire pour toi.",
     "moduleCount": {
       "label": "Modules",
       "decreaseAria": "Diminuer le nombre de modules",
@@ -97,8 +98,8 @@
             "notes": "Arduino Uno R4 Minima ↔ ordinateur hôte"
           },
           "usbCableEsp32": {
-            "part": "Câble USB-A vers Micro-USB",
-            "notes": "Carte ESP32 ↔ ordinateur hôte - vérifie ta carte, certains modèles récents utilisent l'USB-C"
+            "part": "Câble USB-A vers USB-C",
+            "notes": "Carte ESP32-S3 ↔ ordinateur hôte, via le port USB natif de la carte"
           },
           "barrelJack": {
             "part": "Prise jack CC ou pigtail à bornier à vis",
@@ -247,8 +248,7 @@
         "title": "Imprimer les pièces structurelles",
         "steps": {
           "printSortingModule": {
-            "text": "Tranche et imprime {{count}} plaques Sorting Module - une par module de tri - à partir de <mesh>card_sorter.3mf</mesh> (ou réexporte depuis <source>Card Sorter.f3d</source>).",
-            "note": "Le PLA convient pour les logements ; le PETG si l'unité doit rester dans un endroit chaud."
+            "text": "Tranche et imprime {{count}} plaques Sorting Module - une par module de tri - à partir de <mesh>card_sorter.3mf</mesh> (ou réexporte depuis <source>Card Sorter.f3d</source>)."
           },
           "printFeederModule": {
             "text": "Imprime 1 plaque Feeder Module à partir du même fichier - une seule suffit, quel que soit le nombre de modules. Loge le rouleau du chargeur et la gorge de la trémie."
@@ -257,10 +257,10 @@
             "text": "Imprime 1 Sorting Module Shroud - une seule suffit. Le capot qui recouvre les modules empilés."
           },
           "printPlateBase": {
-            "text": "Pour {{modules}} modules de tri, imprime {{count}} pièces de support Plate Base à partir du même fichier - les modules s'empilent en escalier, donc chaque niveau ajouté nécessite une pièce de support de plus que le niveau au-dessus. Change le nombre de modules dans la liste des pièces ci-dessus pour mettre ce nombre à jour."
+            "text": "Pour {{modules}} modules de tri, imprime {{count}} pièces Base Plate(s) à partir du même fichier - les modules s'empilent en escalier, donc chaque niveau ajouté nécessite une pièce de support de plus que le niveau au-dessus. Change le nombre de modules dans la liste des pièces ci-dessus pour mettre ce nombre à jour."
           },
           "printPlateBaseBottom": {
-            "text": "Imprime 1 Plate Base Bottom - une seule suffit. Ferme la base par le dessous."
+            "text": "Imprime 1 plaque Base Bottom."
           },
           "printGenericBase": {
             "text": "Pour {{modules}} modules de tri, imprime {{count}} plaques Generic Base. Change le nombre de modules dans la liste des pièces ci-dessus pour mettre ce nombre à jour."
@@ -295,8 +295,8 @@
             "text": "Sélectionne la carte « Arduino Uno R4 Minima », sélectionne le bon port, puis téléverse firmware/main/main.ino."
           },
           "uploadSketchEsp32": {
-            "text": "Sélectionne la carte « ESP32 Dev Module », sélectionne le bon port, puis téléverse firmware/main/main.ino.",
-            "note": "Utilise la disposition de broches classique WROOM/WROVER déjà présente dans le sketch - si tu es sur une variante S2/S3/C3, ses broches de strapping diffèrent, donc vérifie les numéros de broches des capteurs IR avant de câbler."
+            "text": "Sélectionne la carte « ESP32S3 Dev Module », sélectionne le bon port, puis téléverse firmware/main/main.ino.",
+            "note": "Utilise la disposition de broches ESP32-S3 déjà présente dans le sketch (voir le commentaire IR_PINS dans main.ino) - sur une autre variante ESP32, les broches diffèrent, renumérote alors IR_PINS/IR_PIN_HOPPER."
           },
           "confirmReady": {
             "text": "Ouvre le moniteur série à 9600 bauds et confirme que tu vois {\"status\":\"ready\"} après la réinitialisation de la carte."
@@ -308,23 +308,23 @@
         "steps": {
           "mountModuleServos": {
             "text": "Installe le servo inférieur, le servo de palette et le poussoir - tous des servos SG90 positionnels à 180° - dans chacun des 3 logements de module (9 servos au total).",
-            "note": "Ne visse pas encore de palonnier - le centrage se fait à l'étape suivante, une fois les servos alimentés et commandés vers leur position de repos."
+            "note": "N'installe pas encore les palonniers sur les axes des servos - fixe les trappes/le bras poussoir à leurs palonniers ci-dessous, mais laisse le palonnier lui-même hors du servo jusqu'à ce que chaque module soit calibré depuis l'application."
           },
           "centerServos": {
-            "text": "Câble les {{count}} servos de module dans leurs canaux PCA9685, ainsi que le bus I²C et l'alimentation externe des servos (voir la section Câblage ci-dessous). Ouvre ensuite /app/calibrate et clique sur Connecter - l'application transmet la calibration de chaque module et centre automatiquement chaque servo. Ne fixe aucun palonnier ni liaison avant que ce soit terminé.",
+            "text": "Câble les {{count}} servos de module dans leurs canaux PCA9685, ainsi que le bus I²C et l'alimentation externe des servos (voir la section Câblage ci-dessous). Ouvre ensuite /app/calibrate et clique sur Connecter - l'application transmet la calibration de chaque module et centre automatiquement chaque servo. Ne fixe aucun palonnier sur l'axe d'un servo avant que ce soit terminé.",
             "note": "Pas encore calibré ? Le centrage se fait alors avec des valeurs par défaut adaptées. Peut être relancé à tout moment en te reconnectant, pour recentrer un servo avant de fixer ou repositionner un palonnier."
           },
           "mountBottomFlapper": {
-            "text": "Le servo inférieur étant à sa position de repos après la connexion à l'application, fixe la trappe inférieure au palonnier avec des vis M2×4 pour qu'elle soit alignée uniformément sur le trajet de la carte.",
-            "note": "C'est la trappe par laquelle une carte tombe pour atteindre le module suivant, ou le module actuel en cas de correspondance."
+            "text": "Assemble la trappe inférieure en vissant la trappe à la liaison, puis la liaison au palonnier. N'oublie pas de ne pas encore installer le palonnier sur le servo.",
+            "note": "C'est la trappe par laquelle une carte tombe pour atteindre le module suivant, ou le module actuel en cas de correspondance. Le palonnier n'est fixé sur le servo qu'une fois le module calibré depuis l'application - voir « Calibrer depuis l'application » plus bas."
           },
           "mountSideFlappers": {
-            "text": "Le servo de palette étant à sa position de repos après la connexion à l'application, fixe la trappe gauche et droite à la liaison commune avec des vis M2×4 (une paire par module) pour qu'elles soient toutes deux bien alignées.",
-            "note": "Un seul servo de palette entraîne les deux trappes ensemble - elles s'ouvrent et se ferment en paire, pas indépendamment. Les impulsions exactes d'ouverture/fermeture seront affinées plus tard depuis la grille de calibration des modules."
+            "text": "Assemble les trappes latérales en vissant la trappe gauche et la trappe droite à la liaison commune, puis la liaison au palonnier (une paire par module). N'oublie pas de ne pas encore installer le palonnier sur le servo.",
+            "note": "Un seul servo de palette entraîne les deux trappes ensemble - elles s'ouvrent et se ferment en paire, pas indépendamment. Le palonnier n'est fixé sur le servo qu'une fois le module calibré depuis l'application - voir « Calibrer depuis l'application » plus bas."
           },
           "mountPusherArm": {
-            "text": "Le servo du poussoir étant à sa position de repos neutre après la connexion à l'application, fixe le bras poussoir de carte au palonnier avec des vis M2×4 pour qu'il soit centré entre les bacs gauche et droit.",
-            "note": "Fixer le bras de manière décentrée biaise la distance de poussée d'un côté - les impulsions exactes gauche/droite seront affinées plus tard depuis la grille de calibration des modules."
+            "text": "Assemble le poussoir en vissant le bras poussoir à la liaison, puis la liaison au palonnier. N'oublie pas de ne pas encore installer le palonnier sur le servo.",
+            "note": "Le palonnier n'est fixé sur le servo qu'une fois le module calibré depuis l'application - voir « Calibrer depuis l'application » plus bas."
           },
           "fitFeederOrings": {
             "text": "Monte 6 joints toriques G20 sur le rouleau du chargeur.",
@@ -396,6 +396,10 @@
           },
           "calibrateModules": {
             "text": "Grille de calibration des modules - définis l'impulsion ouvert/fermé pour chaque trappe inférieure et palette, et gauche/neutre/droite pour chaque poussoir, module par module."
+          },
+          "installHorns": {
+            "text": "À l'aide de la grille de calibration ci-dessus, mets chaque palette en position ouverte et chaque poussoir en position neutre, puis appuie le palonnier (avec sa trappe ou son bras poussoir déjà fixé) sur l'axe du servo et fixe-le avec la vis de palonnier - trappe inférieure, trappes latérales et bras poussoir, pour les {{count}} servos du module.",
+            "note": "Fixer un palonnier de façon décentrée biaise toute la liaison - les impulsions exactes d'ouverture/fermeture et gauche/droite seront affinées ensuite depuis la grille de calibration des modules ci-dessus."
           },
           "calibrateFeeder": {
             "text": "Panneau de calibration du chargeur - ajuste la vitesse d'alimentation, le minutage impulsion/pause et la durée de stabilisation en fonction de ta trémie réelle."

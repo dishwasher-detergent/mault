@@ -75,7 +75,6 @@ function buildPhases(
               }}
             />
           ),
-          note: t("assembly.phases.print.steps.printSortingModule.note"),
         },
         {
           key: "print-feeder-module",

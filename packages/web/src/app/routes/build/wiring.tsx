@@ -137,11 +137,11 @@ export function BuildWiring() {
             rows={[
               [
                 <Pin key="a">SDA</Pin>,
-                <Pin key="b">{isEsp32 ? "GPIO21" : "SDA"}</Pin>,
+                <Pin key="b">{isEsp32 ? "GPIO8" : "SDA"}</Pin>,
               ],
               [
                 <Pin key="a">SCL</Pin>,
-                <Pin key="b">{isEsp32 ? "GPIO22" : "SCL"}</Pin>,
+                <Pin key="b">{isEsp32 ? "GPIO9" : "SCL"}</Pin>,
               ],
               [
                 t("wiring.i2cTable.vccLogic"),
