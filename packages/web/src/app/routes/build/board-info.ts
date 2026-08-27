@@ -19,11 +19,11 @@ export const BOARD_INFO: Record<BoardType, BoardInfo> = {
     usbCableName: "USB-A-to-USB-C cable",
   },
   esp32: {
-    displayName: "ESP32 Dev Module (WROOM-32)",
-    shortName: "ESP32",
-    irPins: [18, 19, 23, 25, 26],
-    hopperIrPin: 27,
+    displayName: "ESP32-S3-WROOM-1",
+    shortName: "ESP32-S3",
+    irPins: [4, 5, 6, 7, 15],
+    hopperIrPin: 16,
     logicVoltage: "3.3V",
-    usbCableName: "USB-A-to-Micro-USB cable",
+    usbCableName: "USB-A-to-USB-C cable",
   },
 };

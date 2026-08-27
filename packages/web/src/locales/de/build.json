@@ -13,7 +13,7 @@
     "boardType": {
       "label": "Board",
       "unoR4": "Arduino",
-      "esp32": "ESP32"
+      "esp32": "ESP32-S3"
     }
   },
   "nav": {
@@ -35,6 +35,7 @@
   "bom": {
     "heading": "Stückliste",
     "description": "Die Mengen richten sich nach der Anzahl der Module, die du baust – {{modules}} Module × 3 Servos, 1 Zuführung, {{irSensors}} IR-Sensoren, {{channelsUsed}} der 16 Kanäle des PCA9685 in Gebrauch. Die restlichen Kanäle stehen für zusätzliche Sortiermodule zur Verfügung (bis zu 5 Module an einem einzelnen PCA9685). Hake jedes Teil ab, sobald du es besorgt hast – die Häkchen werden in diesem Browser gespeichert.",
+    "affiliateDisclaimer": "Einige „Kaufen“-Links sind Amazon-Affiliate-Links – wir erhalten möglicherweise eine kleine Provision auf qualifizierte Käufe, ohne Mehrkosten für dich.",
     "moduleCount": {
       "label": "Module",
       "decreaseAria": "Modulanzahl verringern",
@@ -97,8 +98,8 @@
             "notes": "Arduino Uno R4 Minima ↔ Host-Computer"
           },
           "usbCableEsp32": {
-            "part": "USB-A-auf-Micro-USB-Kabel",
-            "notes": "ESP32-Board ↔ Host-Computer - prüfe dein Board, manche neueren Modelle haben USB-C"
+            "part": "USB-A-auf-USB-C-Kabel",
+            "notes": "ESP32-S3-Board ↔ Host-Computer, über den nativen USB-Anschluss des Boards"
           },
           "barrelJack": {
             "part": "DC-Hohlstecker oder Schraubklemmen-Anschlusskabel",
@@ -247,8 +248,7 @@
         "title": "Die Strukturteile drucken",
         "steps": {
           "printSortingModule": {
-            "text": "Slice und drucke {{count}} Sorting-Module-Platten – eine pro Sortiermodul – aus <mesh>card_sorter.3mf</mesh> (oder exportiere sie erneut aus <source>Card Sorter.f3d</source>).",
-            "note": "PLA reicht für die Gehäuse aus; PETG, wenn das Gerät an einem warmen Ort steht."
+            "text": "Slice und drucke {{count}} Sorting-Module-Platten – eine pro Sortiermodul – aus <mesh>card_sorter.3mf</mesh> (oder exportiere sie erneut aus <source>Card Sorter.f3d</source>)."
           },
           "printFeederModule": {
             "text": "Drucke 1 Feeder-Module-Platte aus derselben Datei – unabhängig von der Modulanzahl wird nur eine benötigt. Beherbergt die Zuführrolle und den Trichterhals."
@@ -257,10 +257,10 @@
             "text": "Drucke 1 Sorting-Module-Shroud – es wird nur eine benötigt. Die Abdeckung, die über den gestapelten Modulen sitzt."
           },
           "printPlateBase": {
-            "text": "Für {{modules}} Sortiermodule drucke {{count}} Plate-Base-Stützteile aus derselben Datei – die Module sind treppenförmig gestapelt, sodass jede zusätzliche Stufe ein Stützteil mehr benötigt als die Stufe darüber. Ändere die Modulanzahl in der Teileliste oben, um dies zu aktualisieren."
+            "text": "Für {{modules}} Sortiermodule drucke {{count}} Base-Plate(s)-Platten aus derselben Datei – die Module sind treppenförmig gestapelt, sodass jede zusätzliche Stufe ein Stützteil mehr benötigt als die Stufe darüber. Ändere die Modulanzahl in der Teileliste oben, um dies zu aktualisieren."
           },
           "printPlateBaseBottom": {
-            "text": "Drucke 1 Plate-Base-Bottom – es wird nur eine benötigt. Schließt den Basisstapel nach unten ab."
+            "text": "Drucke 1 Base-Bottom-Platte."
           },
           "printGenericBase": {
             "text": "Für {{modules}} Sortiermodule drucke {{count}} Generic-Base-Platten. Ändere die Modulanzahl in der Teileliste oben, um dies zu aktualisieren."
@@ -295,8 +295,8 @@
             "text": "Wähle das Board „Arduino Uno R4 Minima“, wähle den richtigen Port und lade dann firmware/main/main.ino hoch."
           },
           "uploadSketchEsp32": {
-            "text": "Wähle das Board „ESP32 Dev Module“, wähle den richtigen Port und lade dann firmware/main/main.ino hoch.",
-            "note": "Verwendet das klassische WROOM/WROVER-Pinlayout, das bereits im Sketch steht - bei einer S2/S3/C3-Variante unterscheiden sich deren Strapping-Pins, prüfe also vor dem Verkabeln die Pin-Nummern der IR-Sensoren."
+            "text": "Wähle das Board „ESP32S3 Dev Module“, wähle den richtigen Port und lade dann firmware/main/main.ino hoch.",
+            "note": "Verwendet das im Sketch bereits hinterlegte ESP32-S3-Pinlayout (siehe den IR_PINS-Kommentar in main.ino) - bei einer anderen ESP32-Variante unterscheiden sich die Pins, nummeriere IR_PINS/IR_PIN_HOPPER in dem Fall neu."
           },
           "confirmReady": {
             "text": "Öffne den seriellen Monitor mit 9600 Baud und bestätige, dass nach dem Neustart des Boards {\"status\":\"ready\"} angezeigt wird."
@@ -308,23 +308,23 @@
         "steps": {
           "mountModuleServos": {
             "text": "Setze den Boden-, Paddel- und Schieberservo - alles 180°-Positionsservos vom Typ SG90 - in jedes der 3 Modulgehäuse ein (insgesamt 9 Servos).",
-            "note": "Schraube noch keine Hörner fest – die Zentrierung erfolgt im nächsten Schritt, wenn die Servos unter Strom stehen und in ihre Ruheposition gefahren werden."
+            "note": "Montiere die Hörner noch nicht auf die Servowellen – setze die Klappen/den Schieberarm unten auf ihre Hörner, aber lasse das Horn selbst vom Servo, bis jedes Modul über die App kalibriert ist."
           },
           "centerServos": {
-            "text": "Verkabele alle {{count}} Modul-Servos mit ihren PCA9685-Kanälen sowie dem I²C-Bus und der externen Servoversorgung (siehe Verkabelung unten). Öffne dann /app/calibrate und klicke auf Verbinden – die App überträgt die Kalibrierung jedes Moduls und zentriert dabei automatisch jeden Servo. Montiere kein Horn und kein Gestänge, bevor das abgeschlossen ist.",
+            "text": "Verkabele alle {{count}} Modul-Servos mit ihren PCA9685-Kanälen sowie dem I²C-Bus und der externen Servoversorgung (siehe Verkabelung unten). Öffne dann /app/calibrate und klicke auf Verbinden – die App überträgt die Kalibrierung jedes Moduls und zentriert dabei automatisch jeden Servo. Montiere kein Horn auf eine Servowelle, bevor das abgeschlossen ist.",
             "note": "Noch nicht kalibriert? Dann wird mit sinnvollen Standardwerten zentriert. Kann jederzeit durch erneutes Verbinden wiederholt werden, wenn ein Servo vor der Montage oder Neupositionierung eines Horns neu zentriert werden muss."
           },
           "mountBottomFlapper": {
-            "text": "Bei der Ruheposition des Bodenservos nach dem Verbinden mit der App befestige die Bodenklappe mit M2×4-Schrauben am Horn, damit die Klappe gleichmäßig über dem Kartenweg sitzt.",
-            "note": "Dies ist die Falltür, durch die eine Karte fällt, um das nächste Modul zu erreichen, oder das aktuelle bei einem Treffer."
+            "text": "Baue die Bodenklappe zusammen, indem du die Klappe an das Gestänge schraubst und dann das Gestänge an das Horn. Denke daran, das Horn noch nicht auf den Servo zu montieren.",
+            "note": "Dies ist die Falltür, durch die eine Karte fällt, um das nächste Modul zu erreichen, oder das aktuelle bei einem Treffer. Das Horn wird erst auf den Servo gesetzt, sobald das Modul über die App kalibriert ist – siehe „Über die App kalibrieren“ weiter unten."
           },
           "mountSideFlappers": {
-            "text": "Bei der Ruheposition des Paddelservos nach dem Verbinden mit der App befestige die linke und rechte Klappe mit M2×4-Schrauben (ein Paar pro Modul) am gemeinsamen Gestänge, sodass beide gleichmäßig sitzen.",
-            "note": "Ein Paddelservo treibt beide Klappen gemeinsam an – sie öffnen und schließen als Paar, nicht unabhängig voneinander. Die genauen Öffnungs-/Schließimpulse werden später im Modul-Kalibrierungsraster feinjustiert."
+            "text": "Baue die seitlichen Klappen zusammen, indem du die linke und rechte Klappe an das gemeinsame Gestänge schraubst und dann das Gestänge an das Horn (ein Paar pro Modul). Denke daran, das Horn noch nicht auf den Servo zu montieren.",
+            "note": "Ein Paddelservo treibt beide Klappen gemeinsam an – sie öffnen und schließen als Paar, nicht unabhängig voneinander. Das Horn wird erst auf den Servo gesetzt, sobald das Modul über die App kalibriert ist – siehe „Über die App kalibrieren“ weiter unten."
           },
           "mountPusherArm": {
-            "text": "Bei neutraler Ruheposition des Schieberservos nach dem Verbinden mit der App befestige den Kartenschieberarm mit M2×4-Schrauben am Horn, sodass er zentriert zwischen dem linken und rechten Fach sitzt.",
-            "note": "Wird der Arm außermittig montiert, verschiebt sich die Schubdistanz zu einer Seite – die genauen Links-/Rechts-Impulse werden später im Modul-Kalibrierungsraster feinjustiert."
+            "text": "Baue den Schieber zusammen, indem du den Schieberarm an das Gestänge schraubst und dann das Gestänge an das Horn. Denke daran, das Horn noch nicht auf den Servo zu montieren.",
+            "note": "Das Horn wird erst auf den Servo gesetzt, sobald das Modul über die App kalibriert ist – siehe „Über die App kalibrieren“ weiter unten."
           },
           "fitFeederOrings": {
             "text": "Ziehe 6 G20-O-Ringe auf die Zuführrolle auf.",
@@ -396,6 +396,10 @@
           },
           "calibrateModules": {
             "text": "Modul-Kalibrierungsraster – lege modulweise den Öffnungs-/Schließimpuls für jede Boden- und Paddelklappe sowie links/neutral/rechts für jeden Schieber fest."
+          },
+          "installHorns": {
+            "text": "Stelle mit dem obigen Kalibrierungsraster jede Paddelklappe in ihre offene Position und jeden Schieber in seine neutrale Position, drücke dann das Horn (mit bereits montierter Klappe bzw. Schieberarm) auf die Servowelle und sichere es mit der Hornschraube – Bodenklappe, Paddelklappen und Schieberarm, für alle {{count}} Modul-Servos.",
+            "note": "Ein außermittig montiertes Horn verzerrt das gesamte Gestänge – die genauen Öffnungs-/Schließ- und Links-/Rechts-Impulse werden anschließend im obigen Modul-Kalibrierungsraster feinjustiert."
           },
           "calibrateFeeder": {
             "text": "Zuführungs-Kalibrierungsfeld – stimme Zuführgeschwindigkeit, Impuls-/Pausenzeiten und Setzzeit auf deinen tatsächlichen Trichter ab."

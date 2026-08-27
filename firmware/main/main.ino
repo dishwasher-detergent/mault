@@ -36,10 +36,18 @@ Adafruit_PWMServoDriver pwm = Adafruit_PWMServoDriver();
 int moduleChannelOffset = 0;
 
 // IR sensor pins, one per module (active LOW: pin reads LOW when a card is
-// present). ESP32 pins avoid strapping (0, 2, 5, 12, 15), flash (6-11),
-// WROVER PSRAM (16, 17), and input-only pins (34-39, no internal pull-up) -
-// renumber for other ESP32 variants as needed.
-#if defined(ARDUINO_ARCH_ESP32)
+// present).
+#if defined(CONFIG_IDF_TARGET_ESP32S3)
+// ESP32-S3 pins avoid strapping (0, 3, 45, 46), the native USB D-/D+ pair
+// (19, 20 - see SORTER_HAS_NATIVE_USB above), the default I2C pins used to
+// wire the PCA9685 (8, 9 - see Wiring), the USB-UART bridge (43, 44), and
+// integrated flash/PSRAM (26-37).
+const int IR_PINS[MAX_MODULES] = {4, 5, 6, 7, 15};
+#define IR_PIN_HOPPER 16
+#elif defined(ARDUINO_ARCH_ESP32)
+// Classic ESP32 (WROOM/WROVER) pins avoid strapping (0, 2, 5, 12, 15),
+// flash (6-11), WROVER PSRAM (16, 17), and input-only pins (34-39, no
+// internal pull-up) - renumber for other ESP32 variants as needed.
 const int IR_PINS[MAX_MODULES] = {18, 19, 23, 25, 26};
 #define IR_PIN_HOPPER 27
 #else
