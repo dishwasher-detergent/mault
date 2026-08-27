@@ -1,0 +1,1 @@
+ALTER TABLE "games" ADD COLUMN "api_docs_url" text;

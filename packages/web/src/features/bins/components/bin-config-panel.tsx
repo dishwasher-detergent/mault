@@ -10,7 +10,7 @@ import {
 } from "@/schemas/sort-bins.schema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { BinRuleGroup } from "@magic-vault/shared";
-import { IconLoader2 } from "@tabler/icons-react";
+import { IconExternalLink, IconLoader2 } from "@tabler/icons-react";
 import { useCallback, useEffect } from "react";
 import { Controller, useForm, type Resolver } from "react-hook-form";
 import { useTranslation } from "react-i18next";
@@ -26,6 +26,7 @@ export function BinConfigPanel() {
     save,
     clear,
     configs,
+    apiDocsUrl,
     isPending,
   } = useBinConfigs();
 
@@ -114,7 +115,20 @@ export function BinConfigPanel() {
       </div>
       {!isCatchAll && (
         <ScrollArea>
-          <Label className="mb-2">{t("binConfigPanel.rulesLabel")}</Label>
+          <div className="flex items-center justify-between mb-2">
+            <Label>{t("binConfigPanel.rulesLabel")}</Label>
+            {apiDocsUrl && (
+              <a
+                href={apiDocsUrl}
+                target="_blank"
+                rel="noreferrer"
+                className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors"
+              >
+                {t("binConfigPanel.apiDocsLink")}
+                <IconExternalLink size={12} />
+              </a>
+            )}
+          </div>
           <Controller
             name="rules"
             control={form.control}

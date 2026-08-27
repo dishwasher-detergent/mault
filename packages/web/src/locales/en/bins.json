@@ -17,6 +17,7 @@
     "setCatchAll": "Set as catch-all",
     "catchAllDescription": "Cards that don't match any other bin will go here.",
     "rulesLabel": "Rules",
+    "apiDocsLink": "Field reference",
     "clear": "Clear",
     "save": "Save"
   },

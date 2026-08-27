@@ -37,6 +37,12 @@ function createGameFormSchema(t: TFunction<"games">) {
       .min(1, t("gameFormDialog.validation.required"))
       .regex(/^[a-z0-9-]+$/, t("gameFormDialog.validation.keyFormat")),
     name: z.string().min(1, t("gameFormDialog.validation.required")),
+    apiDocsUrl: z
+      .string()
+      .trim()
+      .url(t("gameFormDialog.validation.urlFormat"))
+      .optional()
+      .or(z.literal("")),
     isActive: z.boolean(),
     fieldDefinitions: z
       .array(fieldMetaFormSchema)
@@ -51,6 +57,7 @@ function toFormValues(game?: Game | null): GameFormValues {
     return {
       key: "",
       name: "",
+      apiDocsUrl: "",
       isActive: true,
       fieldDefinitions: [],
     };
@@ -58,6 +65,7 @@ function toFormValues(game?: Game | null): GameFormValues {
   return {
     key: game.key,
     name: game.name,
+    apiDocsUrl: game.apiDocsUrl ?? "",
     isActive: game.isActive,
     fieldDefinitions: game.fieldDefinitions.map((f) => ({
       field: f.field,
@@ -212,6 +220,16 @@ export function GameFormDialog({
               <FieldError errors={[errors.name]} />
             </Field>
           </div>
+
+          <Field data-invalid={!!errors.apiDocsUrl}>
+            <FieldLabel>{t("gameFormDialog.apiDocsUrlLabel")}</FieldLabel>
+            <Input
+              type="url"
+              placeholder={t("gameFormDialog.apiDocsUrlPlaceholder")}
+              {...register("apiDocsUrl")}
+            />
+            <FieldError errors={[errors.apiDocsUrl]} />
+          </Field>
 
           <Field orientation="horizontal">
             <FieldLabel>{t("gameFormDialog.activeLabel")}</FieldLabel>

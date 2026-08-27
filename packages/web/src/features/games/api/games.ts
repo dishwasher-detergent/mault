@@ -11,6 +11,7 @@ export interface GameInput {
   key: string;
   name: string;
   fieldDefinitions: FieldMeta[];
+  apiDocsUrl?: string | null;
   isActive: boolean;
 }
 

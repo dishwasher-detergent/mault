@@ -37,6 +37,7 @@ export function GamesManager() {
       createGame({
         key: values.key,
         name: values.name,
+        apiDocsUrl: values.apiDocsUrl || null,
         isActive: values.isActive,
         fieldDefinitions: toFieldDefinitions(values.fieldDefinitions),
       }),
@@ -58,6 +59,7 @@ export function GamesManager() {
       updateGame(guid, {
         key: values.key,
         name: values.name,
+        apiDocsUrl: values.apiDocsUrl || null,
         isActive: values.isActive,
         fieldDefinitions: toFieldDefinitions(values.fieldDefinitions),
       }),

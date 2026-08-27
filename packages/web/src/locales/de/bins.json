@@ -17,6 +17,7 @@
     "setCatchAll": "Als Auffangfach festlegen",
     "catchAllDescription": "Karten, die auf kein anderes Fach passen, landen hier.",
     "rulesLabel": "Regeln",
+    "apiDocsLink": "Feldreferenz",
     "clear": "Leeren",
     "save": "Speichern"
   },
