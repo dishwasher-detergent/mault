@@ -94,7 +94,6 @@
   },
   "moduleCalibrationGrid": {
     "moduleHeading": "Module {{module}}",
-    "resetTo": "Reset to {{position}}",
     "sliderTooltip": "Raw servo pulse position (120-490). Use the position buttons above, then a \"Set\" button to save this as a calibration point.",
     "positions": {
       "open": "Open",

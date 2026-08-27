@@ -219,11 +219,9 @@ export default function CalibratePage() {
     isTesting,
     isUnconfigured,
     handleControl,
-    handleReset,
     handleSliderChange,
     handleTest,
     handleTestBin,
-    handleCenterModule,
     handleSetPosition,
     feederConfig,
     feederSpeedValue,
@@ -386,10 +384,8 @@ export default function CalibratePage() {
               isLoading={isLoading}
               isConnected={isConnected}
               onControl={handleControl}
-              onReset={handleReset}
               onSliderChange={handleSliderChange}
               onSetPosition={handleSetPosition}
-              onCenter={handleCenterModule}
             />
           </>
         )}

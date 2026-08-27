@@ -24,7 +24,6 @@ export interface ServoConfig {
   name: "bottom" | "paddle" | "pusher";
   labelKey: string;
   controlPositions: string[];
-  defaultPosition: string;
   calibrationPositions: { labelKey: string; key: keyof ServoCalibration }[];
 }
 
