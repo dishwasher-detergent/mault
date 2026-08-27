@@ -1,0 +1,90 @@
+{
+  "nav": {
+    "setup": "Setup",
+    "commands": "Commands",
+    "features": "Features",
+    "joinDiscordAria": "Join the Discord",
+    "openApp": "Open app",
+    "getStarted": "Get started"
+  },
+  "hero": {
+    "eyebrow": "Discord Integration",
+    "title": "Bring your card sorter into Discord",
+    "description": "Magic Vault's Discord bot posts a message for every card as it's sorted, alerts your server when something goes wrong, and answers /stats on demand - so you don't have to keep the monitor page open to know what's happening.",
+    "getStarted": "Get started",
+    "openSettings": "Open Settings",
+    "seeSetup": "See setup steps",
+    "selfHostedNote": "The bot runs as its own process (packages/bot) alongside the rest of Magic Vault - see the README for the env vars it needs if you're self-hosting."
+  },
+  "setup": {
+    "title": "Link a server in under a minute",
+    "description": "Connecting Discord doesn't touch your hardware or scanning setup - it's three steps in the app and one command in Discord.",
+    "steps": [
+      {
+        "title": "Generate a code",
+        "description": "In Magic Vault, go to Settings → Discord Bot and generate a link code. It's only valid for a few minutes."
+      },
+      {
+        "title": "Run /link",
+        "description": "In your Discord server, run /link <code> with the code from Settings. Requires the Manage Server permission."
+      },
+      {
+        "title": "Pick your channels",
+        "description": "Run /scanning and /notification to choose where card-scan and error alerts get posted - each defaults to the current channel."
+      }
+    ]
+  },
+  "commands": {
+    "title": "Commands",
+    "description": "Everything the bot understands, run directly in your Discord server.",
+    "items": {
+      "link": {
+        "usage": "/link <code>",
+        "description": "Link this Discord server to a Magic Vault organization."
+      },
+      "stats": {
+        "usage": "/stats [collection]",
+        "description": "Show this organization's collection stats, optionally limited to one collection."
+      },
+      "scanning": {
+        "usage": "/scanning [channel]",
+        "description": "Set the channel for card-scan notifications (defaults to the current channel)."
+      },
+      "notification": {
+        "usage": "/notification [channel]",
+        "description": "Set the channel for error/status notifications (defaults to the current channel)."
+      },
+      "help": {
+        "usage": "/help",
+        "description": "List all of the bot's commands."
+      }
+    }
+  },
+  "features": {
+    "title": "What gets posted",
+    "description": "Once a server is linked, the bot keeps it updated automatically - no polling, no refreshing a dashboard.",
+    "items": [
+      {
+        "title": "Card-scan notifications",
+        "description": "Every card sorted posts an embed with its name, price (and foil price), collection, game, the captured scan photo, and a link straight to the live monitor."
+      },
+      {
+        "title": "Error & status alerts",
+        "description": "Sorter jams, feeder issues, and other errors post separately so they don't get lost in the scan feed."
+      },
+      {
+        "title": "On-demand stats",
+        "description": "/stats replies with card count and estimated value for the whole org or a single collection, right in Discord."
+      },
+      {
+        "title": "Live presence",
+        "description": "The bot's status cycles through the games your Magic Vault instance supports, so it's obviously online and connected."
+      }
+    ]
+  },
+  "footer": {
+    "reportIssue": "Report an issue",
+    "signIn": "Sign in",
+    "copyright": "© {{year}} Magic Vault"
+  }
+}

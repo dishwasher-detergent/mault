@@ -2,8 +2,8 @@ import { BrandMark } from "@/components/brand-mark";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
 
-export function BuildFooter() {
-  const { t } = useTranslation("build");
+export function DiscordBotFooter() {
+  const { t } = useTranslation("discordBot");
 
   return (
     <footer className="border-t">
@@ -11,9 +11,6 @@ export function BuildFooter() {
         <BrandMark size="sm" />
 
         <nav className="flex items-center gap-5 text-xs text-muted-foreground">
-          <Link to="/#open-source" className="transition-colors hover:text-foreground">
-            {t("footer.openSource")}
-          </Link>
           <a
             href="https://github.com/dishwasher-detergent/mault/issues/new"
             target="_blank"
@@ -22,7 +19,10 @@ export function BuildFooter() {
           >
             {t("footer.reportIssue")}
           </a>
-          <Link to="/auth/sign-in" className="transition-colors hover:text-foreground">
+          <Link
+            to="/auth/sign-in"
+            className="transition-colors hover:text-foreground"
+          >
             {t("footer.signIn")}
           </Link>
         </nav>

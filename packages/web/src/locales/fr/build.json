@@ -1,5 +1,6 @@
 {
   "hero": {
+    "eyebrow": "Guide de montage du matériel",
     "title": "Construire la trieuse de cartes",
     "description": "Liste des pièces et instructions de montage pour l'unité de tri physique : une trémie fait passer les cartes une par une à travers {{modules}} modules de routage empilés, chacun capable de faire tomber une carte dans l'un de ses deux bacs latéraux ou de la transmettre au module suivant - {{bins}} bacs au total, pilotés par un {{board}} via I²C.",
     "firmwareLabel": "Firmware",

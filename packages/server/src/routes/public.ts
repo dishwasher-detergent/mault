@@ -1,7 +1,7 @@
-import { eq } from "drizzle-orm";
+import { count, eq } from "drizzle-orm";
 import { Hono } from "hono";
 import { db } from "../db";
-import { games } from "../db/schema";
+import { cardImageVectors, games } from "../db/schema";
 import type { AppEnv } from "../middleware/auth";
 import pkg from "../../package.json";
 
@@ -20,7 +20,19 @@ router.get("/games", async (c) => {
       .from(games)
       .where(eq(games.isActive, true))
       .orderBy(games.name);
-    return c.json({ success: true, data: rows });
+
+    const countRows = await db
+      .select({ gameKey: cardImageVectors.gameKey, count: count() })
+      .from(cardImageVectors)
+      .groupBy(cardImageVectors.gameKey);
+    const countByKey = new Map(countRows.map((r) => [r.gameKey, r.count]));
+
+    const data = rows.map((row) => ({
+      ...row,
+      cardCount: countByKey.get(row.key) ?? 0,
+    }));
+
+    return c.json({ success: true, data });
   } catch (err) {
     console.error(err);
     return c.json({ success: false, message: "Database error." }, 500);

@@ -6,14 +6,17 @@ export function LandingStats() {
   const stats = useLandingStats();
 
   return (
-    <section className="border-y bg-secondary/30">
-      <div className="mx-auto grid max-w-6xl grid-cols-2 gap-6 px-4 py-8 md:grid-cols-4">
+    <section className="border-t">
+      <div className="mx-auto grid max-w-6xl grid-cols-2 gap-8 divide-border px-4 py-10 md:grid-cols-4 md:divide-x">
         {stats.map((stat) => (
-          <div key={stat.key} className="flex flex-col items-center text-center">
-            <span className="font-heading text-2xl font-semibold text-primary md:text-3xl">
+          <div
+            key={stat.key}
+            className="flex flex-col gap-1 md:px-6 md:first:pl-0 md:last:pr-0"
+          >
+            <span className="font-heading text-4xl font-bold tracking-tight md:text-5xl">
               {stat.value}
             </span>
-            <span className="mt-1 text-xs/relaxed text-muted-foreground">
+            <span className="text-xs/relaxed text-muted-foreground">
               {t(`stats.items.${stat.key}`)}
             </span>
           </div>

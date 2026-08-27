@@ -1,0 +1,90 @@
+{
+  "nav": {
+    "setup": "Configuration",
+    "commands": "Commandes",
+    "features": "Fonctionnalités",
+    "joinDiscordAria": "Rejoindre le Discord",
+    "openApp": "Ouvrir l'app",
+    "getStarted": "Commencer"
+  },
+  "hero": {
+    "eyebrow": "Intégration Discord",
+    "title": "Amène ton trieur de cartes dans Discord",
+    "description": "Le bot Discord de Magic Vault publie un message pour chaque carte triée, alerte ton serveur en cas de problème et répond à /stats à la demande - plus besoin de garder la page de suivi ouverte pour savoir ce qui se passe.",
+    "getStarted": "Commencer",
+    "openSettings": "Ouvrir les paramètres",
+    "seeSetup": "Voir les étapes de configuration",
+    "selfHostedNote": "Le bot tourne comme son propre processus (packages/bot) à côté du reste de Magic Vault - consulte le README pour les variables d'environnement nécessaires si tu t'auto-héberges."
+  },
+  "setup": {
+    "title": "Relie un serveur en moins d'une minute",
+    "description": "Connecter Discord ne touche ni à ton matériel ni à ta configuration de scan - trois étapes dans l'app et une commande dans Discord.",
+    "steps": [
+      {
+        "title": "Générer un code",
+        "description": "Dans Magic Vault, va dans Paramètres → Bot Discord et génère un code de liaison. Il n'est valable que quelques minutes."
+      },
+      {
+        "title": "Exécuter /link",
+        "description": "Dans ton serveur Discord, exécute /link <code> avec le code des paramètres. Nécessite la permission Gérer le serveur."
+      },
+      {
+        "title": "Choisir tes salons",
+        "description": "Exécute /scanning et /notification pour choisir où les alertes de scan et d'erreur sont publiées - par défaut, le salon actuel."
+      }
+    ]
+  },
+  "commands": {
+    "title": "Commandes",
+    "description": "Tout ce que le bot comprend, exécuté directement dans ton serveur Discord.",
+    "items": {
+      "link": {
+        "usage": "/link <code>",
+        "description": "Relie ce serveur Discord à une organisation Magic Vault."
+      },
+      "stats": {
+        "usage": "/stats [collection]",
+        "description": "Affiche les statistiques de collection de cette organisation, éventuellement limitées à une collection."
+      },
+      "scanning": {
+        "usage": "/scanning [salon]",
+        "description": "Définit le salon pour les notifications de scan de cartes (par défaut, le salon actuel)."
+      },
+      "notification": {
+        "usage": "/notification [salon]",
+        "description": "Définit le salon pour les notifications d'erreur/de statut (par défaut, le salon actuel)."
+      },
+      "help": {
+        "usage": "/help",
+        "description": "Liste toutes les commandes du bot."
+      }
+    }
+  },
+  "features": {
+    "title": "Ce qui est publié",
+    "description": "Une fois un serveur relié, le bot le tient à jour automatiquement - pas de polling, pas de tableau de bord à rafraîchir.",
+    "items": [
+      {
+        "title": "Notifications de scan",
+        "description": "Chaque carte triée publie un embed avec son nom, son prix (et son prix foil), sa collection, son jeu, la photo du scan capturée, et un lien direct vers le suivi en direct."
+      },
+      {
+        "title": "Alertes d'erreur et de statut",
+        "description": "Les bourrages du trieur, les problèmes d'alimentation et autres erreurs sont publiés séparément pour ne pas se perdre dans le flux de scans."
+      },
+      {
+        "title": "Statistiques à la demande",
+        "description": "/stats répond avec le nombre de cartes et la valeur estimée pour toute l'organisation ou une seule collection, directement dans Discord."
+      },
+      {
+        "title": "Présence en direct",
+        "description": "Le statut du bot défile parmi les jeux pris en charge par ton instance Magic Vault, pour montrer clairement qu'il est en ligne et connecté."
+      }
+    ]
+  },
+  "footer": {
+    "reportIssue": "Signaler un problème",
+    "signIn": "Se connecter",
+    "copyright": "© {{year}} Magic Vault"
+  }
+}

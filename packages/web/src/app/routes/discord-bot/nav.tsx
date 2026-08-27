@@ -11,8 +11,8 @@ import { Link } from "react-router-dom";
 const navLinkClass =
   "relative py-1 transition-colors hover:text-foreground after:absolute after:inset-x-0 after:-bottom-0.5 after:h-px after:origin-left after:scale-x-0 after:bg-primary after:transition-transform after:duration-200 hover:after:scale-x-100";
 
-export function BuildNav() {
-  const { t } = useTranslation("build");
+export function DiscordBotNav() {
+  const { t } = useTranslation("discordBot");
   const { data, isPending } = neon.auth.useSession();
   const isSignedIn = !isPending && !!data?.user;
 
@@ -22,22 +22,14 @@ export function BuildNav() {
         <BrandMark />
 
         <nav className="hidden items-center gap-6 text-xs/relaxed font-medium text-muted-foreground md:flex">
-          <a href="#parts" className={navLinkClass}>
-            {t("nav.partsList")}
+          <a href="#setup" className={navLinkClass}>
+            {t("nav.setup")}
           </a>
-          <a href="#wiring" className={navLinkClass}>
-            {t("nav.wiring")}
+          <a href="#commands" className={navLinkClass}>
+            {t("nav.commands")}
           </a>
-          <a href="#assembly" className={navLinkClass}>
-            {t("nav.assembly")}
-          </a>
-          <a
-            href="https://github.com/dishwasher-detergent/mault/issues/new"
-            target="_blank"
-            rel="noopener noreferrer"
-            className={navLinkClass}
-          >
-            {t("nav.reportIssue")}
+          <a href="#features" className={navLinkClass}>
+            {t("nav.features")}
           </a>
         </nav>
 

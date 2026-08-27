@@ -109,26 +109,32 @@ export const ScannedCardItem = memo(function ScannedCardItem({
           <IconCheck />
         </Button>
       )}
-      <div className="flex flex-row justify-between items-center px-1 pb-1">
-        <div className="flex flex-row items-center gap-2">
+      <div className="flex flex-row justify-between items-center gap-2 px-1 pb-1">
+        <div className="flex min-w-0 flex-row items-center gap-2">
           <div
             className="size-3 rounded-full shrink-0"
             style={{ backgroundColor: `var(--${card.rarity})` }}
           />
-          <p className="text-xs font-semibold uppercase" title={card.set}>
+          <p
+            className="truncate text-xs font-semibold uppercase"
+            title={card.set}
+          >
             {card.set}
           </p>
-          <p className="text-xs text-muted-foreground">
+          <p className="shrink-0 text-xs text-muted-foreground">
             #{card.collectorNumber}
           </p>
           {isDownloaded && (
-            <span title={t("scannedCardItem.downloaded")}>
+            <span
+              className="shrink-0"
+              title={t("scannedCardItem.downloaded")}
+            >
               <IconDownload className="size-3 text-muted-foreground shrink-0" />
             </span>
           )}
         </div>
         {displayPrice != null && (
-          <p className="text-xs font-medium text-muted-foreground">
+          <p className="shrink-0 text-xs font-medium text-muted-foreground">
             {formatUsd(displayPrice)}
           </p>
         )}

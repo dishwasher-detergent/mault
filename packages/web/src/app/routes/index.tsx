@@ -7,10 +7,12 @@ import { LandingOpenSource } from "@/app/routes/landing/open-source";
 import { LandingPipeline } from "@/app/routes/landing/pipeline";
 import { LandingStats } from "@/app/routes/landing/stats";
 import { LandingSupportedGames } from "@/app/routes/landing/supported-games";
+import { PublicGlow } from "@/components/public-glow";
 
 export default function LandingPage() {
   return (
-    <div className="flex min-h-screen flex-col bg-background text-foreground">
+    <div className="relative flex min-h-screen flex-col overflow-x-hidden bg-background text-foreground">
+      <PublicGlow />
       <LandingNav />
       <main className="flex-1">
         <LandingHero />

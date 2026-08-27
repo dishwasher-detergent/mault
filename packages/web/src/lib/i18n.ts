@@ -11,6 +11,7 @@ import cardsDe from "@/locales/de/cards.json";
 import collectionsDe from "@/locales/de/collections.json";
 import commonDe from "@/locales/de/common.json";
 import companiesDe from "@/locales/de/companies.json";
+import discordBotDe from "@/locales/de/discord-bot.json";
 import gamesDe from "@/locales/de/games.json";
 import landingDe from "@/locales/de/landing.json";
 import notificationsDe from "@/locales/de/notifications.json";
@@ -26,6 +27,7 @@ import cardsEn from "@/locales/en/cards.json";
 import collectionsEn from "@/locales/en/collections.json";
 import commonEn from "@/locales/en/common.json";
 import companiesEn from "@/locales/en/companies.json";
+import discordBotEn from "@/locales/en/discord-bot.json";
 import gamesEn from "@/locales/en/games.json";
 import landingEn from "@/locales/en/landing.json";
 import notificationsEn from "@/locales/en/notifications.json";
@@ -41,6 +43,7 @@ import cardsFr from "@/locales/fr/cards.json";
 import collectionsFr from "@/locales/fr/collections.json";
 import commonFr from "@/locales/fr/common.json";
 import companiesFr from "@/locales/fr/companies.json";
+import discordBotFr from "@/locales/fr/discord-bot.json";
 import gamesFr from "@/locales/fr/games.json";
 import landingFr from "@/locales/fr/landing.json";
 import notificationsFr from "@/locales/fr/notifications.json";
@@ -63,6 +66,7 @@ const resources = {
     common: commonEn,
     landing: landingEn,
     build: buildEn,
+    discordBot: discordBotEn,
     auth: authEn,
     collections: collectionsEn,
     scanner: scannerEn,
@@ -80,6 +84,7 @@ const resources = {
     common: commonDe,
     landing: landingDe,
     build: buildDe,
+    discordBot: discordBotDe,
     auth: authDe,
     collections: collectionsDe,
     scanner: scannerDe,
@@ -97,6 +102,7 @@ const resources = {
     common: commonFr,
     landing: landingFr,
     build: buildFr,
+    discordBot: discordBotFr,
     auth: authFr,
     collections: collectionsFr,
     scanner: scannerFr,

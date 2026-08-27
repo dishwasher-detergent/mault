@@ -13,6 +13,7 @@ export interface Game {
 export interface PublicGame {
   key: string;
   name: string;
+  cardCount: number;
 }
 
 export interface GameCoverage {
