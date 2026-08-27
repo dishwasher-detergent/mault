@@ -12,7 +12,7 @@
 #define SORTER_HAS_NATIVE_USB 1
 #endif
 
-#define FIRMWARE_VERSION "2.0.4"
+#define FIRMWARE_VERSION "2.0.5"
 
 // Reported in getStatus/boot so the app knows how (or whether) it can
 // update the device - only the ESP32 build can be reflashed from the
