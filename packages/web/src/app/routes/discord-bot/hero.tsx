@@ -1,6 +1,8 @@
 import { buttonVariants } from "@/components/ui/button";
 import { neon } from "@/lib/auth/client";
+import { DISCORD_BOT_INSTALL_URL } from "@/lib/links";
 import { cn } from "@/lib/utils";
+import { IconBrandDiscord } from "@tabler/icons-react";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
 
@@ -22,18 +24,27 @@ export function DiscordBotHero() {
       </p>
 
       <div className="mt-6 flex flex-wrap gap-3">
-        <Link
-          to={isSignedIn ? "/app/settings" : "/auth/sign-up"}
+        <a
+          href={DISCORD_BOT_INSTALL_URL}
+          target="_blank"
+          rel="noreferrer"
           className={cn(
             buttonVariants({ variant: "default", size: "lg" }),
-            "shadow-sm shadow-primary/30 transition-shadow hover:shadow-md hover:shadow-primary/30",
+            "gap-2 shadow-sm shadow-primary/30 transition-shadow hover:shadow-md hover:shadow-primary/30",
           )}
+        >
+          <IconBrandDiscord className="size-4" />
+          {t("hero.addToDiscord")}
+        </a>
+        <Link
+          to={isSignedIn ? "/app/settings" : "/auth/sign-up"}
+          className={cn(buttonVariants({ variant: "outline", size: "lg" }))}
         >
           {isSignedIn ? t("hero.openSettings") : t("hero.getStarted")}
         </Link>
         <a
           href="#setup"
-          className={cn(buttonVariants({ variant: "outline", size: "lg" }))}
+          className={cn(buttonVariants({ variant: "ghost", size: "lg" }))}
         >
           {t("hero.seeSetup")}
         </a>

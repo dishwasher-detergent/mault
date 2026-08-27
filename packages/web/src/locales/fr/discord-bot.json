@@ -11,6 +11,7 @@
     "eyebrow": "Intégration Discord",
     "title": "Amène ton trieur de cartes dans Discord",
     "description": "Le bot Discord de Magic Vault publie un message pour chaque carte triée, alerte ton serveur en cas de problème et répond à /stats à la demande - plus besoin de garder la page de suivi ouverte pour savoir ce qui se passe.",
+    "addToDiscord": "Ajouter à Discord",
     "getStarted": "Commencer",
     "openSettings": "Ouvrir les paramètres",
     "seeSetup": "Voir les étapes de configuration",
@@ -18,8 +19,13 @@
   },
   "setup": {
     "title": "Relie un serveur en moins d'une minute",
-    "description": "Connecter Discord ne touche ni à ton matériel ni à ta configuration de scan - trois étapes dans l'app et une commande dans Discord.",
+    "description": "Connecter Discord ne touche ni à ton matériel ni à ta configuration de scan - juste quelques étapes dans l'app et dans Discord.",
+    "installLink": "Ajouter à Discord →",
     "steps": [
+      {
+        "title": "Ajouter le bot",
+        "description": "Ajoute le bot Magic Vault à ton serveur Discord - nécessite la permission Gérer le serveur."
+      },
       {
         "title": "Générer un code",
         "description": "Dans Magic Vault, va dans Paramètres → Bot Discord et génère un code de liaison. Il n'est valable que quelques minutes."
