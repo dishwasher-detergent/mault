@@ -1,26 +1,18 @@
 import { router } from "@/app/router";
+import { RouteLoadingFallback } from "@/components/route-loading-fallback";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import "@/index.css";
-import { neon } from "@/lib/auth/client";
 import "@/lib/i18n";
-import { NeonAuthUIProvider } from "@neondatabase/neon-js/auth/react/ui";
-import { StrictMode } from "react";
+import { StrictMode, Suspense } from "react";
 import { createRoot } from "react-dom/client";
 import { RouterProvider } from "react-router-dom";
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
-    <NeonAuthUIProvider
-      defaultTheme="system"
-      authClient={neon.auth}
-      redirectTo="/app"
-      account={{
-        basePath: "/app/account",
-      }}
-    >
-      <TooltipProvider>
+    <TooltipProvider>
+      <Suspense fallback={<RouteLoadingFallback />}>
         <RouterProvider router={router} />
-      </TooltipProvider>
-    </NeonAuthUIProvider>
+      </Suspense>
+    </TooltipProvider>
   </StrictMode>,
 );

@@ -1,36 +1,30 @@
-import AccountPage from "@/app/routes/app/account";
-import AdminPage from "@/app/routes/app/admin";
-import BinsPage from "@/app/routes/app/bins";
-import CalibratePage from "@/app/routes/app/calibrate";
-import CollectionsPage from "@/app/routes/app/collections";
-import ScannerPage from "@/app/routes/app/index";
-import AppLayout from "@/app/routes/app/layout";
-import MonitorPage from "@/app/routes/app/monitor";
-import MonitorSessionsPage from "@/app/routes/app/monitor-sessions";
-import PhoneCameraPage from "@/app/routes/app/phone-camera";
-import SettingsPage from "@/app/routes/app/settings";
-import VerifyEmailPage from "@/app/routes/app/verify-email";
-import AuthPage from "@/app/routes/auth";
-import BuildGuidePage from "@/app/routes/build";
-import DiscordBotPage from "@/app/routes/discord-bot";
 import ErrorPage from "@/app/routes/error";
-import LandingPage from "@/app/routes/index";
 import NotFoundPage from "@/app/routes/not-found";
 import { useIsMobile } from "@/hooks/use-is-mobile";
 import { useRole } from "@/hooks/use-role";
-import { RedirectToSignIn, SignedIn } from "@neondatabase/neon-js/auth/react";
+import { lazy } from "react";
 import { createBrowserRouter, Navigate, Outlet } from "react-router-dom";
 
-function AuthGuard() {
-  return (
-    <>
-      <SignedIn>
-        <Outlet />
-      </SignedIn>
-      <RedirectToSignIn />
-    </>
-  );
-}
+const AuthGuard = lazy(() => import("@/app/routes/auth-guard"));
+
+const LandingPage = lazy(() => import("@/app/routes/index"));
+const BuildGuidePage = lazy(() => import("@/app/routes/build"));
+const DiscordBotPage = lazy(() => import("@/app/routes/discord-bot"));
+const AuthPage = lazy(() => import("@/app/routes/auth"));
+const VerifyEmailPage = lazy(() => import("@/app/routes/app/verify-email"));
+const AppLayout = lazy(() => import("@/app/routes/app/layout"));
+const ScannerPage = lazy(() => import("@/app/routes/app/index"));
+const CollectionsPage = lazy(() => import("@/app/routes/app/collections"));
+const BinsPage = lazy(() => import("@/app/routes/app/bins"));
+const CalibratePage = lazy(() => import("@/app/routes/app/calibrate"));
+const AdminPage = lazy(() => import("@/app/routes/app/admin"));
+const MonitorSessionsPage = lazy(
+  () => import("@/app/routes/app/monitor-sessions"),
+);
+const MonitorPage = lazy(() => import("@/app/routes/app/monitor"));
+const PhoneCameraPage = lazy(() => import("@/app/routes/app/phone-camera"));
+const SettingsPage = lazy(() => import("@/app/routes/app/settings"));
+const AccountPage = lazy(() => import("@/app/routes/app/account"));
 
 function AdminGuard() {
   const { isAdmin, isPending } = useRole();
