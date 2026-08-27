@@ -1,9 +1,5 @@
-import { IconLoader2 } from "@tabler/icons-react";
+import { AppLoadingScreen } from "@/components/app-loading-screen";
 
 export function RouteLoadingFallback() {
-  return (
-    <div className="flex h-dvh w-dvw items-center justify-center bg-background">
-      <IconLoader2 className="size-6 animate-spin text-muted-foreground" />
-    </div>
-  );
+  return <AppLoadingScreen />;
 }
