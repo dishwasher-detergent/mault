@@ -14,10 +14,10 @@ export function LandingOpenSource() {
   const { t } = useTranslation("landing");
 
   return (
-    <section id="open-source" className="border-t bg-secondary/20">
-      <div className="mx-auto max-w-6xl px-4 py-20">
-        <div className="mx-auto max-w-2xl text-center">
-          <h2 className="font-heading text-2xl font-semibold tracking-tight md:text-3xl">
+    <section id="open-source" className="border-t">
+      <div className="mx-auto max-w-6xl px-4 py-14 md:py-16">
+        <div className="max-w-2xl">
+          <h2 className="font-heading text-3xl font-semibold tracking-tight text-balance md:text-4xl lg:text-5xl">
             {t("openSource.heading")}
           </h2>
           <p className="mt-3 text-sm/relaxed text-muted-foreground md:text-base/relaxed">
@@ -25,11 +25,9 @@ export function LandingOpenSource() {
           </p>
         </div>
 
-        <div className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          <div className="flex flex-col gap-3 rounded-lg border bg-card p-6">
-            <span className="grid size-9 shrink-0 place-items-center rounded-lg bg-primary/10 text-primary">
-              <IconBrandGithub size={18} />
-            </span>
+        <div className="mt-10 grid divide-y divide-border border-t border-border md:grid-cols-3 md:divide-x md:divide-y-0 md:border-t-0">
+          <div className="flex flex-col items-start gap-3 py-6 md:px-6 md:py-0 md:pl-0">
+            <IconBrandGithub size={20} className="text-primary" />
             <div>
               <p className="font-heading text-sm font-semibold">
                 {t("openSource.sourceCode.title")}
@@ -42,20 +40,15 @@ export function LandingOpenSource() {
               href={REPO_URL}
               target="_blank"
               rel="noreferrer"
-              className={cn(
-                buttonVariants({ variant: "outline", size: "sm" }),
-                "mt-2 self-start",
-              )}
+              className={cn(buttonVariants({ variant: "outline", size: "sm" }))}
             >
               <IconBrandGithub size={16} />
               {t("openSource.sourceCode.cta")}
             </a>
           </div>
 
-          <div className="flex flex-col gap-3 rounded-lg border bg-card p-6">
-            <span className="grid size-9 shrink-0 place-items-center rounded-lg bg-primary/10 text-primary">
-              <IconCube size={18} />
-            </span>
+          <div className="flex flex-col items-start gap-3 py-6 md:px-6 md:py-0">
+            <IconCube size={20} className="text-primary" />
             <div>
               <p className="font-heading text-sm font-semibold">
                 {t("openSource.printableSorter.title")}
@@ -64,7 +57,7 @@ export function LandingOpenSource() {
                 {t("openSource.printableSorter.description")}
               </p>
             </div>
-            <div className="mt-2 flex flex-wrap gap-2">
+            <div className="flex flex-wrap gap-2">
               <a
                 href={MODEL_URL}
                 target="_blank"
@@ -83,10 +76,8 @@ export function LandingOpenSource() {
             </div>
           </div>
 
-          <div className="flex flex-col gap-3 rounded-lg border bg-card p-6">
-            <span className="grid size-9 shrink-0 place-items-center rounded-lg bg-primary/10 text-primary">
-              <IconBrandDiscord size={18} />
-            </span>
+          <div className="flex flex-col items-start gap-3 py-6 md:px-6 md:py-0 md:pr-0">
+            <IconBrandDiscord size={20} className="text-primary" />
             <div>
               <p className="font-heading text-sm font-semibold">
                 {t("openSource.community.title")}
@@ -99,10 +90,7 @@ export function LandingOpenSource() {
               href={DISCORD_URL}
               target="_blank"
               rel="noreferrer"
-              className={cn(
-                buttonVariants({ variant: "outline", size: "sm" }),
-                "mt-2 self-start",
-              )}
+              className={cn(buttonVariants({ variant: "outline", size: "sm" }))}
             >
               <IconBrandDiscord size={16} />
               {t("openSource.community.cta")}

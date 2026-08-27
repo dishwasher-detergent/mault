@@ -9,25 +9,27 @@ export function LandingCta() {
 
   return (
     <section className="border-t">
-      <div className="mx-auto max-w-6xl px-4 py-20">
-        <div className="flex flex-col items-center gap-4 rounded-2xl border bg-primary/10 px-6 py-14 text-center">
-          <h2 className="font-heading text-2xl font-semibold tracking-tight md:text-3xl">
-            {t("cta.heading")}
-          </h2>
-          <p className="max-w-md text-sm/relaxed text-muted-foreground md:text-base/relaxed">
-            {t("cta.subtitle")}
-          </p>
-          <Link
-            to="/auth/sign-up"
-            className={cn(
-              buttonVariants({ variant: "default", size: "lg" }),
-              "mt-2",
-            )}
-          >
-            {t("cta.button")}
-            <IconArrowRight size={16} />
-          </Link>
-        </div>
+      <div className="relative mx-auto flex max-w-2xl flex-col items-center gap-6 px-4 py-16 text-center md:py-20">
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-x-0 top-1/2 -z-10 h-64 -translate-y-1/2 rounded-full bg-primary/10 blur-[100px]"
+        />
+        <h2 className="font-heading text-4xl leading-[1.05] font-semibold tracking-tight text-balance md:text-5xl">
+          {t("cta.heading")}
+        </h2>
+        <p className="max-w-md text-sm/relaxed text-muted-foreground md:text-base/relaxed">
+          {t("cta.subtitle")}
+        </p>
+        <Link
+          to="/auth/sign-up"
+          className={cn(
+            buttonVariants({ variant: "default", size: "lg" }),
+            "mt-2 shadow-sm shadow-primary/30 transition-shadow hover:shadow-md hover:shadow-primary/30",
+          )}
+        >
+          {t("cta.button")}
+          <IconArrowRight size={16} />
+        </Link>
       </div>
     </section>
   );

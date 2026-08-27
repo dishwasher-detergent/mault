@@ -1,4 +1,4 @@
-import { IconPigFilled } from "@tabler/icons-react";
+import { BrandMark } from "@/components/brand-mark";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
 
@@ -8,14 +8,7 @@ export function BuildFooter() {
   return (
     <footer className="border-t">
       <div className="mx-auto flex max-w-4xl flex-col items-center justify-between gap-4 px-4 py-8 sm:flex-row">
-        <Link to="/" className="flex items-center gap-2">
-          <span className="grid size-6 shrink-0 place-items-center rounded-md bg-primary text-primary-foreground">
-            <IconPigFilled className="size-3.5" />
-          </span>
-          <span className="font-heading text-xs font-semibold">
-            Mault
-          </span>
-        </Link>
+        <BrandMark size="sm" />
 
         <nav className="flex items-center gap-5 text-xs text-muted-foreground">
           <Link to="/#open-source" className="transition-colors hover:text-foreground">

@@ -14,8 +14,8 @@
     "copyright": "© {{year}} Mault · v{{version}}"
   },
   "hero": {
-    "title": "Every card,<br></br><highlight>exactly where it belongs.</highlight>",
-    "subtitle": "Mault recognizes your cards the moment you show them to a webcam, then sorts them into bins using rules you set - by rarity, color, set, type, or anything else. No spreadsheets, no guesswork.",
+    "title": "Every card,<br></br><highlight>right where it belongs.</highlight>",
+    "subtitle": "Load your cards into the hopper and Mault takes it from there - the feeder pushes each one past the camera to be recognized, then sorts it into bins using rules you set: rarity, color, set, type, or anything else. No spreadsheets, no guesswork.",
     "getStartedFree": "Get started free",
     "seeHowItWorks": "See how it works",
     "currentSession": "Current session",
@@ -31,85 +31,87 @@
     }
   },
   "supportedGames": {
-    "heading": "Sorts any TCG you throw at it",
-    "subtitle": "New games get added to the sorter's database, not hard-coded into the app - here's what's live right now."
+    "heading": "Happily sorts any TCG you love",
+    "subtitle": "New games get added right into the sorter's database, not hard-coded into the app - here's what's supported today.",
+    "cardsIndexed_one": "{{formatted}} card indexed",
+    "cardsIndexed_other": "{{formatted}} cards indexed"
   },
   "pipeline": {
     "heading": "How it works",
-    "subtitle": "From loose pile to organized collection in four simple steps.",
+    "subtitle": "From a loose pile to a tidy collection, in four easy steps.",
     "stepLabel": "Step {{number}}",
     "steps": {
       "showCard": {
-        "title": "Show it a card",
-        "description": "Hold any card up to your webcam - no scanner or app on your phone required."
+        "title": "Load up the hopper",
+        "description": "Drop your cards in and the feeder pushes each one past the camera automatically - no scanner or phone app needed."
       },
       "recognized": {
         "title": "It's recognized instantly",
-        "description": "Mault matches it against the full card database in a moment, rarity, set and all."
+        "description": "Mault matches it against the full card database in an instant - rarity, set, and all."
       },
       "sorted": {
         "title": "Sorted by your rules",
-        "description": "Set up rules once - by rarity, color, set, type, or anything else - and every card routes itself."
+        "description": "Set your rules once - by rarity, color, set, type, or whatever you like - and every card finds its own way."
       },
       "organized": {
         "title": "Always organized",
-        "description": "Every card is logged and searchable, across as many collections as you keep."
+        "description": "Every card gets logged and stays searchable, across as many collections as you'd like to keep."
       }
     }
   },
   "features": {
-    "heading": "Everything you need to get organized",
-    "subtitle": "Mault handles the sorting so you can spend more time playing and less time digging through boxes.",
+    "heading": "Everything you need to feel organized",
+    "subtitle": "Let Mault handle the sorting, so you can spend more time playing and less time digging through boxes.",
     "items": {
       "recognition": {
         "title": "Instant recognition",
-        "description": "No typing card names, no barcodes. Just show the card and Mault knows what it is."
+        "description": "No typing card names, no barcodes - the feeder puts each card in front of the camera, and Mault knows exactly what it is."
       },
       "rules": {
         "title": "Rules you control",
-        "description": "Mix and match conditions - rarity, color, set, type and more - to route cards exactly where you want."
+        "description": "Mix and match conditions - rarity, color, set, type, and more - to send every card exactly where you'd like."
       },
       "collections": {
         "title": "Multiple collections",
-        "description": "Keep separate collections for trade binders, decks, or storage boxes, and switch between them freely."
+        "description": "Keep separate collections for trade binders, decks, or storage boxes, and hop between them whenever you like."
       },
       "insights": {
         "title": "Know what you own",
-        "description": "See counts, rarities, and sets across your whole library - no more guessing what's in the box."
+        "description": "See counts, rarities, and sets across your whole library, so you never have to guess what's in the box."
       },
       "logging": {
         "title": "Every card logged",
-        "description": "Each scan is saved automatically, so your collection stays accurate without extra bookkeeping."
+        "description": "Every scan is saved automatically, so your collection stays accurate without any extra bookkeeping."
       },
       "hardware": {
         "title": "Built for the table",
-        "description": "Pairs with a physical sorter, so cards land in real bins - not just another spreadsheet. Add more sorting modules to expand up to 11 bins."
+        "description": "Pairs with a physical sorter, so your cards land in real bins - not just another spreadsheet. Add more sorting modules any time to grow up to 11 bins."
       }
     }
   },
   "openSource": {
     "heading": "Fully open source",
-    "subtitle": "The software and the physical sorter are both free to build, inspect, and modify. Grab the code and print your own.",
+    "subtitle": "The software and the physical sorter are both free to build, inspect, and tinker with. Grab the code and print one of your own.",
     "sourceCode": {
       "title": "Source code",
-      "description": "The web app, API, and sorter firmware are all in one repo under an open license.",
+      "description": "The web app, API, and sorter firmware all live together in one repo, under an open license.",
       "cta": "View on GitHub"
     },
     "printableSorter": {
       "title": "3D printable sorter",
-      "description": "Print the card sorter yourself - Fusion 360 and 3MF files are included in the repo.",
+      "description": "Print your own card sorter at home - Fusion 360 and 3MF files are right there in the repo.",
       "getModel": "Get the 3D model",
       "buildGuide": "Read the build guide"
     },
     "community": {
       "title": "Community",
-      "description": "Join the Discord to share builds, get help, and talk to other people running their own sorter.",
+      "description": "Join the Discord to share your build, get a hand when you need it, and chat with others running their own sorter.",
       "cta": "Join the Discord"
     }
   },
   "cta": {
-    "heading": "Stop shuffling. Start sorting.",
-    "subtitle": "Set up your first collection in minutes and let Mault keep it organized from here on out.",
+    "heading": "Let's get your cards sorted.",
+    "subtitle": "Set up your first collection in just a few minutes, and let Mault keep everything organized from here on out.",
     "button": "Get started free"
   }
 }

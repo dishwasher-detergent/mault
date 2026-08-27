@@ -1,0 +1,61 @@
+import { DEMO_SCANNED_CARDS, toScannedCards } from "@/app/routes/landing/demo-cards";
+import { computeStats } from "@/features/scanner/lib/compute-stats";
+import { useTranslation } from "react-i18next";
+
+// A read-only stand-in for the "by rarity"/"by color" panels in
+// features/scanner/components/scan-stats.tsx, reusing the app's own
+// (pure, hook-free) computeStats aggregation over the static demo cards.
+export function DemoStatsBreakdown() {
+  const { t } = useTranslation("scanner");
+  const stats = computeStats(toScannedCards(DEMO_SCANNED_CARDS));
+  if (!stats) return null;
+
+  return (
+    <div className="grid grid-cols-2 gap-2">
+      <div className="rounded-lg border border-input bg-input/20 p-2 dark:bg-input/30">
+        <p className="mb-1.5 text-[10px] font-medium tracking-wide text-muted-foreground uppercase">
+          {t("scanStats.byRarity")}
+        </p>
+        <div className="flex flex-col gap-1">
+          {stats.rarities.map((r) => (
+            <div
+              key={r.key}
+              className="flex items-center justify-between text-xs"
+            >
+              <div className="flex items-center gap-1.5">
+                <div
+                  className="size-2.5 rounded-full"
+                  style={{ backgroundColor: `var(--${r.key})` }}
+                />
+                <span>{r.label}</span>
+              </div>
+              <span className="text-muted-foreground">{r.count}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+      <div className="rounded-lg border border-input bg-input/20 p-2 dark:bg-input/30">
+        <p className="mb-1.5 text-[10px] font-medium tracking-wide text-muted-foreground uppercase">
+          {t("scanStats.byColor")}
+        </p>
+        <div className="flex flex-col gap-1">
+          {stats.colors.map((c) => (
+            <div
+              key={c.key}
+              className="flex items-center justify-between text-xs"
+            >
+              <div className="flex items-center gap-1.5">
+                <div
+                  className="size-2.5 rounded-full border border-border"
+                  style={{ backgroundColor: c.bg }}
+                />
+                <span>{c.label}</span>
+              </div>
+              <span className="text-muted-foreground">{c.count}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}

@@ -9,9 +9,9 @@ export function LandingSupportedGames() {
 
   return (
     <section className="border-t">
-      <div className="mx-auto max-w-6xl px-4 py-20">
-        <div className="mx-auto max-w-2xl text-center">
-          <h2 className="font-heading text-2xl font-semibold tracking-tight md:text-3xl">
+      <div className="mx-auto max-w-6xl px-4 py-14 md:py-16">
+        <div className="max-w-2xl">
+          <h2 className="font-heading text-3xl font-semibold tracking-tight text-balance md:text-4xl lg:text-5xl">
             {t("supportedGames.heading")}
           </h2>
           <p className="mt-3 text-sm/relaxed text-muted-foreground md:text-base/relaxed">
@@ -19,21 +19,26 @@ export function LandingSupportedGames() {
           </p>
         </div>
 
-        <div className="mt-10 flex flex-wrap justify-center gap-3">
+        <div className="mt-8 flex flex-wrap gap-x-12 gap-y-8">
           {games === null
             ? Array.from({ length: 4 }).map((_, i) => (
-                <div
-                  key={i}
-                  className="h-9 w-32 animate-pulse rounded-full border bg-card"
-                />
+                <div key={i} className="flex flex-col gap-2">
+                  <div className="h-4 w-28 animate-pulse rounded bg-muted" />
+                  <div className="h-3 w-20 animate-pulse rounded bg-muted" />
+                </div>
               ))
             : games.map((game) => (
-                <span
-                  key={game.key}
-                  className="rounded-full border bg-card px-4 py-2 text-sm font-medium"
-                >
-                  {game.name}
-                </span>
+                <div key={game.key} className="flex flex-col gap-0.5">
+                  <span className="font-heading text-base font-semibold text-foreground md:text-lg">
+                    {game.name}
+                  </span>
+                  <span className="text-xs text-muted-foreground tabular-nums">
+                    {t("supportedGames.cardsIndexed", {
+                      count: game.cardCount,
+                      formatted: game.cardCount.toLocaleString(),
+                    })}
+                  </span>
+                </div>
               ))}
         </div>
       </div>

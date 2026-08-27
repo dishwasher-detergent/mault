@@ -1,5 +1,6 @@
 {
   "hero": {
+    "eyebrow": "Hardware build guide",
     "title": "Build the card sorter",
     "description": "Parts list and assembly instructions for the physical sorting unit: a hopper feeds cards one at a time through {{modules}} stacked routing modules, each capable of dropping a card into one of two side bins or passing it down to the next module - {{bins}} bins total, driven by an {{board}} over I²C.",
     "firmwareLabel": "Firmware",

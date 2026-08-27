@@ -1,3 +1,4 @@
+import { SectionHeading } from "@/components/section-heading";
 import {
   IconAlertTriangle,
   IconChartBar,
@@ -23,21 +24,17 @@ export function DiscordBotFeatures() {
   return (
     <section id="features" className="border-t bg-secondary/20">
       <div className="mx-auto max-w-4xl px-4 py-16">
-        <h2 className="font-heading text-2xl font-semibold tracking-tight">
-          {t("features.title")}
-        </h2>
-        <p className="mt-2 max-w-2xl text-sm/relaxed text-muted-foreground">
-          {t("features.description")}
-        </p>
+        <SectionHeading
+          align="left"
+          heading={t("features.title")}
+          subtitle={t("features.description")}
+        />
 
-        <div className="mt-8 grid gap-4 sm:grid-cols-2">
+        <div className="mt-8 grid gap-8 sm:grid-cols-2">
           {features.map((feature, i) => {
             const Icon = FEATURE_ICONS[i] ?? IconPhotoCog;
             return (
-              <div
-                key={feature.title}
-                className="flex flex-col gap-3 rounded-lg border bg-card p-5"
-              >
+              <div key={feature.title} className="flex flex-col items-start gap-3">
                 <span className="grid size-9 shrink-0 place-items-center rounded-lg bg-primary/10 text-primary">
                   <Icon className="size-4.5" />
                 </span>

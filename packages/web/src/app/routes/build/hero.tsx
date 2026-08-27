@@ -16,8 +16,11 @@ export function BuildHero() {
   ]);
 
   return (
-    <section className="mx-auto max-w-4xl px-4 pt-12 pb-16">
-      <h1 className="mt-3 font-heading text-3xl font-semibold tracking-tight text-balance md:text-4xl">
+    <section className="mx-auto max-w-4xl px-4 pt-12 pb-16 animate-in fade-in slide-in-from-bottom-4 duration-700">
+      <p className="text-xs font-semibold text-primary">
+        {t("hero.eyebrow")}
+      </p>
+      <h1 className="mt-4 font-heading text-3xl font-semibold tracking-tight text-balance md:text-4xl lg:text-5xl">
         {t("hero.title")}
       </h1>
       <p className="mt-4 max-w-2xl text-sm/relaxed text-muted-foreground md:text-base/relaxed">
@@ -54,7 +57,7 @@ export function BuildHero() {
         </span>
       </div>
 
-      <div className="mt-10 overflow-hidden rounded-lg border bg-card">
+      <div className="mt-10 overflow-hidden rounded-lg border bg-card shadow-sm">
         <div className="divide-y divide-border">
           <p className="p-5 text-xs/relaxed text-muted-foreground md:p-6">
             <Trans

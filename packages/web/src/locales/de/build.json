@@ -1,5 +1,6 @@
 {
   "hero": {
+    "eyebrow": "Bauanleitung für die Hardware",
     "title": "Den Kartensortierer bauen",
     "description": "Teileliste und Montageanleitung für die physische Sortiereinheit: Ein Trichter führt Karten einzeln durch {{modules}} übereinander gestapelte Verteilermodule, von denen jedes eine Karte in eines von zwei seitlichen Fächern fallen lassen oder an das nächste Modul weiterreichen kann – insgesamt {{bins}} Fächer, gesteuert von einem {{board}} über I²C.",
     "firmwareLabel": "Firmware",

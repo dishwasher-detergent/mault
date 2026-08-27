@@ -14,8 +14,8 @@
     "copyright": "© {{year}} Mault · v{{version}}"
   },
   "hero": {
-    "title": "Jede Karte,<br></br><highlight>genau dort, wo sie hingehört.</highlight>",
-    "subtitle": "Mault erkennt deine Karten in dem Moment, in dem du sie vor die Webcam hältst, und sortiert sie anhand von Regeln, die du selbst festlegst - nach Seltenheit, Farbe, Set, Typ oder was auch immer du willst. Keine Tabellen, kein Rätselraten.",
+    "title": "Jede Karte,<br></br><highlight>schön dort, wo sie hingehört.</highlight>",
+    "subtitle": "Lade deine Karten in den Trichter, und Mault übernimmt den Rest - die Zuführung schiebt jede Karte an der Kamera vorbei zur Erkennung und sortiert sie danach in Fächer, ganz nach den Regeln, die du selbst festlegst: Seltenheit, Farbe, Set, Typ oder was du sonst magst. Keine Tabellen, kein Rätselraten.",
     "getStartedFree": "Kostenlos starten",
     "seeHowItWorks": "So funktioniert's",
     "currentSession": "Aktuelle Sitzung",
@@ -31,85 +31,87 @@
     }
   },
   "supportedGames": {
-    "heading": "Sortiert jedes Sammelkartenspiel",
-    "subtitle": "Neue Spiele werden in der Datenbank des Sortierers ergänzt, nicht fest in die App einprogrammiert - hier siehst du, was gerade unterstützt wird."
+    "heading": "Sortiert jedes Sammelkartenspiel, das du liebst",
+    "subtitle": "Neue Spiele wandern direkt in die Datenbank des Sortierers, statt fest in die App einprogrammiert zu werden - hier siehst du, was heute schon unterstützt wird.",
+    "cardsIndexed_one": "{{formatted}} Karte indexiert",
+    "cardsIndexed_other": "{{formatted}} Karten indexiert"
   },
   "pipeline": {
     "heading": "So funktioniert's",
-    "subtitle": "Vom losen Stapel zur organisierten Sammlung in vier einfachen Schritten.",
+    "subtitle": "Vom losen Stapel zur ordentlichen Sammlung, in vier einfachen Schritten.",
     "stepLabel": "Schritt {{number}}",
     "steps": {
       "showCard": {
-        "title": "Zeig ihm eine Karte",
-        "description": "Halte einfach eine beliebige Karte vor deine Webcam - kein Scanner oder App auf dem Handy nötig."
+        "title": "Trichter befüllen",
+        "description": "Leg deine Karten ein - die Zuführung schiebt jede Karte automatisch an der Kamera vorbei. Kein Scanner, keine App nötig."
       },
       "recognized": {
         "title": "Sofort erkannt",
-        "description": "Mault gleicht sie in einem Moment mit der vollständigen Kartendatenbank ab - Seltenheit, Set und alles Weitere inklusive."
+        "description": "Mault gleicht sie im Nu mit der vollständigen Kartendatenbank ab - Seltenheit, Set und alles Weitere inklusive."
       },
       "sorted": {
         "title": "Sortiert nach deinen Regeln",
-        "description": "Lege einmal Regeln fest - nach Seltenheit, Farbe, Set, Typ oder was auch immer - und jede Karte findet von selbst ihren Platz."
+        "description": "Leg einmal deine Regeln fest - nach Seltenheit, Farbe, Set, Typ oder was du magst - und jede Karte findet ganz von selbst ihren Platz."
       },
       "organized": {
         "title": "Immer organisiert",
-        "description": "Jede Karte wird erfasst und ist durchsuchbar, über beliebig viele Sammlungen hinweg."
+        "description": "Jede Karte wird erfasst und bleibt durchsuchbar - über so viele Sammlungen hinweg, wie du möchtest."
       }
     }
   },
   "features": {
-    "heading": "Alles, was du brauchst, um Ordnung zu schaffen",
-    "subtitle": "Mault übernimmt das Sortieren, damit du mehr Zeit zum Spielen hast und weniger Zeit mit dem Durchsuchen von Kisten verbringst.",
+    "heading": "Alles, was du brauchst, um dich organisiert zu fühlen",
+    "subtitle": "Lass Mault das Sortieren übernehmen, damit du mehr Zeit zum Spielen hast und weniger Zeit mit dem Durchsuchen von Kisten verbringst.",
     "items": {
       "recognition": {
         "title": "Sofortige Erkennung",
-        "description": "Kein Eintippen von Kartennamen, keine Barcodes. Zeig einfach die Karte, und Mault weiß, was es ist."
+        "description": "Kein Eintippen von Kartennamen, keine Barcodes - die Zuführung hält jede Karte vor die Kamera, und Mault weiß genau, welche es ist."
       },
       "rules": {
         "title": "Regeln, die du kontrollierst",
-        "description": "Kombiniere Bedingungen - Seltenheit, Farbe, Set, Typ und mehr -, um Karten genau dorthin zu leiten, wo du sie haben willst."
+        "description": "Kombiniere Bedingungen - Seltenheit, Farbe, Set, Typ und mehr -, um jede Karte genau dorthin zu schicken, wo du sie haben möchtest."
       },
       "collections": {
         "title": "Mehrere Sammlungen",
-        "description": "Führe separate Sammlungen für Tauschordner, Decks oder Aufbewahrungsboxen und wechsle jederzeit frei zwischen ihnen."
+        "description": "Führe separate Sammlungen für Tauschordner, Decks oder Aufbewahrungsboxen, und wechsle ganz einfach zwischen ihnen hin und her."
       },
       "insights": {
         "title": "Wisse, was du besitzt",
-        "description": "Sieh Anzahlen, Seltenheiten und Sets über deine gesamte Sammlung hinweg - kein Rätselraten mehr, was in der Kiste steckt."
+        "description": "Sieh Anzahlen, Seltenheiten und Sets über deine gesamte Sammlung hinweg, damit du nie wieder raten musst, was in der Kiste steckt."
       },
       "logging": {
         "title": "Jede Karte erfasst",
-        "description": "Jeder Scan wird automatisch gespeichert, sodass deine Sammlung ohne zusätzlichen Aufwand aktuell bleibt."
+        "description": "Jeder Scan wird automatisch gespeichert, damit deine Sammlung ganz ohne zusätzlichen Aufwand aktuell bleibt."
       },
       "hardware": {
         "title": "Gebaut für den Tisch",
-        "description": "Funktioniert mit einem physischen Sortierer, sodass Karten in echten Fächern landen - nicht nur in einer weiteren Tabelle. Weitere Sortiermodule erweitern das System auf bis zu 11 Fächer."
+        "description": "Funktioniert mit einem physischen Sortierer, damit deine Karten in echten Fächern landen - nicht nur in einer weiteren Tabelle. Füg jederzeit weitere Sortiermodule hinzu und wachse auf bis zu 11 Fächer."
       }
     }
   },
   "openSource": {
     "heading": "Vollständig Open Source",
-    "subtitle": "Die Software und der physische Sortierer sind beide frei zugänglich zum Nachbauen, Prüfen und Anpassen. Hol dir den Code und drucke deinen eigenen.",
+    "subtitle": "Die Software und der physische Sortierer sind beide frei zum Nachbauen, Erkunden und Herumtüfteln. Hol dir den Code und druck dir deinen eigenen.",
     "sourceCode": {
       "title": "Quellcode",
-      "description": "Die Web-App, die API und die Sortierer-Firmware liegen alle in einem Repository unter einer offenen Lizenz.",
+      "description": "Die Web-App, die API und die Sortierer-Firmware wohnen alle gemeinsam in einem Repository, unter einer offenen Lizenz.",
       "cta": "Auf GitHub ansehen"
     },
     "printableSorter": {
       "title": "3D-druckbarer Sortierer",
-      "description": "Drucke dir den Kartensortierer selbst aus - Fusion-360- und 3MF-Dateien liegen im Repository bereit.",
+      "description": "Druck dir deinen eigenen Kartensortierer zu Hause aus - Fusion-360- und 3MF-Dateien liegen direkt im Repository bereit.",
       "getModel": "3D-Modell herunterladen",
       "buildGuide": "Bauanleitung lesen"
     },
     "community": {
       "title": "Community",
-      "description": "Tritt dem Discord bei, um eigene Builds zu zeigen, Hilfe zu bekommen und dich mit anderen auszutauschen, die ihren eigenen Sortierer betreiben.",
+      "description": "Tritt dem Discord bei, um deinen Build zu zeigen, dir bei Bedarf Hilfe zu holen und dich mit anderen auszutauschen, die ihren eigenen Sortierer betreiben.",
       "cta": "Discord beitreten"
     }
   },
   "cta": {
-    "heading": "Schluss mit Kartenwühlen. Fang an zu sortieren.",
-    "subtitle": "Richte deine erste Sammlung in wenigen Minuten ein und lass Mault sie von da an in Ordnung halten.",
+    "heading": "Lass uns deine Karten sortieren.",
+    "subtitle": "Richte deine erste Sammlung in ein paar Minuten ein und lass Mault ab da für Ordnung sorgen.",
     "button": "Kostenlos starten"
   }
 }

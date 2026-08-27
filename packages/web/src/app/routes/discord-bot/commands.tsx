@@ -1,3 +1,4 @@
+import { SectionHeading } from "@/components/section-heading";
 import { useTranslation } from "react-i18next";
 
 const COMMANDS = [
@@ -14,14 +15,13 @@ export function DiscordBotCommands() {
   return (
     <section id="commands" className="border-t">
       <div className="mx-auto max-w-4xl px-4 py-16">
-        <h2 className="font-heading text-2xl font-semibold tracking-tight">
-          {t("commands.title")}
-        </h2>
-        <p className="mt-2 max-w-2xl text-sm/relaxed text-muted-foreground">
-          {t("commands.description")}
-        </p>
+        <SectionHeading
+          align="left"
+          heading={t("commands.title")}
+          subtitle={t("commands.description")}
+        />
 
-        <div className="mt-8 overflow-hidden rounded-lg border">
+        <div className="mt-8 overflow-hidden rounded-lg border bg-card">
           <div className="divide-y">
             {COMMANDS.map((key) => (
               <div
