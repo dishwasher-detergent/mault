@@ -13,7 +13,6 @@ import type {
   SliderKey,
 } from "@/features/calibration/types";
 import type { ModuleConfig, ServoCalibration } from "@magic-vault/shared";
-import { IconRotateClockwise } from "@tabler/icons-react";
 import { useTranslation } from "react-i18next";
 
 interface ServoControlProps {
@@ -29,7 +28,6 @@ interface ServoControlProps {
     servo: "bottom" | "paddle" | "pusher",
     position: string,
   ) => void;
-  onReset: (module: number, servo: ServoConfig) => void;
   onSliderChange: (
     module: number,
     servo: "bottom" | "paddle" | "pusher",
@@ -51,7 +49,6 @@ function ServoControl({
   isLoading,
   isConnected,
   onControl,
-  onReset,
   onSliderChange,
   onSetPosition,
 }: ServoControlProps) {
@@ -61,19 +58,7 @@ function ServoControl({
 
   return (
     <div className="flex flex-col gap-2">
-      <div className="flex items-center justify-between">
-        <p className="text-xs text-muted-foreground">{t(servo.labelKey)}</p>
-        <button
-          disabled={!isConnected}
-          onClick={() => onReset(module, servo)}
-          className="text-muted-foreground hover:text-foreground disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
-          title={t("moduleCalibrationGrid.resetTo", {
-            position: positionLabel(servo.defaultPosition),
-          })}
-        >
-          <IconRotateClockwise size={12} />
-        </button>
-      </div>
+      <p className="text-xs text-muted-foreground">{t(servo.labelKey)}</p>
 
       <ButtonGroup className="w-full">
         {servo.controlPositions.map((position) => (
@@ -183,7 +168,6 @@ interface ModuleCalibrationGridProps {
     servo: "bottom" | "paddle" | "pusher",
     position: string,
   ) => void;
-  onReset: (module: number, servo: ServoConfig) => void;
   onSliderChange: (
     module: number,
     servo: "bottom" | "paddle" | "pusher",
@@ -194,7 +178,6 @@ interface ModuleCalibrationGridProps {
     posKey: keyof ServoCalibration,
     value: number,
   ) => void;
-  onCenter: (module: number) => void;
 }
 
 export function ModuleCalibrationGrid({
@@ -205,7 +188,6 @@ export function ModuleCalibrationGrid({
   isLoading,
   isConnected,
   onControl,
-  onReset,
   onSliderChange,
   onSetPosition,
 }: ModuleCalibrationGridProps) {
@@ -232,7 +214,6 @@ export function ModuleCalibrationGrid({
                   isLoading={isLoading}
                   isConnected={isConnected}
                   onControl={onControl}
-                  onReset={onReset}
                   onSliderChange={onSliderChange}
                   onSetPosition={onSetPosition}
                 />

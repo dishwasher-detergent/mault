@@ -10,6 +10,7 @@ export interface BinConfigsContextValue {
   configs: BinConfig[];
   sets: BinSet[];
   fieldDefinitions: FieldMeta[];
+  apiDocsUrl: string | null;
   isPending: boolean;
   isActivating: boolean;
   isPresetMutating: boolean;

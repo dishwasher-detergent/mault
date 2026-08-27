@@ -11,6 +11,7 @@
     "eyebrow": "Discord Integration",
     "title": "Bring your card sorter into Discord",
     "description": "Magic Vault's Discord bot posts a message for every card as it's sorted, alerts your server when something goes wrong, and answers /stats on demand - so you don't have to keep the monitor page open to know what's happening.",
+    "addToDiscord": "Add to Discord",
     "getStarted": "Get started",
     "openSettings": "Open Settings",
     "seeSetup": "See setup steps",
@@ -18,8 +19,13 @@
   },
   "setup": {
     "title": "Link a server in under a minute",
-    "description": "Connecting Discord doesn't touch your hardware or scanning setup - it's three steps in the app and one command in Discord.",
+    "description": "Connecting Discord doesn't touch your hardware or scanning setup - it's a few steps in the app and in Discord.",
+    "installLink": "Add to Discord →",
     "steps": [
+      {
+        "title": "Add the bot",
+        "description": "Add the Magic Vault bot to your Discord server - requires the Manage Server permission."
+      },
       {
         "title": "Generate a code",
         "description": "In Magic Vault, go to Settings → Discord Bot and generate a link code. It's only valid for a few minutes."

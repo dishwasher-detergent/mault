@@ -67,6 +67,7 @@ export const games = pgTable(
     key: text("key").notNull(),
     name: text("name").notNull(),
     fieldDefinitions: jsonb("field_definitions").notNull(),
+    apiDocsUrl: text("api_docs_url"),
     isActive: boolean("is_active").notNull().default(true),
     createdAt: timestamp("created_at").defaultNow().notNull(),
     updatedAt: timestamp("updated_at").defaultNow().notNull(),

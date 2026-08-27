@@ -94,7 +94,6 @@
   },
   "moduleCalibrationGrid": {
     "moduleHeading": "Modul {{module}}",
-    "resetTo": "Auf {{position}} zurücksetzen",
     "sliderTooltip": "Rohe Servo-Impulsposition (120-490). Verwende zuerst die Positionsschaltflächen oben und dann eine \"Setzen\"-Schaltfläche, um dies als Kalibrierungspunkt zu speichern.",
     "positions": {
       "open": "Offen",

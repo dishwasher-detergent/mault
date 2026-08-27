@@ -32,6 +32,8 @@
     "keyPlaceholder": "Spiel auswählen",
     "nameLabel": "Name",
     "namePlaceholder": "Pokémon",
+    "apiDocsUrlLabel": "URL der API-Dokumentation",
+    "apiDocsUrlPlaceholder": "https://docs.pokemontcg.io/api-reference/cards/card-object",
     "activeLabel": "Aktiv",
     "cancel": "Abbrechen",
     "saving": "Wird gespeichert…",
@@ -40,6 +42,7 @@
     "validation": {
       "required": "Erforderlich",
       "keyFormat": "Nur Kleinbuchstaben, Zahlen und Bindestriche",
+      "urlFormat": "Gib eine gültige URL ein",
       "minFields": "Mindestens ein Feld hinzufügen"
     }
   },

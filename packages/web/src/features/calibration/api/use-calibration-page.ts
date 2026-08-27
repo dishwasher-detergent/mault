@@ -4,12 +4,11 @@ import { useModuleCount } from "@/features/calibration/api/use-module-count";
 import { useOrg } from "@/features/companies/api/use-organization";
 import { useFeederConfig } from "@/features/calibration/api/use-feeder-config";
 import { useModuleConfigs } from "@/features/calibration/api/use-module-configs";
-import { SERVOS } from "@/features/calibration/constants";
 import {
   defaultSliderValues,
   getCalibrationKey,
 } from "@/features/calibration/lib/calibration-utils";
-import type { ActivePositions, ServoConfig, SliderKey } from "@/features/calibration/types";
+import type { ActivePositions, SliderKey } from "@/features/calibration/types";
 import { useSerial } from "@/features/scanner/api/use-serial";
 import {
   computeBinCount,
@@ -119,16 +118,6 @@ export function useCalibrationPage() {
     [sendCommand],
   );
 
-  const handleReset = useCallback(
-    (module: number, servo: ServoConfig) => {
-      sendCommand(
-        JSON.stringify({ servo: servo.name, module, position: servo.defaultPosition }),
-      );
-      setActive((prev) => ({ ...prev, [`${module}:${servo.name}`]: null }));
-    },
-    [sendCommand],
-  );
-
   const handleSliderChange = useCallback(
     (module: number, servo: "bottom" | "paddle" | "pusher", value: number) => {
       setSliderValues((prev) => ({ ...prev, [`${module}:${servo}`]: value }));
@@ -208,22 +197,6 @@ export function useCalibrationPage() {
       setIsSampleRunning(false);
     }
   }, [sendRoute, resolveRoute, moduleCount, setActiveBin, t]);
-
-  const handleCenterModule = useCallback(
-    (module: number) => {
-      const CENTER = 307;
-      for (const servo of SERVOS) {
-        moveServo(module, servo.name, CENTER);
-      }
-      setSliderValues((prev) => ({
-        ...prev,
-        [`${module}:bottom`]: CENTER,
-        [`${module}:paddle`]: CENTER,
-        [`${module}:pusher`]: CENTER,
-      }));
-    },
-    [moveServo],
-  );
 
   const handleSetPosition = useCallback(
     (module: number, posKey: keyof ServoCalibration, value: number) => {
@@ -333,11 +306,9 @@ export function useCalibrationPage() {
     isTesting,
     isUnconfigured,
     handleControl,
-    handleReset,
     handleSliderChange,
     handleTest,
     handleTestBin,
-    handleCenterModule,
     handleSetPosition,
     feederConfig,
     feederSpeedValue,

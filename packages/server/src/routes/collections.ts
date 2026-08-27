@@ -54,6 +54,7 @@ function toCollection(row: {
   gameName: string | null;
   gameIsActive: boolean | null;
   gameFieldDefinitions: unknown;
+  gameApiDocsUrl: string | null;
   gameCreatedAt: Date | null;
   gameUpdatedAt: Date | null;
 }): Collection {
@@ -70,6 +71,7 @@ function toCollection(row: {
           name: row.gameName!,
           isActive: row.gameIsActive!,
           fieldDefinitions: row.gameFieldDefinitions as FieldMeta[],
+          apiDocsUrl: row.gameApiDocsUrl,
           createdAt: row.gameCreatedAt!,
           updatedAt: row.gameUpdatedAt!,
         }
@@ -121,6 +123,7 @@ async function _loadCollections(
       gameName: games.name,
       gameIsActive: games.isActive,
       gameFieldDefinitions: games.fieldDefinitions,
+      gameApiDocsUrl: games.apiDocsUrl,
       gameCreatedAt: games.createdAt,
       gameUpdatedAt: games.updatedAt,
     })
@@ -909,6 +912,7 @@ router.get("/:guid/stream", async (c) => {
                   name: game.name,
                   isActive: game.isActive,
                   fieldDefinitions: game.fieldDefinitions as FieldMeta[],
+                  apiDocsUrl: game.apiDocsUrl,
                   createdAt: game.createdAt,
                   updatedAt: game.updatedAt,
                 }

@@ -83,6 +83,7 @@ export function BinConfigsProvider({
   const activeGameGuid = targetCollection?.game?.guid;
   const fieldDefinitions =
     targetCollection?.game?.fieldDefinitions ?? FIELD_DEFINITIONS;
+  const apiDocsUrl = targetCollection?.game?.apiDocsUrl ?? null;
 
   const sets = useMemo(
     () => allSets.filter((s) => matchesGame(s, activeGameGuid)),
@@ -312,6 +313,7 @@ export function BinConfigsProvider({
         configs,
         sets,
         fieldDefinitions,
+        apiDocsUrl,
         isPending,
         isActivating,
         isPresetMutating,

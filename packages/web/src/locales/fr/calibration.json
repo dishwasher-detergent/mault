@@ -94,7 +94,6 @@
   },
   "moduleCalibrationGrid": {
     "moduleHeading": "Module {{module}}",
-    "resetTo": "Réinitialiser à {{position}}",
     "sliderTooltip": "Position brute de l'impulsion du servo (120-490). Utilise les boutons de position ci-dessus, puis un bouton « Définir » pour enregistrer ce point de calibration.",
     "positions": {
       "open": "Ouvert",

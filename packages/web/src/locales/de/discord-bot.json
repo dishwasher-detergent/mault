@@ -11,6 +11,7 @@
     "eyebrow": "Discord-Integration",
     "title": "Hol dir deinen Kartensortierer in Discord",
     "description": "Der Discord-Bot von Magic Vault postet für jede sortierte Karte eine Nachricht, warnt deinen Server bei Problemen und beantwortet /stats auf Abruf - so musst du nicht ständig die Monitor-Seite offen halten, um zu wissen, was passiert.",
+    "addToDiscord": "Zu Discord hinzufügen",
     "getStarted": "Loslegen",
     "openSettings": "Einstellungen öffnen",
     "seeSetup": "Einrichtungsschritte ansehen",
@@ -18,8 +19,13 @@
   },
   "setup": {
     "title": "Einen Server in unter einer Minute verknüpfen",
-    "description": "Das Verbinden von Discord verändert weder deine Hardware noch dein Scan-Setup - es sind drei Schritte in der App und ein Befehl in Discord.",
+    "description": "Das Verbinden von Discord verändert weder deine Hardware noch dein Scan-Setup - es sind nur wenige Schritte in der App und in Discord.",
+    "installLink": "Zu Discord hinzufügen →",
     "steps": [
+      {
+        "title": "Bot hinzufügen",
+        "description": "Füge den Magic-Vault-Bot zu deinem Discord-Server hinzu - erfordert die Berechtigung „Server verwalten“."
+      },
       {
         "title": "Code generieren",
         "description": "Gehe in Magic Vault zu Einstellungen → Discord-Bot und generiere einen Verknüpfungscode. Er ist nur wenige Minuten gültig."

@@ -15,6 +15,7 @@ function toGame(row: typeof games.$inferSelect): Game {
     name: row.name,
     isActive: row.isActive,
     fieldDefinitions: row.fieldDefinitions as FieldMeta[],
+    apiDocsUrl: row.apiDocsUrl,
     createdAt: row.createdAt,
     updatedAt: row.updatedAt,
   };
@@ -24,6 +25,7 @@ interface GameInput {
   key: string;
   name: string;
   fieldDefinitions: FieldMeta[];
+  apiDocsUrl?: string | null;
   isActive?: boolean;
 }
 
@@ -156,7 +158,7 @@ router.get("/:guid/languages", requireAuth, async (c) => {
 });
 
 router.post("/", requireAuth, requireRole("admin"), async (c) => {
-  const { key, name, fieldDefinitions, isActive } =
+  const { key, name, fieldDefinitions, apiDocsUrl, isActive } =
     await c.req.json<GameInput>();
 
   if (!key?.trim() || !name?.trim()) {
@@ -173,6 +175,7 @@ router.post("/", requireAuth, requireRole("admin"), async (c) => {
         key: key.trim(),
         name: name.trim(),
         fieldDefinitions,
+        apiDocsUrl: apiDocsUrl?.trim() || null,
         isActive: isActive ?? true,
       })
       .returning();
@@ -191,7 +194,7 @@ router.post("/", requireAuth, requireRole("admin"), async (c) => {
 
 router.put("/:guid", requireAuth, requireRole("admin"), async (c) => {
   const guid = c.req.param("guid");
-  const { key, name, fieldDefinitions, isActive } =
+  const { key, name, fieldDefinitions, apiDocsUrl, isActive } =
     await c.req.json<Partial<GameInput>>();
 
   try {
@@ -209,6 +212,7 @@ router.put("/:guid", requireAuth, requireRole("admin"), async (c) => {
     if (name !== undefined) updates.name = name.trim();
     if (fieldDefinitions !== undefined)
       updates.fieldDefinitions = fieldDefinitions;
+    if (apiDocsUrl !== undefined) updates.apiDocsUrl = apiDocsUrl?.trim() || null;
     if (isActive !== undefined) updates.isActive = isActive;
 
     const [row] = await db

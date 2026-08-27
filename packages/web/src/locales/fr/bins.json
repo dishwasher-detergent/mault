@@ -17,6 +17,7 @@
     "setCatchAll": "Définir comme fourre-tout",
     "catchAllDescription": "Les cartes qui ne correspondent à aucun autre bac iront ici.",
     "rulesLabel": "Règles",
+    "apiDocsLink": "Référence des champs",
     "clear": "Effacer",
     "save": "Enregistrer"
   },

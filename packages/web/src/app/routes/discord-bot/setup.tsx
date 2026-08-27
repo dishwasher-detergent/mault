@@ -1,8 +1,14 @@
 import { SectionHeading } from "@/components/section-heading";
-import { IconKey, IconLink, IconSettingsBolt } from "@tabler/icons-react";
+import { DISCORD_BOT_INSTALL_URL } from "@/lib/links";
+import {
+  IconBrandDiscord,
+  IconKey,
+  IconLink,
+  IconSettingsBolt,
+} from "@tabler/icons-react";
 import { useTranslation } from "react-i18next";
 
-const STEP_ICONS = [IconKey, IconLink, IconSettingsBolt];
+const STEP_ICONS = [IconBrandDiscord, IconKey, IconLink, IconSettingsBolt];
 
 export function DiscordBotSetup() {
   const { t } = useTranslation("discordBot");
@@ -20,7 +26,7 @@ export function DiscordBotSetup() {
           subtitle={t("setup.description")}
         />
 
-        <ol className="mt-8 grid gap-8 md:grid-cols-3">
+        <ol className="mt-8 grid gap-8 md:grid-cols-2 lg:grid-cols-4">
           {steps.map((step, i) => {
             const Icon = STEP_ICONS[i] ?? IconKey;
             return (
@@ -35,6 +41,16 @@ export function DiscordBotSetup() {
                 <p className="text-xs/relaxed text-muted-foreground">
                   {step.description}
                 </p>
+                {i === 0 && (
+                  <a
+                    href={DISCORD_BOT_INSTALL_URL}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="text-xs font-medium text-primary hover:underline"
+                  >
+                    {t("setup.installLink")}
+                  </a>
+                )}
               </li>
             );
           })}
