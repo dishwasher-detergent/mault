@@ -141,7 +141,11 @@
           },
           "m3x8Screw": {
             "part": "M3×8 screw",
-            "notes": "Attaches the hopper tube"
+            "notes": "Attaches the variable-height wall to the hopper tube"
+          },
+          "m3Washer": {
+            "part": "M3 washer",
+            "notes": "Used with the M3×8 screws on the variable-height hopper wall"
           },
           "m2x4Screw": {
             "part": "M2×4 screw",

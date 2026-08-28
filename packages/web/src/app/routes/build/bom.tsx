@@ -260,6 +260,14 @@ const GROUPS: Group[] = [
         buyUrl: "https://amzn.to/3UmCJx8",
       },
       {
+        key: "m3-washer",
+        qty: () => "2",
+        name: "M3 washer",
+        part: (t) => t("bom.groups.fasteners.items.m3Washer.part"),
+        notes: (t) => t("bom.groups.fasteners.items.m3Washer.notes"),
+        buyUrl: "https://amzn.to/3UmCJx8",
+      },
+      {
         key: "m2x4-screw",
         qty: (n) => String(n * 11),
         name: "M2x4 screw",

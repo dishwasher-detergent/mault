@@ -141,7 +141,11 @@
           },
           "m3x8Screw": {
             "part": "Vis M3×8",
-            "notes": "Fixe le tube de la trémie"
+            "notes": "Fixe la paroi à hauteur variable au tube de la trémie"
+          },
+          "m3Washer": {
+            "part": "Rondelle M3",
+            "notes": "Utilisée avec les vis M3×8 sur la paroi à hauteur variable de la trémie"
           },
           "m2x4Screw": {
             "part": "Vis M2×4",

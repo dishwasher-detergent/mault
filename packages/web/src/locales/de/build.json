@@ -141,7 +141,11 @@
           },
           "m3x8Screw": {
             "part": "M3×8-Schraube",
-            "notes": "Befestigt das Trichterrohr"
+            "notes": "Befestigt die höhenverstellbare Wand am Trichterrohr"
+          },
+          "m3Washer": {
+            "part": "M3-Unterlegscheibe",
+            "notes": "Wird zusammen mit den M3×8-Schrauben an der höhenverstellbaren Trichterwand verwendet"
           },
           "m2x4Screw": {
             "part": "M2×4-Schraube",
