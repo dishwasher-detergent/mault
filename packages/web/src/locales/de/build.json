@@ -90,8 +90,8 @@
         "title": "Stromversorgung",
         "items": {
           "psu": {
-            "part": "5-V-geregeltes Netzteil, 4–10 A",
-            "notes": "Eigene Servobus-Versorgung an die V+-Klemme des PCA9685 – versorge nicht 10 Servos über die 5V-Onboard-Versorgung des {{board}}-Boards"
+            "part": "6-V-geregeltes Netzteil, 2 A",
+            "notes": "Eigene Servobus-Versorgung an die V+-Klemme des PCA9685 – versorge nicht 10 Servos über die 5V-Onboard-Versorgung des {{board}}-Boards. Hohlstecker 5,5 mm x 2,5 mm, Innenleiter Plus."
           },
           "usbCable": {
             "part": "USB-A-auf-USB-C-Kabel",
@@ -209,8 +209,8 @@
     "servoPowerTable": {
       "colFrom": "Von",
       "colTo": "Zu",
-      "psuPlus": "Externes 5V-Netzteil, +",
-      "psuMinus": "Externes 5V-Netzteil, −",
+      "psuPlus": "Externes 6V-Netzteil, +",
+      "psuMinus": "Externes 6V-Netzteil, −",
       "toPositive": "PCA9685-<pin>V+</pin>-Klemmenblock",
       "toNegative": "PCA9685-<pin>GND</pin>-Klemmenblock <em>und</em> {{board}}-<pin>GND</pin>"
     },
@@ -341,7 +341,7 @@
             "text": "Montiere den Dauerdreh-Zuführservo an der Rolle, am Fuß des Trichters."
           },
           "mountFeederWall": {
-            "text": "Befestige das Wandstück am Rohr, das Karten vom Trichter zur Zuführrolle führt.",
+            "text": "Befestige das Wandstück mit den 2 M3×8-Schrauben und M3-Unterlegscheiben am Trichter - er führt Karten vom Trichter zur Zuführrolle.",
             "note": "Befestige beim Montieren der Wand diese zuerst am Zuführmodul, lege dann 2 Karten unter die Wand und schiebe sie nach unten, bevor du sie festziehst."
           }
         }
@@ -374,7 +374,7 @@
             "note": "Für Versorgung und Masse musst du {{count}} Leitungen zu einer zusammenführen, entweder mit einem Breadboard oder indem du sie verdrillst und verlötest. Du musst die Sensoren manuell auf eine kürzere Reichweite kalibrieren, um Fehlauslösungen zu vermeiden."
           },
           "wirePower": {
-            "text": "Führe die externe 5V-Versorgung an die V+/GND-Klemme des PCA9685 und verbinde deren Masse mit der Masse des {{board}}.",
+            "text": "Führe die externe 6V-Versorgung an die V+/GND-Klemme des PCA9685 und verbinde deren Masse mit der Masse des {{board}}.",
             "note": "Eine fehlende gemeinsame Masse ist die häufigste Ursache dafür, dass Servos zucken, sich aber nie korrekt bewegen."
           }
         }

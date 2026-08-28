@@ -90,8 +90,8 @@
         "title": "Power",
         "items": {
           "psu": {
-            "part": "5V regulated power supply, 4–10A",
-            "notes": "Dedicated servo bus power into the PCA9685 V+ terminal - do not power 10 servos off the {{board}}'s onboard 5V"
+            "part": "6V regulated power supply, 2A",
+            "notes": "Dedicated servo bus power into the PCA9685 V+ terminal - do not power 10 servos off the {{board}}'s onboard 5V. 5.5mm x 2.5mm barrel plug, center positive."
           },
           "usbCable": {
             "part": "USB-A–to–USB-C cable",
@@ -209,8 +209,8 @@
     "servoPowerTable": {
       "colFrom": "From",
       "colTo": "To",
-      "psuPlus": "External 5V PSU, +",
-      "psuMinus": "External 5V PSU, −",
+      "psuPlus": "External 6V PSU, +",
+      "psuMinus": "External 6V PSU, −",
       "toPositive": "PCA9685 <pin>V+</pin> terminal block",
       "toNegative": "PCA9685 <pin>GND</pin> terminal block <em>and</em> {{board}} <pin>GND</pin>"
     },
@@ -341,7 +341,7 @@
             "text": "Install the continuous-rotation feeder servo to the roller, at the base of the hopper."
           },
           "mountFeederWall": {
-            "text": "Attach the wall piece to the tube that guides cards from the hopper to the feeder roller.",
+            "text": "Attach the wall piece to the hopper using the 2 M3×8 screws and M3 washers - it guides cards from the hopper to the feeder roller.",
             "note": "When mounting the wall, attach it to the feeder module first, then put 2 cards below the wall and slide it down before tighting it into place."
           }
         }
@@ -374,7 +374,7 @@
             "note": "For the power and ground, you will have to combine {{count}} wires into one, either with a breadboard or by twisting and soldering them together. You will need to manually calibrate the sensors to have a shorter throw, as to not get false positives."
           },
           "wirePower": {
-            "text": "Bring the external 5V supply into the PCA9685 V+/GND terminal, and tie its ground to the {{board}}'s ground.",
+            "text": "Bring the external 6V supply into the PCA9685 V+/GND terminal, and tie its ground to the {{board}}'s ground.",
             "note": "Skipping the common ground is the #1 cause of servos that twitch but never move correctly."
           }
         }

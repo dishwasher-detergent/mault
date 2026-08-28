@@ -138,7 +138,7 @@ const GROUPS: Group[] = [
       {
         key: "psu",
         qty: () => "1",
-        name: "5V Power Supply",
+        name: "6V Power Supply",
         part: (t) => t("bom.groups.power.items.psu.part"),
         notes: (t, _, boardType) =>
           t("bom.groups.power.items.psu.notes", {
