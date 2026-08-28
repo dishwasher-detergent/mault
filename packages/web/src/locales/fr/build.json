@@ -90,8 +90,8 @@
         "title": "Alimentation",
         "items": {
           "psu": {
-            "part": "Alimentation régulée 5V, 4–10A",
-            "notes": "Alimentation dédiée au bus des servos vers la borne V+ du PCA9685 - ne pas alimenter 10 servos depuis le 5V embarqué de la carte {{board}}"
+            "part": "Alimentation régulée 6V, 2A",
+            "notes": "Alimentation dédiée au bus des servos vers la borne V+ du PCA9685 - ne pas alimenter 10 servos depuis le 5V embarqué de la carte {{board}}. Prise jack 5,5 mm x 2,5 mm, positif au centre."
           },
           "usbCable": {
             "part": "Câble USB-A vers USB-C",
@@ -141,7 +141,11 @@
           },
           "m3x8Screw": {
             "part": "Vis M3×8",
-            "notes": "Fixe le tube de la trémie"
+            "notes": "Fixe la paroi à hauteur variable au tube de la trémie"
+          },
+          "m3Washer": {
+            "part": "Rondelle M3",
+            "notes": "Utilisée avec les vis M3×8 sur la paroi à hauteur variable de la trémie"
           },
           "m2x4Screw": {
             "part": "Vis M2×4",
@@ -205,8 +209,8 @@
     "servoPowerTable": {
       "colFrom": "De",
       "colTo": "Vers",
-      "psuPlus": "Alimentation externe 5V, +",
-      "psuMinus": "Alimentation externe 5V, −",
+      "psuPlus": "Alimentation externe 6V, +",
+      "psuMinus": "Alimentation externe 6V, −",
       "toPositive": "Bornier <pin>V+</pin> du PCA9685",
       "toNegative": "Bornier <pin>GND</pin> du PCA9685 <em>et</em> <pin>GND</pin> du {{board}}"
     },
@@ -337,7 +341,7 @@
             "text": "Installe le servo de chargeur à rotation continue sur le rouleau, à la base de la trémie."
           },
           "mountFeederWall": {
-            "text": "Fixe la paroi au tube qui guide les cartes de la trémie vers le rouleau du chargeur.",
+            "text": "Fixe la paroi à la trémie avec les 2 vis M3×8 et les rondelles M3 - elle guide les cartes de la trémie vers le rouleau du chargeur.",
             "note": "Lors du montage de la paroi, fixe-la d'abord au module du chargeur, puis place 2 cartes sous la paroi et fais-la glisser vers le bas avant de la serrer en place."
           }
         }
@@ -370,7 +374,7 @@
             "note": "Pour l'alimentation et la masse, tu devras combiner {{count}} fils en un seul, soit avec une plaque d'essai, soit en les torsadant et en les soudant ensemble. Tu devras calibrer manuellement les capteurs pour avoir une portée plus courte, afin d'éviter les faux positifs."
           },
           "wirePower": {
-            "text": "Amène l'alimentation externe 5V au bornier V+/GND du PCA9685, et relie sa masse à celle du {{board}}.",
+            "text": "Amène l'alimentation externe 6V au bornier V+/GND du PCA9685, et relie sa masse à celle du {{board}}.",
             "note": "Oublier la masse commune est la cause n°1 des servos qui tremblent sans jamais bouger correctement."
           }
         }
