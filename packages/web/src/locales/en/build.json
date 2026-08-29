@@ -243,6 +243,8 @@
     "heading": "Assembly",
     "description": "Eight phases, structural work first. Checkboxes are saved in this browser, so you can close the tab mid-build and pick back up later.",
     "helpText": "Stuck on a step? <a>Join the Discord</a> if you need help.",
+    "hasVideoAria": "Includes walkthrough video",
+    "videoTitle": "Assembly video",
     "progress": {
       "stepsCount": "{{done}} of {{total}} steps"
     },
@@ -299,8 +301,8 @@
             "text": "Select board \"Arduino Uno R4 Minima\", select the correct port, then upload firmware/main/main.ino."
           },
           "uploadSketchEsp32": {
-            "text": "Select board \"ESP32S3 Dev Module\", select the correct port, then upload firmware/main/main.ino.",
-            "note": "Uses the ESP32-S3 pin layout already in the sketch (see the IR_PINS comment in main.ino) - if you're on a different ESP32 variant, its pins differ, so renumber IR_PINS/IR_PIN_HOPPER before wiring."
+            "text": "Select board \"ESP32S3 Dev Module\", set Tools → USB Mode to \"Hardware CDC and JTAG\" and USB CDC On Boot to \"Enabled\", select the correct port, then upload firmware/main/main.ino.",
+            "note": "Uses the ESP32-S3 pin layout already in the sketch (see the IR_PINS comment in main.ino) - if you're on a different ESP32 variant, its pins differ, so renumber IR_PINS/IR_PIN_HOPPER before wiring. Hardware CDC/JTAG mode with CDC On Boot enabled is required for the board to show up on its native USB port at all, and it's what lets the in-app browser flasher reset the board into bootloader mode reliably without a BOOT-button press; the tradeoff is the board enumerates under a generic Espressif name instead of \"Mault Card Sorter\"."
           },
           "confirmReady": {
             "text": "Open the Serial Monitor at 9600 baud and confirm you see {\"status\":\"ready\"} after the board resets."

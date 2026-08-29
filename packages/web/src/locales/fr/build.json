@@ -243,6 +243,8 @@
     "heading": "Assemblage",
     "description": "Huit phases, en commençant par le travail structurel. Les cases à cocher sont enregistrées dans ce navigateur, tu peux donc fermer l'onglet en cours de construction et reprendre plus tard.",
     "helpText": "Bloqué sur une étape ? <a>Rejoins le Discord</a> si tu as besoin d'aide.",
+    "hasVideoAria": "Comprend une vidéo explicative",
+    "videoTitle": "Vidéo de montage",
     "progress": {
       "stepsCount": "{{done}} sur {{total}} étapes"
     },
@@ -299,8 +301,8 @@
             "text": "Sélectionne la carte « Arduino Uno R4 Minima », sélectionne le bon port, puis téléverse firmware/main/main.ino."
           },
           "uploadSketchEsp32": {
-            "text": "Sélectionne la carte « ESP32S3 Dev Module », sélectionne le bon port, puis téléverse firmware/main/main.ino.",
-            "note": "Utilise la disposition de broches ESP32-S3 déjà présente dans le sketch (voir le commentaire IR_PINS dans main.ino) - sur une autre variante ESP32, les broches diffèrent, renumérote alors IR_PINS/IR_PIN_HOPPER."
+            "text": "Sélectionne la carte « ESP32S3 Dev Module », règle Tools → USB Mode sur « Hardware CDC and JTAG » et USB CDC On Boot sur « Enabled », sélectionne le bon port, puis téléverse firmware/main/main.ino.",
+            "note": "Utilise la disposition de broches ESP32-S3 déjà présente dans le sketch (voir le commentaire IR_PINS dans main.ino) - sur une autre variante ESP32, les broches diffèrent, renumérote alors IR_PINS/IR_PIN_HOPPER. Le mode Hardware CDC/JTAG avec CDC On Boot activé est nécessaire pour que la carte soit accessible via son port USB natif, et permet à l'outil de flashage intégré à l'application de remettre la carte en mode bootloader de façon fiable, sans appuyer sur le bouton BOOT ; en contrepartie, la carte s'annonce sous un nom Espressif générique plutôt que « Mault Card Sorter »."
           },
           "confirmReady": {
             "text": "Ouvre le moniteur série à 9600 bauds et confirme que tu vois {\"status\":\"ready\"} après la réinitialisation de la carte."

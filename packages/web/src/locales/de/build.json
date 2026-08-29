@@ -243,6 +243,8 @@
     "heading": "Montage",
     "description": "Acht Phasen, zuerst die Strukturarbeiten. Die Kontrollkästchen werden in diesem Browser gespeichert, sodass du den Tab mitten im Aufbau schließen und später weitermachen kannst.",
     "helpText": "Bei einem Schritt nicht weiter? <a>Tritt dem Discord bei</a>, wenn du Hilfe brauchst.",
+    "hasVideoAria": "Enthält ein Video zur Anleitung",
+    "videoTitle": "Montagevideo",
     "progress": {
       "stepsCount": "{{done}} von {{total}} Schritten"
     },
@@ -299,8 +301,8 @@
             "text": "Wähle das Board „Arduino Uno R4 Minima“, wähle den richtigen Port und lade dann firmware/main/main.ino hoch."
           },
           "uploadSketchEsp32": {
-            "text": "Wähle das Board „ESP32S3 Dev Module“, wähle den richtigen Port und lade dann firmware/main/main.ino hoch.",
-            "note": "Verwendet das im Sketch bereits hinterlegte ESP32-S3-Pinlayout (siehe den IR_PINS-Kommentar in main.ino) - bei einer anderen ESP32-Variante unterscheiden sich die Pins, nummeriere IR_PINS/IR_PIN_HOPPER in dem Fall neu."
+            "text": "Wähle das Board „ESP32S3 Dev Module“, stelle unter Tools → USB Mode „Hardware CDC and JTAG“ und USB CDC On Boot „Enabled“ ein, wähle den richtigen Port und lade dann firmware/main/main.ino hoch.",
+            "note": "Verwendet das im Sketch bereits hinterlegte ESP32-S3-Pinlayout (siehe den IR_PINS-Kommentar in main.ino) - bei einer anderen ESP32-Variante unterscheiden sich die Pins, nummeriere IR_PINS/IR_PIN_HOPPER in dem Fall neu. Hardware-CDC/JTAG-Modus mit aktiviertem CDC On Boot ist nötig, damit das Board überhaupt über seinen nativen USB-Port erreichbar ist, und ermöglicht es dem browserbasierten Flash-Tool in der App, das Board zuverlässig ohne Drücken der BOOT-Taste in den Bootloader-Modus zu versetzen; im Gegenzug meldet sich das Board unter einem generischen Espressif-Namen statt „Mault Card Sorter“."
           },
           "confirmReady": {
             "text": "Öffne den seriellen Monitor mit 9600 Baud und bestätige, dass nach dem Neustart des Boards {\"status\":\"ready\"} angezeigt wird."
