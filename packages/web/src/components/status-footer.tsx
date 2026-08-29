@@ -172,13 +172,22 @@ function HealthStatusItem() {
   const { pathname } = useLocation();
   const { data } = useQuery(healthQueryOptions);
 
-  // Only surfaces when something is actually down - unlike the camera/
-  // sorter dots (always shown, since "not connected" is routine), a
-  // healthy backend/upstream is the expected steady state and shouldn't
-  // occupy footer space just to say so.
-  if (!data || data.healthy || pathname === "/app/health") return null;
+  if (pathname === "/app/health") return null;
 
-  const failedChecks = data.checks.filter((check) => check.status === "error");
+  const failedChecks = data?.checks.filter((check) => check.status === "error") ?? [];
+  const dot = !data ? "muted" : data.healthy ? "success" : "error";
+  const label = !data
+    ? t("statusFooter.health")
+    : data.healthy
+      ? t("statusFooter.healthOk")
+      : t("statusFooter.healthIssues", { count: failedChecks.length });
+  const tooltip = !data
+    ? t("statusFooter.healthChecking")
+    : data.healthy
+      ? t("statusFooter.healthOkTooltip")
+      : t("statusFooter.healthIssuesTooltip", {
+          names: failedChecks.map((check) => check.name).join(", "),
+        });
 
   return (
     <Tooltip>
@@ -186,16 +195,10 @@ function HealthStatusItem() {
         onClick={() => navigate("/app/health")}
         className="flex items-center gap-1.5 cursor-pointer hover:text-foreground transition-colors"
       >
-        <StatusDot variant="error" />
-        <span className="text-xs text-muted-foreground">
-          {t("statusFooter.healthIssues", { count: failedChecks.length })}
-        </span>
+        <StatusDot variant={dot} />
+        <span className="text-xs text-muted-foreground">{label}</span>
       </TooltipTrigger>
-      <TooltipContent side="top">
-        {t("statusFooter.healthIssuesTooltip", {
-          names: failedChecks.map((check) => check.name).join(", "),
-        })}
-      </TooltipContent>
+      <TooltipContent side="top">{tooltip}</TooltipContent>
     </Tooltip>
   );
 }

@@ -54,7 +54,11 @@
     "cardTotal_other": "{{count}} cartes · ${{value}} USD",
     "healthIssues_one": "{{count}} problème détecté",
     "healthIssues_other": "{{count}} problèmes détectés",
-    "healthIssuesTooltip": "Problème avec : {{names}}. Cliquez pour les détails."
+    "healthIssuesTooltip": "Problème avec : {{names}}. Cliquez pour les détails.",
+    "health": "État",
+    "healthOk": "Tous les systèmes sont normaux",
+    "healthOkTooltip": "La base de données et toutes les API de cartes sont accessibles. Cliquez pour les détails.",
+    "healthChecking": "Vérification de l’état des services…"
   },
   "appVersion": {
     "outdatedBanner": "Une nouvelle version de Magic Vault est disponible.",
