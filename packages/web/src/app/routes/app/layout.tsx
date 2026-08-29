@@ -1,6 +1,5 @@
 import { AppProviders } from "@/app/providers";
 import { AppNav } from "@/app/routes/app/nav";
-import { AppBreadcrumb } from "@/components/app-breadcrumb";
 import { AppVersionBanner } from "@/components/app-version-banner";
 import { ChannelLayoutBanner } from "@/components/channel-layout-banner";
 import { EmailVerificationBanner } from "@/components/email-verification-banner";
@@ -11,10 +10,15 @@ import { ImpersonationBanner } from "@/components/impersonation-banner";
 import { PageTransition } from "@/components/page-transition";
 import { RequireCollectionDialog } from "@/components/require-collection-dialog";
 import { FooterDivider, StatusFooter } from "@/components/status-footer";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { useIsMobile } from "@/hooks/use-is-mobile";
+import { DONATE_URL } from "@/lib/links";
+import { IconCoffee } from "@tabler/icons-react";
+import { useTranslation } from "react-i18next";
 import { Outlet } from "react-router-dom";
 
 export default function AppLayout() {
+  const { t } = useTranslation("common");
   const isMobile = useIsMobile();
 
   return (
@@ -58,9 +62,27 @@ export default function AppLayout() {
             </div>
           </div>
           <div className="absolute bottom-0 left-0 px-4 h-6 flex items-center w-full gap-3 text-xs">
-            <AppBreadcrumb />
+            <StatusFooter />
             <div className="ml-auto flex items-center gap-3 shrink-0">
-              <StatusFooter />
+              <Tooltip>
+                <TooltipTrigger
+                  render={
+                    <a
+                      href={DONATE_URL}
+                      target="_blank"
+                      rel="noreferrer"
+                      aria-label={t("footer.donateAriaLabel")}
+                    />
+                  }
+                  className="flex items-center gap-1 text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  <IconCoffee size={14} />
+                  {t("footer.donate")}
+                </TooltipTrigger>
+                <TooltipContent side="top">
+                  {t("footer.donateAriaLabel")}
+                </TooltipContent>
+              </Tooltip>
               <FooterDivider />
               <div className="flex items-center gap-2">
                 <span className="text-muted-foreground">

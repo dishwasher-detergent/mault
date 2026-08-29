@@ -13,13 +13,10 @@
     "discordAriaLabel": "Join the Discord",
     "collapse": "Collapse",
     "collapseSidebar": "Collapse sidebar ([)",
-    "expandSidebar": "Expand sidebar ([)",
-    "donate": "Donate",
-    "donateAriaLabel": "Support Mault on Buy Me a Coffee"
+    "expandSidebar": "Expand sidebar ([)"
   },
   "breadcrumb": {
-    "account": "Account",
-    "sortingLogic": "Sorting Logic"
+    "account": "Account"
   },
   "userMenu": {
     "trigger": "Account menu",
@@ -105,5 +102,9 @@
     "description": "An unexpected error occurred. Try reloading the page.",
     "reload": "Reload page",
     "backHome": "Back to home"
+  },
+  "footer": {
+    "donate": "Donate",
+    "donateAriaLabel": "Support Mault on Buy Me a Coffee"
   }
 }

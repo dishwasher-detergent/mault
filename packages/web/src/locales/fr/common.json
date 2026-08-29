@@ -13,13 +13,10 @@
     "discordAriaLabel": "Rejoindre le Discord",
     "collapse": "Réduire",
     "collapseSidebar": "Réduire la barre latérale ([)",
-    "expandSidebar": "Développer la barre latérale ([)",
-    "donate": "Faire un don",
-    "donateAriaLabel": "Soutenir Mault sur Buy Me a Coffee"
+    "expandSidebar": "Développer la barre latérale ([)"
   },
   "breadcrumb": {
-    "account": "Compte",
-    "sortingLogic": "Logique de tri"
+    "account": "Compte"
   },
   "userMenu": {
     "trigger": "Menu du compte",
@@ -105,5 +102,9 @@
     "description": "Une erreur inattendue s'est produite. Essaie de recharger la page.",
     "reload": "Recharger la page",
     "backHome": "Retour à l'accueil"
+  },
+  "footer": {
+    "donate": "Faire un don",
+    "donateAriaLabel": "Soutenir Mault sur Buy Me a Coffee"
   }
 }
