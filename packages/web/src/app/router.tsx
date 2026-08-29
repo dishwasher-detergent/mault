@@ -25,6 +25,7 @@ const MonitorPage = lazy(() => import("@/app/routes/app/monitor"));
 const PhoneCameraPage = lazy(() => import("@/app/routes/app/phone-camera"));
 const SettingsPage = lazy(() => import("@/app/routes/app/settings"));
 const AccountPage = lazy(() => import("@/app/routes/app/account"));
+const HealthPage = lazy(() => import("@/app/routes/app/health"));
 
 function AdminGuard() {
   const { isAdmin, isPending } = useRole();
@@ -115,6 +116,10 @@ export const router = createBrowserRouter([
               {
                 path: "/app/settings",
                 element: <SettingsPage />,
+              },
+              {
+                path: "/app/health",
+                element: <HealthPage />,
               },
               {
                 path: "/app/account/:path",
