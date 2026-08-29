@@ -13,7 +13,9 @@
     "discordAriaLabel": "Join the Discord",
     "collapse": "Collapse",
     "collapseSidebar": "Collapse sidebar ([)",
-    "expandSidebar": "Expand sidebar ([)"
+    "expandSidebar": "Expand sidebar ([)",
+    "donate": "Donate",
+    "donateAriaLabel": "Support Mault on Buy Me a Coffee"
   },
   "breadcrumb": {
     "account": "Account",

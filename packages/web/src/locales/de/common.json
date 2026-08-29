@@ -13,7 +13,9 @@
     "discordAriaLabel": "Discord beitreten",
     "collapse": "Einklappen",
     "collapseSidebar": "Seitenleiste einklappen ([)",
-    "expandSidebar": "Seitenleiste ausklappen ([)"
+    "expandSidebar": "Seitenleiste ausklappen ([)",
+    "donate": "Spenden",
+    "donateAriaLabel": "Mault auf Buy Me a Coffee unterstützen"
   },
   "breadcrumb": {
     "account": "Konto",

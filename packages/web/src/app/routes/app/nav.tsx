@@ -22,13 +22,14 @@ import { useLiveSessionCounts } from "@/features/collections/api/use-live-counts
 import { OrgSwitcher } from "@/features/companies/components/org-switcher";
 import { useIsMobile } from "@/hooks/use-is-mobile";
 import { useRole } from "@/hooks/use-role";
-import { DISCORD_URL } from "@/lib/links";
+import { DISCORD_URL, DONATE_URL } from "@/lib/links";
 import { cn } from "@/lib/utils";
 import {
   IconAdjustments,
   IconAlbum,
   IconBrandDiscord,
   IconCameraSpark,
+  IconCoffee,
   IconDatabaseCog,
   IconHeartRateMonitor,
   IconLayoutSidebarLeftCollapse,
@@ -521,6 +522,25 @@ export function AppNav() {
         <IconBrandDiscord size={16} />
         {expanded && (
           <span className="truncate text-sm">{t("nav.discord")}</span>
+        )}
+      </a>
+      <a
+        href={DONATE_URL}
+        target="_blank"
+        rel="noreferrer"
+        title={t("nav.donateAriaLabel")}
+        aria-label={t("nav.donateAriaLabel")}
+        className={cn(
+          buttonVariants({
+            variant: "ghost",
+            size: `${expanded ? "default" : "icon-lg"}`,
+          }),
+          expanded ? "mx-2 justify-start gap-2.5 px-2.5 border-0" : "",
+        )}
+      >
+        <IconCoffee size={16} />
+        {expanded && (
+          <span className="truncate text-sm">{t("nav.donate")}</span>
         )}
       </a>
       <Button
