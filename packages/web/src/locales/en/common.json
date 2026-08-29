@@ -52,7 +52,10 @@
     "syncFailed": "Card image vector sync failed",
     "sync": "Card image vector sync",
     "cardTotal_one": "{{count}} card · ${{value}} USD",
-    "cardTotal_other": "{{count}} cards · ${{value}} USD"
+    "cardTotal_other": "{{count}} cards · ${{value}} USD",
+    "healthIssues_one": "{{count}} issue detected",
+    "healthIssues_other": "{{count}} issues detected",
+    "healthIssuesTooltip": "Having trouble: {{names}}. Click for details."
   },
   "appVersion": {
     "outdatedBanner": "A new version of Magic Vault is available.",

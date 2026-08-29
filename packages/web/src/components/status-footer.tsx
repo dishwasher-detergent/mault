@@ -3,12 +3,14 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { healthQueryOptions } from "@/features/health/api/health";
 import { useCameraContext } from "@/features/scanner/api/use-camera";
 import { useScannedCards } from "@/features/scanner/api/use-scanned-cards";
 import { useSerial } from "@/features/scanner/api/use-serial";
 import { useRole } from "@/hooks/use-role";
 import { createSyncEventSource } from "@/lib/api/admin";
 import type { SyncState } from "@magic-vault/shared";
+import { useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useLocation, useNavigate } from "react-router-dom";
@@ -164,6 +166,40 @@ function SyncStatusItem() {
   );
 }
 
+function HealthStatusItem() {
+  const { t } = useTranslation("common");
+  const navigate = useNavigate();
+  const { pathname } = useLocation();
+  const { data } = useQuery(healthQueryOptions);
+
+  // Only surfaces when something is actually down - unlike the camera/
+  // sorter dots (always shown, since "not connected" is routine), a
+  // healthy backend/upstream is the expected steady state and shouldn't
+  // occupy footer space just to say so.
+  if (!data || data.healthy || pathname === "/app/health") return null;
+
+  const failedChecks = data.checks.filter((check) => check.status === "error");
+
+  return (
+    <Tooltip>
+      <TooltipTrigger
+        onClick={() => navigate("/app/health")}
+        className="flex items-center gap-1.5 cursor-pointer hover:text-foreground transition-colors"
+      >
+        <StatusDot variant="error" />
+        <span className="text-xs text-muted-foreground">
+          {t("statusFooter.healthIssues", { count: failedChecks.length })}
+        </span>
+      </TooltipTrigger>
+      <TooltipContent side="top">
+        {t("statusFooter.healthIssuesTooltip", {
+          names: failedChecks.map((check) => check.name).join(", "),
+        })}
+      </TooltipContent>
+    </Tooltip>
+  );
+}
+
 export function StatusFooter() {
   const { t } = useTranslation("common");
   const { status: cameraStatus } = useCameraContext();
@@ -217,6 +253,7 @@ export function StatusFooter() {
         />
         <StatusItem label={deviceLabel} dot={deviceDot} tooltip={deviceTooltip} />
         <SyncStatusItem />
+        <HealthStatusItem />
       </div>
       {cards.length > 0 && (
         <>

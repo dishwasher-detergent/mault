@@ -52,7 +52,10 @@
     "syncFailed": "Kartenbild-Vektor-Sync fehlgeschlagen",
     "sync": "Kartenbild-Vektor-Sync",
     "cardTotal_one": "{{count}} Karte · ${{value}} USD",
-    "cardTotal_other": "{{count}} Karten · ${{value}} USD"
+    "cardTotal_other": "{{count}} Karten · ${{value}} USD",
+    "healthIssues_one": "{{count}} Problem erkannt",
+    "healthIssues_other": "{{count}} Probleme erkannt",
+    "healthIssuesTooltip": "Probleme bei: {{names}}. Für Details klicken."
   },
   "appVersion": {
     "outdatedBanner": "Eine neue Version von Magic Vault ist verfügbar.",
