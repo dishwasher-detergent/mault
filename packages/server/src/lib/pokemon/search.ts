@@ -4,7 +4,7 @@ import { fetchCardApi } from "../card-search/fetch";
 import type { CardSearchAdapter } from "../card-search/types";
 import { validateQuery } from "../card-search/validate";
 
-export const POKEMON_DEFAULT_URL = "https://api.tcgdex.net/v2/en/cards";
+export const POKEMON_DEFAULT_URL = "https://api.eu1.tcgdex.net/v2/en/cards";
 
 interface PokemonCardBrief {
   id: string;

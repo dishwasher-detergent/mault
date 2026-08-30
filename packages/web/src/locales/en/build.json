@@ -149,8 +149,8 @@
           },
           "m2x4Screw": {
             "part": "M2×4 screw",
-            "partSpec": "(11 per module)",
-            "notes": "11 per module ({{count}} modules): flapper (bottom/sides), pusher arms, and IR sensor mounts"
+            "partSpec": "(20 for 2 modules, +6 per module beyond that)",
+            "notes": "20 for 2 modules, +6 per additional module ({{count}} modules): flapper (bottom/sides), pusher arms, and IR sensor mounts"
           },
           "m2x6Screw": {
             "part": "M2×6 screw",
