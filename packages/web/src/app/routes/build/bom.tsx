@@ -269,7 +269,7 @@ const GROUPS: Group[] = [
       },
       {
         key: "m2x4-screw",
-        qty: (n) => String(n * 11),
+        qty: (n) => String(20 + (n - 2) * 6),
         name: "M2x4 screw",
         part: (t) => (
           <>

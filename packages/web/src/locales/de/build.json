@@ -149,8 +149,8 @@
           },
           "m2x4Screw": {
             "part": "M2×4-Schraube",
-            "partSpec": "(11 pro Modul)",
-            "notes": "11 pro Modul ({{count}} Module): Klappen (Boden/Seiten), Schieberarme und IR-Sensorhalterungen"
+            "partSpec": "(20 für 2 Module, +6 pro weiteres Modul)",
+            "notes": "20 für 2 Module, +6 pro zusätzliches Modul ({{count}} Module): Klappen (Boden/Seiten), Schieberarme und IR-Sensorhalterungen"
           },
           "m2x6Screw": {
             "part": "M2×6-Schraube",

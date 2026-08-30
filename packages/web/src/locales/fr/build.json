@@ -149,8 +149,8 @@
           },
           "m2x4Screw": {
             "part": "Vis M2×4",
-            "partSpec": "(11 par module)",
-            "notes": "11 par module ({{count}} modules) : trappe (bas/côtés), bras du poussoir, et supports du capteur IR"
+            "partSpec": "(20 pour 2 modules, +6 par module supplémentaire)",
+            "notes": "20 pour 2 modules, +6 par module supplémentaire ({{count}} modules) : trappe (bas/côtés), bras du poussoir, et supports du capteur IR"
           },
           "m2x6Screw": {
             "part": "Vis M2×6",
