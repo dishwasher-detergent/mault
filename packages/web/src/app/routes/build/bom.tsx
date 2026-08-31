@@ -311,6 +311,14 @@ const GROUPS: Group[] = [
         buyUrl: "https://amzn.to/45T0LCt",
       },
       {
+        key: "wago-connectors",
+        qty: () => "2",
+        name: "Wago connectors",
+        part: (t) => t("bom.groups.fasteners.items.wagoConnectors.part"),
+        notes: (t) => t("bom.groups.fasteners.items.wagoConnectors.notes"),
+        buyUrl: "https://amzn.to/3UJSq1u",
+      },
+      {
         key: "dupont-connectors",
         qty: () => "~50",
         name: "Dupont Connectors",

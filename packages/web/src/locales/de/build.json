@@ -164,6 +164,10 @@
             "part": "Niederspannungskabel",
             "notes": "IR-Sensoren/Servos. Damit musst du eventuell einige in Reihe verbinden – umwickle sie einfach mit Isolierband, damit sie sich nicht lösen."
           },
+          "wagoConnectors": {
+            "part": "Wago-Verbinder (optional)",
+            "notes": "Verteilt Strom und Masse an jeden IR-Sensor, ohne Kabel verdrillen oder löten zu müssen"
+          },
           "dupontConnectors": {
             "part": "Dupont-Steckverbinder (optional)",
             "notes": "Diese werden nur benötigt, wenn du eigene Kabel in individueller Länge herstellst."

@@ -164,6 +164,10 @@
             "part": "Low Voltage Wire",
             "notes": "IR sensor/Servos. Using these you may have to daisy chain some together, just electrical tape them to make sure they don't come apart."
           },
+          "wagoConnectors": {
+            "part": "Wago connectors (Optional)",
+            "notes": "Splices power and ground to each IR sensor without twisting/soldering wires together"
+          },
           "dupontConnectors": {
             "part": "Dupont Connectors (Optional)",
             "notes": "These are only needed if you're making your own custom length wires."

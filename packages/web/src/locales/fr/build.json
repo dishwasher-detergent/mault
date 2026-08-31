@@ -164,6 +164,10 @@
             "part": "Fil basse tension",
             "notes": "Capteur IR/Servos. Avec ceux-ci, tu devras peut-être en chaîner certains ensemble, utilise du ruban électrique pour t'assurer qu'ils ne se séparent pas."
           },
+          "wagoConnectors": {
+            "part": "Connecteurs Wago (optionnel)",
+            "notes": "Répartit l'alimentation et la masse vers chaque capteur IR sans avoir à torsader ou souder les fils"
+          },
           "dupontConnectors": {
             "part": "Connecteurs Dupont (optionnel)",
             "notes": "Nécessaires uniquement si tu fabriques tes propres câbles sur mesure."
