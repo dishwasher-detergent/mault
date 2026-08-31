@@ -199,6 +199,7 @@
     "sessionEndedDescription": "The scanner disconnected this camera. You can turn off the camera or scan a new QR code to reconnect."
   },
   "scannerOverlay": {
+    "apiDown": "{{api}} is currently down - scanning is disabled for this collection until it's back. Check the status page for updates.",
     "connectCamera": "Connect a camera to start scanning.",
     "waitingForPhone": "Waiting for a phone to pair as the camera - use the camera menu to show the QR code.",
     "phoneReadyNoPhoto": "Phone camera ready. It'll take a photo as soon as a card arrives.",

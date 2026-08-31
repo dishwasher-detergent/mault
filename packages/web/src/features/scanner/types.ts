@@ -1,6 +1,7 @@
 import type { PhoneCameraCaptureStatus } from "@/features/scanner/api/use-phone-camera-capture";
 import type {
   BinRoute,
+  HealthCheck,
   PlayingCard,
   PlayingCardWithDistance,
   ScanRegion,
@@ -117,6 +118,7 @@ export interface ScannerOverlayProps {
   cameraSource: CameraSource;
   phonePairingStatus: PhoneCameraCaptureStatus;
   hasPhonePhoto: boolean;
+  apiHealthCheck: HealthCheck | null;
   onRetryError: () => void;
   onConnectScanner: () => void;
 }
