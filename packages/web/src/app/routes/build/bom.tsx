@@ -252,11 +252,11 @@ const GROUPS: Group[] = [
         buyUrl: "https://amzn.to/3UmCJx8",
       },
       {
-        key: "m3x8-screw",
+        key: "m3x10-screw",
         qty: () => "2",
-        name: "M3x8 screw",
-        part: (t) => t("bom.groups.fasteners.items.m3x8Screw.part"),
-        notes: (t) => t("bom.groups.fasteners.items.m3x8Screw.notes"),
+        name: "M3x10 screw",
+        part: (t) => t("bom.groups.fasteners.items.m3x10Screw.part"),
+        notes: (t) => t("bom.groups.fasteners.items.m3x10Screw.notes"),
         buyUrl: "https://amzn.to/3UmCJx8",
       },
       {
