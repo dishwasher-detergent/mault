@@ -339,6 +339,14 @@ const GROUPS: Group[] = [
         notes: (t) => t("bom.groups.optional.items.webcam.notes"),
         buyUrl: "https://amzn.to/3SvwSVM",
       },
+      {
+        key: "camera-mount-screw",
+        qty: () => "1",
+        name: "1/4\"-20 camera mount screw",
+        part: (t) => t("bom.groups.optional.items.cameraMountScrew.part"),
+        notes: (t) => t("bom.groups.optional.items.cameraMountScrew.notes"),
+        buyUrl: "https://amzn.to/4gKMoVS",
+      },
     ],
   },
 ];

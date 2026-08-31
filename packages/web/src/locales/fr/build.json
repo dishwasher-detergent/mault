@@ -180,6 +180,10 @@
           "webcam": {
             "part": "Webcam USB",
             "notes": "C'est celle que j'utilise - n'importe quelle webcam fonctionne tant que tu peux régler manuellement la mise au point, la luminosité, etc. (le réglage automatique peut fausser les scans)"
+          },
+          "cameraMountScrew": {
+            "part": "Vis de fixation caméra 1/4\"-20",
+            "notes": "Filetage standard de fixation trépied - se visse dans le support de webcam ou de téléphone"
           }
         }
       }

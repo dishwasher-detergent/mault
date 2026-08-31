@@ -180,6 +180,10 @@
           "webcam": {
             "part": "USB webcam",
             "notes": "This is the one I use - any webcam works as long as you can manually adjust focus, brightness, etc. (auto-adjusting can throw off scans)"
+          },
+          "cameraMountScrew": {
+            "part": "1/4\"-20 camera mount screw",
+            "notes": "Standard tripod-mount thread - screws into a webcam or phone mount's socket"
           }
         }
       }

@@ -180,6 +180,10 @@
           "webcam": {
             "part": "USB-Webcam",
             "notes": "Das ist die, die ich verwende - jede Webcam funktioniert, solange sich Fokus, Helligkeit usw. manuell einstellen lassen (automatische Anpassung kann Scans verfälschen)"
+          },
+          "cameraMountScrew": {
+            "part": "1/4\"-20 Kamera-Befestigungsschraube",
+            "notes": "Standard-Stativgewinde - passt in die Buchse einer Webcam- oder Telefonhalterung"
           }
         }
       }
