@@ -139,13 +139,13 @@
             "part": "M3-Mutter",
             "notes": "Passend zu den M3×6-Schrauben der Bodenplatte"
           },
-          "m3x8Screw": {
-            "part": "M3×8-Schraube",
+          "m3x10Screw": {
+            "part": "M3×10-Schraube",
             "notes": "Befestigt die höhenverstellbare Wand am Trichterrohr"
           },
           "m3Washer": {
             "part": "M3-Unterlegscheibe",
-            "notes": "Wird zusammen mit den M3×8-Schrauben an der höhenverstellbaren Trichterwand verwendet"
+            "notes": "Wird zusammen mit den M3×10-Schrauben an der höhenverstellbaren Trichterwand verwendet"
           },
           "m2x4Screw": {
             "part": "M2×4-Schraube",
@@ -309,8 +309,8 @@
           }
         }
       },
-      "servos": {
-        "title": "Die Servos montieren",
+      "assembleModules": {
+        "title": "Die Module zusammenbauen",
         "steps": {
           "mountModuleServos": {
             "text": "Setze den Boden-, Paddel- und Schieberservo - alles 180°-Positionsservos vom Typ SG90 - in jedes der 3 Modulgehäuse ein (insgesamt 9 Servos).",
@@ -343,14 +343,9 @@
             "text": "Montiere den Dauerdreh-Zuführservo an der Rolle, am Fuß des Trichters."
           },
           "mountFeederWall": {
-            "text": "Befestige das Wandstück mit den 2 M3×8-Schrauben und M3-Unterlegscheiben am Trichter - er führt Karten vom Trichter zur Zuführrolle.",
+            "text": "Befestige das Wandstück mit den 2 M3×10-Schrauben und M3-Unterlegscheiben am Trichter - er führt Karten vom Trichter zur Zuführrolle.",
             "note": "Befestige beim Montieren der Wand diese zuerst am Zuführmodul, lege dann 2 Karten unter die Wand und schiebe sie nach unten, bevor du sie festziehst."
-          }
-        }
-      },
-      "irSensors": {
-        "title": "Die IR-Sensoren montieren",
-        "steps": {
+          },
           "mountModuleIr": {
             "text": "Befestige an jedem Modul (1-{{modules}}) einen IR-Sensor am Tor mit je 1 M2×6-Schraube, ausgerichtet quer zum Kartenweg."
           },

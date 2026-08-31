@@ -139,13 +139,13 @@
             "part": "M3 nut",
             "notes": "Paired with the base panel M3×6 screws"
           },
-          "m3x8Screw": {
-            "part": "M3×8 screw",
+          "m3x10Screw": {
+            "part": "M3×10 screw",
             "notes": "Attaches the variable-height wall to the hopper tube"
           },
           "m3Washer": {
             "part": "M3 washer",
-            "notes": "Used with the M3×8 screws on the variable-height hopper wall"
+            "notes": "Used with the M3×10 screws on the variable-height hopper wall"
           },
           "m2x4Screw": {
             "part": "M2×4 screw",
@@ -309,8 +309,8 @@
           }
         }
       },
-      "servos": {
-        "title": "Mount the servos",
+      "assembleModules": {
+        "title": "Assemble the modules",
         "steps": {
           "mountModuleServos": {
             "text": "Install the bottom, paddle, and pusher servo - all 180° positional SG90s - into each of the 3 module housings (9 servos total).",
@@ -343,14 +343,9 @@
             "text": "Install the continuous-rotation feeder servo to the roller, at the base of the hopper."
           },
           "mountFeederWall": {
-            "text": "Attach the wall piece to the hopper using the 2 M3×8 screws and M3 washers - it guides cards from the hopper to the feeder roller.",
+            "text": "Attach the wall piece to the hopper using the 2 M3×10 screws and M3 washers - it guides cards from the hopper to the feeder roller.",
             "note": "When mounting the wall, attach it to the feeder module first, then put 2 cards below the wall and slide it down before tighting it into place."
-          }
-        }
-      },
-      "irSensors": {
-        "title": "Mount the IR sensors",
-        "steps": {
+          },
           "mountModuleIr": {
             "text": "Fix one IR sensor at the gate of each module (1-{{modules}}) with 1 M2×6 screw each, aimed across the card path."
           },

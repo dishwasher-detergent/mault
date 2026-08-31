@@ -139,13 +139,13 @@
             "part": "Écrou M3",
             "notes": "Associé aux vis M3×6 des panneaux de base"
           },
-          "m3x8Screw": {
-            "part": "Vis M3×8",
+          "m3x10Screw": {
+            "part": "Vis M3×10",
             "notes": "Fixe la paroi à hauteur variable au tube de la trémie"
           },
           "m3Washer": {
             "part": "Rondelle M3",
-            "notes": "Utilisée avec les vis M3×8 sur la paroi à hauteur variable de la trémie"
+            "notes": "Utilisée avec les vis M3×10 sur la paroi à hauteur variable de la trémie"
           },
           "m2x4Screw": {
             "part": "Vis M2×4",
@@ -309,8 +309,8 @@
           }
         }
       },
-      "servos": {
-        "title": "Monter les servos",
+      "assembleModules": {
+        "title": "Assembler les modules",
         "steps": {
           "mountModuleServos": {
             "text": "Installe le servo inférieur, le servo de palette et le poussoir - tous des servos SG90 positionnels à 180° - dans chacun des 3 logements de module (9 servos au total).",
@@ -343,14 +343,9 @@
             "text": "Installe le servo de chargeur à rotation continue sur le rouleau, à la base de la trémie."
           },
           "mountFeederWall": {
-            "text": "Fixe la paroi à la trémie avec les 2 vis M3×8 et les rondelles M3 - elle guide les cartes de la trémie vers le rouleau du chargeur.",
+            "text": "Fixe la paroi à la trémie avec les 2 vis M3×10 et les rondelles M3 - elle guide les cartes de la trémie vers le rouleau du chargeur.",
             "note": "Lors du montage de la paroi, fixe-la d'abord au module du chargeur, puis place 2 cartes sous la paroi et fais-la glisser vers le bas avant de la serrer en place."
-          }
-        }
-      },
-      "irSensors": {
-        "title": "Monter les capteurs IR",
-        "steps": {
+          },
           "mountModuleIr": {
             "text": "Fixe un capteur IR à la porte de chaque module (1 à {{modules}}) avec 1 vis M2×6 chacun, pointé à travers le trajet de la carte."
           },
