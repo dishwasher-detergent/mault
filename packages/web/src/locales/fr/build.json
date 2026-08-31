@@ -363,8 +363,8 @@
           }
         }
       },
-      "wiring": {
-        "title": "Câbler l'électronique",
+      "wireAndCalibrate": {
+        "title": "Câbler et calibrer",
         "steps": {
           "wireI2c": {
             "text": "Câble le PCA9685 au bus I²C du {{board}} (SDA/SCL) et à l'alimentation logique/GND.",
@@ -381,25 +381,7 @@
           "wirePower": {
             "text": "Amène l'alimentation externe 6V au bornier V+/GND du PCA9685, et relie sa masse à celle du {{board}}.",
             "note": "Oublier la masse commune est la cause n°1 des servos qui tremblent sans jamais bouger correctement."
-          }
-        }
-      },
-      "powerOnTest": {
-        "title": "Premier test de mise sous tension",
-        "steps": {
-          "runTestCommand": {
-            "text": "Avec l'alimentation externe des servos connectée, envoie {\"test\": true} en série.",
-            "note": "Ouvre chaque trappe inférieure et palette, balaie tous les poussoirs à gauche puis à droite, revient au neutre, puis fait brièvement tourner le chargeur."
           },
-          "watchModules": {
-            "text": "Observe chaque module pendant le test - confirme que rien ne coince ou ne grince en fin de course.",
-            "note": "Si un servo force en position ouverte ou fermée, son logement a probablement besoin d'être ajusté avant la calibration."
-          }
-        }
-      },
-      "calibrate": {
-        "title": "Calibrer depuis l'application",
-        "steps": {
           "connectSerial": {
             "text": "Connecte le {{board}} à l'application via Web Serial, puis ouvre /app/calibrate."
           },
@@ -418,6 +400,19 @@
           },
           "testBins": {
             "text": "Contrôles de routage des bacs - envoie une carte de test vers chacun des 7 bacs à tour de rôle et confirme qu'elle atterrit correctement."
+          }
+        }
+      },
+      "powerOnTest": {
+        "title": "Premier test de mise sous tension",
+        "steps": {
+          "runTestCommand": {
+            "text": "Avec l'alimentation externe des servos connectée, envoie {\"test\": true} en série.",
+            "note": "Ouvre chaque trappe inférieure et palette, balaie tous les poussoirs à gauche puis à droite, revient au neutre, puis fait brièvement tourner le chargeur."
+          },
+          "watchModules": {
+            "text": "Observe chaque module pendant le test - confirme que rien ne coince ou ne grince en fin de course.",
+            "note": "Si un servo force en position ouverte ou fermée, son logement a probablement besoin d'être ajusté avant la calibration."
           }
         }
       },

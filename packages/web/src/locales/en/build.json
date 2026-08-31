@@ -363,8 +363,8 @@
           }
         }
       },
-      "wiring": {
-        "title": "Wire the electronics",
+      "wireAndCalibrate": {
+        "title": "Wire and calibrate",
         "steps": {
           "wireI2c": {
             "text": "Wire the PCA9685 to the {{board}}'s I²C bus (SDA/SCL) and logic power/GND.",
@@ -381,25 +381,7 @@
           "wirePower": {
             "text": "Bring the external 6V supply into the PCA9685 V+/GND terminal, and tie its ground to the {{board}}'s ground.",
             "note": "Skipping the common ground is the #1 cause of servos that twitch but never move correctly."
-          }
-        }
-      },
-      "powerOnTest": {
-        "title": "First power-on test",
-        "steps": {
-          "runTestCommand": {
-            "text": "With the external servo supply connected, send {\"test\": true} over serial.",
-            "note": "Cycles every bottom and paddle open, sweeps all pushers left then right, resets to neutral, then briefly spins the feeder."
           },
-          "watchModules": {
-            "text": "Watch each module during the test - confirm nothing binds or grinds at the end of its travel.",
-            "note": "If a servo strains at open or closed, its housing cutout likely needs adjusting before calibration."
-          }
-        }
-      },
-      "calibrate": {
-        "title": "Calibrate from the app",
-        "steps": {
           "connectSerial": {
             "text": "Connect the {{board}} to the app via Web Serial, then open /app/calibrate."
           },
@@ -418,6 +400,19 @@
           },
           "testBins": {
             "text": "Bin Routing Controls - send a test card to each of the 7 bins in turn and confirm it lands correctly."
+          }
+        }
+      },
+      "powerOnTest": {
+        "title": "First power-on test",
+        "steps": {
+          "runTestCommand": {
+            "text": "With the external servo supply connected, send {\"test\": true} over serial.",
+            "note": "Cycles every bottom and paddle open, sweeps all pushers left then right, resets to neutral, then briefly spins the feeder."
+          },
+          "watchModules": {
+            "text": "Watch each module during the test - confirm nothing binds or grinds at the end of its travel.",
+            "note": "If a servo strains at open or closed, its housing cutout likely needs adjusting before calibration."
           }
         }
       },

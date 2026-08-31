@@ -35,9 +35,24 @@ router.get("/games", async (c) => {
       .groupBy(cardImageVectors.gameKey);
     const countByKey = new Map(countRows.map((r) => [r.gameKey, r.count]));
 
+    const langRows = await db
+      .select({
+        gameKey: cardImageVectors.gameKey,
+        lang: cardImageVectors.lang,
+      })
+      .from(cardImageVectors)
+      .groupBy(cardImageVectors.gameKey, cardImageVectors.lang);
+    const langsByKey = new Map<string, string[]>();
+    for (const row of langRows) {
+      const list = langsByKey.get(row.gameKey) ?? [];
+      list.push(row.lang);
+      langsByKey.set(row.gameKey, list);
+    }
+
     const data = rows.map((row) => ({
       ...row,
       cardCount: countByKey.get(row.key) ?? 0,
+      languages: (langsByKey.get(row.key) ?? []).sort(),
     }));
 
     return c.json({ success: true, data });
