@@ -133,7 +133,7 @@
         "items": {
           "m3x6Screw": {
             "part": "M3×6-Schraube",
-            "notes": "14 befestigen jeweils den Fachboden am Gehäuse; 8 befestigen die Bodenplatten an der Basis"
+            "notes": "14 befestigen jeweils den Fachboden am Gehäuse; 8 befestigen die Bodenplatten an der Basis; 2 befestigen eine Kamera- oder Telefonhalterung"
           },
           "m3Nut": {
             "part": "M3-Mutter",
@@ -149,12 +149,12 @@
           },
           "m2x4Screw": {
             "part": "M2×4-Schraube",
-            "partSpec": "(20 für 2 Module, +6 pro weiteres Modul)",
-            "notes": "20 für 2 Module, +6 pro zusätzliches Modul ({{count}} Module): Klappen (Boden/Seiten), Schieberarme und IR-Sensorhalterungen"
+            "partSpec": "(20 für 2 Module, +6 pro weiteres Modul, +7 für die Platinenbefestigung)",
+            "notes": "20 für 2 Module, +6 pro zusätzliches Modul ({{count}} Module): Klappen (Boden/Seiten), Schieberarme und IR-Sensorhalterungen; +7 zur Befestigung des {{board}} und der PCA9685-Servotreiberplatine an den Bodenplatten"
           },
           "m2x6Screw": {
             "part": "M2×6-Schraube",
-            "notes": "Befestigt den {{board}} und die PCA9685-Servotreiberplatine an den Bodenplatten"
+            "notes": "1 zur Befestigung jedes IR-Sensors ({{count}} insgesamt)"
           },
           "servoHornScrew": {
             "part": "Servohorn-Schraube (im Lieferumfang der Servos enthalten)",
@@ -278,7 +278,7 @@
             "text": "Passe jedes Modulgehäuse trocken an, bevor du Elektronik einsetzt – schleife oder korrigiere jetzt enge Servoaussparungen."
           },
           "mountBoardsToPanels": {
-            "text": "Befestige den {{board}} und die PCA9685-Servotreiberplatine mit 8 M2×6-Schrauben an den Bodenplatten."
+            "text": "Befestige den {{board}} und die PCA9685-Servotreiberplatine mit 7 M2×4-Schrauben an den Bodenplatten."
           },
           "attachBasePanels": {
             "text": "Befestige die Bodenplatten mit 8 M3×6-Schrauben und 8 M3-Muttern an der Basis.",
@@ -352,10 +352,10 @@
         "title": "Die IR-Sensoren montieren",
         "steps": {
           "mountModuleIr": {
-            "text": "Befestige an jedem Modul (1-{{modules}}) einen IR-Sensor am Tor, ausgerichtet quer zum Kartenweg."
+            "text": "Befestige an jedem Modul (1-{{modules}}) einen IR-Sensor am Tor mit je 1 M2×6-Schraube, ausgerichtet quer zum Kartenweg."
           },
           "mountHopperIr": {
-            "text": "Befestige den verbleibenden IR-Sensor im Trichterhals, direkt über der Zuführung.",
+            "text": "Befestige den verbleibenden IR-Sensor im Trichterhals, direkt über der Zuführung, mit 1 M2×6-Schraube.",
             "note": "Dieser teilt der Zuführung mit, wann der Trichter leer ist – die Platzierung ist hier wichtiger als bei den Modulsensoren."
           }
         }

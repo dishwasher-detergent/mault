@@ -188,6 +188,7 @@ function buildPhases(
       key: "servos",
       title: t("assembly.phases.servos.title"),
       icon: IconTool,
+      videos: ["https://youtu.be/ayseLirjn4k", "https://youtu.be/nFxPrAMkSPc"],
       steps: [
         {
           key: "mount-module-servos",
@@ -278,6 +279,7 @@ function buildPhases(
       key: "wiring",
       title: t("assembly.phases.wiring.title"),
       icon: IconPlugConnected,
+      videos: ["https://youtu.be/ZKFTkpGLBB4", "https://youtu.be/FTFXHQ4d4Jk"],
       steps: [
         {
           key: "wire-i2c",

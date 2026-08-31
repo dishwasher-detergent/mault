@@ -133,7 +133,7 @@
         "items": {
           "m3x6Screw": {
             "part": "M3×6 screw",
-            "notes": "14 attach each bin base to the housing; 8 attach the base panels to the base"
+            "notes": "14 attach each bin base to the housing; 8 attach the base panels to the base; 2 mount a camera or phone bracket"
           },
           "m3Nut": {
             "part": "M3 nut",
@@ -149,12 +149,12 @@
           },
           "m2x4Screw": {
             "part": "M2×4 screw",
-            "partSpec": "(20 for 2 modules, +6 per module beyond that)",
-            "notes": "20 for 2 modules, +6 per additional module ({{count}} modules): flapper (bottom/sides), pusher arms, and IR sensor mounts"
+            "partSpec": "(20 for 2 modules, +6 per module beyond that, +7 for the board mount)",
+            "notes": "20 for 2 modules, +6 per additional module ({{count}} modules): flapper (bottom/sides), pusher arms, and IR sensor mounts; +7 to mount the {{board}} and PCA9685 servo driver board to the base panels"
           },
           "m2x6Screw": {
             "part": "M2×6 screw",
-            "notes": "Mounts the {{board}} and PCA9685 servo driver board to the base panels"
+            "notes": "1 to mount each IR sensor ({{count}} total)"
           },
           "servoHornScrew": {
             "part": "Servo horn screw (Included with servos)",
@@ -278,7 +278,7 @@
             "text": "Dry-fit each module housing before inserting any electronics - sand or adjust any tight servo pockets now."
           },
           "mountBoardsToPanels": {
-            "text": "Mount the {{board}} and PCA9685 servo driver board to the base panels with 8 M2×6 screws."
+            "text": "Mount the {{board}} and PCA9685 servo driver board to the base panels with 7 M2×4 screws."
           },
           "attachBasePanels": {
             "text": "Attach the base panels to the base with 8 M3×6 screws and 8 M3 nuts.",
@@ -352,10 +352,10 @@
         "title": "Mount the IR sensors",
         "steps": {
           "mountModuleIr": {
-            "text": "Fix one IR sensor at the gate of each module (1-{{modules}}), aimed across the card path."
+            "text": "Fix one IR sensor at the gate of each module (1-{{modules}}) with 1 M2×6 screw each, aimed across the card path."
           },
           "mountHopperIr": {
-            "text": "Fix the remaining IR sensor in the hopper throat, just above the feeder.",
+            "text": "Fix the remaining IR sensor in the hopper throat, just above the feeder, with 1 M2×6 screw.",
             "note": "This one tells the feeder when the hopper is empty - placement matters more than the module sensors."
           }
         }

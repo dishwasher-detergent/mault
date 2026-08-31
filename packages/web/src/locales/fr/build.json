@@ -133,7 +133,7 @@
         "items": {
           "m3x6Screw": {
             "part": "Vis M3×6",
-            "notes": "14 fixent chaque base de bac au boîtier ; 8 fixent les panneaux de base à la base"
+            "notes": "14 fixent chaque base de bac au boîtier ; 8 fixent les panneaux de base à la base ; 2 fixent un support de caméra ou de téléphone"
           },
           "m3Nut": {
             "part": "Écrou M3",
@@ -149,12 +149,12 @@
           },
           "m2x4Screw": {
             "part": "Vis M2×4",
-            "partSpec": "(20 pour 2 modules, +6 par module supplémentaire)",
-            "notes": "20 pour 2 modules, +6 par module supplémentaire ({{count}} modules) : trappe (bas/côtés), bras du poussoir, et supports du capteur IR"
+            "partSpec": "(20 pour 2 modules, +6 par module supplémentaire, +7 pour la fixation des cartes)",
+            "notes": "20 pour 2 modules, +6 par module supplémentaire ({{count}} modules) : trappe (bas/côtés), bras du poussoir, et supports du capteur IR ; +7 pour fixer le {{board}} et la carte driver de servo PCA9685 aux panneaux de base"
           },
           "m2x6Screw": {
             "part": "Vis M2×6",
-            "notes": "Fixe le {{board}} et la carte driver de servo PCA9685 aux panneaux de base"
+            "notes": "1 pour fixer chaque capteur IR ({{count}} au total)"
           },
           "servoHornScrew": {
             "part": "Vis de palonnier de servo (incluse avec les servos)",
@@ -278,7 +278,7 @@
             "text": "Fais un essai à sec de chaque logement de module avant d'insérer l'électronique - ponce ou ajuste dès maintenant les logements de servo trop serrés."
           },
           "mountBoardsToPanels": {
-            "text": "Fixe le {{board}} et la carte driver de servo PCA9685 aux panneaux de base avec 8 vis M2×6."
+            "text": "Fixe le {{board}} et la carte driver de servo PCA9685 aux panneaux de base avec 7 vis M2×4."
           },
           "attachBasePanels": {
             "text": "Fixe les panneaux de base à la base avec 8 vis M3×6 et 8 écrous M3.",
@@ -352,10 +352,10 @@
         "title": "Monter les capteurs IR",
         "steps": {
           "mountModuleIr": {
-            "text": "Fixe un capteur IR à la porte de chaque module (1 à {{modules}}), pointé à travers le trajet de la carte."
+            "text": "Fixe un capteur IR à la porte de chaque module (1 à {{modules}}) avec 1 vis M2×6 chacun, pointé à travers le trajet de la carte."
           },
           "mountHopperIr": {
-            "text": "Fixe le capteur IR restant dans la gorge de la trémie, juste au-dessus du chargeur.",
+            "text": "Fixe le capteur IR restant dans la gorge de la trémie, juste au-dessus du chargeur, avec 1 vis M2×6.",
             "note": "Celui-ci indique au chargeur quand la trémie est vide - son positionnement compte plus que celui des capteurs de module."
           }
         }

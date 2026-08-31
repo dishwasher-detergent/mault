@@ -237,7 +237,7 @@ const GROUPS: Group[] = [
     rows: [
       {
         key: "m3x6-screw",
-        qty: () => "22",
+        qty: () => "24",
         name: "M3x6 screw",
         part: (t) => t("bom.groups.fasteners.items.m3x6Screw.part"),
         notes: (t) => t("bom.groups.fasteners.items.m3x6Screw.notes"),
@@ -269,7 +269,7 @@ const GROUPS: Group[] = [
       },
       {
         key: "m2x4-screw",
-        qty: (n) => String(20 + (n - 2) * 6),
+        qty: (n) => String(20 + (n - 2) * 6 + 7),
         name: "M2x4 screw",
         part: (t) => (
           <>
@@ -279,19 +279,20 @@ const GROUPS: Group[] = [
             </span>
           </>
         ),
-        notes: (t, n) =>
-          t("bom.groups.fasteners.items.m2x4Screw.notes", { count: n }),
+        notes: (t, n, boardType) =>
+          t("bom.groups.fasteners.items.m2x4Screw.notes", {
+            count: n,
+            board: BOARD_INFO[boardType].shortName,
+          }),
         buyUrl: "https://amzn.to/3UmCJx8",
       },
       {
         key: "m2x6-screw",
-        qty: () => "8",
+        qty: (n) => String(n + 1),
         name: "M2x6 screw",
         part: (t) => t("bom.groups.fasteners.items.m2x6Screw.part"),
-        notes: (t, _, boardType) =>
-          t("bom.groups.fasteners.items.m2x6Screw.notes", {
-            board: BOARD_INFO[boardType].shortName,
-          }),
+        notes: (t, n) =>
+          t("bom.groups.fasteners.items.m2x6Screw.notes", { count: n + 1 }),
         buyUrl: "https://amzn.to/3UmCJx8",
       },
       {
