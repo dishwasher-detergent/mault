@@ -11,6 +11,7 @@ import { LORCANA_DEFAULT_URL } from "../lib/lorcana/search";
 import { ONE_PIECE_DEFAULT_URL } from "../lib/onepiece/search";
 import { POKEMON_DEFAULT_URL } from "../lib/pokemon/search";
 import { SCRYFALL_DEFAULT_URL } from "../lib/scryfall/search";
+import { YUGIOH_DEFAULT_URL } from "../lib/yugioh/search";
 import type { AppEnv } from "../middleware/auth";
 
 const router = new Hono<AppEnv>();
@@ -62,9 +63,6 @@ router.get("/games", async (c) => {
   }
 });
 
-// Kept in sync with resolve.ts's ADAPTERS_BY_GAME_KEY. gameKey is threaded
-// through into the HealthCheck response so the web client can gate
-// scanning for a collection on its specific game's check.
 const EXTERNAL_API_CHECKS: { name: string; url: string; gameKey: string }[] = [
   {
     name: "Scryfall (Magic: The Gathering)",
@@ -84,6 +82,11 @@ const EXTERNAL_API_CHECKS: { name: string; url: string; gameKey: string }[] = [
     gameKey: "onepiece",
   },
   { name: "Flesh and Blood API", url: FAB_DEFAULT_URL, gameKey: "fab" },
+  {
+    name: "YGOPRODeck (Yu-Gi-Oh!)",
+    url: YUGIOH_DEFAULT_URL,
+    gameKey: "yugioh",
+  },
 ];
 
 async function checkDatabase(): Promise<HealthCheck> {
