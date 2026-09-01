@@ -29,10 +29,7 @@
       "dialogDescription": "Spielt die neueste Firmware über diesen Browser-Tab auf deinen verbundenen ESP32. Trenne das Gerät nicht und schließe diesen Tab nicht, während der Vorgang läuft.",
       "startButton": "Update starten",
       "flashing": "Wird installiert — Gerät nicht trennen…",
-      "successConfirmed": "Firmware auf v{{version}} aktualisiert.",
-      "successUnconfirmed": "Firmware wurde installiert, aber das Gerät hat sich nicht rechtzeitig wieder verbunden. Verbinde dich manuell erneut, um es zu bestätigen.",
-      "toastConfirmed": "Sortierer auf Firmware v{{version}} aktualisiert.",
-      "toastUnconfirmed": "Firmware wurde installiert, aber das Gerät hat sich nicht rechtzeitig wieder verbunden. Verbinde dich manuell erneut.",
+      "success": "Firmware wurde installiert. Trenne den Sortierer von deinem Computer und schließe ihn dann wieder an, um den Vorgang abzuschließen.",
       "errorTitle": "Update fehlgeschlagen",
       "close": "Schließen",
       "tryAgain": "Erneut versuchen"
