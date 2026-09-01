@@ -69,7 +69,6 @@ export type SerialBoardType = "esp32" | "uno_r4";
 export interface FlashEsp32Result {
   success: boolean;
   error?: string;
-  confirmedVersion?: string | null;
 }
 
 export interface TestResult {
@@ -89,7 +88,7 @@ export interface SerialContextValue {
   sendCommand: (data: string) => Promise<boolean>;
   receiveResponse: (timeoutMs?: number) => Promise<string>;
   subscribe: (listener: SerialMessageListener) => () => void;
-  registerPreTestHook: (fn: () => Promise<void>) => void;
+  registerPreTestHook: (fn: () => Promise<void>) => () => void;
   isFlashing: boolean;
   flashProgress: number | null;
   flashLog: string[];

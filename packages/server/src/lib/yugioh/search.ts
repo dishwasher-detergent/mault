@@ -4,7 +4,8 @@ import { fetchCardApi } from "../card-search/fetch";
 import type { CardSearchAdapter } from "../card-search/types";
 import { validateQuery } from "../card-search/validate";
 
-export const YUGIOH_DEFAULT_URL = "https://db.ygoprodeck.com/api/v7/cardinfo.php";
+export const YUGIOH_DEFAULT_URL =
+  "https://db.ygoprodeck.com/api/v7/cardinfo.php";
 
 export interface YgoCardSet {
   set_name: string;
@@ -54,9 +55,6 @@ interface YgoApiResponse {
   error?: string;
 }
 
-// Printed set codes are "SETPREFIX-NUMBER" (e.g. "LOB-005", "RA01-EN001") -
-// split on the last hyphen the same way Lorcana's id parsing does, since a
-// set prefix never itself contains one.
 export function splitSetCode(setCode: string): { set: string; number: string } {
   const idx = setCode.lastIndexOf("-");
   if (idx <= 0) return { set: setCode, number: "" };
@@ -70,7 +68,10 @@ function resolvePrice(prices: YgoCardPrice[] | undefined): number | null {
   return Number.isFinite(value) && value > 0 ? value : null;
 }
 
-function normalizeOne(raw: YgoCard, image: YgoCardImage | undefined): PlayingCard {
+function normalizeOne(
+  raw: YgoCard,
+  image: YgoCardImage | undefined,
+): PlayingCard {
   const id = image ? image.id : raw.id;
   const primarySet = raw.card_sets?.[0];
   const { set, number } = primarySet
@@ -101,13 +102,6 @@ function normalizeOne(raw: YgoCard, image: YgoCardImage | undefined): PlayingCar
   };
 }
 
-// A search hit's card_images can list several distinct official alternate
-// artworks under one name (e.g. Dark Magician's various tin/anniversary
-// prints) - each is independently fetchable via ?id=<that image's id> and
-// visually distinct, so each becomes its own per-print PlayingCard rather
-// than collapsing them into a single row (a direct ?id= lookup only ever
-// returns the one matching image, so this still yields a single-element
-// array there).
 export function normalizeYugiohCard(raw: YgoCard): PlayingCard[] {
   const images = raw.card_images?.length ? raw.card_images : [undefined];
   return images.map((image) => normalizeOne(raw, image));
@@ -123,8 +117,6 @@ export async function Search(
   const url = `${baseUrl}?fname=${encodeURIComponent(query)}`;
   const response = await fetchCardApi(url, { headers: CARD_API_HEADERS });
 
-  // YGOPRODeck responds 400 (not 404) with an {"error": "..."} body when
-  // fname matches nothing.
   if (response.status === 400) {
     return {
       message: `No cards were found with the query: ${query}`,
