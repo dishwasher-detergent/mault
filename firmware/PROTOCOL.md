@@ -2,14 +2,14 @@
 
 This documents the serial wire protocol implemented by the sorting
 machine's firmware (`main/main.ino`), running on an Arduino Uno R4
-Minima (the current build docs/BOM target) or an ESP32 (see the
+(the current build docs/BOM target) or an ESP32 (see the
 `ARDUINO_ARCH_ESP32` pin block in `main.ino`). Any client that can open
 a serial connection to the device can drive it by following this spec
 — it does not assume any particular host language or application.
 
 ## Transport
 
-- **9600 baud**. Uno R4 Minima uses native USB CDC serial; most ESP32
+- **9600 baud**. Uno R4 uses native USB CDC serial; most ESP32
   boards instead go through a UART-to-USB bridge chip, which looks
   identical to a client opening the port but does **not** share the
   Uno's reconnect-without-reset behavior described below — a host
@@ -79,7 +79,7 @@ a serial connection to the device can drive it by following this spec
 2. Send `{"getStatus": true}` and read the response to confirm the
    device is alive and check its firmware `version`. Also useful after
    reopening a port without a physical power cycle: on native-USB boards
-   (Uno R4 Minima) the sketch doesn't reset and won't print a fresh boot
+   (Uno R4) the sketch doesn't reset and won't print a fresh boot
    message on its own, so this is the only way to get one; on
    UART-bridge boards (most ESP32s) reopening does reset the sketch and
    print one unprompted, but sending this is still harmless and confirms
@@ -235,12 +235,12 @@ is present. `hopper` is `true` while cards remain in the feeder stack.
 {"route": {"module": 2, "direction": "left"}}
 ```
 - `direction`: `"left" | "right" | "bottom"`
-- Runs the feeder first, then routes the card: for `"left"`/`"right"`,
-  opens each preceding module's bottom in turn to advance the card
-  (confirming arrival via that module's IR sensor, 3s timeout each
-  step), then opens the target module's paddle and drives its pusher in
-  the requested direction; for `"bottom"`, opens every module's bottom
-  simultaneously so the card drops straight through the whole stack.
+- Runs the feeder first, then routes the card: opens each preceding
+  module's bottom in turn to advance the card (confirming arrival via
+  that module's IR sensor, 3s timeout each step), then either opens the
+  target module's paddle and drives its pusher in the requested
+  direction (`"left"`/`"right"`), or opens just the target module's own
+  bottom to drop the card there (`"bottom"`).
 - A card destined for a module's bottom output doesn't need to be the
   last module — any module can be targeted with `direction: "bottom"`.
 

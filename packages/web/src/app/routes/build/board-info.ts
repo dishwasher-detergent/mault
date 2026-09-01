@@ -11,8 +11,8 @@ export interface BoardInfo {
 
 export const BOARD_INFO: Record<BoardType, BoardInfo> = {
   uno_r4: {
-    displayName: "Arduino Uno R4 Minima",
-    shortName: "Uno R4 Minima",
+    displayName: "Arduino Uno R4",
+    shortName: "Uno R4",
     irPins: [2, 3, 4, 6, 7],
     hopperIrPin: 5,
     logicVoltage: "5V",

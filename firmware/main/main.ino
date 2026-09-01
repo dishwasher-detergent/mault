@@ -342,9 +342,13 @@ bool feedNextCard() {
   return false;
 }
 
-// "bottom" opens every addressable module's trapdoor at once, regardless of
-// targetModule - a bin can attach "bottom" to any module, there's no
-// separate catch-all bin type.
+// "bottom" targets targetModule's own trapdoor, not a shared catch-all - a
+// bin can attach "bottom" to any module. Like "left"/"right" below, it walks
+// the card through each preceding module one at a time (confirming arrival
+// via that module's IR sensor) before dropping it through the target
+// module's own bottom, rather than opening every module's trapdoor at once,
+// which would drop the card through the first (nearest) open module instead
+// of the one actually targeted.
 void routeCard(int targetModule, const char* direction) {
   if (targetModule < 1 || targetModule > maxModuleForOffset()) {
     printModuleRangeError();
@@ -353,20 +357,7 @@ void routeCard(int targetModule, const char* direction) {
 
   if (!feedNextCard()) return;
 
-  if (strcmp(direction, "bottom") == 0) {
-    for (int m = 1; m <= maxModuleForOffset(); m++) {
-      setServoPosition(getChannel(m, 0), moduleConfig[m - 1].bottomOpen);
-    }
-    delay(DELAY_PUSH);
-    setAllNeutral();
-    delay(200);
-
-    Serial.print(F("{\"status\":\"routed\",\"module\":"));
-    Serial.print(targetModule);
-    Serial.println(F(",\"direction\":\"bottom\"}"));
-    return;
-  }
-
+  bool dropBottom = strcmp(direction, "bottom") == 0;
   bool pushLeft = strcmp(direction, "left") == 0;
 
   for (int m = 1; m < targetModule; m++) {
@@ -380,6 +371,18 @@ void routeCard(int targetModule, const char* direction) {
     }
   }
   if (targetModule > 1) delay(DELAY_CARD_ENTER);
+
+  if (dropBottom) {
+    setServoPosition(getChannel(targetModule, 0), moduleConfig[targetModule - 1].bottomOpen);
+    delay(DELAY_PUSH);
+    setAllNeutral();
+    delay(200);
+
+    Serial.print(F("{\"status\":\"routed\",\"module\":"));
+    Serial.print(targetModule);
+    Serial.println(F(",\"direction\":\"bottom\"}"));
+    return;
+  }
 
   ModuleConfig& c = moduleConfig[targetModule - 1];
   setServoPosition(getChannel(targetModule, 1), c.paddleOpen);

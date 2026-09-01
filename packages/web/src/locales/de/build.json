@@ -95,7 +95,7 @@
           },
           "usbCable": {
             "part": "USB-A-auf-USB-C-Kabel",
-            "notes": "Arduino Uno R4 Minima ↔ Host-Computer"
+            "notes": "Arduino Uno R4 ↔ Host-Computer"
           },
           "usbCableEsp32": {
             "part": "USB-A-auf-USB-C-Kabel",
@@ -306,7 +306,7 @@
             "note": "Bibliotheksverwaltung → jeweils nach Namen suchen."
           },
           "uploadSketch": {
-            "text": "Wähle das Board „Arduino Uno R4 Minima“, wähle den richtigen Port und lade dann firmware/main/main.ino hoch."
+            "text": "Wähle das Board „Arduino Uno R4“, wähle den richtigen Port und lade dann firmware/main/main.ino hoch."
           },
           "uploadSketchEsp32": {
             "text": "Wähle das Board „ESP32S3 Dev Module“, stelle unter Tools → USB Mode „Hardware CDC and JTAG“ und USB CDC On Boot „Enabled“ ein, wähle den richtigen Port und lade dann firmware/main/main.ino hoch.",
