@@ -95,7 +95,7 @@
           },
           "usbCable": {
             "part": "Câble USB-A vers USB-C",
-            "notes": "Arduino Uno R4 Minima ↔ ordinateur hôte"
+            "notes": "Arduino Uno R4 ↔ ordinateur hôte"
           },
           "usbCableEsp32": {
             "part": "Câble USB-A vers USB-C",
@@ -298,7 +298,7 @@
             "note": "Gestionnaire de bibliothèques → recherche chacune par son nom."
           },
           "uploadSketch": {
-            "text": "Sélectionne la carte « Arduino Uno R4 Minima », sélectionne le bon port, puis téléverse firmware/main/main.ino."
+            "text": "Sélectionne la carte « Arduino Uno R4 », sélectionne le bon port, puis téléverse firmware/main/main.ino."
           },
           "uploadSketchEsp32": {
             "text": "Sélectionne la carte « ESP32S3 Dev Module », règle Tools → USB Mode sur « Hardware CDC and JTAG » et USB CDC On Boot sur « Enabled », sélectionne le bon port, puis téléverse firmware/main/main.ino.",

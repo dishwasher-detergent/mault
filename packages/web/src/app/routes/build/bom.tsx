@@ -57,15 +57,7 @@ const GROUPS: Group[] = [
         key: "board",
         qty: () => "1",
         name: (boardType) => BOARD_INFO[boardType].displayName,
-        part: (_, boardType) =>
-          boardType === "uno_r4" ? (
-            <>
-              Arduino Uno R4 Minima{" "}
-              <span className="text-muted-foreground">(ABX0080)</span>
-            </>
-          ) : (
-            BOARD_INFO[boardType].displayName
-          ),
+        part: (_, boardType) => BOARD_INFO[boardType].displayName,
         notes: (t, _, boardType) => (
           <Trans
             t={t}
