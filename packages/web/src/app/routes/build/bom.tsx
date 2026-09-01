@@ -229,7 +229,7 @@ const GROUPS: Group[] = [
     rows: [
       {
         key: "m3x6-screw",
-        qty: () => "22",
+        qty: () => "24",
         name: "M3x6 screw",
         part: (t) => t("bom.groups.fasteners.items.m3x6Screw.part"),
         notes: (t) => t("bom.groups.fasteners.items.m3x6Screw.notes"),
@@ -244,11 +244,11 @@ const GROUPS: Group[] = [
         buyUrl: "https://amzn.to/3UmCJx8",
       },
       {
-        key: "m3x8-screw",
+        key: "m3x10-screw",
         qty: () => "2",
-        name: "M3x8 screw",
-        part: (t) => t("bom.groups.fasteners.items.m3x8Screw.part"),
-        notes: (t) => t("bom.groups.fasteners.items.m3x8Screw.notes"),
+        name: "M3x10 screw",
+        part: (t) => t("bom.groups.fasteners.items.m3x10Screw.part"),
+        notes: (t) => t("bom.groups.fasteners.items.m3x10Screw.notes"),
         buyUrl: "https://amzn.to/3UmCJx8",
       },
       {
@@ -261,7 +261,7 @@ const GROUPS: Group[] = [
       },
       {
         key: "m2x4-screw",
-        qty: (n) => String(20 + (n - 2) * 6),
+        qty: (n) => String(20 + (n - 2) * 6 + 7),
         name: "M2x4 screw",
         part: (t) => (
           <>
@@ -271,19 +271,20 @@ const GROUPS: Group[] = [
             </span>
           </>
         ),
-        notes: (t, n) =>
-          t("bom.groups.fasteners.items.m2x4Screw.notes", { count: n }),
+        notes: (t, n, boardType) =>
+          t("bom.groups.fasteners.items.m2x4Screw.notes", {
+            count: n,
+            board: BOARD_INFO[boardType].shortName,
+          }),
         buyUrl: "https://amzn.to/3UmCJx8",
       },
       {
         key: "m2x6-screw",
-        qty: () => "8",
+        qty: (n) => String(n + 1),
         name: "M2x6 screw",
         part: (t) => t("bom.groups.fasteners.items.m2x6Screw.part"),
-        notes: (t, _, boardType) =>
-          t("bom.groups.fasteners.items.m2x6Screw.notes", {
-            board: BOARD_INFO[boardType].shortName,
-          }),
+        notes: (t, n) =>
+          t("bom.groups.fasteners.items.m2x6Screw.notes", { count: n + 1 }),
         buyUrl: "https://amzn.to/3UmCJx8",
       },
       {
@@ -300,6 +301,14 @@ const GROUPS: Group[] = [
         part: (t) => t("bom.groups.fasteners.items.hookupWire.part"),
         notes: (t) => t("bom.groups.fasteners.items.hookupWire.notes"),
         buyUrl: "https://amzn.to/45T0LCt",
+      },
+      {
+        key: "wago-connectors",
+        qty: () => "2",
+        name: "Wago connectors",
+        part: (t) => t("bom.groups.fasteners.items.wagoConnectors.part"),
+        notes: (t) => t("bom.groups.fasteners.items.wagoConnectors.notes"),
+        buyUrl: "https://amzn.to/3UJSq1u",
       },
       {
         key: "dupont-connectors",
@@ -329,6 +338,14 @@ const GROUPS: Group[] = [
         part: (t) => t("bom.groups.optional.items.webcam.part"),
         notes: (t) => t("bom.groups.optional.items.webcam.notes"),
         buyUrl: "https://amzn.to/3SvwSVM",
+      },
+      {
+        key: "camera-mount-screw",
+        qty: () => "1",
+        name: "1/4\"-20 camera mount screw",
+        part: (t) => t("bom.groups.optional.items.cameraMountScrew.part"),
+        notes: (t) => t("bom.groups.optional.items.cameraMountScrew.notes"),
+        buyUrl: "https://amzn.to/4gKMoVS",
       },
     ],
   },

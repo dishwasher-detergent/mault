@@ -1,0 +1,39 @@
+services:
+  server:
+    build:
+      context: .
+      dockerfile: Dockerfile.server
+    env_file: .env
+    ports:
+      - "3001:3001"
+    restart: unless-stopped
+
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile.web
+      args:
+        VITE_NEON_AUTH_URL: ${VITE_NEON_AUTH_URL}
+        VITE_NEON_DATA_API_URL: ${VITE_NEON_DATA_API_URL}
+        VITE_APP_ENV: ${VITE_APP_ENV}
+        VITE_LATEST_FIRMWARE_VERSION: ${VITE_LATEST_FIRMWARE_VERSION}
+    environment:
+      API_URL: http://server:3001
+    ports:
+      - "8080:80"
+    depends_on:
+      - server
+    restart: unless-stopped
+
+  bot:
+    build:
+      context: .
+      dockerfile: Dockerfile.bot
+    env_file: .env
+    ports:
+      - "3002:3002"
+    depends_on:
+      - server
+    restart: unless-stopped
+    profiles:
+      - bot

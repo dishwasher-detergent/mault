@@ -7,12 +7,10 @@ import { useModuleCount } from "@/app/routes/build/use-module-count";
 import { DISCORD_URL } from "@/lib/links";
 import { cn } from "@/lib/utils";
 import {
-  IconAdjustmentsHorizontal,
   IconCpu,
   IconCube,
   IconPlayerPlay,
   IconPlugConnected,
-  IconSettings2,
   IconTool,
   IconVideo,
 } from "@tabler/icons-react";
@@ -185,18 +183,25 @@ function buildPhases(
       ],
     },
     {
-      key: "servos",
-      title: t("assembly.phases.servos.title"),
+      key: "assemble-modules",
+      title: t("assembly.phases.assembleModules.title"),
       icon: IconTool,
+      videos: ["https://youtu.be/ayseLirjn4k", "https://youtu.be/nFxPrAMkSPc"],
       steps: [
         {
           key: "mount-module-servos",
-          text: t("assembly.phases.servos.steps.mountModuleServos.text"),
+          text: t(
+            "assembly.phases.assembleModules.steps.mountModuleServos.text",
+          ),
         },
         {
           key: "mount-bottom-flapper",
-          text: t("assembly.phases.servos.steps.mountBottomFlapper.text"),
-          note: t("assembly.phases.servos.steps.mountBottomFlapper.note"),
+          text: t(
+            "assembly.phases.assembleModules.steps.mountBottomFlapper.text",
+          ),
+          note: t(
+            "assembly.phases.assembleModules.steps.mountBottomFlapper.note",
+          ),
           images: [
             "/instructions/bottom_paddle_disassembled.jpg",
             "/instructions/bottom_paddle_assembled.jpg",
@@ -205,8 +210,12 @@ function buildPhases(
         },
         {
           key: "mount-side-flappers",
-          text: t("assembly.phases.servos.steps.mountSideFlappers.text"),
-          note: t("assembly.phases.servos.steps.mountSideFlappers.note"),
+          text: t(
+            "assembly.phases.assembleModules.steps.mountSideFlappers.text",
+          ),
+          note: t(
+            "assembly.phases.assembleModules.steps.mountSideFlappers.note",
+          ),
           images: [
             "/instructions/side_paddles_disassembled.jpg",
             "/instructions/side_paddles_assembled.jpg",
@@ -215,8 +224,8 @@ function buildPhases(
         },
         {
           key: "mount-pusher-arm",
-          text: t("assembly.phases.servos.steps.mountPusherArm.text"),
-          note: t("assembly.phases.servos.steps.mountPusherArm.note"),
+          text: t("assembly.phases.assembleModules.steps.mountPusherArm.text"),
+          note: t("assembly.phases.assembleModules.steps.mountPusherArm.note"),
           images: [
             "/instructions/pusher_disassembled.jpg",
             "/instructions/pusher_assembled.jpg",
@@ -225,13 +234,19 @@ function buildPhases(
         },
         {
           key: "fit-feeder-orings",
-          text: t("assembly.phases.servos.steps.fitFeederOrings.text"),
-          note: t("assembly.phases.servos.steps.fitFeederOrings.note"),
+          text: t(
+            "assembly.phases.assembleModules.steps.fitFeederOrings.text",
+          ),
+          note: t(
+            "assembly.phases.assembleModules.steps.fitFeederOrings.note",
+          ),
           images: ["/instructions/roller_o_rings_mounted.jpg"],
         },
         {
           key: "mount-feeder-roller",
-          text: t("assembly.phases.servos.steps.mountFeederRoller.text"),
+          text: t(
+            "assembly.phases.assembleModules.steps.mountFeederRoller.text",
+          ),
           images: [
             "/instructions/assembling_feeder.jpg",
             "/instructions/roller_mounted.jpg",
@@ -239,114 +254,113 @@ function buildPhases(
         },
         {
           key: "mount-feeder-servo",
-          text: t("assembly.phases.servos.steps.mountFeederServo.text"),
+          text: t(
+            "assembly.phases.assembleModules.steps.mountFeederServo.text",
+          ),
           images: ["/instructions/feeder_servo_mounted.jpg"],
         },
         {
           key: "mount-feeder-wall",
-          text: t("assembly.phases.servos.steps.mountFeederWall.text"),
-          note: t("assembly.phases.servos.steps.mountFeederWall.note"),
+          text: t(
+            "assembly.phases.assembleModules.steps.mountFeederWall.text",
+          ),
+          note: t(
+            "assembly.phases.assembleModules.steps.mountFeederWall.note",
+          ),
           images: [
             "/instructions/rube_disassembled.jpg",
             "/instructions/tube_assembled.jpg",
             "/instructions/feeder_tube_wall.jpg",
           ],
         },
-      ],
-    },
-    {
-      key: "ir-sensors",
-      title: t("assembly.phases.irSensors.title"),
-      icon: IconAdjustmentsHorizontal,
-      steps: [
         {
           key: "mount-module-ir",
-          text: t("assembly.phases.irSensors.steps.mountModuleIr.text", {
-            modules: moduleCount,
-          }),
+          text: t(
+            "assembly.phases.assembleModules.steps.mountModuleIr.text",
+            { modules: moduleCount },
+          ),
           images: ["/instructions/sorter_ir_sensor_mounted.jpg"],
         },
         {
           key: "mount-hopper-ir",
-          text: t("assembly.phases.irSensors.steps.mountHopperIr.text"),
-          note: t("assembly.phases.irSensors.steps.mountHopperIr.note"),
+          text: t("assembly.phases.assembleModules.steps.mountHopperIr.text"),
+          note: t("assembly.phases.assembleModules.steps.mountHopperIr.note"),
           images: ["/instructions/feeder_ir_sensor_mounted.jpg"],
         },
       ],
     },
     {
-      key: "wiring",
-      title: t("assembly.phases.wiring.title"),
+      key: "wire-and-calibrate",
+      title: t("assembly.phases.wireAndCalibrate.title"),
       icon: IconPlugConnected,
+      videos: ["https://youtu.be/ZKFTkpGLBB4", "https://youtu.be/FTFXHQ4d4Jk"],
       steps: [
         {
           key: "wire-i2c",
-          text: t("assembly.phases.wiring.steps.wireI2c.text", {
+          text: t("assembly.phases.wireAndCalibrate.steps.wireI2c.text", {
             board: board.shortName,
           }),
-          note: t("assembly.phases.wiring.steps.wireI2c.note"),
+          note: t("assembly.phases.wireAndCalibrate.steps.wireI2c.note"),
         },
         {
           key: "wire-servos",
-          text: t("assembly.phases.wiring.steps.wireServos.text", {
+          text: t("assembly.phases.wireAndCalibrate.steps.wireServos.text", {
             count: moduleCount * 3 + 1,
             lastChannel: moduleCount * 3 - 1,
           }),
-          note: t("assembly.phases.wiring.steps.wireServos.note"),
+          note: t("assembly.phases.wireAndCalibrate.steps.wireServos.note"),
         },
         {
           key: "wire-sensors",
-          text: t("assembly.phases.wiring.steps.wireSensors.text", {
+          text: t("assembly.phases.wireAndCalibrate.steps.wireSensors.text", {
             count: moduleCount + 1,
           }),
-          note: t("assembly.phases.wiring.steps.wireSensors.note", {
+          note: t("assembly.phases.wireAndCalibrate.steps.wireSensors.note", {
             count: moduleCount + 1,
           }),
         },
         {
           key: "wire-power",
-          text: t("assembly.phases.wiring.steps.wirePower.text", {
+          text: t("assembly.phases.wireAndCalibrate.steps.wirePower.text", {
             board: board.shortName,
           }),
-          note: t("assembly.phases.wiring.steps.wirePower.note"),
+          note: t("assembly.phases.wireAndCalibrate.steps.wirePower.note"),
         },
-      ],
-    },
-    {
-      key: "calibrate",
-      title: t("assembly.phases.calibrate.title"),
-      icon: IconSettings2,
-      steps: [
         {
           key: "connect-serial",
-          text: t("assembly.phases.calibrate.steps.connectSerial.text", {
-            board: board.shortName,
-          }),
+          text: t(
+            "assembly.phases.wireAndCalibrate.steps.connectSerial.text",
+            { board: board.shortName },
+          ),
         },
         {
           key: "calibrate-modules",
-          text: t("assembly.phases.calibrate.steps.calibrateModules.text"),
+          text: t(
+            "assembly.phases.wireAndCalibrate.steps.calibrateModules.text",
+          ),
         },
         {
           key: "install-horns",
-          text: t("assembly.phases.calibrate.steps.installHorns.text", {
+          text: t("assembly.phases.wireAndCalibrate.steps.installHorns.text", {
             count: moduleCount * 3,
           }),
-          note: t("assembly.phases.calibrate.steps.installHorns.note"),
+          note: t("assembly.phases.wireAndCalibrate.steps.installHorns.note"),
         },
         {
           key: "calibrate-feeder",
-          text: t("assembly.phases.calibrate.steps.calibrateFeeder.text"),
+          text: t(
+            "assembly.phases.wireAndCalibrate.steps.calibrateFeeder.text",
+          ),
         },
         {
           key: "check-ir",
-          text: t("assembly.phases.calibrate.steps.checkIr.text", {
+          text: t("assembly.phases.wireAndCalibrate.steps.checkIr.text", {
             count: moduleCount + 1,
           }),
         },
         {
           key: "test-bins",
-          text: t("assembly.phases.calibrate.steps.testBins.text"),
+          text: t("assembly.phases.wireAndCalibrate.steps.testBins.text"),
         },
       ],
     },
@@ -411,7 +425,7 @@ export function BuildAssembly() {
     : 0;
 
   return (
-    <section id="assembly" className="mx-auto max-w-5xl px-4 py-16">
+    <section id="assembly" className="mx-auto max-w-7xl px-4 py-16">
       <h2 className="font-heading text-2xl font-semibold tracking-tight md:text-3xl">
         {t("assembly.heading")}
       </h2>
@@ -468,7 +482,7 @@ export function BuildAssembly() {
               )}
             >
               {hasVideos && (
-                <div className="flex flex-col gap-3 lg:sticky lg:top-20 lg:w-80 lg:shrink-0">
+                <div className="flex flex-col gap-3 lg:sticky lg:top-20 lg:w-3/5 lg:shrink-0">
                   {videoIds.map(([url, id]) => (
                     <div
                       key={url}
@@ -488,7 +502,7 @@ export function BuildAssembly() {
                 </div>
               )}
               <div className="min-w-0 flex-1 rounded-lg border bg-card">
-                <div className="flex items-center gap-3 border-b bg-secondary/30 px-4 py-3 md:px-5">
+                <div className="sticky top-20 z-10 flex items-center gap-3 rounded-t-lg border-b bg-secondary px-4 py-3 md:px-5">
                   <span className="grid size-8 shrink-0 place-items-center rounded-md bg-primary/10 text-primary">
                     <phase.icon size={16} />
                   </span>

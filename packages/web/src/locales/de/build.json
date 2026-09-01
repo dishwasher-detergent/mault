@@ -133,28 +133,28 @@
         "items": {
           "m3x6Screw": {
             "part": "M3×6-Schraube",
-            "notes": "14 befestigen jeweils den Fachboden am Gehäuse; 8 befestigen die Bodenplatten an der Basis"
+            "notes": "14 befestigen jeweils den Fachboden am Gehäuse; 8 befestigen die Bodenplatten an der Basis; 2 befestigen eine Kamera- oder Telefonhalterung"
           },
           "m3Nut": {
             "part": "M3-Mutter",
             "notes": "Passend zu den M3×6-Schrauben der Bodenplatte"
           },
-          "m3x8Screw": {
-            "part": "M3×8-Schraube",
+          "m3x10Screw": {
+            "part": "M3×10-Schraube",
             "notes": "Befestigt die höhenverstellbare Wand am Trichterrohr"
           },
           "m3Washer": {
             "part": "M3-Unterlegscheibe",
-            "notes": "Wird zusammen mit den M3×8-Schrauben an der höhenverstellbaren Trichterwand verwendet"
+            "notes": "Wird zusammen mit den M3×10-Schrauben an der höhenverstellbaren Trichterwand verwendet"
           },
           "m2x4Screw": {
             "part": "M2×4-Schraube",
-            "partSpec": "(20 für 2 Module, +6 pro weiteres Modul)",
-            "notes": "20 für 2 Module, +6 pro zusätzliches Modul ({{count}} Module): Klappen (Boden/Seiten), Schieberarme und IR-Sensorhalterungen"
+            "partSpec": "(20 für 2 Module, +6 pro weiteres Modul, +7 für die Platinenbefestigung)",
+            "notes": "20 für 2 Module, +6 pro zusätzliches Modul ({{count}} Module): Klappen (Boden/Seiten), Schieberarme und IR-Sensorhalterungen; +7 zur Befestigung des {{board}} und der PCA9685-Servotreiberplatine an den Bodenplatten"
           },
           "m2x6Screw": {
             "part": "M2×6-Schraube",
-            "notes": "Befestigt den {{board}} und die PCA9685-Servotreiberplatine an den Bodenplatten"
+            "notes": "1 zur Befestigung jedes IR-Sensors ({{count}} insgesamt)"
           },
           "servoHornScrew": {
             "part": "Servohorn-Schraube (im Lieferumfang der Servos enthalten)",
@@ -163,6 +163,10 @@
           "hookupWire": {
             "part": "Niederspannungskabel",
             "notes": "IR-Sensoren/Servos. Damit musst du eventuell einige in Reihe verbinden – umwickle sie einfach mit Isolierband, damit sie sich nicht lösen."
+          },
+          "wagoConnectors": {
+            "part": "Wago-Verbinder (optional)",
+            "notes": "Verteilt Strom und Masse an jeden IR-Sensor, ohne Kabel verdrillen oder löten zu müssen"
           },
           "dupontConnectors": {
             "part": "Dupont-Steckverbinder (optional)",
@@ -180,6 +184,10 @@
           "webcam": {
             "part": "USB-Webcam",
             "notes": "Das ist die, die ich verwende - jede Webcam funktioniert, solange sich Fokus, Helligkeit usw. manuell einstellen lassen (automatische Anpassung kann Scans verfälschen)"
+          },
+          "cameraMountScrew": {
+            "part": "1/4\"-20 Kamera-Befestigungsschraube",
+            "notes": "Standard-Stativgewinde - passt in die Buchse einer Webcam- oder Telefonhalterung"
           }
         }
       }
@@ -278,7 +286,7 @@
             "text": "Passe jedes Modulgehäuse trocken an, bevor du Elektronik einsetzt – schleife oder korrigiere jetzt enge Servoaussparungen."
           },
           "mountBoardsToPanels": {
-            "text": "Befestige den {{board}} und die PCA9685-Servotreiberplatine mit 8 M2×6-Schrauben an den Bodenplatten."
+            "text": "Befestige den {{board}} und die PCA9685-Servotreiberplatine mit 7 M2×4-Schrauben an den Bodenplatten."
           },
           "attachBasePanels": {
             "text": "Befestige die Bodenplatten mit 8 M3×6-Schrauben und 8 M3-Muttern an der Basis.",
@@ -309,8 +317,8 @@
           }
         }
       },
-      "servos": {
-        "title": "Die Servos montieren",
+      "assembleModules": {
+        "title": "Die Module zusammenbauen",
         "steps": {
           "mountModuleServos": {
             "text": "Setze den Boden-, Paddel- und Schieberservo - alles 180°-Positionsservos vom Typ SG90 - in jedes der 3 Modulgehäuse ein (insgesamt 9 Servos).",
@@ -343,25 +351,20 @@
             "text": "Montiere den Dauerdreh-Zuführservo an der Rolle, am Fuß des Trichters."
           },
           "mountFeederWall": {
-            "text": "Befestige das Wandstück mit den 2 M3×8-Schrauben und M3-Unterlegscheiben am Trichter - er führt Karten vom Trichter zur Zuführrolle.",
+            "text": "Befestige das Wandstück mit den 2 M3×10-Schrauben und M3-Unterlegscheiben am Trichter - er führt Karten vom Trichter zur Zuführrolle.",
             "note": "Befestige beim Montieren der Wand diese zuerst am Zuführmodul, lege dann 2 Karten unter die Wand und schiebe sie nach unten, bevor du sie festziehst."
-          }
-        }
-      },
-      "irSensors": {
-        "title": "Die IR-Sensoren montieren",
-        "steps": {
+          },
           "mountModuleIr": {
-            "text": "Befestige an jedem Modul (1-{{modules}}) einen IR-Sensor am Tor, ausgerichtet quer zum Kartenweg."
+            "text": "Befestige an jedem Modul (1-{{modules}}) einen IR-Sensor am Tor mit je 1 M2×6-Schraube, ausgerichtet quer zum Kartenweg."
           },
           "mountHopperIr": {
-            "text": "Befestige den verbleibenden IR-Sensor im Trichterhals, direkt über der Zuführung.",
+            "text": "Befestige den verbleibenden IR-Sensor im Trichterhals, direkt über der Zuführung, mit 1 M2×6-Schraube.",
             "note": "Dieser teilt der Zuführung mit, wann der Trichter leer ist – die Platzierung ist hier wichtiger als bei den Modulsensoren."
           }
         }
       },
-      "wiring": {
-        "title": "Die Elektronik verkabeln",
+      "wireAndCalibrate": {
+        "title": "Verkabeln und kalibrieren",
         "steps": {
           "wireI2c": {
             "text": "Verbinde den PCA9685 mit dem I²C-Bus des {{board}} (SDA/SCL) sowie mit der Logikversorgung/GND.",
@@ -378,25 +381,7 @@
           "wirePower": {
             "text": "Führe die externe 6V-Versorgung an die V+/GND-Klemme des PCA9685 und verbinde deren Masse mit der Masse des {{board}}.",
             "note": "Eine fehlende gemeinsame Masse ist die häufigste Ursache dafür, dass Servos zucken, sich aber nie korrekt bewegen."
-          }
-        }
-      },
-      "powerOnTest": {
-        "title": "Erster Einschalttest",
-        "steps": {
-          "runTestCommand": {
-            "text": "Sende bei angeschlossener externer Servoversorgung {\"test\": true} über die serielle Schnittstelle.",
-            "note": "Öffnet nacheinander alle Boden- und Paddelklappen, bewegt alle Schieber links und dann rechts, setzt alles auf neutral zurück und lässt anschließend kurz die Zuführung laufen."
           },
-          "watchModules": {
-            "text": "Beobachte jedes Modul während des Tests – stelle sicher, dass nichts am Ende seines Wegs klemmt oder schleift.",
-            "note": "Wenn sich ein Servo beim Öffnen oder Schließen anstrengt, muss vermutlich der Gehäuseausschnitt vor der Kalibrierung angepasst werden."
-          }
-        }
-      },
-      "calibrate": {
-        "title": "Über die App kalibrieren",
-        "steps": {
           "connectSerial": {
             "text": "Verbinde den {{board}} über Web Serial mit der App und öffne dann /app/calibrate."
           },
@@ -415,6 +400,19 @@
           },
           "testBins": {
             "text": "Fachsteuerung – sende der Reihe nach eine Testkarte an jedes der 7 Fächer und bestätige, dass sie korrekt landet."
+          }
+        }
+      },
+      "powerOnTest": {
+        "title": "Erster Einschalttest",
+        "steps": {
+          "runTestCommand": {
+            "text": "Sende bei angeschlossener externer Servoversorgung {\"test\": true} über die serielle Schnittstelle.",
+            "note": "Öffnet nacheinander alle Boden- und Paddelklappen, bewegt alle Schieber links und dann rechts, setzt alles auf neutral zurück und lässt anschließend kurz die Zuführung laufen."
+          },
+          "watchModules": {
+            "text": "Beobachte jedes Modul während des Tests – stelle sicher, dass nichts am Ende seines Wegs klemmt oder schleift.",
+            "note": "Wenn sich ein Servo beim Öffnen oder Schließen anstrengt, muss vermutlich der Gehäuseausschnitt vor der Kalibrierung angepasst werden."
           }
         }
       },

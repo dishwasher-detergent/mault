@@ -149,6 +149,15 @@ docker run -p 8080:80 magic-vault-web
 
 Point `WEB_URL` (server env) at the public URL of the web container so CORS and Discord monitor-page links resolve correctly, and re-run `db:push`/`db:migrate` against the Neon database as part of your deploy if the schema changed.
 
+`docker-compose.yml` wires the three images together (server on :3001, web on :8080, and the optional bot on :3002) reading build args and env vars from the root `.env`:
+
+```bash
+docker compose up --build              # server + web
+docker compose --profile bot up --build  # + Discord bot
+```
+
+Still self-hosted-app-only — `.env` must already point `DATABASE_URL`/`NEON_AUTH_URL` at a real Neon project, since compose doesn't run a database.
+
 ## Hardware
 
 The full bill of materials, wiring diagrams, and assembly instructions live in the app at `/build`. In short:

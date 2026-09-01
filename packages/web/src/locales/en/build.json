@@ -133,28 +133,28 @@
         "items": {
           "m3x6Screw": {
             "part": "M3×6 screw",
-            "notes": "14 attach each bin base to the housing; 8 attach the base panels to the base"
+            "notes": "14 attach each bin base to the housing; 8 attach the base panels to the base; 2 mount a camera or phone bracket"
           },
           "m3Nut": {
             "part": "M3 nut",
             "notes": "Paired with the base panel M3×6 screws"
           },
-          "m3x8Screw": {
-            "part": "M3×8 screw",
+          "m3x10Screw": {
+            "part": "M3×10 screw",
             "notes": "Attaches the variable-height wall to the hopper tube"
           },
           "m3Washer": {
             "part": "M3 washer",
-            "notes": "Used with the M3×8 screws on the variable-height hopper wall"
+            "notes": "Used with the M3×10 screws on the variable-height hopper wall"
           },
           "m2x4Screw": {
             "part": "M2×4 screw",
-            "partSpec": "(20 for 2 modules, +6 per module beyond that)",
-            "notes": "20 for 2 modules, +6 per additional module ({{count}} modules): flapper (bottom/sides), pusher arms, and IR sensor mounts"
+            "partSpec": "(20 for 2 modules, +6 per module beyond that, +7 for the board mount)",
+            "notes": "20 for 2 modules, +6 per additional module ({{count}} modules): flapper (bottom/sides), pusher arms, and IR sensor mounts; +7 to mount the {{board}} and PCA9685 servo driver board to the base panels"
           },
           "m2x6Screw": {
             "part": "M2×6 screw",
-            "notes": "Mounts the {{board}} and PCA9685 servo driver board to the base panels"
+            "notes": "1 to mount each IR sensor ({{count}} total)"
           },
           "servoHornScrew": {
             "part": "Servo horn screw (Included with servos)",
@@ -163,6 +163,10 @@
           "hookupWire": {
             "part": "Low Voltage Wire",
             "notes": "IR sensor/Servos. Using these you may have to daisy chain some together, just electrical tape them to make sure they don't come apart."
+          },
+          "wagoConnectors": {
+            "part": "Wago connectors (Optional)",
+            "notes": "Splices power and ground to each IR sensor without twisting/soldering wires together"
           },
           "dupontConnectors": {
             "part": "Dupont Connectors (Optional)",
@@ -180,6 +184,10 @@
           "webcam": {
             "part": "USB webcam",
             "notes": "This is the one I use - any webcam works as long as you can manually adjust focus, brightness, etc. (auto-adjusting can throw off scans)"
+          },
+          "cameraMountScrew": {
+            "part": "1/4\"-20 camera mount screw",
+            "notes": "Standard tripod-mount thread - screws into a webcam or phone mount's socket"
           }
         }
       }
@@ -278,7 +286,7 @@
             "text": "Dry-fit each module housing before inserting any electronics - sand or adjust any tight servo pockets now."
           },
           "mountBoardsToPanels": {
-            "text": "Mount the {{board}} and PCA9685 servo driver board to the base panels with 8 M2×6 screws."
+            "text": "Mount the {{board}} and PCA9685 servo driver board to the base panels with 7 M2×4 screws."
           },
           "attachBasePanels": {
             "text": "Attach the base panels to the base with 8 M3×6 screws and 8 M3 nuts.",
@@ -309,8 +317,8 @@
           }
         }
       },
-      "servos": {
-        "title": "Mount the servos",
+      "assembleModules": {
+        "title": "Assemble the modules",
         "steps": {
           "mountModuleServos": {
             "text": "Install the bottom, paddle, and pusher servo - all 180° positional SG90s - into each of the 3 module housings (9 servos total).",
@@ -343,25 +351,20 @@
             "text": "Install the continuous-rotation feeder servo to the roller, at the base of the hopper."
           },
           "mountFeederWall": {
-            "text": "Attach the wall piece to the hopper using the 2 M3×8 screws and M3 washers - it guides cards from the hopper to the feeder roller.",
+            "text": "Attach the wall piece to the hopper using the 2 M3×10 screws and M3 washers - it guides cards from the hopper to the feeder roller.",
             "note": "When mounting the wall, attach it to the feeder module first, then put 2 cards below the wall and slide it down before tighting it into place."
-          }
-        }
-      },
-      "irSensors": {
-        "title": "Mount the IR sensors",
-        "steps": {
+          },
           "mountModuleIr": {
-            "text": "Fix one IR sensor at the gate of each module (1-{{modules}}), aimed across the card path."
+            "text": "Fix one IR sensor at the gate of each module (1-{{modules}}) with 1 M2×6 screw each, aimed across the card path."
           },
           "mountHopperIr": {
-            "text": "Fix the remaining IR sensor in the hopper throat, just above the feeder.",
+            "text": "Fix the remaining IR sensor in the hopper throat, just above the feeder, with 1 M2×6 screw.",
             "note": "This one tells the feeder when the hopper is empty - placement matters more than the module sensors."
           }
         }
       },
-      "wiring": {
-        "title": "Wire the electronics",
+      "wireAndCalibrate": {
+        "title": "Wire and calibrate",
         "steps": {
           "wireI2c": {
             "text": "Wire the PCA9685 to the {{board}}'s I²C bus (SDA/SCL) and logic power/GND.",
@@ -378,25 +381,7 @@
           "wirePower": {
             "text": "Bring the external 6V supply into the PCA9685 V+/GND terminal, and tie its ground to the {{board}}'s ground.",
             "note": "Skipping the common ground is the #1 cause of servos that twitch but never move correctly."
-          }
-        }
-      },
-      "powerOnTest": {
-        "title": "First power-on test",
-        "steps": {
-          "runTestCommand": {
-            "text": "With the external servo supply connected, send {\"test\": true} over serial.",
-            "note": "Cycles every bottom and paddle open, sweeps all pushers left then right, resets to neutral, then briefly spins the feeder."
           },
-          "watchModules": {
-            "text": "Watch each module during the test - confirm nothing binds or grinds at the end of its travel.",
-            "note": "If a servo strains at open or closed, its housing cutout likely needs adjusting before calibration."
-          }
-        }
-      },
-      "calibrate": {
-        "title": "Calibrate from the app",
-        "steps": {
           "connectSerial": {
             "text": "Connect the {{board}} to the app via Web Serial, then open /app/calibrate."
           },
@@ -415,6 +400,19 @@
           },
           "testBins": {
             "text": "Bin Routing Controls - send a test card to each of the 7 bins in turn and confirm it lands correctly."
+          }
+        }
+      },
+      "powerOnTest": {
+        "title": "First power-on test",
+        "steps": {
+          "runTestCommand": {
+            "text": "With the external servo supply connected, send {\"test\": true} over serial.",
+            "note": "Cycles every bottom and paddle open, sweeps all pushers left then right, resets to neutral, then briefly spins the feeder."
+          },
+          "watchModules": {
+            "text": "Watch each module during the test - confirm nothing binds or grinds at the end of its travel.",
+            "note": "If a servo strains at open or closed, its housing cutout likely needs adjusting before calibration."
           }
         }
       },

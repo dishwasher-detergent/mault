@@ -2,17 +2,24 @@
 #include <Wire.h>
 #include <Adafruit_PWMServoDriver.h>
 
-// S2/S3 only: lets setup() give the USB CDC connection a custom
-// product/manufacturer name (see SORTER_HAS_NATIVE_USB below). Classic
-// ESP32 (WROOM/WROVER) and the Uno R4 Minima never define
-// CONFIG_IDF_TARGET_ESP32S2/S3, so this #include is simply skipped for
-// them - no error from a missing header.
-#if defined(ARDUINO_ARCH_ESP32) && (CONFIG_IDF_TARGET_ESP32S2 || CONFIG_IDF_TARGET_ESP32S3)
-#include <USB.h>
-#define SORTER_HAS_NATIVE_USB 1
-#endif
+// S2/S3 boards must be built with "USB Mode: Hardware CDC and JTAG" and
+// "USB CDC On Boot: Enabled" (Arduino IDE Tools menu, or
+// USBMode=hwcdc,CDCOnBoot=cdc on the arduino-cli FQBN - see
+// firmware-release.yml) - the core then maps Serial to the chip's
+// hardware USB-Serial/JTAG peripheral automatically, no app code needed.
+// This used to instead be a manually-owned USBCDC/USB-OTG connection so
+// the device could report a custom product/manufacturer name, but that
+// mode's software bootloader-reset handshake hits an unresolved upstream
+// bug when connected directly to a PC rather than through a USB hub
+// (reset_sem timeout in usb_switch_to_cdc_jtag() -
+// github.com/espressif/arduino-esp32/issues/10204), which made this
+// app's in-browser flashEsp32 unreliable. Hardware CDC/JTAG mode's reset
+// handshake doesn't hit that bug, at the cost of a fixed Espressif
+// device name/VID/PID instead of a custom one. Classic ESP32
+// (WROOM/WROVER) and the Uno R4 Minima have no native USB either way and
+// are unaffected - Serial there is always the UART bridge chip.
 
-#define FIRMWARE_VERSION "2.0.4"
+#define FIRMWARE_VERSION "2.0.6"
 
 // Reported in getStatus/boot so the app knows how (or whether) it can
 // update the device - only the ESP32 build can be reflashed from the
@@ -39,7 +46,7 @@ int moduleChannelOffset = 0;
 // present).
 #if defined(CONFIG_IDF_TARGET_ESP32S3)
 // ESP32-S3 pins avoid strapping (0, 3, 45, 46), the native USB D-/D+ pair
-// (19, 20 - see SORTER_HAS_NATIVE_USB above), the default I2C pins used to
+// (19, 20), the default I2C pins used to
 // wire the PCA9685 (8, 9 - see Wiring), the USB-UART bridge (43, 44), and
 // integrated flash/PSRAM (26-37).
 const int IR_PINS[MAX_MODULES] = {4, 5, 6, 7, 15};
@@ -249,6 +256,39 @@ void checkModule1Jam() {
     Serial.println(F("{\"error\":\"jam\",\"module\":1}"));
   }
 }
+
+#if defined(RGB_BUILTIN)
+#ifndef RGB_BRIGHTNESS
+#define RGB_BRIGHTNESS 64
+#endif
+
+void updateStatusLed() {
+  static unsigned long lastStep = 0;
+  static uint8_t wheelPos = 0;
+
+  if (!Serial) {
+    rgbLedWrite(RGB_BUILTIN, 0, 0, RGB_BRIGHTNESS);
+    return;
+  }
+
+  if (millis() - lastStep < 20) return;
+  lastStep = millis();
+
+  uint8_t pos = 255 - wheelPos++;
+  uint8_t r, g, b;
+  if (pos < 85) {
+    r = 255 - pos * 3; g = 0; b = pos * 3;
+  } else if (pos < 170) {
+    pos -= 85;
+    r = 0; g = pos * 3; b = 255 - pos * 3;
+  } else {
+    pos -= 170;
+    r = pos * 3; g = 255 - pos * 3; b = 0;
+  }
+  rgbLedWrite(RGB_BUILTIN, (r * RGB_BRIGHTNESS) / 255, (g * RGB_BRIGHTNESS) / 255,
+              (b * RGB_BRIGHTNESS) / 255);
+}
+#endif
 
 void setAllNeutral() {
   for (int m = 1; m <= maxModuleForOffset(); m++) setModuleNeutral(m);
@@ -600,10 +640,8 @@ void handleCommand(char* json) {
 }
 
 void setup() {
-#if defined(SORTER_HAS_NATIVE_USB)
-  USB.manufacturerName("Mault");
-  USB.productName("Mault Card Sorter");
-  USB.begin();
+#if defined(RGB_BUILTIN)
+  rgbLedWrite(RGB_BUILTIN, 0, 0, RGB_BRIGHTNESS);  // blue - powered, not yet connected
 #endif
 
   Serial.begin(9600);
@@ -651,4 +689,7 @@ void loop() {
     }
   }
   checkModule1Jam();
+#if defined(RGB_BUILTIN)
+  updateStatusLed();
+#endif
 }
