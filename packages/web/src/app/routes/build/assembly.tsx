@@ -11,7 +11,6 @@ import {
   IconCube,
   IconPlayerPlay,
   IconPlugConnected,
-  IconSettings2,
   IconTool,
   IconVideo,
 } from "@tabler/icons-react";
@@ -291,79 +290,77 @@ function buildPhases(
       ],
     },
     {
-      key: "wiring",
-      title: t("assembly.phases.wiring.title"),
+      key: "wire-and-calibrate",
+      title: t("assembly.phases.wireAndCalibrate.title"),
       icon: IconPlugConnected,
       videos: ["https://youtu.be/ZKFTkpGLBB4", "https://youtu.be/FTFXHQ4d4Jk"],
       steps: [
         {
           key: "wire-i2c",
-          text: t("assembly.phases.wiring.steps.wireI2c.text", {
+          text: t("assembly.phases.wireAndCalibrate.steps.wireI2c.text", {
             board: board.shortName,
           }),
-          note: t("assembly.phases.wiring.steps.wireI2c.note"),
+          note: t("assembly.phases.wireAndCalibrate.steps.wireI2c.note"),
         },
         {
           key: "wire-servos",
-          text: t("assembly.phases.wiring.steps.wireServos.text", {
+          text: t("assembly.phases.wireAndCalibrate.steps.wireServos.text", {
             count: moduleCount * 3 + 1,
             lastChannel: moduleCount * 3 - 1,
           }),
-          note: t("assembly.phases.wiring.steps.wireServos.note"),
+          note: t("assembly.phases.wireAndCalibrate.steps.wireServos.note"),
         },
         {
           key: "wire-sensors",
-          text: t("assembly.phases.wiring.steps.wireSensors.text", {
+          text: t("assembly.phases.wireAndCalibrate.steps.wireSensors.text", {
             count: moduleCount + 1,
           }),
-          note: t("assembly.phases.wiring.steps.wireSensors.note", {
+          note: t("assembly.phases.wireAndCalibrate.steps.wireSensors.note", {
             count: moduleCount + 1,
           }),
         },
         {
           key: "wire-power",
-          text: t("assembly.phases.wiring.steps.wirePower.text", {
+          text: t("assembly.phases.wireAndCalibrate.steps.wirePower.text", {
             board: board.shortName,
           }),
-          note: t("assembly.phases.wiring.steps.wirePower.note"),
+          note: t("assembly.phases.wireAndCalibrate.steps.wirePower.note"),
         },
-      ],
-    },
-    {
-      key: "calibrate",
-      title: t("assembly.phases.calibrate.title"),
-      icon: IconSettings2,
-      steps: [
         {
           key: "connect-serial",
-          text: t("assembly.phases.calibrate.steps.connectSerial.text", {
-            board: board.shortName,
-          }),
+          text: t(
+            "assembly.phases.wireAndCalibrate.steps.connectSerial.text",
+            { board: board.shortName },
+          ),
         },
         {
           key: "calibrate-modules",
-          text: t("assembly.phases.calibrate.steps.calibrateModules.text"),
+          text: t(
+            "assembly.phases.wireAndCalibrate.steps.calibrateModules.text",
+          ),
         },
         {
           key: "install-horns",
-          text: t("assembly.phases.calibrate.steps.installHorns.text", {
+          text: t("assembly.phases.wireAndCalibrate.steps.installHorns.text", {
             count: moduleCount * 3,
           }),
-          note: t("assembly.phases.calibrate.steps.installHorns.note"),
+          note: t("assembly.phases.wireAndCalibrate.steps.installHorns.note"),
         },
         {
           key: "calibrate-feeder",
-          text: t("assembly.phases.calibrate.steps.calibrateFeeder.text"),
+          text: t(
+            "assembly.phases.wireAndCalibrate.steps.calibrateFeeder.text",
+          ),
         },
         {
           key: "check-ir",
-          text: t("assembly.phases.calibrate.steps.checkIr.text", {
+          text: t("assembly.phases.wireAndCalibrate.steps.checkIr.text", {
             count: moduleCount + 1,
           }),
         },
         {
           key: "test-bins",
-          text: t("assembly.phases.calibrate.steps.testBins.text"),
+          text: t("assembly.phases.wireAndCalibrate.steps.testBins.text"),
         },
       ],
     },

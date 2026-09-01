@@ -164,6 +164,10 @@
             "part": "Niederspannungskabel",
             "notes": "IR-Sensoren/Servos. Damit musst du eventuell einige in Reihe verbinden – umwickle sie einfach mit Isolierband, damit sie sich nicht lösen."
           },
+          "wagoConnectors": {
+            "part": "Wago-Verbinder (optional)",
+            "notes": "Verteilt Strom und Masse an jeden IR-Sensor, ohne Kabel verdrillen oder löten zu müssen"
+          },
           "dupontConnectors": {
             "part": "Dupont-Steckverbinder (optional)",
             "notes": "Diese werden nur benötigt, wenn du eigene Kabel in individueller Länge herstellst."
@@ -180,6 +184,10 @@
           "webcam": {
             "part": "USB-Webcam",
             "notes": "Das ist die, die ich verwende - jede Webcam funktioniert, solange sich Fokus, Helligkeit usw. manuell einstellen lassen (automatische Anpassung kann Scans verfälschen)"
+          },
+          "cameraMountScrew": {
+            "part": "1/4\"-20 Kamera-Befestigungsschraube",
+            "notes": "Standard-Stativgewinde - passt in die Buchse einer Webcam- oder Telefonhalterung"
           }
         }
       }
@@ -355,8 +363,8 @@
           }
         }
       },
-      "wiring": {
-        "title": "Die Elektronik verkabeln",
+      "wireAndCalibrate": {
+        "title": "Verkabeln und kalibrieren",
         "steps": {
           "wireI2c": {
             "text": "Verbinde den PCA9685 mit dem I²C-Bus des {{board}} (SDA/SCL) sowie mit der Logikversorgung/GND.",
@@ -373,25 +381,7 @@
           "wirePower": {
             "text": "Führe die externe 6V-Versorgung an die V+/GND-Klemme des PCA9685 und verbinde deren Masse mit der Masse des {{board}}.",
             "note": "Eine fehlende gemeinsame Masse ist die häufigste Ursache dafür, dass Servos zucken, sich aber nie korrekt bewegen."
-          }
-        }
-      },
-      "powerOnTest": {
-        "title": "Erster Einschalttest",
-        "steps": {
-          "runTestCommand": {
-            "text": "Sende bei angeschlossener externer Servoversorgung {\"test\": true} über die serielle Schnittstelle.",
-            "note": "Öffnet nacheinander alle Boden- und Paddelklappen, bewegt alle Schieber links und dann rechts, setzt alles auf neutral zurück und lässt anschließend kurz die Zuführung laufen."
           },
-          "watchModules": {
-            "text": "Beobachte jedes Modul während des Tests – stelle sicher, dass nichts am Ende seines Wegs klemmt oder schleift.",
-            "note": "Wenn sich ein Servo beim Öffnen oder Schließen anstrengt, muss vermutlich der Gehäuseausschnitt vor der Kalibrierung angepasst werden."
-          }
-        }
-      },
-      "calibrate": {
-        "title": "Über die App kalibrieren",
-        "steps": {
           "connectSerial": {
             "text": "Verbinde den {{board}} über Web Serial mit der App und öffne dann /app/calibrate."
           },
@@ -410,6 +400,19 @@
           },
           "testBins": {
             "text": "Fachsteuerung – sende der Reihe nach eine Testkarte an jedes der 7 Fächer und bestätige, dass sie korrekt landet."
+          }
+        }
+      },
+      "powerOnTest": {
+        "title": "Erster Einschalttest",
+        "steps": {
+          "runTestCommand": {
+            "text": "Sende bei angeschlossener externer Servoversorgung {\"test\": true} über die serielle Schnittstelle.",
+            "note": "Öffnet nacheinander alle Boden- und Paddelklappen, bewegt alle Schieber links und dann rechts, setzt alles auf neutral zurück und lässt anschließend kurz die Zuführung laufen."
+          },
+          "watchModules": {
+            "text": "Beobachte jedes Modul während des Tests – stelle sicher, dass nichts am Ende seines Wegs klemmt oder schleift.",
+            "note": "Wenn sich ein Servo beim Öffnen oder Schließen anstrengt, muss vermutlich der Gehäuseausschnitt vor der Kalibrierung angepasst werden."
           }
         }
       },

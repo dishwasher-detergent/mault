@@ -1,6 +1,7 @@
 import type { HealthCheck, HealthCheckResponse } from "@magic-vault/shared";
 import { count, eq, sql } from "drizzle-orm";
 import { Hono } from "hono";
+import pkg from "../../package.json";
 import { db } from "../db";
 import { cardImageVectors, games } from "../db/schema";
 import { fetchCardApi } from "../lib/card-search/fetch";
@@ -10,8 +11,8 @@ import { LORCANA_DEFAULT_URL } from "../lib/lorcana/search";
 import { ONE_PIECE_DEFAULT_URL } from "../lib/onepiece/search";
 import { POKEMON_DEFAULT_URL } from "../lib/pokemon/search";
 import { SCRYFALL_DEFAULT_URL } from "../lib/scryfall/search";
+import { YUGIOH_DEFAULT_URL } from "../lib/yugioh/search";
 import type { AppEnv } from "../middleware/auth";
-import pkg from "../../package.json";
 
 const router = new Hono<AppEnv>();
 
@@ -35,9 +36,24 @@ router.get("/games", async (c) => {
       .groupBy(cardImageVectors.gameKey);
     const countByKey = new Map(countRows.map((r) => [r.gameKey, r.count]));
 
+    const langRows = await db
+      .select({
+        gameKey: cardImageVectors.gameKey,
+        lang: cardImageVectors.lang,
+      })
+      .from(cardImageVectors)
+      .groupBy(cardImageVectors.gameKey, cardImageVectors.lang);
+    const langsByKey = new Map<string, string[]>();
+    for (const row of langRows) {
+      const list = langsByKey.get(row.gameKey) ?? [];
+      list.push(row.lang);
+      langsByKey.set(row.gameKey, list);
+    }
+
     const data = rows.map((row) => ({
       ...row,
       cardCount: countByKey.get(row.key) ?? 0,
+      languages: (langsByKey.get(row.key) ?? []).sort(),
     }));
 
     return c.json({ success: true, data });
@@ -47,17 +63,30 @@ router.get("/games", async (c) => {
   }
 });
 
-// External card-search APIs checked by GET /public/health below - kept in
-// sync with resolve.ts's ADAPTERS_BY_GAME_KEY (one entry per adapter, not
-// per Game row, since a Game's existence is admin-configurable/DB-driven
-// but which upstream APIs this deployment depends on is not).
-const EXTERNAL_API_CHECKS: { name: string; url: string }[] = [
-  { name: "Scryfall (Magic: The Gathering)", url: SCRYFALL_DEFAULT_URL },
-  { name: "TCGdex (Pokémon)", url: POKEMON_DEFAULT_URL },
-  { name: "Gundam Card Game API", url: GUNDAM_DEFAULT_URL },
-  { name: "Lorcast (Disney Lorcana)", url: LORCANA_DEFAULT_URL },
-  { name: "OPTCGAPI (One Piece)", url: ONE_PIECE_DEFAULT_URL },
-  { name: "Flesh and Blood API", url: FAB_DEFAULT_URL },
+const EXTERNAL_API_CHECKS: { name: string; url: string; gameKey: string }[] = [
+  {
+    name: "Scryfall (Magic: The Gathering)",
+    url: SCRYFALL_DEFAULT_URL,
+    gameKey: "mtg",
+  },
+  { name: "TCGdex (Pokémon)", url: POKEMON_DEFAULT_URL, gameKey: "pokemon" },
+  { name: "Gundam Card Game API", url: GUNDAM_DEFAULT_URL, gameKey: "gundam" },
+  {
+    name: "Lorcast (Disney Lorcana)",
+    url: LORCANA_DEFAULT_URL,
+    gameKey: "lorcana",
+  },
+  {
+    name: "OPTCGAPI (One Piece)",
+    url: ONE_PIECE_DEFAULT_URL,
+    gameKey: "onepiece",
+  },
+  { name: "Flesh and Blood API", url: FAB_DEFAULT_URL, gameKey: "fab" },
+  {
+    name: "YGOPRODeck (Yu-Gi-Oh!)",
+    url: YUGIOH_DEFAULT_URL,
+    gameKey: "yugioh",
+  },
 ];
 
 async function checkDatabase(): Promise<HealthCheck> {
@@ -75,17 +104,16 @@ async function checkDatabase(): Promise<HealthCheck> {
   }
 }
 
-// Only checks that the upstream responds at all (any status code) - a
-// reachability check, not a check that a real search would succeed. This
-// mirrors exactly the failure mode card-search/fetch.ts's fetchCardApi
-// guards against (DNS/connection/timeout failures throwing instead of
-// resolving), which is what actually took the Pokémon adapter down.
-async function checkExternalApi(name: string, url: string): Promise<HealthCheck> {
+async function checkExternalApi(
+  name: string,
+  url: string,
+  gameKey: string,
+): Promise<HealthCheck> {
   const start = Date.now();
   try {
     const response = await fetchCardApi(url, { method: "GET" });
     await response.body?.cancel();
-    return { name, status: "ok", latencyMs: Date.now() - start };
+    return { name, status: "ok", latencyMs: Date.now() - start, gameKey };
   } catch (err) {
     const timedOut = err instanceof Error && err.name === "TimeoutError";
     return {
@@ -93,15 +121,11 @@ async function checkExternalApi(name: string, url: string): Promise<HealthCheck>
       status: "error",
       latencyMs: Date.now() - start,
       message: timedOut ? "Timed out." : "Unreachable.",
+      gameKey,
     };
   }
 }
 
-// Every open tab (footer + the health page itself) polls this on its own
-// timer - without sharing a result, each poll would hit all 6 third-party
-// card APIs again, multiplied by however many tabs/users happen to have
-// the app open. A short-lived cache collapses concurrent/near-concurrent
-// polls into one real round of checks.
 const HEALTH_CACHE_TTL_MS = 20_000;
 let cachedHealth: { data: HealthCheckResponse; expiresAt: number } | null =
   null;
@@ -116,7 +140,9 @@ router.get("/health", async (c) => {
 
   const [database, ...externalApis] = await Promise.all([
     checkDatabase(),
-    ...EXTERNAL_API_CHECKS.map((api) => checkExternalApi(api.name, api.url)),
+    ...EXTERNAL_API_CHECKS.map((api) =>
+      checkExternalApi(api.name, api.url, api.gameKey),
+    ),
   ]);
   const checks = [database, ...externalApis];
 

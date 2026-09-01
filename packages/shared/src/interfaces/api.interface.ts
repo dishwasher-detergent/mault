@@ -39,6 +39,7 @@ export interface HealthCheck {
   status: HealthCheckStatus;
   latencyMs: number;
   message?: string;
+  gameKey?: string;
 }
 
 export interface HealthCheckResponse {
