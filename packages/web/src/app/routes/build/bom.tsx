@@ -64,7 +64,9 @@ const GROUPS: Group[] = [
             i18nKey={
               boardType === "uno_r4"
                 ? "bom.groups.electronics.items.unoR4.notes"
-                : "bom.groups.electronics.items.esp32.notes"
+                : boardType === "esp32"
+                  ? "bom.groups.electronics.items.esp32.notes"
+                  : "bom.groups.electronics.items.esp32Wroom.notes"
             }
             values={{ path: "firmware/main/main.ino" }}
             components={{
@@ -146,13 +148,17 @@ const GROUPS: Group[] = [
           t(
             boardType === "uno_r4"
               ? "bom.groups.power.items.usbCable.part"
-              : "bom.groups.power.items.usbCableEsp32.part",
+              : boardType === "esp32"
+                ? "bom.groups.power.items.usbCableEsp32.part"
+                : "bom.groups.power.items.usbCableEsp32Wroom.part",
           ),
         notes: (t, _, boardType) =>
           t(
             boardType === "uno_r4"
               ? "bom.groups.power.items.usbCable.notes"
-              : "bom.groups.power.items.usbCableEsp32.notes",
+              : boardType === "esp32"
+                ? "bom.groups.power.items.usbCableEsp32.notes"
+                : "bom.groups.power.items.usbCableEsp32Wroom.notes",
           ),
       },
       {
@@ -559,6 +565,16 @@ export function BuildBom() {
               onClick={() => setBoardType("esp32")}
             >
               {t("hero.boardType.esp32")}
+            </Button>
+            <Button
+              variant={boardType === "esp32_wroom" ? "secondary" : "ghost"}
+              size="sm"
+              className={cn(
+                boardType !== "esp32_wroom" && "text-muted-foreground",
+              )}
+              onClick={() => setBoardType("esp32_wroom")}
+            >
+              {t("hero.boardType.esp32Wroom")}
             </Button>
           </div>
         </div>
