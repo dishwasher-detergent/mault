@@ -13,7 +13,8 @@
     "boardType": {
       "label": "Carte",
       "unoR4": "Arduino",
-      "esp32": "ESP32-S3"
+      "esp32": "ESP32-S3",
+      "esp32Wroom": "ESP32 (WROOM)"
     }
   },
   "nav": {
@@ -62,6 +63,9 @@
           "esp32": {
             "notes": "Exécute <code>{{path}}</code> ; connexion USB à l'ordinateur hôte pour le Web Serial - peut aussi être mis à jour directement depuis l'app ensuite, voir /app une fois configuré"
           },
+          "esp32Wroom": {
+            "notes": "Exécute <code>{{path}}</code> ; connexion USB à l'ordinateur hôte pour le Web Serial. Mets à jour son firmware uniquement via l'IDE Arduino - le flasheur intégré à l'app cible spécifiquement l'ESP32-S3 et n'est pas sûr à utiliser sur cette carte."
+          },
           "pca9685": {
             "part": "Adafruit PCA9685, driver PWM/servo 16 canaux 12 bits",
             "notes": "Driver de servo I²C - pilote les 10 servos"
@@ -100,6 +104,10 @@
           "usbCableEsp32": {
             "part": "Câble USB-A vers USB-C",
             "notes": "Carte ESP32-S3 ↔ ordinateur hôte, via le port USB natif de la carte"
+          },
+          "usbCableEsp32Wroom": {
+            "part": "Câble USB-A vers USB-C ou Micro-USB (vérifie le port de ta carte)",
+            "notes": "Carte ESP32-WROOM-32 ↔ ordinateur hôte, via sa puce pont USB-série (CP2102/CH340, selon la carte) - le connecteur lui-même est en USB-C sur les cartes récentes, en Micro-USB sur les plus anciennes"
           },
           "barrelJack": {
             "part": "Prise jack CC ou pigtail à bornier à vis",
@@ -262,7 +270,8 @@
         "title": "Imprimer les pièces structurelles",
         "steps": {
           "printSortingModule": {
-            "text": "Tranche et imprime {{count}} plaques Sorting Module - une par module de tri - à partir de <mesh>card_sorter.3mf</mesh> (ou réexporte depuis <source>Card Sorter.f3d</source>)."
+            "text": "Tranche et imprime {{count}} plaques Sorting Module - une par module de tri - à partir de <mesh>card_sorter.3mf</mesh> (ou réexporte depuis <source>Card Sorter.f3d</source>).",
+            "note": "« Plaque » désigne ici le plateau d'impression du logiciel de tranchage (l'agencement des pièces d'un job d'impression) - pas une pièce nommée « Plaque » dans le modèle."
           },
           "printFeederModule": {
             "text": "Imprime 1 plaque Feeder Module à partir du même fichier - une seule suffit, quel que soit le nombre de modules. Loge le rouleau du chargeur et la gorge de la trémie."
@@ -310,7 +319,11 @@
           },
           "uploadSketchEsp32": {
             "text": "Sélectionne la carte « ESP32S3 Dev Module », règle Tools → USB Mode sur « Hardware CDC and JTAG » et USB CDC On Boot sur « Enabled », sélectionne le bon port, puis téléverse firmware/main/main.ino.",
-            "note": "Utilise la disposition de broches ESP32-S3 déjà présente dans le sketch (voir le commentaire IR_PINS dans main.ino) - sur une autre variante ESP32, les broches diffèrent, renumérote alors IR_PINS/IR_PIN_HOPPER. Le mode Hardware CDC/JTAG avec CDC On Boot activé est nécessaire pour que la carte soit accessible via son port USB natif, et permet à l'outil de flashage intégré à l'application de remettre la carte en mode bootloader de façon fiable, sans appuyer sur le bouton BOOT ; en contrepartie, la carte s'annonce sous un nom Espressif générique plutôt que « Mault Card Sorter »."
+            "note": "Utilise la disposition de broches ESP32-S3 déjà présente dans le sketch (voir le commentaire IR_PINS dans main.ino) - tu montes plutôt une carte ESP32 WROOM classique ? Choisis cette option de carte ci-dessus, sa propre disposition de broches est déjà prévue dans le sketch aussi. Le mode Hardware CDC/JTAG avec CDC On Boot activé est nécessaire pour que la carte soit accessible via son port USB natif, et permet à l'outil de flashage intégré à l'application de remettre la carte en mode bootloader de façon fiable, sans appuyer sur le bouton BOOT ; en contrepartie, la carte s'annonce sous un nom Espressif générique plutôt que « Mault Card Sorter »."
+          },
+          "uploadSketchEsp32Wroom": {
+            "text": "Sélectionne la carte « ESP32 Dev Module », sélectionne le bon port, puis téléverse firmware/main/main.ino.",
+            "note": "Utilise la disposition de broches de l'ESP32 classique déjà présente dans le sketch (voir le commentaire IR_PINS dans main.ino) - aucune renumérotation nécessaire. N'utilise pas l'outil de flashage intégré à l'application pour mettre à jour cette carte : il télécharge un binaire compilé spécifiquement pour l'ESP32-S3, qui ne fonctionnera pas correctement sur une autre puce ESP32. Retéléverse plutôt depuis l'IDE Arduino à chaque changement de firmware."
           },
           "confirmReady": {
             "text": "Ouvre le moniteur série à 9600 bauds et confirme que tu vois {\"status\":\"ready\"} après la réinitialisation de la carte."
@@ -396,7 +409,8 @@
             "text": "Panneau de calibration du chargeur - ajuste la vitesse d'alimentation, le minutage impulsion/pause et la durée de stabilisation en fonction de ta trémie réelle."
           },
           "checkIr": {
-            "text": "Panneau des capteurs IR - vérifie que les {{count}} capteurs signalent correctement la présence/l'absence avec une carte en main."
+            "text": "Panneau des capteurs IR - vérifie que les {{count}} capteurs signalent correctement la présence/l'absence avec une carte en main.",
+            "note": "Si un capteur ne se déclenche pas, ou se déclenche sans rien devant lui, calibre sa distance de détection manuellement : au dos du capteur se trouve un petit boîtier bleu avec une molette grise (potentiomètre). Tourne-la à fond dans un sens pour qu'il ne détecte plus rien, puis tourne-la lentement en sens inverse jusqu'à ce qu'il détecte juste une carte à deux ou trois centimètres devant lui."
           },
           "testBins": {
             "text": "Contrôles de routage des bacs - envoie une carte de test vers chacun des 7 bacs à tour de rôle et confirme qu'elle atterrit correctement."

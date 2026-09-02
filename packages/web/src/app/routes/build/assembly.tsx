@@ -46,7 +46,8 @@ function buildPhases(
   boardType: BoardType,
 ): Phase[] {
   const board = BOARD_INFO[boardType];
-  const isEsp32 = boardType === "esp32";
+  const isEsp32Family = boardType !== "uno_r4";
+  const isEsp32S3 = boardType === "esp32";
   const sortingModules = moduleCount;
   const plateBase = ((moduleCount + 1) * (moduleCount + 2)) / 2;
   const genericBase = Math.max(0, moduleCount - 2);
@@ -85,6 +86,7 @@ function buildPhases(
               }}
             />
           ),
+          note: t("assembly.phases.print.steps.printSortingModule.note"),
         },
         {
           key: "print-feeder-module",
@@ -152,7 +154,7 @@ function buildPhases(
       title: t("assembly.phases.firmware.title"),
       icon: IconCpu,
       steps: [
-        ...(isEsp32
+        ...(isEsp32Family
           ? [
               {
                 key: "install-esp32-core",
@@ -166,16 +168,26 @@ function buildPhases(
           text: t("assembly.phases.firmware.steps.installLibraries.text"),
           note: t("assembly.phases.firmware.steps.installLibraries.note"),
         },
-        isEsp32
+        isEsp32S3
           ? {
               key: "upload-sketch",
               text: t("assembly.phases.firmware.steps.uploadSketchEsp32.text"),
               note: t("assembly.phases.firmware.steps.uploadSketchEsp32.note"),
             }
-          : {
-              key: "upload-sketch",
-              text: t("assembly.phases.firmware.steps.uploadSketch.text"),
-            },
+          : isEsp32Family
+            ? {
+                key: "upload-sketch",
+                text: t(
+                  "assembly.phases.firmware.steps.uploadSketchEsp32Wroom.text",
+                ),
+                note: t(
+                  "assembly.phases.firmware.steps.uploadSketchEsp32Wroom.note",
+                ),
+              }
+            : {
+                key: "upload-sketch",
+                text: t("assembly.phases.firmware.steps.uploadSketch.text"),
+              },
         {
           key: "confirm-ready",
           text: t("assembly.phases.firmware.steps.confirmReady.text"),
@@ -357,6 +369,7 @@ function buildPhases(
           text: t("assembly.phases.wireAndCalibrate.steps.checkIr.text", {
             count: moduleCount + 1,
           }),
+          note: t("assembly.phases.wireAndCalibrate.steps.checkIr.note"),
         },
         {
           key: "test-bins",
