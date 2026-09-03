@@ -350,6 +350,9 @@ function buildPhases(
           text: t(
             "assembly.phases.wireAndCalibrate.steps.calibrateModules.text",
           ),
+          note: t(
+            "assembly.phases.wireAndCalibrate.steps.calibrateModules.note",
+          ),
         },
         {
           key: "install-horns",
