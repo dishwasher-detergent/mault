@@ -1,13 +1,9 @@
 import { createHmac, timingSafeEqual } from "node:crypto";
 import type { DiscordEmbed } from "./discord";
 
-const BMC_COLOR = 0xffdd00; // Buy Me a Coffee yellow
+const BMC_COLOR = 0xffdd00;
+const BMC_URL = "https://buymeacoffee.com/mault";
 
-// Per Buy Me a Coffee's webhook docs: HMAC-SHA256 hex digest of the raw
-// (unparsed) request body, keyed by the signing secret from the BMC
-// dashboard, sent in the `x-signature-sha256` header. Must run on the raw
-// body text, not a re-serialized JSON.parse of it - re-stringifying can
-// reorder keys/whitespace and break the digest.
 export function verifyBuyMeACoffeeSignature(
   rawBody: string,
   signature: string | null,
@@ -72,44 +68,31 @@ function firstNumber(
   return undefined;
 }
 
-// BMC's public docs describe the outer envelope (event_id/type/live_mode/data)
-// and the HMAC signing scheme, but not the exact field names inside `data`
-// for a donation.created event - the field list below covers both their
-// current and legacy webhook formats. If BMC changes the shape again, this
-// degrades to "Someone bought a coffee!" with no amount/note rather than
-// throwing, so a webhook retry storm can't come from a parsing error here.
+function isTruthyFlag(value: unknown): boolean {
+  return value === true || value === "true";
+}
+
 export function buildDonationEmbed(
   data: Record<string, unknown>,
   liveMode: boolean,
 ): DiscordEmbed {
-  const name =
-    firstString(data, ["supporter_name", "payer_name", "name"]) ?? "Someone";
-  const note = firstString(data, ["support_note", "note", "message"]);
-  const coffees = firstNumber(data, [
-    "support_coffees",
-    "number_of_coffees",
-    "coffees",
-  ]);
+  const note = isTruthyFlag(data["note_hidden"])
+    ? undefined
+    : firstString(data, ["support_note", "note"]);
   const amount = firstNumber(data, ["amount", "total_amount"]);
-  const currency =
-    firstString(data, ["currency", "support_currency"]) ?? "USD";
+  const currency = firstString(data, ["currency", "support_currency"]) ?? "USD";
 
-  const summary = [
+  const lines = [
     amount != null ? `**${amount.toFixed(2)} ${currency}**` : undefined,
-    coffees != null
-      ? `${coffees} coffee${coffees === 1 ? "" : "s"}`
-      : undefined,
-  ]
-    .filter(Boolean)
-    .join(" — ");
+    note ?? "No message included.",
+  ].filter(Boolean);
 
   return {
-    title: `☕ ${name} bought a coffee!`,
-    description: [summary || "New donation", note ? `> ${note}` : undefined]
-      .filter(Boolean)
-      .join("\n\n"),
+    title: "Donation",
+    description: lines.join("\n\n"),
     color: BMC_COLOR,
     timestamp: new Date().toISOString(),
+    url: BMC_URL,
     ...(liveMode ? {} : { footer: { text: "TEST EVENT" } }),
   };
 }
