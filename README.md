@@ -112,6 +112,13 @@ DISCORD_DEV_GUILD_ID=
 BOT_PORT=3002
 BOT_URL=http://localhost:3002
 
+# Buy Me a Coffee donation webhook - optional. Set the webhook URL in the BMC
+# dashboard to <server>/public/webhooks/buymeacoffee and use its signing
+# secret here; DISCORD_DONATION_CHANNEL_ID is the channel donations post
+# into (requires the bot above to be running).
+BUY_ME_A_COFFEE_WEBHOOK_SECRET=
+DISCORD_DONATION_CHANNEL_ID=
+
 # Public variables for the React app
 VITE_API_URL=http://localhost:3001
 VITE_APP_ENV=local
@@ -129,7 +136,7 @@ pnpm --filter @magic-vault/server db:studio    # open Drizzle Studio
 
 ## Deployment
 
-`Dockerfile.server` builds the Hono API (and pre-downloads the SigLIP model at build time). `Dockerfile.web` builds the Vite SPA and serves it with nginx (`nginx.conf`); `VITE_API_URL` must be supplied as a build arg since it's baked into the client bundle. `Dockerfile.bot` builds the optional Discord bot — it talks to the server over HTTP (`SERVER_URL`), never the database directly, but the connection is bidirectional: the server also calls back into the bot's own small HTTP server (`BOT_PORT`, exposed to the server as `BOT_URL`) to post every notification into whichever channel was set with `/notify-channel` (errors, jams, sync failures) or `/scan-channel` (card scans). Both directions share `BOT_API_SECRET`.
+`Dockerfile.server` builds the Hono API (and pre-downloads the SigLIP model at build time). `Dockerfile.web` builds the Vite SPA and serves it with nginx (`nginx.conf`); `VITE_API_URL` must be supplied as a build arg since it's baked into the client bundle. `Dockerfile.bot` builds the optional Discord bot — it talks to the server over HTTP (`SERVER_URL`), never the database directly, but the connection is bidirectional: the server also calls back into the bot's own small HTTP server (`BOT_PORT`, exposed to the server as `BOT_URL`) to post every notification into whichever channel was set with `/notify-channel` (errors, jams, sync failures) or `/scan-channel` (card scans), or into the fixed `DISCORD_DONATION_CHANNEL_ID` for Buy Me a Coffee donations (`routes/public.ts`'s `/webhooks/buymeacoffee`, unauthenticated but HMAC-verified rather than org-linked). Both directions share `BOT_API_SECRET`.
 
 Self-hosting only replaces where the _app_ runs — the database and auth still need a [Neon project](#setting-up-neon) set up first, and its connection details passed to the server container as env vars (`DATABASE_URL`, `NEON_AUTH_URL`, `WEB_URL`) and to the web build as build args (`VITE_API_URL`, `VITE_NEON_AUTH_URL`, `VITE_NEON_DATA_API_URL`, `VITE_APP_ENV`, `VITE_LATEST_FIRMWARE_VERSION`). A minimal setup:
 
