@@ -4,13 +4,12 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { useBinConfigs } from "@/features/bins/api/use-bin-configs";
 import {
-  isSortingRulesTourCompleted,
-  markSortingRulesTourCompleted,
-  MANUAL_RULES_TOUR_STEP_IDS,
-  SORTING_RULES_TOUR_STEPS,
-} from "@/features/bins/lib/sorting-rules-tour";
+  CALIBRATION_TOUR_STEPS,
+  isCalibrationTourCompleted,
+  markCalibrationTourCompleted,
+} from "@/features/calibration/lib/calibration-tour";
+import type { CalibrationSection } from "@/features/calibration/types";
 import { TourTooltip } from "@/features/onboarding/components/tour-tooltip";
 import { cn } from "@/lib/utils";
 import { IconHelpCircle } from "@tabler/icons-react";
@@ -18,24 +17,50 @@ import { useEffect, useMemo, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import { EVENTS, STATUS, useJoyride, type Step } from "react-joyride";
 
-export function SortingRulesTour({ className }: { className?: string }) {
+function createSectionBeforeHook(
+  targetSection: CalibrationSection,
+  getSection: () => CalibrationSection,
+  setSection: (section: CalibrationSection) => void,
+) {
+  return async () => {
+    if (getSection() === targetSection) return;
+    setSection(targetSection);
+    await new Promise((resolve) => setTimeout(resolve, 60));
+  };
+}
+
+interface CalibrationTourProps {
+  section: CalibrationSection;
+  setSection: (section: CalibrationSection) => void;
+  className?: string;
+}
+
+export function CalibrationTour({
+  section,
+  setSection,
+  className,
+}: CalibrationTourProps) {
   const { t } = useTranslation("onboarding");
-  const { selectedSet } = useBinConfigs();
-  const isAutoAssignEnabled = !!selectedSet?.autoAssignField;
+  const sectionRef = useRef(section);
+  useEffect(() => {
+    sectionRef.current = section;
+  }, [section]);
 
   const steps: Step[] = useMemo(
     () =>
-      SORTING_RULES_TOUR_STEPS.filter(
-        (config) =>
-          !isAutoAssignEnabled || !MANUAL_RULES_TOUR_STEP_IDS.has(config.id),
-      ).map((config) => ({
+      CALIBRATION_TOUR_STEPS.map((config) => ({
         target: config.target,
         placement: config.placement,
         title: t(config.titleKey),
         content: t(config.contentKey),
         skipScroll: config.target === "body",
+        before: createSectionBeforeHook(
+          config.section,
+          () => sectionRef.current,
+          setSection,
+        ),
       })),
-    [t, isAutoAssignEnabled],
+    [t, setSection],
   );
 
   const { controls, state, Tour, on } = useJoyride({
@@ -68,7 +93,7 @@ export function SortingRulesTour({ className }: { className?: string }) {
 
   useEffect(() => {
     if (state.status === STATUS.FINISHED || state.status === STATUS.SKIPPED) {
-      markSortingRulesTourCompleted();
+      markCalibrationTourCompleted();
     }
   }, [state.status]);
 
@@ -76,7 +101,7 @@ export function SortingRulesTour({ className }: { className?: string }) {
   useEffect(() => {
     if (autoStartChecked.current) return;
     autoStartChecked.current = true;
-    if (!isSortingRulesTourCompleted()) controls.start(0);
+    if (!isCalibrationTourCompleted()) controls.start(0);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -95,7 +120,7 @@ export function SortingRulesTour({ className }: { className?: string }) {
             </Button>
           }
         />
-        <TooltipContent>{t("sortingRulesTour.triggerTooltip")}</TooltipContent>
+        <TooltipContent>{t("calibrationTour.triggerTooltip")}</TooltipContent>
       </Tooltip>
       {Tour}
     </>
