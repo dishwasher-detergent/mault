@@ -1,24 +1,21 @@
 import type { BinConfig, BinRuleGroup } from "@magic-vault/shared";
-import { and, eq } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 import { Hono } from "hono";
 import { authQuery } from "../../db";
 import { bins } from "../../db/schema";
 import { requireAuth, requireOrg, type AppEnv } from "../../middleware/auth";
-import { resolveGameId, snapshotBinSet } from "./shared";
+import { resolveGameId } from "./shared";
 
-export const editBinRoute = new Hono<AppEnv>().put(
-  "/bins/:binNumber",
+// Marks a physical bin as emptied - cards scanned before now stop counting
+// toward its cardLimit, without touching the collection's card history.
+export const emptyBinRoute = new Hono<AppEnv>().post(
+  "/bins/:binNumber/empty",
   requireAuth,
   requireOrg,
   async (c) => {
     const orgId = c.get("orgId");
     const binNumber = parseInt(c.req.param("binNumber"));
     const gameGuid = c.req.query("gameGuid");
-    const { rules, isCatchAll, cardLimit } = await c.req.json<{
-      rules: BinRuleGroup;
-      isCatchAll?: boolean;
-      cardLimit?: number | null;
-    }>();
     try {
       const result = await authQuery(c.get("jwtClaims"), async (tx) => {
         const gameId = await resolveGameId(tx, gameGuid);
@@ -35,45 +32,19 @@ export const editBinRoute = new Hono<AppEnv>().put(
                   eq(binSets.gameId, gameId),
                   eq(binSets.orgId, orgId),
                 ),
-          columns: { id: true, guid: true },
+          columns: { id: true },
           with: { bins: { columns: { id: true, binNumber: true } } },
         });
         if (!activeBinSet)
           return { message: "No active set found.", success: false };
 
-        if (isCatchAll) {
-          await tx
-            .update(bins)
-            .set({ isCatchAll: false, updatedAt: new Date() })
-            .where(
-              and(eq(bins.binSet, activeBinSet.id), eq(bins.isCatchAll, true)),
-            );
-        }
-
         const existing = activeBinSet.bins.find((b) => b.binNumber === binNumber);
+        if (!existing) return { message: "Bin not found.", success: false };
 
-        if (existing) {
-          await tx
-            .update(bins)
-            .set({
-              rules,
-              isCatchAll: isCatchAll ?? false,
-              cardLimit: cardLimit ?? null,
-              updatedAt: new Date(),
-            })
-            .where(eq(bins.id, existing.id));
-        } else {
-          await tx.insert(bins).values({
-            binNumber,
-            rules,
-            isCatchAll: isCatchAll ?? false,
-            cardLimit: cardLimit ?? null,
-            binSet: activeBinSet.id,
-            orgId,
-          });
-        }
-
-        await snapshotBinSet(tx, activeBinSet.id, activeBinSet.guid!, orgId);
+        await tx
+          .update(bins)
+          .set({ lastEmptiedAt: new Date(), updatedAt: new Date() })
+          .where(eq(bins.id, existing.id));
 
         const updatedBins = await tx.query.bins.findMany({
           where: (t, { eq }) => eq(t.binSet, activeBinSet.id),
@@ -88,7 +59,7 @@ export const editBinRoute = new Hono<AppEnv>().put(
         });
 
         return {
-          message: "Successfully saved bin config.",
+          message: "Bin marked as emptied.",
           success: true,
           data: updatedBins.map(
             (b): BinConfig => ({
