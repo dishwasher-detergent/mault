@@ -1,21 +1,21 @@
-import { COLLECTION_CARDS_PAGE_SIZE } from "@magic-vault/shared";
 import { Hono } from "hono";
 import { authQuery } from "../../db";
 import { requireAuth, requireOrg, type AppEnv } from "../../middleware/auth";
 import {
   findCardsCollection,
-  loadCardsPage,
+  isUuid,
+  loadCardPosition,
   parseCardsQuery,
-  parsePage,
 } from "./cards-query";
 
-export const listCollectionCardsRoute = new Hono<AppEnv>().get(
-  "/:guid/cards",
+export const collectionCardPositionRoute = new Hono<AppEnv>().get(
+  "/:guid/cards/:scanId/position",
   requireAuth,
   requireOrg,
   async (c) => {
+    const scanId = c.req.param("scanId");
+    if (!isUuid(scanId)) return c.json({ success: true, data: null });
     const query = parseCardsQuery(c.req.query());
-    const page = parsePage(c.req.query("page"));
     try {
       const result = await authQuery(c.get("jwtClaims"), async (tx) => {
         const collection = await findCardsCollection(
@@ -26,18 +26,14 @@ export const listCollectionCardsRoute = new Hono<AppEnv>().get(
         if (!collection)
           return { success: false, message: "Collection not found." };
 
-        const data = await loadCardsPage(
+        const data = await loadCardPosition(
           tx,
           collection.id,
           collection.fieldDefinitions,
           query,
-          page,
-          COLLECTION_CARDS_PAGE_SIZE,
+          scanId,
         );
-        return {
-          success: true,
-          data: { ...data, page, pageSize: COLLECTION_CARDS_PAGE_SIZE },
-        };
+        return { success: true, data };
       });
       return c.json(result);
     } catch (err) {

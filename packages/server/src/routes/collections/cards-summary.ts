@@ -1,21 +1,20 @@
-import { COLLECTION_CARDS_PAGE_SIZE } from "@magic-vault/shared";
+import { sql } from "drizzle-orm";
 import { Hono } from "hono";
 import { authQuery } from "../../db";
 import { requireAuth, requireOrg, type AppEnv } from "../../middleware/auth";
 import {
+  cardFilterSql,
   findCardsCollection,
-  loadCardsPage,
+  loadCardStats,
   parseCardsQuery,
-  parsePage,
 } from "./cards-query";
 
-export const listCollectionCardsRoute = new Hono<AppEnv>().get(
-  "/:guid/cards",
+export const collectionCardsSummaryRoute = new Hono<AppEnv>().get(
+  "/:guid/cards/summary",
   requireAuth,
   requireOrg,
   async (c) => {
     const query = parseCardsQuery(c.req.query());
-    const page = parsePage(c.req.query("page"));
     try {
       const result = await authQuery(c.get("jwtClaims"), async (tx) => {
         const collection = await findCardsCollection(
@@ -26,18 +25,13 @@ export const listCollectionCardsRoute = new Hono<AppEnv>().get(
         if (!collection)
           return { success: false, message: "Collection not found." };
 
-        const data = await loadCardsPage(
+        const all = await loadCardStats(tx, collection.id, sql`TRUE`);
+        const filtered = await loadCardStats(
           tx,
           collection.id,
-          collection.fieldDefinitions,
-          query,
-          page,
-          COLLECTION_CARDS_PAGE_SIZE,
+          cardFilterSql(query),
         );
-        return {
-          success: true,
-          data: { ...data, page, pageSize: COLLECTION_CARDS_PAGE_SIZE },
-        };
+        return { success: true, data: { all, filtered } };
       });
       return c.json(result);
     } catch (err) {
